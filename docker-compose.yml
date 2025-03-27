@@ -45,7 +45,6 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     networks:
       - sep-network
-
   registry:
     build:
       context: ./registry-service

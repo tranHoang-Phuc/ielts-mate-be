@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/common-library/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/discovery-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/registry-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/sample/src/main/java" charset="UTF-8" />
   </component>
 </project>

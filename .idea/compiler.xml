@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="sample" />
         <module name="registry-service" />
       </profile>
     </annotationProcessing>
@@ -19,6 +20,7 @@
       <module name="common-library" options="-parameters" />
       <module name="discovery-service" options="-parameters" />
       <module name="registry-service" options="-parameters" />
+      <module name="sample" options="-parameters" />
     </option>
   </component>
 </project>
