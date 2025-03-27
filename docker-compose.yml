@@ -46,6 +46,13 @@ services:
     networks:
       - sep-network
 
+  registry:
+    build:
+      context: ./registry-service
+      dockerfile: Dockerfile
+    hostname: eureka-server
+    ports:
+      - "8761:8761"
 
 volumes:
   postgres:
