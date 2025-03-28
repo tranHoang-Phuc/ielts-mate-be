@@ -6,12 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="common-library" />
         <module name="sample" />
         <module name="registry-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="common-library" target="17" />
       <module name="discovery-service" target="17" />
     </bytecodeTargetLevel>
   </component>
