@@ -8,19 +8,24 @@
         <groupId>com.fptu</groupId>
         <artifactId>sep490</artifactId>
         <version>${revision}</version>
-        <relativePath>../pom.xml</relativePath> <!-- Đảm bảo tệp này tồn tại -->
+        <relativePath>../pom.xml</relativePath>
     </parent>
-
     <artifactId>common-library</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
-
+    <name>Common Library</name>
+    <description>SEP Common Library service</description>
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
+    </properties>
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -30,5 +35,20 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
+
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
