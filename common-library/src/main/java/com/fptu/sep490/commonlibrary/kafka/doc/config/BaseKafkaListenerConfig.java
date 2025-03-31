@@ -31,6 +31,7 @@ public abstract class BaseKafkaListenerConfig<K, V> {
         factory.setConsumerFactory(typeConsumerFactory(keyType, valueType));
         return factory;
     }
+
     private ConsumerFactory<K, V> typeConsumerFactory(Class<K> keyClazz, Class<V> valueClazz) {
         Map<String, Object> props = buildConsumerProperties();
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -40,11 +41,13 @@ public abstract class BaseKafkaListenerConfig<K, V> {
 
         return new DefaultKafkaConsumerFactory<>(props, keyDeserializer, valueDeserializer);
     }
+
     private static <T> JsonDeserializer<T> getJsonDeserializer(Class<T> clazz) {
         var jsonDeserializer = new JsonDeserializer<>(clazz);
         jsonDeserializer.addTrustedPackages("*");
         return jsonDeserializer;
     }
+
     private Map<String, Object> buildConsumerProperties() {
         return kafkaProperties.buildConsumerProperties();
     }
