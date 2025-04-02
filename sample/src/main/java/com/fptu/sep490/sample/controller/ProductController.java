@@ -21,27 +21,16 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ProductGetVm> addProduct(@RequestBody ProductPostVm product) {
         var productGetVm = productService.createProduct(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(productGetVm);
     }
 
-    @GetMapping("/test")
-    @PermitAll
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Test successful");
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductGetVm> getProduct(@PathVariable Long id) {
+        var productGetVm = productService.getProductById(id);
+        return ResponseEntity.ok(productGetVm);
     }
 
-    @GetMapping("/test/user")
-    @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> testUser() {
-        return ResponseEntity.ok("Test user successful");
-    }
 
-    @GetMapping("/test/admin")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> testAdmin() {
-        return ResponseEntity.ok("Test admin successful");
-    }
 }
