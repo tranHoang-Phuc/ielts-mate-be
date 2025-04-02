@@ -1,4 +1,4 @@
-package fptu.sep490.sample.config;
+package com.fptu.sep490.sample.config;
 
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Optional;
 
 @Configuration
-@EnableJpaRepositories("com.fptu.sep490.sample.repository")
-@EntityScan({"com.fptu.sep490.sample.model", "com.fptu.sep490.sample.attribute"})
+@EnableJpaRepositories({"com.fptu.sep490.sample.repository"})
+@EntityScan({"com.fptu.sep490.sample.model"})
 @EnableJpaAuditing(auditorAwareRef = "auditorAware")
 public class DatabaseAutoConfig {
     @Bean

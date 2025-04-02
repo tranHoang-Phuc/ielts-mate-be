@@ -1,4 +1,4 @@
-package fptu.sep490.sample.constants;
+package com.fptu.sep490.sample.constants;
 
 public class PageableConstant {
     public static final String DEFAULT_PAGE_SIZE = "10";

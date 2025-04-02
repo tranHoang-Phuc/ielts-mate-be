@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -124,6 +125,14 @@ public class GlobalExceptionHandler {
         return handleBadRequest(ex, request);
     }
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ErrorVm> handleAuthorizationDeniedException(AuthorizationDeniedException ex,
+                                                                       WebRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        String message = ex.getMessage();
+
+        return buildErrorResponse(status, message, null, ex, request, 403);
+    }
 
     @ExceptionHandler({SignInRequiredException.class})
     public ResponseEntity<ErrorVm> handleSignInRequired(SignInRequiredException ex) {

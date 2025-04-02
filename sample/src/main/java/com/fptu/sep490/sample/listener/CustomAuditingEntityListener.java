@@ -1,6 +1,6 @@
-package fptu.sep490.sample.listener;
+package com.fptu.sep490.sample.listener;
 
-import fptu.sep490.sample.model.AbstractAuditEntity;
+import com.fptu.sep490.sample.model.AbstractAuditEntity;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import org.springframework.beans.factory.ObjectFactory;

@@ -12,6 +12,11 @@ spring:
     username: admin
     password: admin
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost/realms/SEP490
 eureka:
   client:
     service-url:
@@ -19,3 +24,5 @@ eureka:
 
 server:
   port: 8000
+  servlet:
+    context-path: /sample

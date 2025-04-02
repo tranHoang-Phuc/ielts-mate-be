@@ -1,4 +1,4 @@
-package fptu.sep490.sample.config;
+package com.fptu.sep490.sample.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

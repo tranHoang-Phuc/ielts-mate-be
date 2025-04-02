@@ -9,3 +9,4 @@ public record ErrorVm(String statusCode, String title, String detail, List<Strin
         this(statusCode, title, detail, new ArrayList<>());
     }
 }
+

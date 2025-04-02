@@ -1,6 +1,6 @@
-package fptu.sep490.sample.model;
+package com.fptu.sep490.sample.model;
 
-import fptu.sep490.sample.listener.CustomAuditingEntityListener;
+import com.fptu.sep490.sample.listener.CustomAuditingEntityListener;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;

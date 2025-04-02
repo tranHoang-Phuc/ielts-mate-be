@@ -1,4 +1,4 @@
-package fptu.sep490.sample;
+package com.fptu.sep490.sample;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -7,7 +7,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="sample" />
         <module name="registry-service" />
       </profile>
       <profile name="Annotation profile for sep" enabled="true">
@@ -21,6 +20,7 @@
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar" />
         </processorPath>
         <module name="common-library" />
+        <module name="sample" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
