@@ -11,3 +11,6 @@ docker compose -f docker-compose.yml up -d --build
 
 echo "Check the status of SEP services..."
 docker ps
+
+echo "Press any key to exit..."
+read -n 1 -s

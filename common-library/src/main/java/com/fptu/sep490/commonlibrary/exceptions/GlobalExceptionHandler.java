@@ -196,7 +196,7 @@ public class GlobalExceptionHandler {
             ));
         } else {
             return ResponseEntity.status(status).body(new ErrorVm(
-                    "error", message, message
+                    "error", message
             ));
         }
     }

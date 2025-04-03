@@ -10,6 +10,9 @@ import com.fptu.sep490.sample.viewmodel.ProductPostVm;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,7 +33,6 @@ public class ProductServiceImpl implements ProductService {
     public ProductGetVm updateProduct(Long id, ProductPostVm product) {
         var existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(Constants.ErrorCode.PRODUCT_NOT_FOUND, id));
-        // Update the existing product with the new values
         existingProduct.setName(product.name());
         existingProduct.setShortDescription(product.shortDescription());
 
@@ -50,5 +52,12 @@ public class ProductServiceImpl implements ProductService {
         var newProduct = productMapper.toModel(product);
         var productCreated =   productRepository.save(newProduct);
         return productMapper.toProductGetVm(productCreated);
+    }
+
+    @Override
+    public Page<ProductGetVm> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productRepository.findAllBy(pageable)
+                .map(productMapper::toProductGetVm);
     }
 }

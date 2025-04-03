@@ -1,6 +1,7 @@
 package com.fptu.sep490.sample.repository;
 
 import com.fptu.sep490.sample.model.Product;
+import com.fptu.sep490.sample.viewmodel.ProductGetVm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,5 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
+    Page<Product> findAllBy(Pageable pageable);
 }
