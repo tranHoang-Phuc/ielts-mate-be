@@ -1,12 +1,12 @@
 package com.fptu.sep490.commonlibrary.viewmodel.error;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-public record ErrorVm(String statusCode, String title, String detail, List<String> fieldErrors) {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record ErrorVm(String status, String message, String trace) {
 
-    public ErrorVm(String statusCode, String title, String detail) {
-        this(statusCode, title, detail, new ArrayList<>());
+    public ErrorVm(String status, String detail) {
+        this(status, detail, null);
     }
 }
 

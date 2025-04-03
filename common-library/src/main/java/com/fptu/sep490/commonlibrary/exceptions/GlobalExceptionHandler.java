@@ -4,10 +4,12 @@ package com.fptu.sep490.commonlibrary.exceptions;
 import com.fptu.sep490.commonlibrary.viewmodel.error.ErrorVm;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,14 +18,20 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
     private static final String ERROR_LOG_FORMAT = "Error: URI: {}, ErrorCode: {}, Message: {}";
     private static final String INVALID_REQUEST_INFORMATION_MESSAGE = "Request information is not valid";
+    private final Environment environment;
 
+    public GlobalExceptionHandler(Environment environment) {
+        this.environment = environment;
+    }
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorVm> handleNotFoundException(NotFoundException ex, WebRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
@@ -94,8 +102,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalServerErrorException.class)
     protected ResponseEntity<ErrorVm> handleInternalServerErrorException(InternalServerErrorException e) {
         log.error("Internal server error exception: ", e);
-        ErrorVm errorVm = new ErrorVm(HttpStatus.INTERNAL_SERVER_ERROR.toString(),
-                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e.getMessage());
+        String stackTrace = Arrays.stream(e.getStackTrace())
+                .map(StackTraceElement::toString)
+                .collect(Collectors.joining("\n"));
+        ErrorVm errorVm = new ErrorVm(HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getMessage(), stackTrace);
         return ResponseEntity.internalServerError().body(errorVm);
     }
 
@@ -124,7 +134,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorVm> handleWrongEmailFormatException(WrongEmailFormatException ex, WebRequest request) {
         return handleBadRequest(ex, request);
     }
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorVm> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
+        String message = ex.getMessage();
 
+        return buildErrorResponse(status, message, null, ex, request, 405);
+    }
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorVm> handleAuthorizationDeniedException(AuthorizationDeniedException ex,
                                                                        WebRequest request) {
@@ -163,13 +180,24 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ErrorVm> buildErrorResponse(HttpStatus status, String message, List<String> errors,
                                                        Exception ex, WebRequest request, int statusCode) {
-        ErrorVm errorVm =
-                new ErrorVm(status.toString(), status.getReasonPhrase(), message, errors);
+        boolean isDev = Arrays.asList(environment.getActiveProfiles()).contains("dev");
 
         if (request != null) {
             log.error(ERROR_LOG_FORMAT, this.getServletPath(request), statusCode, message);
         }
         log.error(message, ex);
-        return ResponseEntity.status(status).body(errorVm);
+
+        if (isDev) {
+            String stackTrace = Arrays.stream(ex.getStackTrace())
+                    .map(StackTraceElement::toString)
+                    .collect(Collectors.joining("\n"));
+            return ResponseEntity.status(status).body(new ErrorVm(
+                    "error", message, stackTrace
+            ));
+        } else {
+            return ResponseEntity.status(status).body(new ErrorVm(
+                    "error", message, message
+            ));
+        }
     }
 }
