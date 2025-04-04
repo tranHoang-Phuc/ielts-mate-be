@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication(scanBasePackages = {"com.fptu.sep490.sample", "com.fptu.sep490.commonlibrary"})
-@EnableMethodSecurity
 public class SampleApplication {
 
     public static void main(String[] args) {
