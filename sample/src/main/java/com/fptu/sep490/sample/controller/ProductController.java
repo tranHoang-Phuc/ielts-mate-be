@@ -45,6 +45,7 @@ public class ProductController {
                 .data(productGetVmPage.getContent())
                 .pagination(pagination)
                 .build());
+    
     }
 
     @PostMapping

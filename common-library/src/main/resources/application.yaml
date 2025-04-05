@@ -14,6 +14,8 @@ spring:
 
 cors:
   allowed-origins: '*'
+  allowed-methods: '*'
+  allowed-headers: '*'
 
 logging:
   pattern:
