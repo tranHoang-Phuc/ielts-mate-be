@@ -49,16 +49,17 @@ echo "127.0.0.1 registry.sep.local" | sudo tee -a /etc/hosts
 
 #### Linux/Unix:
 
-**Run `start-sep.sh` script**:
-    - Open a terminal
-    - Navigate to the directory containing the `start-sep.sh` script
-    - Run script
-      ```bash
-      ./start-sep.sh
-      ```
+-**Run `start-sep.sh` script**:
+    - Open a terminal.
+    - Navigate to the directory containing the `start-sep.sh` script.
+    - Run script.
+```bash
+./start-sep.sh
+```
+
 #### On Windows:
 
-For Windows, the `start-sep.sh` script will not work directly since it's a Bash script. Instead, you can either:
+- For Windows, the `start-sep.sh` script will not work directly since it's a Bash script. Instead, you can either:
     - Use a Bash shell like Git Bash or Windows Subsystem for Linux (WSL), then follow the instructions above.
     - Alternatively, if the services are dockerized, you can use Docker Compose (ensure Docker is installed on your machine) to start the services.
 
