@@ -1,35 +1,40 @@
 # SEP Project Setup
 
-Welcome to the SEP Project repository! This guide will help you set up the project on your local machine.
+Welcome to the SEP Project repository! This guide will walk you through setting up the project on your local machine.
 
 ## Prerequisites
 
-Before running the setup scripts, ensure you have the following installed:
+Before proceeding with the setup, ensure the following requirements are met:
 
-- **Windows** (for `add-host.bat` script)
-- **Linux/Unix** (for `start-sep.sh` script)
-- **Administrator privileges** (for running the `add-host.bat` script on Windows)
-- **Bash shell** (Linux/Unix-based systems)
-- **PostgreSQL** and other necessary services should be available locally or properly configured
-
-### Windows:
-- **Administrator privileges** to modify the `hosts` file
-- **Bash shell** (for running `start-sep.sh`, can use Git Bash or WSL if on Windows)
+- **Operating System**:
+  - **Windows**: Required for running the `add-host.bat` script.
+  - **Linux/Unix**: Required for running the `start-sep.sh` script.
+- **Administrator/Root Privileges**:
+  - On Windows: Needed to modify the `hosts` file via `add-host.bat`.
+  - On Linux/Unix: Needed to edit `/etc/hosts`.
+- **Bash Shell**:
+  - Required for running `start-sep.sh`.
+  - On Windows, you can use Git Bash, Windows Subsystem for Linux (WSL), or a similar tool.
+- **PostgreSQL**:
+  - Ensure PostgreSQL (and any other required services) is installed locally or configured correctly.
+- **Docker** (optional):
+  - Required if you plan to run services using Docker Compose.
 
 ## Setup Instructions
 
-### Step 1: Add Host Entries
+### Step 1: Configure Host Entries
 
-#### On Windows:
+You need to add specific entries to your system's `hosts` file to resolve local domains.
 
-**Run `add-host.bat` as Administrator**:
-    - Locate the `add-host.bat` file in your project directory.
-    - Right-click on `add-host.bat` and select **"Run as Administrator"**.
-    - This script will add the following entries to your system's `hosts` file:
-      ```
+#### On Windows
+1. **Run `add-host.bat` as Administrator**:
+   - Navigate to the project directory containing `add-host.bat`.
+   - Right-click the file and select **"Run as Administrator"**.
+   - The script will append the following entries to your `C:\Windows\System32\drivers\etc\hosts` file:
+ ```bash
       127.0.0.1 identity.sep.local
       127.0.0.1 registry.sep.local
-      ```
+ ```
 
 #### On Linux/Unix:
 
