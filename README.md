@@ -49,7 +49,7 @@ echo "127.0.0.1 registry.sep.local" | sudo tee -a /etc/hosts
 
 #### Linux/Unix:
 
--**Run `start-sep.sh` script**:
+- **Run `start-sep.sh` script**:
     - Open a terminal.
     - Navigate to the directory containing the `start-sep.sh` script.
     - Run script.
