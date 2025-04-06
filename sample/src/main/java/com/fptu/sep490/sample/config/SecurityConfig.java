@@ -27,7 +27,8 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/webjars/**",
             "/api/v1/products/**",
-            "/api/v1/products"
+            "/api/v1/products",
+            "swagger-ui.html",
     };
 
     @Bean

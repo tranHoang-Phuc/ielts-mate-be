@@ -11,12 +11,14 @@ spring:
     url: jdbc:postgresql://localhost:5432/sample
     username: admin
     password: admin
-
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost/realms/SEP490
+          issuer-uri: http://identity.sep.local/realms/SEP490
+
+
+
 eureka:
   client:
     service-url:

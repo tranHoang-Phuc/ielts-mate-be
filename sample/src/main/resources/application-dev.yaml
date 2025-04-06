@@ -11,12 +11,27 @@ spring:
     url: jdbc:postgresql://localhost:5432/sample
     username: admin
     password: admin
-
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: http://localhost/realms/SEP490
+springdoc:
+  paths-to-match: /**
+  packages-to-scan: com.fptu.sep490.sample.controller
+  swagger-ui:
+    path: /swagger-ui
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: swagger-ui
+  oauth-flow:
+    authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
+    token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
+
+logging:
+  level:
+    org.springdoc: DEBUG
+
 eureka:
   client:
     service-url:

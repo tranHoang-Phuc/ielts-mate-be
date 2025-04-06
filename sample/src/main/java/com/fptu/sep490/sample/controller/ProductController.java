@@ -1,11 +1,16 @@
 package com.fptu.sep490.sample.controller;
 
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
+import com.fptu.sep490.commonlibrary.viewmodel.error.ErrorVm;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.sample.service.ProductService;
 import com.fptu.sep490.sample.viewmodel.ProductGetVm;
 import com.fptu.sep490.sample.viewmodel.ProductPostVm;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.annotation.security.PermitAll;
 import jakarta.websocket.server.PathParam;
 import lombok.AccessLevel;
@@ -50,6 +55,12 @@ public class ProductController {
 
     @PostMapping
     @PermitAll
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created",
+                    content = @Content(schema = @Schema(implementation = ProductGetVm.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(schema = @Schema(implementation = ErrorVm.class)))
+    })
     public ResponseEntity<BaseResponse<ProductGetVm>> addProduct(@RequestBody ProductPostVm product) {
         var productGetVm = productService.createProduct(product);
         return ResponseEntity.ok(BaseResponse.<ProductGetVm>builder()

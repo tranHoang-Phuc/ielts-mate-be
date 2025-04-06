@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   nginx:
+    container_name: nginx
     image:  nginx:1.27.2
     restart: unless-stopped
     volumes:
@@ -12,9 +13,11 @@ services:
     networks:
       - sep-network
   identity:
+    container_name: identity
     image: quay.io/keycloak/keycloak:26.0.2
-    command: 'start-dev --import-realm'
+    command: 'start-dev --features=scripts --import-realm'
     environment:
+      KC_FEATURES: scripts
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
@@ -28,6 +31,7 @@ services:
     networks:
       - sep-network
   postgres:
+    container_name: postgres
     build:
       context: ./docker/postgres
       dockerfile: Dockerfile
@@ -46,6 +50,7 @@ services:
     networks:
       - sep-network
   registry:
+    container_name: registry-service
     build:
       context: ./registry-service
       dockerfile: Dockerfile
@@ -54,6 +59,9 @@ services:
       - "8761:8761"
     networks:
       - sep-network
+    depends_on:
+      - identity
+      - postgres
 
 volumes:
   postgres:
