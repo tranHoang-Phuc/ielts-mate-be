@@ -67,6 +67,7 @@ services:
       - postgres
 
   zookeeper:
+    container_name: zookeeper
     image: debezium/zookeeper:2.7.3.Final
     restart: always
     ports:
@@ -77,6 +78,7 @@ services:
       - sep-network
 
   kafka:
+    container_name: kafka
     image: confluentinc/cp-kafka:7.7.1
     hostname: ${KAFKA_SERVICE_HOST}
     depends_on:
@@ -95,6 +97,7 @@ services:
       - sep-network
    
   kafka-connect:
+    container_name: kafka-connect
     image: debezium/connect:2.7.3.Final
     restart: always
     ports:
@@ -125,6 +128,7 @@ services:
       - sep-network
 
   redis:
+    container_name: redis
     image: redis:7.4.1-alpine
     restart: always
     ports:
