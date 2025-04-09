@@ -18,7 +18,8 @@
 
     <modules>
         <module>common-library</module>
-        <module>sample</module> <!-- Thêm module sample giả định -->
+        <module>sample</module>
+        <module>identity-service</module>
     </modules>
 
     <properties>
@@ -33,7 +34,7 @@
         <org.lombok.version>1.18.34</org.lombok.version>
         <lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
         <spring-boot.version>3.4.4</spring-boot.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
+        <spring-cloud.version>2024.0.0</spring-cloud.version>
         <spring-kafka.version>3.2.0</spring-kafka.version>
         <springdoc-openapi-starter-webmvc-ui.version>2.7.0</springdoc-openapi-starter-webmvc-ui.version>
 
