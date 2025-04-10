@@ -22,9 +22,9 @@ logging:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 keycloak:
-  base-uri: http://identity.sep.local
+
   token-uri: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
-  realm: SEP490
-  client-id: fptu_sep490
-  client-secret: mpr72Hq8HAJGVxWkW3MNvUoZD6cHM8DY
+
+
+
   scope: openid
