@@ -7,6 +7,9 @@ public class Constants {
         public static final String INVALID_CREDENTIALS = "INVALID_CREDENTIALS";
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
         public static final String KEYCLOAK_ERROR = "KEYCLOAK_ERROR";
+        public static final String EXISTED_USERNAME = "EXISTED_USERNAME";
+        public static final String EXISTED_EMAIL = "EXISTED_EMAIL";
+        public static final String USERNAME_MISSING = "USERNAME_MISSING";
     }
 
     public final class RedisKey {
