@@ -48,29 +48,19 @@ public class AuthController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(schema = @Schema(implementation = LoginRequest.class))
-            ),
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Login successful",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = KeyCloakTokenResponse.class)
-                            ),
-                            headers = {
-                                    @Header(
-                                            name = "Set-Cookie",
-                                            description = "Set cookies for access and refresh tokens",
-                                            required = true,
-                                            schema = @Schema(type = "string")
-                                    )
-                            }
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized"
-                    )
-            }
+            ), responses = {
+            @ApiResponse(responseCode = "200", description = "Login successful", content = @Content(
+                    mediaType = "application/json", schema = @Schema(implementation = KeyCloakTokenResponse.class)),
+                    headers = {@Header(
+                            name = "Set-Cookie",
+                            description = "Set cookies for access and refresh tokens",
+                            required = true,
+                            schema = @Schema(type = "string"))}),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized"
+            )
+    }
     )
     public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> login(@RequestBody LoginRequest loginRequest,
                                                                      HttpServletResponse response)

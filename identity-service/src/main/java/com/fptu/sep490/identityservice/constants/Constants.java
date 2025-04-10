@@ -10,6 +10,7 @@ public class Constants {
         public static final String EXISTED_USERNAME = "EXISTED_USERNAME";
         public static final String EXISTED_EMAIL = "EXISTED_EMAIL";
         public static final String USERNAME_MISSING = "USERNAME_MISSING";
+        public static final String EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
     }
 
     public final class RedisKey {
