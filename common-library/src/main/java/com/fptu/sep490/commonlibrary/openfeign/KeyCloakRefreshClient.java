@@ -1,4 +1,4 @@
-package com.fptu.sep490.identityservice.repository.client;
+package com.fptu.sep490.commonlibrary.openfeign;
 
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
@@ -8,22 +8,13 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "keycloak-token-client", url = "${keycloak.base-uri}")
-public interface KeyCloakTokenClient {
+@FeignClient(name = "keycloak-refresh-client", url = "${keycloak.base-uri}")
+public interface KeyCloakRefreshClient {
     @PostMapping(value = "/realms/{realm}/protocol/openid-connect/token",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     KeyCloakTokenResponse requestToken(@RequestBody MultiValueMap<String, String> formParams,
                                        @PathVariable("realm") String realm);
-
-    @PostMapping(
-            value = "/realms/{realm}/protocol/openid-connect/logout",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
-    )
-    void logout(@PathVariable("realm") String realm,
-                @RequestBody MultiValueMap<String, String> formParams,
-                @RequestHeader("Authorization") String accessToken);
 
     @PostMapping(
             value = "/realms/{realm}/protocol/openid-connect/token/introspect",

@@ -1,8 +1,10 @@
 package com.fptu.sep490.sample.viewmodel;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record ProductGetVm(
-        long id,
-        String name,
-        String shortDescription
+        @JsonProperty("id") long id,
+        @JsonProperty("name") String name,
+        @JsonProperty("short_description") String shortDescription
 ) {
 }

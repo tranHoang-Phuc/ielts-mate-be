@@ -153,10 +153,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({SignInRequiredException.class})
     public ResponseEntity<ErrorVm> handleSignInRequired(SignInRequiredException ex) {
-        HttpStatus status = HttpStatus.FORBIDDEN;
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
         String message = ex.getMessage();
 
-        return buildErrorResponse(status, message, null, ex, null, 403);
+        return buildErrorResponse(status, message, null, ex, null, 401);
     }
 
     @ExceptionHandler({Forbidden.class})
