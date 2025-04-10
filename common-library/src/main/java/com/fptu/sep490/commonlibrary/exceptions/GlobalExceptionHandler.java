@@ -159,6 +159,20 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, message, null, ex, null, 401);
     }
 
+    @ExceptionHandler({UnauthorizedException.class})
+    public ResponseEntity<ErrorVm> handleUnauthorized(UnauthorizedException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String message = ex.getMessage();
+        return buildErrorResponse(status, message, null, ex, request, 401);
+    }
+
+    @ExceptionHandler({KeyCloakRuntimeException.class})
+    public ResponseEntity<ErrorVm> handleKeyCloakRuntimeException(KeyCloakRuntimeException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = ex.getMessage();
+        return buildErrorResponse(status, message, null, ex, request, 500);
+    }
+
     @ExceptionHandler({Forbidden.class})
     public ResponseEntity<ErrorVm> handleForbidden(NotFoundException ex, WebRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;

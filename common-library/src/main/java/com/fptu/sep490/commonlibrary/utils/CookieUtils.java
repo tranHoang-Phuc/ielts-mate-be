@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CookieUtils {
     public static void setTokenCookies(HttpServletResponse response, KeyCloakTokenResponse tokenResponse) {
-        Cookie accessToken = new Cookie("access_token", tokenResponse.accessToken());
+        Cookie accessToken = new Cookie("authorization", tokenResponse.accessToken());
         accessToken.setHttpOnly(true);
         accessToken.setPath("/");
         accessToken.setMaxAge(tokenResponse.expiresIn());
@@ -22,7 +22,7 @@ public class CookieUtils {
     }
 
     public static void clearCookie(HttpServletResponse response) {
-        Cookie accessToken = new Cookie("access_token", null);
+        Cookie accessToken = new Cookie("authorization", null);
         accessToken.setMaxAge(0);
         accessToken.setPath("/");
 

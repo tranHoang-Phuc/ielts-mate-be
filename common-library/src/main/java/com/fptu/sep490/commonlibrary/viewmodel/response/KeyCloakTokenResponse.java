@@ -21,6 +21,5 @@ public record KeyCloakTokenResponse(
         String sessionState,
         @JsonProperty("scope")
         String scope
-
 ) {
 }

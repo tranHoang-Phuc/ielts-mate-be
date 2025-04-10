@@ -10,7 +10,10 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://identity/realms/SEP490
-
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 
 cors:
   allowed-origins: '*'

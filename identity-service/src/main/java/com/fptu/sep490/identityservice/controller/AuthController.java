@@ -3,6 +3,7 @@ package com.fptu.sep490.identityservice.controller;
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.exceptions.AccessDeniedException;
 import com.fptu.sep490.commonlibrary.exceptions.SignInRequiredException;
+import com.fptu.sep490.commonlibrary.exceptions.UnauthorizedException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.identityservice.constants.Constants;
 import com.fptu.sep490.identityservice.service.AuthService;
@@ -10,6 +11,9 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
+import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
+import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -29,8 +33,10 @@ public class AuthController {
     AuthService authService;
 
     @PostMapping("/login")
-
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    @Operation(summary = "Login with username and password",
+            description = "Authenticate a user and return Keycloak access token in cookies and body.")
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> login(@RequestBody LoginRequest loginRequest,
+                                                                     HttpServletResponse response) {
         KeyCloakTokenResponse loginResponse = authService.login(loginRequest.username(), loginRequest.password());
         CookieUtils.setTokenCookies(response, loginResponse);
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
@@ -41,9 +47,9 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> refreshToken(HttpServletRequest request,
                                                                             HttpServletResponse response) {
-        String refreshToken = CookieUtils.getCookieValue(request, "refresh_token");
+        String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new SignInRequiredException(Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
+            throw new UnauthorizedException(Constants.ErrorCode.UNAUTHORIZED);
         }
         KeyCloakTokenResponse refreshedToken = authService.refreshToken(refreshToken);
         CookieUtils.setTokenCookies(response, refreshedToken);
@@ -72,6 +78,11 @@ public class AuthController {
                     .data(introspectResponse)
                     .build());
 
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody UserCreationRequest userCreationRequest) {
+        return null;
     }
 
     private String extractAccessToken(HttpServletRequest request) {
