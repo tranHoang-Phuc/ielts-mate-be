@@ -12,7 +12,6 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -25,12 +24,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
@@ -160,6 +155,12 @@ public class AuthController {
         String userId = authService.createUser(userCreationRequest);
         URI location = URI.create("/api/v1/profile/" + userId);
         return ResponseEntity.created(location).build();
+    }
+
+    @PostMapping("/send/verify/{email}")
+    public ResponseEntity<?> sendVerifyEmail(@PathVariable("email") String email) throws JsonProcessingException {
+        authService.verifyEmail(email);
+        return ResponseEntity.noContent().build();
     }
 
     private String extractAccessToken(HttpServletRequest request) {

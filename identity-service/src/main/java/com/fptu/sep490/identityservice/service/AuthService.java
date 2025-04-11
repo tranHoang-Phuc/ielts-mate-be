@@ -11,4 +11,5 @@ public interface AuthService {
     void logout(String accessToken, String refreshToken);
     IntrospectResponse introspect(String accessToken);
     String createUser(UserCreationRequest request) throws JsonProcessingException;
+    void verifyEmail(String email) throws JsonProcessingException;
 }

@@ -96,36 +96,7 @@ services:
     networks:
       - sep-network
    
-  kafka-connect:
-    container_name: kafka-connect
-    image: debezium/connect:2.7.3.Final
-    restart: always
-    ports:
-      - 8083:8083
-      - 5005:5005
-    depends_on:
-      - kafka
-    environment:
-      - BOOTSTRAP_SERVERS=kafka:9092
-      - GROUP_ID=1
-      - CONFIG_STORAGE_TOPIC=kafka_connect_configs
-      - OFFSET_STORAGE_TOPIC=kafka_connect_offsets
-    networks:
-      - sep-network
-    
-  kafka-ui:
-    container_name: kafka-ui
-    image: provectuslabs/kafka-ui:latest
-    environment:
-      DYNAMIC_CONFIG_ENABLED: 'true'
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    ports:
-      - 8089:8080
-    depends_on:
-      - kafka
-      - kafka-connect
-    networks:
-      - sep-network
+
 
   redis:
     container_name: redis

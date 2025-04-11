@@ -40,3 +40,7 @@ keycloak:
   client-id: fptu_sep490
   client-secret: mpr72Hq8HAJGVxWkW3MNvUoZD6cHM8DY
   scope: openid
+
+email:
+  secret: WAniqRWoEkvK5emuspFWNDL3ZPTE1mnyXZXYJwgM7xzar99KOfpc79AxglWqeVwJ
+  expiration: 3000

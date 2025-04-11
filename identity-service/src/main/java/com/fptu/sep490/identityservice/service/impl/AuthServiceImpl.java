@@ -11,7 +11,11 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
+import com.fptu.sep490.identityservice.viewmodel.UserPendingVerify;
 import feign.FeignException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,8 +26,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -45,6 +54,14 @@ public class AuthServiceImpl implements AuthService {
     @Value("${keycloak.client-secret}")
     @NonFinal
     String clientSecret;
+
+    @Value("${email.secret}")
+    @NonFinal
+    String emailVerifySecret;
+
+    @Value("${email.expiration}")
+    @NonFinal
+    int emailVerifyTokenExpireTime;
 
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
@@ -99,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .enabled(true)
-                .emailVerified(true)
+                .emailVerified(false)
                 .credentials(
                         List.of(
                                 UserCreationParam.Credential.builder()
@@ -112,11 +129,40 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
-            return extractUserId(creationResponse);
+            var userId = extractUserId(creationResponse);
+            UserPendingVerify userPendingVerify = new UserPendingVerify(userId, request.email());
+            redisService.addToSet(Constants.RedisKey.USER_PENDING_VERIFY + request.email(), userPendingVerify);
+            return userId;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
 
+    }
+
+    @Override
+    public void verifyEmail(String email) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PENDING_VERIFY + email;
+        Set<UserPendingVerify> userPendingVerifies = redisService.getSet(cacheKey, UserPendingVerify.class);
+        if (userPendingVerifies.isEmpty()) {
+            return;
+        }
+        UserPendingVerify userPendingVerify = userPendingVerifies.iterator().next();
+
+       // Generate token
+        String token = generateEmailVerifyToken(userPendingVerify.userId(), email);
+        // push to kafka
+
+    }
+
+    private String generateEmailVerifyToken(String userId, String email) {
+        Key key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .setSubject(userId)
+                .claim("email", email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + emailVerifyTokenExpireTime))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     private String extractUserId(ResponseEntity<?> response){
@@ -126,10 +172,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-    private String getCachedClientToken() {
+    private String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
 
-        String cachedToken = redisService.get(cacheKey, String.class);
+        String cachedToken = redisService.getValue(cacheKey, String.class);
         if (cachedToken != null) {
             return cachedToken;
         }
@@ -142,7 +188,7 @@ public class AuthServiceImpl implements AuthService {
         KeyCloakTokenResponse tokenResponse = keyCloakTokenClient.requestToken(form, realm);
         String newToken = tokenResponse.accessToken();
         var expiresIn = tokenResponse.expiresIn();
-        redisService.save(cacheKey, newToken, Duration.ofSeconds(expiresIn));
+        redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
         return newToken;
     }
 }
