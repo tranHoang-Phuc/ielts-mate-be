@@ -159,7 +159,7 @@ public class AuthController {
 
     @PostMapping("/send/verify/{email}")
     public ResponseEntity<?> sendVerifyEmail(@PathVariable("email") String email) throws JsonProcessingException {
-        authService.verifyEmail(email);
+        authService.sendVerifyEmail(email);
         return ResponseEntity.noContent().build();
     }
 

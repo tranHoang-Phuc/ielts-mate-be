@@ -22,6 +22,7 @@
         <module name="common-library" />
         <module name="sample" />
         <module name="identity-service" />
+        <module name="notification-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -33,6 +34,7 @@
       <module name="common-library" options="-parameters" />
       <module name="discovery-service" options="-parameters" />
       <module name="identity-service" options="-parameters" />
+      <module name="notification-service" options="-parameters" />
       <module name="registry-service" options="-parameters" />
       <module name="sample" options="-parameters" />
     </option>

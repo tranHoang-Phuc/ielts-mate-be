@@ -12,6 +12,8 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
 import com.fptu.sep490.identityservice.viewmodel.UserPendingVerify;
+import com.fptu.sep490.identityservice.viewmodel.UserProfileResponse;
+import com.fptu.sep490.identityservice.viewmodel.event.UserProfileEvent;
 import feign.FeignException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,6 +24,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -29,7 +32,6 @@ import org.springframework.util.MultiValueMap;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -42,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     ErrorNormalizer errorNormalizer;
     RedisService redisService;
     KeyCloakUserClient keyCloakUserClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${keycloak.realm}")
     @NonFinal
@@ -62,6 +65,10 @@ public class AuthServiceImpl implements AuthService {
     @Value("${email.expiration}")
     @NonFinal
     int emailVerifyTokenExpireTime;
+
+    @Value("${kafka.topic.user-verification}")
+    @NonFinal
+    String userVerificationTopic;
 
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
@@ -140,18 +147,20 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyEmail(String email) throws JsonProcessingException {
+    public void sendVerifyEmail(String email) throws JsonProcessingException {
         String cacheKey = Constants.RedisKey.USER_PENDING_VERIFY + email;
         Set<UserPendingVerify> userPendingVerifies = redisService.getSet(cacheKey, UserPendingVerify.class);
         if (userPendingVerifies.isEmpty()) {
             return;
         }
         UserPendingVerify userPendingVerify = userPendingVerifies.iterator().next();
-
-       // Generate token
         String token = generateEmailVerifyToken(userPendingVerify.userId(), email);
-        // push to kafka
-
+        String clientToken = getCachedClientToken();
+        UserProfileResponse userProfileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken,
+                userPendingVerify.userId());
+        UserProfileEvent userProfileEvent = new UserProfileEvent(userProfileResponse, token,
+                "Subject", "HtmlContent");
+        kafkaTemplate.send(userVerificationTopic, userProfileEvent);
     }
 
     private String generateEmailVerifyToken(String userId, String email) {
