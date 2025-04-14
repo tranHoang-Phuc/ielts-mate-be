@@ -20,6 +20,7 @@
         <module>common-library</module>
         <module>sample</module>
         <module>identity-service</module>
+        <module>notification-service</module>
     </modules>
 
     <properties>

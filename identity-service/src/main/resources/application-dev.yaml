@@ -44,3 +44,7 @@ keycloak:
 email:
   secret: WAniqRWoEkvK5emuspFWNDL3ZPTE1mnyXZXYJwgM7xzar99KOfpc79AxglWqeVwJ
   expiration: 3000
+
+kafka:
+  topic:
+    user-verification: user-verification-topic
