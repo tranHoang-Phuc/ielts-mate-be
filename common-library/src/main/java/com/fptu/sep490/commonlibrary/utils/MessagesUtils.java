@@ -12,7 +12,6 @@ public class MessagesUtils {
             Locale.getDefault());
 
     private MessagesUtils() {
-        //Add constructor
     }
 
     public static String getMessage(String errorCode, Object... var2) {
@@ -20,7 +19,6 @@ public class MessagesUtils {
         try {
             message = messageBundle.getString(errorCode);
         } catch (MissingResourceException ex) {
-            // case message_code is not defined.
             message = errorCode;
         }
         FormattingTuple formattingTuple = MessageFormatter.arrayFormat(message, var2);
