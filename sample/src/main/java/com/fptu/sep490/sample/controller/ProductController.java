@@ -19,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -94,6 +95,7 @@ public class ProductController {
     @GetMapping("/test/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> testAdmin() {
+        String token = SecurityContextHolder.getContext().getAuthentication().getCredentials().toString();
         return ResponseEntity.ok("Hello admin");
     }
 

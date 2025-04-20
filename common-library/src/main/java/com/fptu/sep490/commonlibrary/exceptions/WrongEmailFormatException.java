@@ -1,13 +1,16 @@
 package com.fptu.sep490.commonlibrary.exceptions;
 
 import com.fptu.sep490.commonlibrary.utils.MessagesUtils;
+import lombok.Getter;
 
 public class WrongEmailFormatException extends RuntimeException {
 
     private final String message;
-
-    public WrongEmailFormatException(String errorCode, Object... var2) {
+    @Getter
+    private final String businessErrorCode;
+    public WrongEmailFormatException(String errorCode, String businessErrorCode, Object... var2) {
         this.message = MessagesUtils.getMessage(errorCode, var2);
+        this.businessErrorCode = businessErrorCode;
     }
 
     @Override

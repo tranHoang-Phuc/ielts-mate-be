@@ -22,11 +22,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.*;
+
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
     private static final String ERROR_LOG_FORMAT = "Error: URI: {}, ErrorCode: {}, Message: {}";
     private static final String INVALID_REQUEST_INFORMATION_MESSAGE = "Request information is not valid";
+
+
     private final Environment environment;
 
     public GlobalExceptionHandler(Environment environment) {
@@ -36,8 +40,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorVm> handleNotFoundException(NotFoundException ex, WebRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         String message = ex.getMessage();
-
-        return buildErrorResponse(status, message, null, ex, request, 404);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status,errorCode, message, null, ex, request, 404);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -49,7 +53,9 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(error -> error.getField() + " " + error.getDefaultMessage())
                 .toList();
-        return buildErrorResponse(status, INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, request, 0);
+
+
+        return buildErrorResponse(status,INVALID_REQUEST_INFORMATION_ERROR_CODE ,INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, request, 0);
     }
 
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -64,7 +70,7 @@ public class GlobalExceptionHandler {
                     return error.getDefaultMessage();
                 }).toList();
 
-        return buildErrorResponse(status, INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, null, status.value());
+        return buildErrorResponse(status,INVALID_REQUEST_INFORMATION_ERROR_CODE , INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, null, status.value());
     }
 
     @ExceptionHandler(Exception.class)
@@ -72,12 +78,12 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String message = ex.getMessage();
 
-        return buildErrorResponse(status, message, null, ex, request, 500);
+        return buildErrorResponse(status,INTERNAL_SERVER_ERROR_MESSAGE ,message, null, ex, request, 500);
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorVm> handleBadRequestException(BadRequestException ex, WebRequest request) {
-        return handleBadRequest(ex, request);
+        return handleBadRequest(ex, request, BAD_REQUEST_ERROR_CODE);
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -91,12 +97,12 @@ public class GlobalExceptionHandler {
                         violation.getMessage()))
                 .toList();
 
-        return buildErrorResponse(status, INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, null, 0);
+        return buildErrorResponse(status,INTERNAL_SERVER_ERROR_MESSAGE, INVALID_REQUEST_INFORMATION_MESSAGE, errors, ex, null, 0);
     }
 
     @ExceptionHandler(DuplicatedException.class)
     protected ResponseEntity<ErrorVm> handleDuplicated(DuplicatedException ex) {
-        return handleBadRequest(ex, null);
+        return handleBadRequest(ex, null, DUPLICATED_ERROR_CODE);
     }
 
     @ExceptionHandler(InternalServerErrorException.class)
@@ -105,34 +111,36 @@ public class GlobalExceptionHandler {
         String stackTrace = Arrays.stream(e.getStackTrace())
                 .map(StackTraceElement::toString)
                 .collect(Collectors.joining("\n"));
-        ErrorVm errorVm = new ErrorVm(HttpStatus.INTERNAL_SERVER_ERROR.toString(), e.getMessage(), stackTrace);
+        ErrorVm errorVm = new ErrorVm(HttpStatus.INTERNAL_SERVER_ERROR.toString(), INTERNAL_SERVER_ERROR_MESSAGE,
+                e.getMessage(), stackTrace);
         return ResponseEntity.internalServerError().body(errorVm);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     protected ResponseEntity<ErrorVm> handleMissingParams(MissingServletRequestParameterException e) {
-        return handleBadRequest(e, null);
+        return handleBadRequest(e, null, MISSING_SERVLET_REQUEST_PARAMETER_ERROR_CODE);
     }
 
     @ExceptionHandler(ResourceExistedException.class)
     public ResponseEntity<ErrorVm> handleResourceExistedException(ResourceExistedException ex, WebRequest request) {
         HttpStatus status = HttpStatus.CONFLICT;
         String message = ex.getMessage();
-
-        return buildErrorResponse(status, message, null, ex, request, 409);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode ,message, null, ex, request, 409);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorVm> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;
         String message = ex.getMessage();
+        String errorCode = ex.getBusinessErrorCode();
 
-        return buildErrorResponse(status, message, null, ex, request, 403);
+        return buildErrorResponse(status, errorCode ,message, null, ex, request, 403);
     }
 
     @ExceptionHandler(WrongEmailFormatException.class)
     public ResponseEntity<ErrorVm> handleWrongEmailFormatException(WrongEmailFormatException ex, WebRequest request) {
-        return handleBadRequest(ex, request);
+        return handleBadRequest(ex, request, WRONG_EMAIL_FORMAT_ERROR_CODE);
     }
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ErrorVm> handleHttpRequestMethodNotSupportedException(
@@ -140,7 +148,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.METHOD_NOT_ALLOWED;
         String message = ex.getMessage();
 
-        return buildErrorResponse(status, message, null, ex, request, 405);
+        return buildErrorResponse(status, INTERNAL_SERVER_ERROR_MESSAGE, message, null, ex, request, 405);
     }
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<ErrorVm> handleAuthorizationDeniedException(AuthorizationDeniedException ex,
@@ -148,43 +156,47 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.FORBIDDEN;
         String message = ex.getMessage();
 
-        return buildErrorResponse(status, message, null, ex, request, 403);
+        return buildErrorResponse(status,INTERNAL_AUTHORIZATION_ERROR_MESSAGE , message, null, ex, request, 403);
     }
 
     @ExceptionHandler({SignInRequiredException.class})
     public ResponseEntity<ErrorVm> handleSignInRequired(SignInRequiredException ex) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         String message = ex.getMessage();
-
-        return buildErrorResponse(status, message, null, ex, null, 401);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode ,message, null, ex, null, 401);
     }
 
     @ExceptionHandler({UnauthorizedException.class})
     public ResponseEntity<ErrorVm> handleUnauthorized(UnauthorizedException ex, WebRequest request) {
         HttpStatus status = HttpStatus.UNAUTHORIZED;
         String message = ex.getMessage();
-        return buildErrorResponse(status, message, null, ex, request, 401);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode, message, null, ex, request, 401);
     }
 
     @ExceptionHandler({KeyCloakRuntimeException.class})
     public ResponseEntity<ErrorVm> handleKeyCloakRuntimeException(KeyCloakRuntimeException ex, WebRequest request) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String message = ex.getMessage();
-        return buildErrorResponse(status, message, null, ex, request, 500);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode, message, null, ex, request, 500);
     }
 
     @ExceptionHandler({BrevoException.class})
     public ResponseEntity<ErrorVm> handleBrevoException(BrevoException ex, WebRequest request) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String message = ex.getMessage();
-        return buildErrorResponse(status, message, null, ex, request, 500);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode,message, null, ex, request, 500);
     }
 
     @ExceptionHandler({Forbidden.class})
     public ResponseEntity<ErrorVm> handleForbidden(NotFoundException ex, WebRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;
         String message = ex.getMessage();
-        return buildErrorResponse(status, message, null, ex, request, 403);
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode,message, null, ex, request, 403);
     }
 
     private String getServletPath(WebRequest webRequest) {
@@ -192,14 +204,14 @@ public class GlobalExceptionHandler {
         return servletRequest.getRequest().getServletPath();
     }
 
-    private ResponseEntity<ErrorVm> handleBadRequest(Exception ex, WebRequest request) {
+    private ResponseEntity<ErrorVm> handleBadRequest(Exception ex, WebRequest request, String errorCode) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String message = ex.getMessage();
 
-        return buildErrorResponse(status, message, null, ex, request, 400);
+        return buildErrorResponse(status, errorCode ,message, null, ex, request, 400);
     }
 
-    private ResponseEntity<ErrorVm> buildErrorResponse(HttpStatus status, String message, List<String> errors,
+    private ResponseEntity<ErrorVm> buildErrorResponse(HttpStatus status,String errorCode ,String message, List<String> errors,
                                                        Exception ex, WebRequest request, int statusCode) {
         boolean isDev = Arrays.asList(environment.getActiveProfiles()).contains("dev");
 
@@ -213,11 +225,11 @@ public class GlobalExceptionHandler {
                     .map(StackTraceElement::toString)
                     .collect(Collectors.joining("\n"));
             return ResponseEntity.status(status).body(new ErrorVm(
-                    "error", message, stackTrace
+                    "error",errorCode ,message, stackTrace
             ));
         } else {
             return ResponseEntity.status(status).body(new ErrorVm(
-                    "error", message
+                    "error",errorCode, message
             ));
         }
     }

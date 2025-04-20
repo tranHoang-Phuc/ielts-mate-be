@@ -1,5 +1,6 @@
 package com.fptu.sep490.notificationservice.service.impl;
 
+import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.BrevoException;
 import com.fptu.sep490.notificationservice.constants.Constants;
 import com.fptu.sep490.notificationservice.repository.client.EmailClient;
@@ -49,7 +50,8 @@ public class EmailServiceImpl implements EmailService {
         try {
             return emailClient.sendEmail(apiKey, emailResponse);
         } catch (FeignException e) {
-            throw new BrevoException(Constants.ErrorCode.ERROR_WHEN_SENDING_EMAIL);
+            throw new BrevoException(Constants.ErrorCode.ERROR_WHEN_SENDING_EMAIL,
+                    ErrorCodeMessage.ERROR_WHEN_SENDING_EMAIL);
         }
     }
 }

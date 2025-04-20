@@ -26,14 +26,16 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductGetVm getProductById(Long id) {
         var product = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Constants.ErrorCode.PRODUCT_NOT_FOUND, id));
+                .orElseThrow(() -> new NotFoundException(Constants.ErrorCodeMessage.PRODUCT_NOT_FOUND,
+                        Constants.ErrorCode.PRODUCT_NOT_FOUND , id));
         return productMapper.toProductGetVm(product);
     }
 
     @Override
     public ProductGetVm updateProduct(Long id, ProductPostVm product) {
         var existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Constants.ErrorCode.PRODUCT_NOT_FOUND, id));
+                .orElseThrow(() -> new NotFoundException(Constants.ErrorCodeMessage.PRODUCT_NOT_FOUND,
+                        Constants.ErrorCode.PRODUCT_NOT_FOUND ,id));
         existingProduct.setName(product.name());
         existingProduct.setShortDescription(product.shortDescription());
 
@@ -44,7 +46,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         var existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(Constants.ErrorCode.PRODUCT_NOT_FOUND, id));
+                .orElseThrow(() -> new NotFoundException(Constants.ErrorCodeMessage.PRODUCT_NOT_FOUND,
+                        Constants.ErrorCode.PRODUCT_NOT_FOUND ,id));
         productRepository.delete(existingProduct);
     }
 

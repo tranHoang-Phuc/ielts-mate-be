@@ -1,12 +1,16 @@
 package com.fptu.sep490.commonlibrary.exceptions;
 
 import com.fptu.sep490.commonlibrary.utils.MessagesUtils;
+import lombok.Getter;
 
 public class BrevoException extends RuntimeException {
     private String message;
+    @Getter
+    private String businessErrorCode;
 
-    public BrevoException(String errorCode, Object... var2) {
+    public BrevoException(String errorCode, String businessErrorCode,Object... var2) {
         this.message = MessagesUtils.getMessage(errorCode, var2);
+        this.businessErrorCode = businessErrorCode;
     }
 
     @Override
