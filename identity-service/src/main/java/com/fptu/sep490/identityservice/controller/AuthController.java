@@ -12,6 +12,7 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
+import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -25,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -36,7 +38,7 @@ import java.net.URI;
 public class AuthController {
     AuthService authService;
 
-    @PostMapping("/login")
+    @PostMapping("/sign-in")
     @Operation(
             summary = "Login with username and password",
             description = "Authenticate user and return Keycloak access token in cookies and body.",
@@ -57,10 +59,10 @@ public class AuthController {
             )
     }
     )
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> login(@RequestBody LoginRequest loginRequest,
-                                                                     HttpServletResponse response)
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody LoginRequest loginRequest,
+                                                                      HttpServletResponse response)
             throws JsonProcessingException {
-        KeyCloakTokenResponse loginResponse = authService.login(loginRequest.username(), loginRequest.password());
+        KeyCloakTokenResponse loginResponse = authService.login(loginRequest.email(), loginRequest.password());
         CookieUtils.setTokenCookies(response, loginResponse);
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
                 .data(loginResponse)
@@ -93,7 +95,7 @@ public class AuthController {
                                                                             HttpServletResponse response) {
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
         if (refreshToken == null || refreshToken.isEmpty()) {
-            throw new UnauthorizedException(Constants.ErrorCode.UNAUTHORIZED);
+            throw new UnauthorizedException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED);
         }
         KeyCloakTokenResponse refreshedToken = authService.refreshToken(refreshToken);
         CookieUtils.setTokenCookies(response, refreshedToken);
@@ -115,7 +117,8 @@ public class AuthController {
         String accessToken = extractAccessToken(request);
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new SignInRequiredException(Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
+            throw new SignInRequiredException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION,
+                    Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
         }
         authService.logout(accessToken, refreshToken);
         CookieUtils.clearCookie(response);
@@ -140,7 +143,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/register")
+    @PostMapping("/sign-up")
     @Operation(
             summary = "Register a new user",
             description = "Creates a new user in Keycloak and returns the location of the profile resource."
@@ -163,14 +166,30 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @GetMapping("/verify-email/status")
+    @Operation(
+            summary = "Check email verification status",
+            description = "Check if the email is verified or not"
+    )
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserAccessInfo>> checkEmailVerificationStatus(HttpServletRequest request)
+            throws JsonProcessingException {
+        String accessToken = extractAccessToken(request);
+        UserAccessInfo userAccessInfo = authService.getUserAccessInfo(accessToken);
+        return ResponseEntity.ok(BaseResponse.<UserAccessInfo>builder()
+                .data(userAccessInfo)
+                .build());
+    }
+
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || header.isBlank() || !header.startsWith("Bearer ")) {
-            throw new AccessDeniedException(Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
+            throw new AccessDeniedException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED);
         }
         String token = header.substring(7);
         if (token.isBlank()) {
-            throw new AccessDeniedException(Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
+            throw new AccessDeniedException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED);
         }
         return token;
     }

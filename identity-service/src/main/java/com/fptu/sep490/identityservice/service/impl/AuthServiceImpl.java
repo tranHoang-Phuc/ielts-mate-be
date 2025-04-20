@@ -1,6 +1,7 @@
 package com.fptu.sep490.identityservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.identityservice.constants.Constants;
 import com.fptu.sep490.identityservice.exception.ErrorNormalizer;
@@ -9,10 +10,7 @@ import com.fptu.sep490.identityservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.identityservice.service.AuthService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
-import com.fptu.sep490.identityservice.viewmodel.UserPendingVerify;
-import com.fptu.sep490.identityservice.viewmodel.UserProfileResponse;
+import com.fptu.sep490.identityservice.viewmodel.*;
 import com.fptu.sep490.identityservice.viewmodel.event.UserProfileEvent;
 import feign.FeignException;
 import io.jsonwebtoken.Jwts;
@@ -25,6 +23,9 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -41,9 +42,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     KeyCloakTokenClient keyCloakTokenClient;
+    KeyCloakUserClient keyCloakUserClient;
     ErrorNormalizer errorNormalizer;
     RedisService redisService;
-    KeyCloakUserClient keyCloakUserClient;
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${keycloak.realm}")
@@ -69,6 +70,10 @@ public class AuthServiceImpl implements AuthService {
     @Value("${kafka.topic.user-verification}")
     @NonFinal
     String userVerificationTopic;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    @NonFinal
+    String issuerUri;
 
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
@@ -118,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
     public String createUser(UserCreationRequest request) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
         UserCreationParam userCreationParam = UserCreationParam.builder()
-                .username(request.username())
+                .username(request.email())
                 .email(request.email())
                 .firstName(request.firstName())
                 .lastName(request.lastName())
@@ -136,10 +141,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
-            var userId = extractUserId(creationResponse);
-            UserPendingVerify userPendingVerify = new UserPendingVerify(userId, request.email());
-            redisService.addToSet(Constants.RedisKey.USER_PENDING_VERIFY + request.email(), userPendingVerify);
-            return userId;
+            return extractUserId(creationResponse);
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
@@ -161,6 +163,23 @@ public class AuthServiceImpl implements AuthService {
         UserProfileEvent userProfileEvent = new UserProfileEvent(userProfileResponse, token,
                 "Subject", "HtmlContent");
         kafkaTemplate.send(userVerificationTopic, userProfileEvent);
+    }
+
+    @Override
+    public UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException {
+        String username = getUsernameFromToken(accessToken);
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer" +  clientToken, username);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
+        }
+        return userAccessInfos.getFirst();
+    }
+
+    private String getUsernameFromToken(String accessToken) {
+        JwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
+        Jwt jwt = decoder.decode(accessToken);
+        return jwt.getClaim("preferred_username");
     }
 
     private String generateEmailVerifyToken(String userId, String email) {

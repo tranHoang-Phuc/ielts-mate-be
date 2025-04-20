@@ -3,7 +3,7 @@ package com.fptu.sep490.identityservice.exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.constants.ApiConstant;
-import com.fptu.sep490.commonlibrary.exceptions.AccessDeniedException;
+import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.KeyCloakRuntimeException;
 import com.fptu.sep490.commonlibrary.exceptions.ResourceExistedException;
 import com.fptu.sep490.commonlibrary.exceptions.UnauthorizedException;
@@ -22,10 +22,10 @@ public class ErrorNormalizer {
 
     private final ObjectMapper objectMapper;
     private final Map<String, String> errorCodeMap = Map.of(
-            "User exists with same username", Constants.ErrorCode.EXISTED_USERNAME,
-            "User exists with same email", Constants.ErrorCode.EXISTED_EMAIL,
-            "User name is missing", Constants.ErrorCode.USERNAME_MISSING,
-            "Account is not fully set up", Constants.ErrorCode.EMAIL_NOT_VERIFIED
+            "User exists with same username", Constants.ErrorCodeMessage.EXISTED_USERNAME,
+            "User exists with same email", Constants.ErrorCodeMessage.EXISTED_EMAIL,
+            "User name is missing", Constants.ErrorCodeMessage.USERNAME_MISSING,
+            "Account is not fully set up", Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED
     );
 
     public ErrorNormalizer(ObjectMapper objectMapper) {
@@ -34,27 +34,30 @@ public class ErrorNormalizer {
 
     public KeyCloakRuntimeException handleKeyCloakException(FeignException exception) throws JsonProcessingException {
         if (exception.status() == Integer.parseInt(ApiConstant.CODE_401)) {
-            throw new UnauthorizedException(Constants.ErrorCode.UNAUTHORIZED);
+            throw new UnauthorizedException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED);
         }
         var response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
         String errorMessage = response.errorMessage();
         String errorDescription = response.errorDescription();
         if (errorDescription != null) {
             String code = errorCodeMap.get(errorDescription);
-            if (Constants.ErrorCode.EMAIL_NOT_VERIFIED.equals(code)) {
-                throw new UnauthorizedException(Constants.ErrorCode.EMAIL_NOT_VERIFIED);
+            if (Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED.equals(code)) {
+                throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED);
             }
         }
         String code = errorCodeMap.get(errorMessage);
         if (code != null) {
             return switch (code) {
-                case Constants.ErrorCode.EXISTED_USERNAME -> throw new ResourceExistedException(code);
-                case Constants.ErrorCode.EXISTED_EMAIL -> throw new ResourceExistedException(code);
-                case Constants.ErrorCode.USERNAME_MISSING -> throw new ResourceNotFoundException(code);
-                default -> new KeyCloakRuntimeException(Constants.ErrorCode.KEYCLOAK_ERROR);
+                case Constants.ErrorCodeMessage.EXISTED_USERNAME -> throw new ResourceExistedException(code,
+                        Constants.ErrorCode.EXISTED_USERNAME);
+                case Constants.ErrorCodeMessage.EXISTED_EMAIL -> throw new ResourceExistedException(code,
+                        Constants.ErrorCode.EXISTED_EMAIL);
+                case Constants.ErrorCodeMessage.USERNAME_MISSING -> throw new ResourceNotFoundException(code,
+                        Constants.ErrorCode.USERNAME_MISSING);
+                default -> new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCodeMessage.KEYCLOAK_ERROR);
             };
         }
 
-        return new KeyCloakRuntimeException(Constants.ErrorCode.KEYCLOAK_ERROR);
+        return new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCode.KEYCLOAK_ERROR);
     }
 }

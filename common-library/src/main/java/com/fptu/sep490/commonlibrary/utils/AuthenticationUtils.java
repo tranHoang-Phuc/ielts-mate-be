@@ -1,6 +1,7 @@
 package com.fptu.sep490.commonlibrary.utils;
 
 import com.fptu.sep490.commonlibrary.constants.ApiConstant;
+import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,7 +18,7 @@ public final class AuthenticationUtils {
         Authentication authentication = getAuthentication();
 
         if (authentication instanceof AnonymousAuthenticationToken) {
-            throw new AccessDeniedException(ApiConstant.ACCESS_DENIED);
+            throw new AccessDeniedException(ApiConstant.ACCESS_DENIED, ErrorCodeMessage.ACCESS_DENIED);
         }
 
         JwtAuthenticationToken contextHolder = (JwtAuthenticationToken) authentication;
