@@ -1,5 +1,8 @@
 package com.fptu.sep490.identityservice.viewmodel;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record UserAccessInfo(
         String id,
         String username,
@@ -7,11 +10,12 @@ public record UserAccessInfo(
         String lastName,
         String email,
         boolean emailVerified,
-        int createdTimestamp,
+        long createdTimestamp,
         boolean enabled,
         boolean totp,
         AccessInfo access
 ) {
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record AccessInfo(
             boolean manageGroupMembership,
             boolean view,

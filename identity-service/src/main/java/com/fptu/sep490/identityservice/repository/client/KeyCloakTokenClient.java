@@ -25,6 +25,7 @@ public interface KeyCloakTokenClient {
                 @RequestBody MultiValueMap<String, String> formParams,
                 @RequestHeader("Authorization") String accessToken);
 
+
     @PostMapping(
             value = "/realms/{realm}/protocol/openid-connect/token/introspect",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE

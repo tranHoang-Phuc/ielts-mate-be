@@ -1,5 +1,6 @@
 package com.fptu.sep490.identityservice.repository.client;
 
+import com.fptu.sep490.identityservice.viewmodel.ChangePasswordRequest;
 import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
 import com.fptu.sep490.identityservice.viewmodel.UserProfileResponse;
@@ -15,7 +16,6 @@ import java.util.List;
 public interface KeyCloakUserClient {
     @PostMapping(value = "/admin/realms/{realm}/users",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Headers("Authorization: Bearer {token}")
     ResponseEntity<?> createUser(@PathVariable String realm,
                                  @RequestHeader("Authorization") String token,
                                  @RequestBody UserCreationParam user);
@@ -23,15 +23,20 @@ public interface KeyCloakUserClient {
 
     @GetMapping(value = "/admin/realms/{realm}/users/{userId}",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Headers("Authorization: Bearer {token}")
-    UserProfileResponse getUserById(@PathVariable String realm,
+    UserProfileResponse getUserById(@PathVariable("realm") String realm,
                                     @RequestHeader("Authorization") String token,
-                                    @PathVariable String userId);
+                                    @PathVariable("userId") String userId);
 
     @GetMapping(value = "/admin/realms/{realm}/users",
             consumes = MediaType.APPLICATION_JSON_VALUE)
-    @Headers("Authorization: Bearer {token}")
-    List<UserAccessInfo> getUserByEmail(@PathVariable String realm,
-                                        @RequestHeader("Authorization") String token,
+    List<UserAccessInfo> getUserByEmail(@PathVariable("realm") String realm,
+                                        @RequestHeader("Authorization") String bearerToken,
                                         @RequestParam("username") String username);
+
+    @PutMapping(value = "/admin/realms/{realm}/users/{userId}/reset-password",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> resetPassword(@PathVariable("realm") String realm,
+                                    @RequestHeader("Authorization") String token,
+                                    @PathVariable("userId") String userId,
+                                    @RequestBody ChangePasswordRequest changePasswordRequest);
 }

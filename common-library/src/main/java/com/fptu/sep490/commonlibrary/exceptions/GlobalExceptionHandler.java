@@ -138,6 +138,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, errorCode ,message, null, ex, request, 403);
     }
 
+    @ExceptionHandler({ConflictException.class})
+    public ResponseEntity<ErrorVm> handleConflictException(ConflictException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.CONFLICT;
+        String message = ex.getMessage();
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode ,message, null, ex, request, 409);
+    }
+
     @ExceptionHandler(WrongEmailFormatException.class)
     public ResponseEntity<ErrorVm> handleWrongEmailFormatException(WrongEmailFormatException ex, WebRequest request) {
         return handleBadRequest(ex, request, WRONG_EMAIL_FORMAT_ERROR_CODE);

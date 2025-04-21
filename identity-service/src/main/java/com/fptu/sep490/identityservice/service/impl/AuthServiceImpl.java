@@ -1,6 +1,8 @@
 package com.fptu.sep490.identityservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.exceptions.BadRequestException;
+import com.fptu.sep490.commonlibrary.exceptions.ConflictException;
 import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.identityservice.constants.Constants;
@@ -20,6 +22,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -93,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public KeyCloakTokenResponse refreshToken(String refreshToken) {
-        MultiValueMap<String , String> form = new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "refresh_token");
         form.add("client_id", clientId);
         form.add("client_secret", clientSecret);
@@ -103,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String accessToken, String refreshToken) {
-        MultiValueMap<String , String> form = new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("client_id", clientId);
         form.add("client_secret", clientSecret);
         form.add("refresh_token", refreshToken);
@@ -169,11 +172,47 @@ public class AuthServiceImpl implements AuthService {
     public UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
         String clientToken = getCachedClientToken();
-        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer" +  clientToken, username);
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
         if (userAccessInfos.isEmpty()) {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
         }
         return userAccessInfos.getFirst();
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException {
+        if (!isValidToken(resetPasswordRequest.token())) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+        if (!resetPasswordRequest.password().equals(resetPasswordRequest.confirmPassword())) {
+            throw new ConflictException(Constants.ErrorCodeMessage.CONFLICT_PASSWORD,
+                    Constants.ErrorCode.CONFLICT_PASSWORD);
+        }
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer  " +
+                getCachedClientToken(), resetPasswordRequest.email());
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
+                    Constants.ErrorCode.USER_NOT_FOUND, resetPasswordRequest.email());
+        }
+
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        try {
+            keyCloakUserClient.resetPassword(realm, "Bearer " + getCachedClientToken(), userId,
+                    ChangePasswordRequest.builder()
+                            .type("password")
+                            .temporary(false)
+                            .value(resetPasswordRequest.password())
+                            .build());
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
+
+    }
+
+    private boolean isValidToken(String token) {
+        return true;
     }
 
     private String getUsernameFromToken(String accessToken) {
@@ -193,7 +232,7 @@ public class AuthServiceImpl implements AuthService {
                 .compact();
     }
 
-    private String extractUserId(ResponseEntity<?> response){
+    private String extractUserId(ResponseEntity<?> response) {
         String location = response.getHeaders().get("Location").getFirst();
         String[] splitedStr = location.split("/");
         return splitedStr[splitedStr.length - 1];

@@ -12,6 +12,8 @@ public class Constants {
         public static final String USERNAME_MISSING = "USERNAME_MISSING";
         public static final String EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
         public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
+        public static final String INVALID_VERIFIED_TOKEN = "INVALID_VERIFIED_TOKEN";
+        public static final String CONFLICT_PASSWORD = "CONFLICT_PASSWORD";
     }
 
     public final class RedisKey {
@@ -27,5 +29,10 @@ public class Constants {
 
         public static final String UNAUTHORIZED = "00014";
         public static final String SIGN_IN_REQUIRE_EXCEPTION = "00015";
+
+        public static final String INVALID_VERIFIED_TOKEN = "00016";
+
+        public static final String CONFLICT_PASSWORD = "00017";
+        public static final String USER_NOT_FOUND = "00018";
     }
 }

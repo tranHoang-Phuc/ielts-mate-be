@@ -12,6 +12,7 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
+import com.fptu.sep490.identityservice.viewmodel.ResetPasswordRequest;
 import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
 import io.swagger.v3.oas.annotations.Operation;
@@ -180,6 +181,22 @@ public class AuthController {
         return ResponseEntity.ok(BaseResponse.<UserAccessInfo>builder()
                 .data(userAccessInfo)
                 .build());
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(
+            summary = "Reset password",
+            description = "Reset the password for the user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Password reset successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest)
+            throws JsonProcessingException {
+        authService.resetPassword(resetPasswordRequest);
+        return ResponseEntity.noContent().build();
     }
 
     private String extractAccessToken(HttpServletRequest request) {
