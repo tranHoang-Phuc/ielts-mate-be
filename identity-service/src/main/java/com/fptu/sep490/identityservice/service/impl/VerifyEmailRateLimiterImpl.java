@@ -25,7 +25,7 @@ public class VerifyEmailRateLimiterImpl implements VerifyEmailRateLimiter {
     public boolean isBlocked(String email) throws JsonProcessingException {
         String key = getKey(email);
         Integer count = redisService.getValue(key, Integer.class);
-        if(count == null) {
+        if (count == null) {
             resetAttempts(email);
             return false;
         }

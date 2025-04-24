@@ -310,10 +310,15 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public void verifyResetToken(String email, String otp) {
+        isValidToken(otp, "reset-password", "reset-password");
+    }
 
-    private boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
+
+    public boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
         String email = getEmailFromToken(token);
-        if(!isTokenValidInCache(email, expectedAction, token)) {
+        if (!isTokenValidInCache(email, expectedAction, token)) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
@@ -338,7 +343,7 @@ public class AuthServiceImpl implements AuthService {
                 throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                         Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
             }
-
+            redisService.delete(getVerifyTokenKey(email, action));
             return true;
 
         } catch (JwtException | IllegalArgumentException e) {

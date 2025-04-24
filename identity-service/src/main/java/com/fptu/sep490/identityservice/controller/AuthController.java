@@ -159,7 +159,6 @@ public class AuthController {
     }
 
 
-
     @GetMapping("/verify-email/status")
     @Operation(
             summary = "Check email verification status",
@@ -237,8 +236,19 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping()
-
+    @PostMapping("/verify-reset-token")
+    @Operation(
+            summary = "Verify reset token",
+            description = "Verify the reset password token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Reset token verified successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<?> verifyResetToken(@RequestBody VerifyResetTokenRequest verifyResetTokenRequest) {
+        authService.verifyResetToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
+        return ResponseEntity.noContent().build();
+    }
 
 
     private String extractAccessToken(HttpServletRequest request) {

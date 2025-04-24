@@ -10,13 +10,24 @@ import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
 
 public interface AuthService {
     KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException;
+
     KeyCloakTokenResponse refreshToken(String refreshToken);
+
     void logout(String accessToken, String refreshToken);
+
     IntrospectResponse introspect(String accessToken);
+
     String createUser(UserCreationRequest request) throws JsonProcessingException;
+
     void sendVerifyEmail(String email) throws JsonProcessingException;
+
     UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException;
+
     void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException;
+
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException;
+
     void verifyEmail(String email, String otp) throws JsonProcessingException;
+
+    void verifyResetToken(String email, String otp);
 }
