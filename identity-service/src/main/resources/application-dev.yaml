@@ -60,3 +60,7 @@ kafka:
 
 client:
   domain: localhost:3000
+
+rate-limiter:
+  max-attempts: 5
+  block-duration: 3600

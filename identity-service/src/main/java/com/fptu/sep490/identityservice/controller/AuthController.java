@@ -237,6 +237,8 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping()
+
 
 
     private String extractAccessToken(HttpServletRequest request) {

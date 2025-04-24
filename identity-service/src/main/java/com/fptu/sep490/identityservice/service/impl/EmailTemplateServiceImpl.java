@@ -24,4 +24,13 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         context.setVariable("verifyUrl", url);
         return templateEngine.process("verify-email", context);
     }
+
+    @Override
+    public String buildForgotPasswordEmail(String url) {
+        Context context = new Context();
+        context.setVariable("forgotPasswordUrl", url);
+        return templateEngine.process("forgot-password", context);
+    }
+
+
 }

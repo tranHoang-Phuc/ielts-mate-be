@@ -3,6 +3,7 @@ package com.fptu.sep490.identityservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.exceptions.BadRequestException;
 import com.fptu.sep490.commonlibrary.exceptions.ConflictException;
+import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
 import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.event.EmailSendingRequest;
@@ -15,6 +16,8 @@ import com.fptu.sep490.identityservice.service.AuthService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.service.EmailTemplateService;
+import com.fptu.sep490.identityservice.service.ForgotPasswordRateLimiter;
+import com.fptu.sep490.identityservice.service.VerifyEmailRateLimiter;
 import com.fptu.sep490.identityservice.viewmodel.*;
 import com.fptu.sep490.event.VerificationRequest;
 import feign.FeignException;
@@ -52,8 +55,9 @@ public class AuthServiceImpl implements AuthService {
     ErrorNormalizer errorNormalizer;
     RedisService redisService;
     KafkaTemplate<String, Object> kafkaTemplate;
-    EmailTemplateService emailSendingRequest;
-    private final EmailTemplateService emailTemplateService;
+    EmailTemplateService emailTemplateService;
+    ForgotPasswordRateLimiter forgotPasswordRateLimiter;
+    VerifyEmailRateLimiter verifyEmailRateLimiter;
 
     @Value("${keycloak.realm}")
     @NonFinal
@@ -86,6 +90,7 @@ public class AuthServiceImpl implements AuthService {
     @Value("${client.domain}")
     @NonFinal
     String clientDomain;
+
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
         try {
@@ -161,6 +166,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendVerifyEmail(String email) throws JsonProcessingException {
+        if (verifyEmailRateLimiter.isBlocked(email)) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.VERIFY_EMAIL_RATE_LIMIT,
+                    Constants.ErrorCode.VERIFY_EMAIL_RATE_LIMIT);
+        }
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, email);
         if (userAccessInfos.isEmpty()) {
@@ -169,10 +178,11 @@ public class AuthServiceImpl implements AuthService {
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
         String userId = userAccessInfo.id();
         String verifyToken = generateEmailVerifyToken(userId, email, "verify-email", "email-verification");
+        verifyEmailRateLimiter.recordAttempt(email);
         VerificationRequest verificationRequest = VerificationRequest.builder()
                 .token(verifyToken)
                 .build();
-        String htmlContent = emailTemplateService.buildVerificationEmail(clientDomain+"/verify-email?otp=" + verifyToken +
+        String htmlContent = emailTemplateService.buildVerificationEmail(clientDomain + "/verify-email?otp=" + verifyToken +
                 "&email=" + email);
         RecipientUser recipientUser = RecipientUser.builder()
                 .email(email)
@@ -201,7 +211,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException {
-        if (isValidToken(resetPasswordRequest.token(), "reset-password", "reset-password")) {
+        if (!isValidToken(resetPasswordRequest.token(), "reset-password", "reset-password")) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
@@ -232,10 +242,41 @@ public class AuthServiceImpl implements AuthService {
     }
 
 
-
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException {
-        sendVerifyEmail(forgotPasswordRequest.email());
+        if (forgotPasswordRateLimiter.isBlocked(forgotPasswordRequest.email())) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.FORGOT_PASSWORD_RATE_LIMIT,
+                    Constants.ErrorCode.FORGOT_PASSWORD_RATE_LIMIT);
+        }
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken,
+                forgotPasswordRequest.email());
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, forgotPasswordRequest.email());
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        String verifyToken = generateEmailVerifyToken(userId, forgotPasswordRequest.email(),
+                "reset-password", "reset-password");
+        forgotPasswordRateLimiter.recordAttempt(forgotPasswordRequest.email());
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .token(verifyToken)
+                .build();
+        String htmlContent = emailTemplateService.buildForgotPasswordEmail(clientDomain + "/reset?token=" + verifyToken +
+                "&email=" + forgotPasswordRequest.email());
+
+        RecipientUser recipientUser = RecipientUser.builder()
+                .email(forgotPasswordRequest.email())
+                .firstName(userAccessInfo.firstName())
+                .lastName(userAccessInfo.lastName())
+                .userId(userId)
+                .build();
+        EmailSendingRequest<VerificationRequest> emailSendingRequest = EmailSendingRequest.<VerificationRequest>builder()
+                .recipientUser(recipientUser)
+                .htmlContent(htmlContent).subject("Forgot password")
+                .data(verificationRequest)
+                .build();
+        kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
     }
 
     @Override
@@ -245,7 +286,7 @@ public class AuthServiceImpl implements AuthService {
             throw new ConflictException(Constants.ErrorCode.EMAIL_NOT_MATCH,
                     Constants.ErrorCodeMessage.EMAIL_NOT_MATCH);
         }
-        if(isValidToken(otp, "verify-email", "email-verification")) {
+        if (!isValidToken(otp, "verify-email", "email-verification")) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
@@ -271,6 +312,11 @@ public class AuthServiceImpl implements AuthService {
 
 
     private boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
+        String email = getEmailFromToken(token);
+        if(!isTokenValidInCache(email, expectedAction, token)) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
@@ -293,7 +339,7 @@ public class AuthServiceImpl implements AuthService {
                         Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
             }
 
-            return false;
+            return true;
 
         } catch (JwtException | IllegalArgumentException e) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
@@ -301,6 +347,15 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    public boolean isTokenValidInCache(String email, String action, String token) {
+        String redisKey = getVerifyTokenKey(email, action);
+        try {
+            String cachedToken = redisService.getValue(redisKey, String.class);
+            return token.equals(cachedToken);
+        } catch (JsonProcessingException e) {
+            return false;
+        }
+    }
 
     private String getUsernameFromToken(String accessToken) {
         JwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
@@ -323,13 +378,12 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private String generateEmailVerifyToken(String userId, String email,String action, String purpose) {
-
-
+    private String generateEmailVerifyToken(String userId, String email, String action, String purpose) {
         Key key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(emailVerifyTokenExpireTime);
-        return Jwts.builder()
+
+        String token = Jwts.builder()
                 .setSubject(userId)
                 .claim("username", email)
                 .claim("email", email)
@@ -340,6 +394,18 @@ public class AuthServiceImpl implements AuthService {
                 .setIssuer(issuerUri)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+        String redisKey = getVerifyTokenKey(email, action);
+        try {
+            redisService.saveValue(redisKey, token, Duration.ofSeconds(emailVerifyTokenExpireTime));
+        } catch (JsonProcessingException e) {
+            throw new InternalServerErrorException(Constants.ErrorCode.REDIS_ERROR,
+                    Constants.ErrorCodeMessage.REDIS_ERROR);
+        }
+        return token;
+    }
+
+    private String getVerifyTokenKey(String email, String action) {
+        return String.format("verify-token:%s:%s", action, email);
     }
 
     private String extractUserId(ResponseEntity<?> response) {

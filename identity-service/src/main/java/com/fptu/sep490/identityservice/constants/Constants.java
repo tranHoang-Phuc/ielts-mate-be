@@ -17,6 +17,10 @@ public class Constants {
         public static final String TIME_OUT_TOKEN = "TIME_OUT_TOKEN";
         public static final String EMAIL_NOT_MATCH = "EMAIL_NOT_MATCH";
 
+        public static final String FORGOT_PASSWORD_RATE_LIMIT = "FORGOT_PASSWORD_RATE_LIMIT";
+        public static final String REDIS_ERROR = "REDIS_ERROR";
+
+        public static final String VERIFY_EMAIL_RATE_LIMIT = "VERIFY_EMAIL_RATE_LIMIT";
     }
 
     public final class RedisKey {
@@ -39,5 +43,10 @@ public class Constants {
         public static final String USER_NOT_FOUND = "00018";
         public static final String TIME_OUT_TOKEN = "00019";
         public static final String EMAIL_NOT_MATCH = "00020";
+        public static final String FORGOT_PASSWORD_RATE_LIMIT = "00021";
+
+        public static final String REDIS_ERROR = "00022";
+        public static final String VERIFY_EMAIL_RATE_LIMIT = "00023";
+
     }
 }

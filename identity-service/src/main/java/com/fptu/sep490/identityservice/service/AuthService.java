@@ -18,6 +18,5 @@ public interface AuthService {
     UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException;
     void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException;
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException;
-
     void verifyEmail(String email, String otp) throws JsonProcessingException;
 }
