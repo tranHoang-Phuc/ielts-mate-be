@@ -3,6 +3,7 @@ package com.fptu.sep490.identityservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
+import com.fptu.sep490.identityservice.viewmodel.ForgotPasswordRequest;
 import com.fptu.sep490.identityservice.viewmodel.ResetPasswordRequest;
 import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
 import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
@@ -16,4 +17,7 @@ public interface AuthService {
     void sendVerifyEmail(String email) throws JsonProcessingException;
     UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException;
     void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException;
+    void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException;
+
+    void verifyEmail(String email, String otp) throws JsonProcessingException;
 }

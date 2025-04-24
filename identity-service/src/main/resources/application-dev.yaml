@@ -6,6 +6,12 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://identity.sep.local/realms/SEP490
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 
 server:
   port: 8090
@@ -27,6 +33,8 @@ springdoc:
 logging:
   level:
     org.springdoc: DEBUG
+    org.apache.kafka.clients.producer: DEBUG
+    org.springframework.kafka.core.KafkaTemplate: DEBUG
 
 eureka:
   client:
@@ -38,13 +46,17 @@ keycloak:
   token-uri: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
   realm: SEP490
   client-id: fptu_sep490
-  client-secret: mpr72Hq8HAJGVxWkW3MNvUoZD6cHM8DY
+  client-secret: o9UhBrop7zQBmtTEVPVHMkY8ooMpCTeW
   scope: openid
 
 email:
   secret: WAniqRWoEkvK5emuspFWNDL3ZPTE1mnyXZXYJwgM7xzar99KOfpc79AxglWqeVwJ
-  expiration: 3000
+  expiration: 300
 
 kafka:
   topic:
     user-verification: user-verification-topic
+
+
+client:
+  domain: localhost:3000

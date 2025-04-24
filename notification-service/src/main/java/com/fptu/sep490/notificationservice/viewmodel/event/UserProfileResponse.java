@@ -1,13 +1,8 @@
-package com.fptu.sep490.identityservice.viewmodel;
-
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+package com.fptu.sep490.notificationservice.viewmodel.event;
 
 import java.io.Serializable;
 
-@Builder
-public record UserProfileResponse (
+public record UserProfileResponse(
         String id,
         String username,
         String email,

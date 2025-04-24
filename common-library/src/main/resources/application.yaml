@@ -15,7 +15,7 @@ spring:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: localhost:9094
 
 cors:
   allowed-origins: '*'

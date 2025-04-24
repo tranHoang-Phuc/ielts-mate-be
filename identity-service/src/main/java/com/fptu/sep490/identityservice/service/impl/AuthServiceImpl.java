@@ -5,6 +5,8 @@ import com.fptu.sep490.commonlibrary.exceptions.BadRequestException;
 import com.fptu.sep490.commonlibrary.exceptions.ConflictException;
 import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
+import com.fptu.sep490.event.EmailSendingRequest;
+import com.fptu.sep490.event.RecipientUser;
 import com.fptu.sep490.identityservice.constants.Constants;
 import com.fptu.sep490.identityservice.exception.ErrorNormalizer;
 import com.fptu.sep490.identityservice.repository.client.KeyCloakTokenClient;
@@ -12,17 +14,18 @@ import com.fptu.sep490.identityservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.identityservice.service.AuthService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
+import com.fptu.sep490.identityservice.service.EmailTemplateService;
 import com.fptu.sep490.identityservice.viewmodel.*;
-import com.fptu.sep490.identityservice.viewmodel.event.UserProfileEvent;
+import com.fptu.sep490.event.VerificationRequest;
 import feign.FeignException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -36,9 +39,9 @@ import org.springframework.util.MultiValueMap;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -49,6 +52,8 @@ public class AuthServiceImpl implements AuthService {
     ErrorNormalizer errorNormalizer;
     RedisService redisService;
     KafkaTemplate<String, Object> kafkaTemplate;
+    EmailTemplateService emailSendingRequest;
+    private final EmailTemplateService emailTemplateService;
 
     @Value("${keycloak.realm}")
     @NonFinal
@@ -78,6 +83,9 @@ public class AuthServiceImpl implements AuthService {
     @NonFinal
     String issuerUri;
 
+    @Value("${client.domain}")
+    @NonFinal
+    String clientDomain;
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
         try {
@@ -153,19 +161,31 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendVerifyEmail(String email) throws JsonProcessingException {
-        String cacheKey = Constants.RedisKey.USER_PENDING_VERIFY + email;
-        Set<UserPendingVerify> userPendingVerifies = redisService.getSet(cacheKey, UserPendingVerify.class);
-        if (userPendingVerifies.isEmpty()) {
-            return;
-        }
-        UserPendingVerify userPendingVerify = userPendingVerifies.iterator().next();
-        String token = generateEmailVerifyToken(userPendingVerify.userId(), email);
         String clientToken = getCachedClientToken();
-        UserProfileResponse userProfileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken,
-                userPendingVerify.userId());
-        UserProfileEvent userProfileEvent = new UserProfileEvent(userProfileResponse, token,
-                "Subject", "HtmlContent");
-        kafkaTemplate.send(userVerificationTopic, userProfileEvent);
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, email);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, email);
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        String verifyToken = generateEmailVerifyToken(userId, email, "verify-email", "email-verification");
+        VerificationRequest verificationRequest = VerificationRequest.builder()
+                .token(verifyToken)
+                .build();
+        String htmlContent = emailTemplateService.buildVerificationEmail(clientDomain+"/verify-email?otp=" + verifyToken +
+                "&email=" + email);
+        RecipientUser recipientUser = RecipientUser.builder()
+                .email(email)
+                .firstName(userAccessInfo.firstName())
+                .lastName(userAccessInfo.lastName())
+                .userId(userId)
+                .build();
+        EmailSendingRequest<VerificationRequest> emailSendingRequest = EmailSendingRequest.<VerificationRequest>builder()
+                .recipientUser(recipientUser)
+                .htmlContent(htmlContent).subject("Verify email")
+                .data(verificationRequest)
+                .build();
+        kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
     }
 
     @Override
@@ -181,7 +201,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException {
-        if (!isValidToken(resetPasswordRequest.token())) {
+        if (isValidToken(resetPasswordRequest.token(), "reset-password", "reset-password")) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
@@ -211,9 +231,76 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
-    private boolean isValidToken(String token) {
-        return true;
+
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException {
+        sendVerifyEmail(forgotPasswordRequest.email());
     }
+
+    @Override
+    public void verifyEmail(String email, String otp) throws JsonProcessingException {
+        String userName = getEmailFromToken(otp);
+        if (!email.equals(userName)) {
+            throw new ConflictException(Constants.ErrorCode.EMAIL_NOT_MATCH,
+                    Constants.ErrorCodeMessage.EMAIL_NOT_MATCH);
+        }
+        if(isValidToken(otp, "verify-email", "email-verification")) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm,
+                "Bearer " + clientToken, email);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
+                    Constants.ErrorCode.USER_NOT_FOUND, email);
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        try {
+            keyCloakUserClient.verifyEmail(realm, "Bearer " + clientToken, userId,
+                    VerifyParam.builder()
+                            .emailVerified(true)
+                            .build());
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
+
+    }
+
+
+    private boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
+                    .requireIssuer(issuerUri)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            Date expiration = claims.getExpiration();
+            if (expiration == null || expiration.before(new Date())) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.TIME_OUT_TOKEN,
+                        Constants.ErrorCode.TIME_OUT_TOKEN);
+            }
+
+            String action = claims.get("action", String.class);
+            String purpose = claims.get("purpose", String.class);
+
+            if (!expectedAction.equals(action) || !expectedPurpose.equals(purpose)) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                        Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+            }
+
+            return false;
+
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+    }
+
 
     private String getUsernameFromToken(String accessToken) {
         JwtDecoder decoder = JwtDecoders.fromIssuerLocation(issuerUri);
@@ -221,13 +308,36 @@ public class AuthServiceImpl implements AuthService {
         return jwt.getClaim("preferred_username");
     }
 
-    private String generateEmailVerifyToken(String userId, String email) {
+    public String getEmailFromToken(String accessToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
+                    .build()
+                    .parseClaimsJws(accessToken)
+                    .getBody();
+
+            return claims.get("email", String.class);
+        } catch (JwtException e) {
+            throw new BadRequestException(Constants.ErrorCode.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN);
+        }
+    }
+
+    private String generateEmailVerifyToken(String userId, String email,String action, String purpose) {
+
+
         Key key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
+        Instant now = Instant.now();
+        Instant expiration = now.plusSeconds(emailVerifyTokenExpireTime);
         return Jwts.builder()
                 .setSubject(userId)
+                .claim("username", email)
                 .claim("email", email)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + emailVerifyTokenExpireTime))
+                .claim("action", action)
+                .claim("purpose", purpose)
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiration))
+                .setIssuer(issuerUri)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

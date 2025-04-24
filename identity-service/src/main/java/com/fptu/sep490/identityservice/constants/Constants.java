@@ -14,6 +14,9 @@ public class Constants {
         public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
         public static final String INVALID_VERIFIED_TOKEN = "INVALID_VERIFIED_TOKEN";
         public static final String CONFLICT_PASSWORD = "CONFLICT_PASSWORD";
+        public static final String TIME_OUT_TOKEN = "TIME_OUT_TOKEN";
+        public static final String EMAIL_NOT_MATCH = "EMAIL_NOT_MATCH";
+
     }
 
     public final class RedisKey {
@@ -34,5 +37,7 @@ public class Constants {
 
         public static final String CONFLICT_PASSWORD = "00017";
         public static final String USER_NOT_FOUND = "00018";
+        public static final String TIME_OUT_TOKEN = "00019";
+        public static final String EMAIL_NOT_MATCH = "00020";
     }
 }

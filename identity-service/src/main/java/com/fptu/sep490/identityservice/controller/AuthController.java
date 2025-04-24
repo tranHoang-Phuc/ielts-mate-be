@@ -11,10 +11,7 @@ import com.fptu.sep490.identityservice.service.AuthService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
-import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
-import com.fptu.sep490.identityservice.viewmodel.ResetPasswordRequest;
-import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
+import com.fptu.sep490.identityservice.viewmodel.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -161,11 +158,6 @@ public class AuthController {
         return ResponseEntity.created(location).build();
     }
 
-    @PostMapping("/send/verify/{email}")
-    public ResponseEntity<?> sendVerifyEmail(@PathVariable("email") String email) throws JsonProcessingException {
-        authService.sendVerifyEmail(email);
-        return ResponseEntity.noContent().build();
-    }
 
 
     @GetMapping("/verify-email/status")
@@ -181,6 +173,37 @@ public class AuthController {
         return ResponseEntity.ok(BaseResponse.<UserAccessInfo>builder()
                 .data(userAccessInfo)
                 .build());
+    }
+
+    @PostMapping("/verify-email/send-otp")
+    @Operation(
+            summary = "Send OTP for email verification",
+            description = "Send an OTP to the user's email address for verification"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "OTP sent successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<?> sendOtp(@RequestBody SendOtpRequest sendOtpRequest)
+            throws JsonProcessingException {
+        authService.sendVerifyEmail(sendOtpRequest.email());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/verify-email/verify")
+    @Operation(
+            summary = "Verify email",
+            description = "Verify the user's email address"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Email verified successfully"),
+            @ApiResponse(responseCode = "409", description = "Email not valid", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
+            throws JsonProcessingException {
+        authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/reset-password")
@@ -199,6 +222,23 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/forgot-password")
+    @Operation(
+            summary = "Forgot password",
+            description = "Send a reset password email to the user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Forgot password email sent successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
+            throws JsonProcessingException {
+        authService.forgotPassword(forgotPasswordRequest);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header == null || header.isBlank() || !header.startsWith("Bearer ")) {
@@ -210,4 +250,6 @@ public class AuthController {
         }
         return token;
     }
+
+
 }

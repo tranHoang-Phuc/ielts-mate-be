@@ -1,9 +1,6 @@
 package com.fptu.sep490.identityservice.repository.client;
 
-import com.fptu.sep490.identityservice.viewmodel.ChangePasswordRequest;
-import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
-import com.fptu.sep490.identityservice.viewmodel.UserProfileResponse;
+import com.fptu.sep490.identityservice.viewmodel.*;
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -39,4 +36,11 @@ public interface KeyCloakUserClient {
                                     @RequestHeader("Authorization") String token,
                                     @PathVariable("userId") String userId,
                                     @RequestBody ChangePasswordRequest changePasswordRequest);
+
+    @PutMapping(value = "/admin/realms/{realm}/users/{userId}",
+    consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> verifyEmail(@PathVariable("realm") String realm,
+                                  @RequestHeader("Authorization") String token,
+                                  @PathVariable("userId") String userId,
+                                  @RequestBody VerifyParam verifyParam);
 }
