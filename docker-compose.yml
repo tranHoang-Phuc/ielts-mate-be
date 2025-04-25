@@ -32,6 +32,9 @@ services:
     networks:
       - sep-network
 
+
+
+
   postgres:
     container_name: postgres
     build:
@@ -65,6 +68,21 @@ services:
     depends_on:
       - identity
       - postgres
+
+  identity-service:
+    container_name: identity-service
+    build:
+      context: /identity-service
+      dockerfile: Dockerfile
+    hostname: identity-service
+    ports:
+      - "8090:8090"
+    networks:
+      - sep-network
+    depends_on:
+      - identity
+      - registry
+      - redis
 
   kafka:
     image: 'bitnami/kafka:3.7.0'

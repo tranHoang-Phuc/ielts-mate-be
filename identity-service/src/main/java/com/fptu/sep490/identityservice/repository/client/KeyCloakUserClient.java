@@ -38,7 +38,7 @@ public interface KeyCloakUserClient {
                                     @RequestBody ChangePasswordRequest changePasswordRequest);
 
     @PutMapping(value = "/admin/realms/{realm}/users/{userId}",
-    consumes = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> verifyEmail(@PathVariable("realm") String realm,
                                   @RequestHeader("Authorization") String token,
                                   @PathVariable("userId") String userId,

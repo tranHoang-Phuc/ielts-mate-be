@@ -17,6 +17,8 @@ server {
     }
 }
 
+
+
 server {
     listen 80;
     server_name registry.sep.local;
@@ -29,3 +31,4 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
+

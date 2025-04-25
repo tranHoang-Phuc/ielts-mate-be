@@ -3,6 +3,7 @@ setlocal enabledelayedexpansion
 
 set IDENTITY=127.0.0.1 identity.sep.local
 set REGISTRY=127.0.0.1 registry.sep.local
+set API=127.0.0.1 api.sep.local
 
 set HOSTS_FILE=%SystemRoot%\System32\drivers\etc\hosts
 
@@ -27,6 +28,14 @@ if %errorLevel% NEQ 0 (
     echo Đã thêm: %REGISTRY%
 ) else (
     echo Đã tồn tại: %REGISTRY%
+)
+
+findstr /C:"%API%" "%HOSTS_FILE%" >nul
+if %errorLevel% NEQ 0 (
+    echo %API% >> "%HOSTS_FILE%"
+    echo Đã thêm: %API%
+) else (
+    echo Đã tồn tại: %API%
 )
 
 echo Hoàn tất!
