@@ -1,10 +1,7 @@
 package com.fptu.sep490.identityservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fptu.sep490.commonlibrary.exceptions.BadRequestException;
-import com.fptu.sep490.commonlibrary.exceptions.ConflictException;
-import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
-import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
+import com.fptu.sep490.commonlibrary.exceptions.*;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.event.EmailSendingRequest;
 import com.fptu.sep490.event.RecipientUser;
@@ -167,7 +164,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendVerifyEmail(String email) throws JsonProcessingException {
         if (verifyEmailRateLimiter.isBlocked(email)) {
-            throw new BadRequestException(Constants.ErrorCodeMessage.VERIFY_EMAIL_RATE_LIMIT,
+            throw new TooManyRequestException(Constants.ErrorCodeMessage.VERIFY_EMAIL_RATE_LIMIT,
                     Constants.ErrorCode.VERIFY_EMAIL_RATE_LIMIT);
         }
         String clientToken = getCachedClientToken();
@@ -245,7 +242,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException {
         if (forgotPasswordRateLimiter.isBlocked(forgotPasswordRequest.email())) {
-            throw new BadRequestException(Constants.ErrorCodeMessage.FORGOT_PASSWORD_RATE_LIMIT,
+            throw new TooManyRequestException(Constants.ErrorCodeMessage.FORGOT_PASSWORD_RATE_LIMIT,
                     Constants.ErrorCode.FORGOT_PASSWORD_RATE_LIMIT);
         }
         String clientToken = getCachedClientToken();

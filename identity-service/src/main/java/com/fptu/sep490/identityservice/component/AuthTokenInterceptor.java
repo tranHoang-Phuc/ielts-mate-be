@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -23,8 +24,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @RequiredArgsConstructor
 public class AuthTokenInterceptor implements HandlerInterceptor {
 
-    KeyCloakTokenClient keyCloakTokenClient;
-
+    ObjectProvider<KeyCloakTokenClient> keyCloakTokenClient;
     @Value("${keycloak.realm}")
     @NonFinal
     String realm;
@@ -55,7 +55,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         form.add("client_secret", clientSecret);
         form.add("refresh_token", refreshToken);
         try {
-            KeyCloakTokenResponse keyCloakTokenResponse = keyCloakTokenClient.requestToken(form, realm);
+            KeyCloakTokenResponse keyCloakTokenResponse = keyCloakTokenClient.getObject().requestToken(form, realm);
             CookieUtils.setTokenCookies(response, keyCloakTokenResponse);
         } catch (Exception ex) {
             throw new AccessDeniedException(Constants.ErrorCode.UNAUTHORIZED, Constants.ErrorCodeMessage.UNAUTHORIZED);
@@ -69,7 +69,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         form.add("client_id", clientId);
         form.add("client_secret", clientSecret);
         form.add("token", accessToken);
-        var response = keyCloakTokenClient.introspect(realm, form);
+        var response = keyCloakTokenClient.getObject().introspect(realm, form);
         return response.active();
     }
 }

@@ -129,6 +129,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, errorCode ,message, null, ex, request, 409);
     }
 
+    @ExceptionHandler(TooManyRequestException.class)
+    public ResponseEntity<ErrorVm> handleTooManyRequestException(TooManyRequestException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.TOO_MANY_REQUESTS;
+        String message = ex.getMessage();
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode ,message, null, ex, request, 429);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorVm> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         HttpStatus status = HttpStatus.FORBIDDEN;

@@ -21,6 +21,7 @@ public class Constants {
         public static final String REDIS_ERROR = "REDIS_ERROR";
 
         public static final String VERIFY_EMAIL_RATE_LIMIT = "VERIFY_EMAIL_RATE_LIMIT";
+        public static final String TOO_MANY_REQUEST = "TOO_MANY_REQUEST";
     }
 
     public final class RedisKey {
@@ -47,6 +48,8 @@ public class Constants {
 
         public static final String REDIS_ERROR = "00022";
         public static final String VERIFY_EMAIL_RATE_LIMIT = "00023";
+
+        public static final String TOO_MANY_REQUEST = "00024";
 
     }
 }
