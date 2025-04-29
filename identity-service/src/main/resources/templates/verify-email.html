@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
@@ -23,11 +22,6 @@
             text-align: center;
         }
 
-        .logo {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-
         h1 {
             font-size: 22px;
             margin: 10px 0;
@@ -42,17 +36,6 @@
             font-size: 15px;
             line-height: 1.6;
             margin: 15px 0;
-        }
-
-        .verify-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #0070f3;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 600;
-            margin: 20px 0;
         }
 
         .footer-note {
@@ -76,7 +59,12 @@
 <div class="container">
     <h1>Please verify your email <span class="emoji"></span></h1>
     <p>To use our service, click the verification button. This helps keep your account secure.</p>
-    <a th:href="@{${verifyUrl}}" class="verify-btn">Verify my account</a>
+
+    <a th:href="@{${verifyUrl}}"
+       style="display:inline-block;padding:12px 24px;background-color:#0070f3;color:#ffffff !important;text-decoration:none;border-radius:6px;font-weight:600;margin:20px 0;">
+        Verify my account
+    </a>
+
     <p class="footer-note">
         You're receiving this email because you have an account in our service. If you are not sure why you're receiving this, please contact us by replying to this email.
     </p>
