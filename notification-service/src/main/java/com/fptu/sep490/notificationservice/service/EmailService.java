@@ -5,4 +5,6 @@ import com.fptu.sep490.notificationservice.viewmodel.event.consume.EmailSenderEv
 
 public interface EmailService {
     EmailResponse sendEmail(EmailSenderEvent sendEmailRequest);
+
+    EmailResponse test();
 }

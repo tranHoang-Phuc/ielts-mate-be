@@ -1,6 +1,8 @@
 package com.fptu.sep490.commonlibrary.redis;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
@@ -11,10 +13,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class RedisService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    RedisTemplate<String, Object> redisTemplate;
+
+    ObjectMapper objectMapper;
 
     public <T> void saveValue(String key, T value, Duration ttl) throws JsonProcessingException {
         String json = objectMapper.writeValueAsString(value);

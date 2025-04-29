@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class EmailVerificationListener {
-    EmailService emailSendingRequest;
+    EmailService emailService;
 
     @KafkaListener(topics = "${kafka.topic.user-verification}", groupId = "${spring.kafka.consumer.group-id}")
     public void listen(EmailSendingRequest request) {
@@ -29,6 +29,6 @@ public class EmailVerificationListener {
                 .subject("Verify your email")
                 .htmlContent(request.getHtmlContent())
                 .build();
-        log.info(emailSenderEvent.htmlContent());
+        emailService.sendEmail(emailSenderEvent);
     }
 }

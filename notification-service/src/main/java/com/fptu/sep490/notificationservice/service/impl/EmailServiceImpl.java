@@ -54,4 +54,29 @@ public class EmailServiceImpl implements EmailService {
                     ErrorCodeMessage.ERROR_WHEN_SENDING_EMAIL);
         }
     }
+
+    @Override
+    public EmailResponse test() {
+        var recipient = Recipient.builder()
+                .email("hoangphuc7bdtd@gmail.com")
+                .name("Phuc Tran Hoang")
+                .build();
+        var sender = Sender.builder()
+                .email("phucth115.dev@gmail.com")
+                .name("noreply")
+                .build();
+
+        var emailRequest = EmailRequest.builder()
+                .sender(sender)
+                .to(List.of(recipient))
+                .subject("Test email")
+                .htmlContent("<html><body><h1>Hello, this is a test email!</h1></body></html>")
+                .build();
+        try {
+            return emailClient.sendEmail(apiKey, emailRequest);
+        } catch (FeignException e) {
+            throw new BrevoException(Constants.ErrorCode.ERROR_WHEN_SENDING_EMAIL,
+                    ErrorCodeMessage.ERROR_WHEN_SENDING_EMAIL);
+        }
+    }
 }

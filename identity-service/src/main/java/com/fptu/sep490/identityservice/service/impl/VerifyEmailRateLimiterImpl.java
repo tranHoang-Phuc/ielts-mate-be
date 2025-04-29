@@ -3,13 +3,20 @@ package com.fptu.sep490.identityservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.identityservice.service.VerifyEmailRateLimiter;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 
 @Service
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class VerifyEmailRateLimiterImpl implements VerifyEmailRateLimiter {
     RedisService redisService;
 
