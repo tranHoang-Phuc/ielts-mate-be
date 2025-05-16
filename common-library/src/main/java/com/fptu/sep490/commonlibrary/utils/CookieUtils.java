@@ -4,25 +4,33 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
 public class CookieUtils {
     public static void setTokenCookies(HttpServletResponse response, KeyCloakTokenResponse tokenResponse) {
-        Cookie accessToken = new Cookie("authorization", tokenResponse.accessToken());
-        accessToken.setHttpOnly(true);
-        accessToken.setPath("/");
-        accessToken.setMaxAge(tokenResponse.expiresIn());
+        ResponseCookie accessCookie = ResponseCookie.from("Authorization", tokenResponse.accessToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(tokenResponse.expiresIn())
+                .sameSite("Strict")
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenResponse.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(tokenResponse.expiresIn())
+                .sameSite("Strict")
+                .build();
 
-        Cookie refreshToken = new Cookie("refresh_token", tokenResponse.refreshToken());
-        refreshToken.setHttpOnly(true);
-        refreshToken.setPath("/");
-        refreshToken.setMaxAge(tokenResponse.refreshExpiresIn());
 
-        response.addCookie(accessToken);
-        response.addCookie(refreshToken);
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
     public static void clearCookie(HttpServletResponse response) {
-        Cookie accessToken = new Cookie("authorization", null);
+        Cookie accessToken = new Cookie("Authorization", null);
         accessToken.setMaxAge(0);
         accessToken.setPath("/");
 

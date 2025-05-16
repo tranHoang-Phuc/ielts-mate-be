@@ -70,6 +70,6 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         form.add("client_secret", clientSecret);
         form.add("token", accessToken);
         var response = keyCloakTokenClient.getObject().introspect(realm, form);
-        return response.active();
+        return response.isActive();
     }
 }

@@ -1,5 +1,7 @@
 package com.fptu.sep490.identityservice.config;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -11,6 +13,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collection;
@@ -29,15 +33,45 @@ public class SecurityConfig {
 
     };
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           BearerTokenResolver bearerTokenResolver,
+                                           JwtAuthenticationConverter jwtAuthenticationConverterForKeycloak)
+            throws Exception {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(WHITE_LIST).permitAll()
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenResolver(bearerTokenResolver)
+                        .jwt(jwt  -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak)))
                 .build();
+    }
+
+    @Bean
+    public BearerTokenResolver bearerTokenResolver() {
+        return new BearerTokenResolver() {
+            private final DefaultBearerTokenResolver defaultResolver  = new DefaultBearerTokenResolver();
+            @Override
+            public String resolve(HttpServletRequest request) {
+                String token = defaultResolver.resolve(request);
+                if (token != null && !token.isBlank()) {
+                    return token;
+                }
+                if (request.getCookies() != null) {
+                    for (Cookie cookie : request.getCookies()) {
+                        if ("Authorization".equalsIgnoreCase(cookie.getName())) {
+                            String val = cookie.getValue();
+                            if (val != null && !val.isBlank()) {
+                                return val.trim();
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+        };
     }
 
     @Bean

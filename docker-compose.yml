@@ -84,6 +84,19 @@ services:
       - registry
       - redis
 
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    hostname: api-gateway
+    ports:
+      - "9191:9191"
+    networks:
+      - sep-network
+    depends_on:
+      - identity-service
+
   kafka:
     image: 'bitnami/kafka:3.7.0'
     container_name: kafka

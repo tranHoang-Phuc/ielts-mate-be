@@ -18,11 +18,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.apache.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -61,10 +63,12 @@ public class AuthController {
                                                                       HttpServletResponse response)
             throws JsonProcessingException {
         KeyCloakTokenResponse loginResponse = authService.login(loginRequest.email(), loginRequest.password());
-        CookieUtils.setTokenCookies(response, loginResponse);
+       CookieUtils.setTokenCookies(response, loginResponse);
+
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
-                .data(loginResponse)
-                .build());
+                        .data(loginResponse)
+                        .build());
+
     }
 
     @PostMapping("/refresh")
@@ -115,8 +119,8 @@ public class AuthController {
         String accessToken = extractAccessToken(request);
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new SignInRequiredException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION,
-                    Constants.ErrorCode.SIGN_IN_REQUIRE_EXCEPTION);
+            throw new UnauthorizedException(Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED);
         }
         authService.logout(accessToken, refreshToken);
         CookieUtils.clearCookie(response);
@@ -253,15 +257,32 @@ public class AuthController {
 
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
-        if (header == null || header.isBlank() || !header.startsWith("Bearer ")) {
-            throw new AccessDeniedException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED);
+        if (header != null && !header.isBlank() && header.startsWith("Bearer ")) {
+            String token = header.substring(7).trim();
+            if (!token.isBlank()) {
+                return token;
+            }
         }
-        String token = header.substring(7);
-        if (token.isBlank()) {
-            throw new AccessDeniedException(Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED);
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("Authorization".equalsIgnoreCase(cookie.getName())) {
+                    String token = cookie.getValue() != null ? cookie.getValue().trim() : "";
+                    if (!token.isBlank()) {
+                        return token;
+                    }
+                }
+            }
         }
-        return token;
+        throw new AccessDeniedException(
+                Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION,
+                com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED
+        );
     }
 
+    @GetMapping("/test")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Test successful");
+    }
 
 }
