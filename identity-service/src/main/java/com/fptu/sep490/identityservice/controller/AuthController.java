@@ -3,7 +3,6 @@ package com.fptu.sep490.identityservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.exceptions.AccessDeniedException;
-import com.fptu.sep490.commonlibrary.exceptions.SignInRequiredException;
 import com.fptu.sep490.commonlibrary.exceptions.UnauthorizedException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.identityservice.constants.Constants;
@@ -21,15 +20,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.apache.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -59,7 +61,7 @@ public class AuthController {
             )
     }
     )
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody LoginRequest loginRequest,
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody @Valid LoginRequest loginRequest,
                                                                       HttpServletResponse response)
             throws JsonProcessingException {
         KeyCloakTokenResponse loginResponse = authService.login(loginRequest.email(), loginRequest.password());
@@ -155,7 +157,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
             @ApiResponse(responseCode = "409", description = "Username already exists", content = @Content)
     })
-    public ResponseEntity<?> register(@RequestBody UserCreationRequest userCreationRequest)
+    public ResponseEntity<?> register(@RequestBody @Valid UserCreationRequest userCreationRequest)
             throws JsonProcessingException {
         String userId = authService.createUser(userCreationRequest);
         URI location = URI.create("/api/v1/profile/" + userId);
@@ -255,6 +257,25 @@ public class AuthController {
     }
 
 
+    @GetMapping("/google")
+    @Operation(
+            summary = "Login with Google",
+            description = "Get the Google login URL and redirect the user to it"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "302", description = "Redirect to Google login URL"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<Void> loginWithGoogle() throws URISyntaxException {
+        String authUrl = authService.createGoogleUrl();
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(new URI(authUrl))
+                .build();
+    }
+
+
+
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && !header.isBlank() && header.startsWith("Bearer ")) {
@@ -277,12 +298,6 @@ public class AuthController {
                 Constants.ErrorCodeMessage.SIGN_IN_REQUIRE_EXCEPTION,
                 com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED
         );
-    }
-
-    @GetMapping("/test")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("Test successful");
     }
 
 }

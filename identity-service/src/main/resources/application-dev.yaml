@@ -1,22 +1,21 @@
 spring:
   application:
-    name: identity-service
+    name: ${SPRING_APP_NAME:identity-service}
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://identity.sep.local/realms/SEP490
+          issuer-uri: ${JWT_ISSUER_URI:http://identity.sep.local/realms/SEP490}
   kafka:
-    bootstrap-servers: localhost:9094
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-
 server:
-  port: 8090
+  port: ${SERVER_PORT:8090}
   servlet:
-    context-path: /identity
+    context-path: ${SERVER_CONTEXT_PATH:/identity}
 
 springdoc:
   paths-to-match: /**
@@ -25,10 +24,10 @@ springdoc:
     path: /swagger-ui
     oauth:
       use-pkce-with-authorization-code-grant: true
-      client-id: swagger-ui
+      client-id: ${SWAGGER_CLIENT_ID:swagger-ui}
   oauth-flow:
-    authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
-    token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
+    authorization-url: ${SWAGGER_AUTH_URL:http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth}
+    token-url: ${SWAGGER_TOKEN_URL:http://identity.sep.local/realms/SEP490/protocol/openid-connect/token}
 
 logging:
   level:
@@ -39,28 +38,32 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
 
 keycloak:
-  base-uri: http://identity.sep.local
-  token-uri: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
-  realm: SEP490
-  client-id: fptu_sep490
-  client-secret: o9UhBrop7zQBmtTEVPVHMkY8ooMpCTeW
-  scope: openid
+  base-uri: ${KEYCLOAK_BASE_URI:http://identity.sep.local}
+  token-uri: ${KEYCLOAK_TOKEN_URI:http://identity.sep.local/realms/SEP490/protocol/openid-connect/token}
+  realm: ${KEYCLOAK_REALM:SEP490}
+  client-id: ${KEYCLOAK_CLIENT_ID:fptu_sep490}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:o9UhBrop7zQBmtTEVPVHMkY8ooMpCTeW}
+  scope: ${KEYCLOAK_SCOPE:openid}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI:http://identity.sep.local/realms/SEP490/broker/google/endpoint}
 
 email:
-  secret: WAniqRWoEkvK5emuspFWNDL3ZPTE1mnyXZXYJwgM7xzar99KOfpc79AxglWqeVwJ
-  expiration: 300
+  secret: ${EMAIL_SECRET:WAniqRWoEkvK5emuspFWNDL3ZPTE1mnyXZXYJwgM7xzar99KOfpc79AxglWqeVwJ}
+  expiration: ${EMAIL_EXPIRATION:300}
 
 kafka:
   topic:
-    user-verification: user-verification-topic
-
+    user-verification: ${KAFKA_USER_VERIFICATION_TOPIC:user-verification-topic}
 
 client:
-  domain: localhost:3000
+  domain: ${CLIENT_DOMAIN:localhost:3000}
 
 rate-limiter:
-  max-attempts: 5
-  block-duration: 3600
+  max-attempts: ${RATE_LIMITER_MAX_ATTEMPTS:5}
+  block-duration: ${RATE_LIMITER_BLOCK_DURATION:3600}
+
+app:
+  oauth2:
+    redirect-uri:  ${APP_OAUTH2_REDIRECT_URI:http://${CLIENT_DOMAIN:localhost:3000}/oauth2/callback}

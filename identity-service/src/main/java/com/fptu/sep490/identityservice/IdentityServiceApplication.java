@@ -1,6 +1,7 @@
 package com.fptu.sep490.identityservice;
 
 import com.fptu.sep490.commonlibrary.config.CorsConfig;
+import com.fptu.sep490.identityservice.config.KeycloakProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,7 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 @SpringBootApplication(scanBasePackages = {"com.fptu.sep490.identityservice", "com.fptu.sep490.commonlibrary"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {"com.fptu.sep490.identityservice.repository.client"})
-@EnableConfigurationProperties({CorsConfig.class})
+@EnableConfigurationProperties({CorsConfig.class, KeycloakProperties.class})
 public class IdentityServiceApplication {
 
 	public static void main(String[] args) {

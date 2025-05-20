@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Duration;
@@ -55,6 +56,10 @@ public class AuthServiceImpl implements AuthService {
     EmailTemplateService emailTemplateService;
     ForgotPasswordRateLimiter forgotPasswordRateLimiter;
     VerifyEmailRateLimiter verifyEmailRateLimiter;
+
+    @Value("${keycloak.base-uri}")
+    @NonFinal
+    String kcUrl;
 
     @Value("${keycloak.realm}")
     @NonFinal
@@ -88,6 +93,9 @@ public class AuthServiceImpl implements AuthService {
     @NonFinal
     String clientDomain;
 
+    @Value("${keycloak.redirect-uri}")
+    @NonFinal
+    String redirectUri;
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
         try {
@@ -310,6 +318,20 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void verifyResetToken(String email, String otp) {
         isValidToken(otp, "reset-password", "reset-password");
+    }
+
+    @Override
+    public String createGoogleUrl() {
+        return String.format(
+                "%s/realms/%s/protocol/openid-connect/auth" +
+                        "?client_id=%s" +
+                        "&redirect_uri=%s" +
+                        "&response_type=code" +
+                        "&scope=openid" +
+                        "&kc_idp_hint=google",
+                kcUrl, realm, clientId,
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+        );
     }
 
 

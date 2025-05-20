@@ -30,4 +30,6 @@ public interface AuthService {
     void verifyEmail(String email, String otp) throws JsonProcessingException;
 
     void verifyResetToken(String email, String otp);
+
+    String createGoogleUrl();
 }
