@@ -10,15 +10,14 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.fptu</groupId>
+    <groupId>com.fptu.sep490</groupId>
     <artifactId>ielts-mate-be</artifactId>
-    <version>${revision}</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>sep</name>
+    <name>ielts-mate-be</name>
 
     <modules>
         <module>common-library</module>
-        <module>sample</module>
         <module>identity-service</module>
         <module>notification-service</module>
         <module>api-gateway</module>

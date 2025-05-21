@@ -5,16 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.fptu</groupId>
+        <groupId>com.fptu.sep490</groupId>
         <artifactId>ielts-mate-be</artifactId>
-        <version>${revision}</version>
+        <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+    <groupId>com.fptu</groupId>
     <artifactId>common-library</artifactId>
-    <version>${revision}</version>
+    <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Common Library</name>
-    <description>SEP Common Library service</description>
+    <name>common Library</name>
+
     <properties>
 
     </properties>

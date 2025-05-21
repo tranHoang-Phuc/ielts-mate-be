@@ -1,7 +1,7 @@
 FROM maven:3.9.8-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
-RUN mvn -B -pl identity-service -am clean package -DskipTests
+RUN mvn -B -pl notification-service -am clean package -DskipTests
 
 # runtime chuyển sang Alpine nhẹ
 FROM eclipse-temurin:21-alpine AS runtime
