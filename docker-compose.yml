@@ -16,19 +16,21 @@ services:
   identity:
     container_name: identity
     image: quay.io/keycloak/keycloak:26.0.2
-    command: 'start-dev --features=scripts --import-realm'
+    ports:
+      - "8080:8080"
+    command: "start-dev --features=scripts --import-realm"
     environment:
-      KC_FEATURES: scripts
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
-      KC_DB: ${KC_DB}
-      KC_DB_URL: ${KC_DB_URL}
-      KC_DB_USERNAME: ${KC_DB_USERNAME}
-      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
-      KC_HTTP_PORT: ${KC_HTTP_PORT}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HTTP_PORT: ${KC_HTTP_PORT:-8080}
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
     volumes:
-      - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
-      - ./identity/themes/sep/theme:/opt/keycloak/themes
+      - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./identity/themes/sep/theme:/opt/keycloak/themes:ro
+      - keycloak_data:/var/lib/keycloak/data
     networks:
       - sep-network
 
@@ -195,6 +197,9 @@ volumes:
     driver: local
   redis:
     driver: local
+  keycloak_data:
+    driver: local
+
 
 networks:
   sep-network:
