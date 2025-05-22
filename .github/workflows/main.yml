@@ -9,10 +9,18 @@ jobs:
   docker-compose:
     runs-on: self-hosted
     environment: docker
+    
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
+        uses: actions/checkout@v4  # Sử dụng version mới hơn
+        
+      - name: Clean up old containers
+        run: |
+          sudo docker compose -f docker-compose.yml down || true
+          sudo docker system prune -f
+          
       - name: Build & Up containers
-        run:  sudo docker compose -f docker-compose.yml up -d --build
-
+        run: sudo docker compose -f docker-compose.yml up -d --build
+        
+      - name: Verify deployment
+        run: sudo docker compose -f docker-compose.yml ps
