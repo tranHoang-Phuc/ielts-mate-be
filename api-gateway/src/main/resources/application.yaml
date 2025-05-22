@@ -18,7 +18,7 @@ spring:
     gateway:
       routes:
         - id: IDENTITY-SERVICE
-          uri: http://localhost:8090
+          uri: http://47.128.245.17:8090
           predicates:
             - Path=/identity/api/v1/**
       globalcors:
@@ -43,7 +43,7 @@ springdoc:
     path: /swagger-ui
     urls:
       - name: identity-service
-        url: http://localhost:8090/identity/v3/api-docs
+        url: http://47.128.245.17:8090/identity/v3/api-docs
 
 
 server:

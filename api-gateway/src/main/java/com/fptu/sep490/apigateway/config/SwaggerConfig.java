@@ -35,7 +35,7 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url("http://47.128.245.17:8080")))
+                .servers(List.of(new Server().url("http://47.128.245.17:8090")))
                 .info(new Info().title("Identity Service").version("1.0.0"));
     }
 
