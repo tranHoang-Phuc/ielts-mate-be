@@ -1,0 +1,20 @@
+name: Ielts Mate Backend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker-compose:
+    runs-on: self-hosted
+    environment: docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Make start.sh executable
+        run: chmod +x start.sh
+
+      - name: Build & Up containers
+        run: ./start.sh
