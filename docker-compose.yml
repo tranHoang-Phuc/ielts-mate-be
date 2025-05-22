@@ -30,8 +30,6 @@ services:
       KC_HTTP_PORT: ${KC_HTTP_PORT:-8080}
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
 
     volumes:
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
