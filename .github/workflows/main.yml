@@ -13,8 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Make start.sh executable
-        run: chmod +x start.sh
-
       - name: Build & Up containers
-        run: ./start.sh
+        run: docker compose -f docker-compose.yml up -d --build
+
