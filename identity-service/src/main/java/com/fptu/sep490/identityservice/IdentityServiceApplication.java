@@ -11,7 +11,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication(scanBasePackages = {"com.fptu.sep490.identityservice", "com.fptu.sep490.commonlibrary"})
 @EnableDiscoveryClient
 @EnableFeignClients(basePackages = {"com.fptu.sep490.identityservice.repository.client"})
-@EnableConfigurationProperties({CorsConfig.class,KeycloakProperties.class})
+@EnableConfigurationProperties({KeycloakProperties.class})
 public class IdentityServiceApplication {
 
 	public static void main(String[] args) {
