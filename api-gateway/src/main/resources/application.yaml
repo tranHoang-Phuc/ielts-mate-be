@@ -20,8 +20,10 @@ spring:
         - id: IDENTITY-SERVICE
           uri: http://47.128.245.17:8090
           predicates:
-            - Path=/identity/api/v1/**
-            - Path=/identity/v3/**
+            - Path=/identity/api/v1/**, \
+              /identity/v3/api-docs/**, \
+              /identity/swagger-ui.html, \
+              /identity/swagger-ui/**
       globalcors:
         cors-configurations:
           '[/**]':
@@ -46,6 +48,9 @@ springdoc:
       - name: identity-service
         url: https://tootsstore.online/identity/v3/api-docs
 
-
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
 server:
   port: 9191

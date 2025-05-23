@@ -158,6 +158,8 @@ services:
     hostname: api-gateway
     ports:
       - "9191:9191"
+    environment:
+      EUREKA_URL: ${EUREKA_URL}
     networks:
       - sep-network
     depends_on:
