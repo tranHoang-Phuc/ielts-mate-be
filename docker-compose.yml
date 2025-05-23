@@ -6,8 +6,10 @@ services:
     volumes:
       - ./nginx/templates:/etc/nginx/templates
       - ./nginx/configuration/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf
+      - ~/certbot/etc:/etc/letsencrypt:ro
     ports:
       - "80:80"
+      - "443:443"
     networks:
       - sep-network
 
