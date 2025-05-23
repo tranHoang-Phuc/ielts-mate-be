@@ -43,7 +43,7 @@ springdoc:
     path: /swagger-ui
     urls:
       - name: identity-service
-        url: http://47.128.245.17:8090/identity/v3/api-docs
+        url: https://tootsstore.online/identity/v3/api-docs
 
 
 server:
