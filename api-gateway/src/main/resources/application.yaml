@@ -21,19 +21,7 @@ spring:
           uri: http://47.128.245.17:8090
           predicates:
             - Path=/identity/**
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: false
-            maxAge: 3600
+
 
 springdoc:
   api-docs:
