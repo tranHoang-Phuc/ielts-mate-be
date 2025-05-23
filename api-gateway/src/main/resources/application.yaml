@@ -21,6 +21,7 @@ spring:
           uri: http://47.128.245.17:8090
           predicates:
             - Path=/identity/api/v1/**
+            - Path=/identity/v3/**
       globalcors:
         cors-configurations:
           '[/**]':
