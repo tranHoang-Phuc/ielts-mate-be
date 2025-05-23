@@ -17,13 +17,13 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: IDENTITY-SERVICE
+        - id: identity-service
           uri: http://47.128.245.17:8090
           predicates:
-            - Path=/identity/api/v1/**, \
-              /identity/v3/api-docs/**, \
-              /identity/swagger-ui.html, \
-              /identity/swagger-ui/**
+            - Path=/identity/api/v1/**
+            - Path=/identity/v3/api-docs*,/identity/v3/api-docs/**
+            - Path=/identity/swagger-ui.html
+            - Path=/identity/swagger-ui/**
       globalcors:
         cors-configurations:
           '[/**]':
