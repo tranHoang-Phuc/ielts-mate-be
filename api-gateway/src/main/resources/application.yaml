@@ -25,7 +25,7 @@ spring:
         cors-configurations:
           '[/**]':
             allowedOrigins:
-              - "http://localhost:3000",
+              - "http://localhost:3000"
               - "https://ielts-mate-fe.vercel.app"
             allowedMethods:
               - GET
