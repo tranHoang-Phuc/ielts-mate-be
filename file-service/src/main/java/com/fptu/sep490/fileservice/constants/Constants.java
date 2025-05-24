@@ -1,4 +1,4 @@
-package com.fptu.sep490.identityservice.constants;
+package com.fptu.sep490.fileservice.constants;
 
 public class Constants {
     public final class ErrorCodeMessage {
@@ -23,7 +23,6 @@ public class Constants {
         public static final String VERIFY_EMAIL_RATE_LIMIT = "VERIFY_EMAIL_RATE_LIMIT";
         public static final String TOO_MANY_REQUEST = "TOO_MANY_REQUEST";
         public static final String EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED";
-        public static final String EMAIL_NOT_SETUP = "EMAIL_NOT_SETUP";
     }
 
     public final class RedisKey {
@@ -53,8 +52,6 @@ public class Constants {
 
         public static final String TOO_MANY_REQUEST = "00024";
 
-
         public static final String EMAIL_ALREADY_VERIFIED = "00025";
-        public static final String EMAIL_NOT_SETUP = "00026";
     }
 }

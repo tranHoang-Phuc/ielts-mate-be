@@ -43,7 +43,7 @@ public class ErrorNormalizer {
         if (errorDescription != null) {
             String code = errorCodeMap.get(errorDescription);
             if (Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED.equals(code)) {
-                throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED);
+                throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_SETUP, com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.EMAIL_NOT_SETUP);
             }
         }
         String code = errorCodeMap.get(errorMessage);

@@ -14,4 +14,5 @@ public class ErrorCodeMessage {
 
     public static final String ERROR_WHEN_SENDING_EMAIL = "000009";
     public static final String EMAIL_NOT_VERIFIED = "000010";
+    public static final String EMAIL_NOT_SETUP = "000011";
 }
