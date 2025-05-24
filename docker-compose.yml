@@ -119,6 +119,21 @@ services:
       - discovery-service
       - redis
 
+  file-service:
+    container_name: file-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: file-runtime
+    hostname: file-service
+    ports:
+      - "${SERVER_PORT_FILE:-8070}:8070"
+    networks:
+      - sep-network
+    depends_on:
+      - discovery-service
+      - redis
+
   notification-service:
     container_name: notification-service
     build:

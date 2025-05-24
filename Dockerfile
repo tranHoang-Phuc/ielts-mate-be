@@ -8,6 +8,7 @@ COPY identity-service identity-service
 COPY notification-service notification-service
 COPY discovery-service discovery-service
 COPY api-gateway api-gateway
+COPY file-service file-service
 RUN mvn -B clean package -DskipTests
 
 
@@ -28,6 +29,11 @@ COPY --from=builder /workspace/notification-service/target/*.jar app.jar
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
 
 FROM eclipse-temurin:21-alpine AS discovery-runtime
+WORKDIR /app
+COPY --from=builder /workspace/discovery-service/target/*.jar app.jar
+ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
+
+FROM eclipse-temurin:21-alpine AS file-runtime
 WORKDIR /app
 COPY --from=builder /workspace/discovery-service/target/*.jar app.jar
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar app.jar"]
