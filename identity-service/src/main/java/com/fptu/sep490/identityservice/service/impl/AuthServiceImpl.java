@@ -342,6 +342,23 @@ public class AuthServiceImpl implements AuthService {
         );
     }
 
+    @Override
+    public UserCreationProfile getUserProfile(String accessToken) throws JsonProcessingException {
+        String username = getUsernameFromToken(accessToken);
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        return UserCreationProfile.builder()
+                .id(userAccessInfo.id())
+                .email(userAccessInfo.email())
+                .firstName(userAccessInfo.firstName())
+                .lastName(userAccessInfo.lastName())
+                .build();
+    }
+
 
     public boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
         String email = getEmailFromToken(token);

@@ -254,6 +254,24 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/me")
+    @Operation(
+            summary = "Get user profile",
+            description = "Get the profile of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User profile retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserAccessInfo.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserCreationProfile>> getProfile(HttpServletRequest request) throws JsonProcessingException {
+        String accessToken = extractAccessToken(request);
+        UserCreationProfile userAccessInfo = authService.getUserProfile(accessToken);
+        return ResponseEntity.ok(BaseResponse.<UserCreationProfile>builder()
+                .data(userAccessInfo)
+                .build());
+    }
 
     @GetMapping("/google")
     @Operation(

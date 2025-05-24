@@ -29,4 +29,6 @@ public interface AuthService {
     void verifyResetToken(String email, String otp);
 
     String createGoogleUrl();
+
+    UserCreationProfile getUserProfile(String accessToken) throws JsonProcessingException;
 }
