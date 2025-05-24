@@ -36,7 +36,7 @@ public class EmailServiceImpl implements EmailService {
         EmailRequest emailResponse = EmailRequest.builder()
                 .sender(Sender.builder()
                         .name("noreply")
-                        .email("noreply.ielsmate@gmail.com")
+                        .email("phucth115.dev@gmail.com")
                         .build()
                 )
                 .to(List.of(Recipient.builder()
