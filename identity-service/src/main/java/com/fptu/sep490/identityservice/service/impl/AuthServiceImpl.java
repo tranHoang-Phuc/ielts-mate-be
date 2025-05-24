@@ -100,9 +100,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
-        if (userAccessInfos.isEmpty()) {
-            throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_SETUP, Constants.ErrorCode.EMAIL_NOT_SETUP);
+        List<UserAccessInfo> userAccessInfos =
+                keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
+        if (userAccessInfos.isEmpty() || userAccessInfos.getFirst() == null) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
+                    Constants.ErrorCode.USER_NOT_FOUND);
         }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
