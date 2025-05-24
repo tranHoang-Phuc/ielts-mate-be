@@ -318,6 +318,21 @@ public class AuthServiceImpl implements AuthService {
                     VerifyParam.builder()
                             .emailVerified(true)
                             .build());
+            String htmlContent = emailTemplateService.buildEmailVerificationSuccess(userAccessInfo.email(),
+                    userAccessInfo.firstName() + userAccessInfo.lastName());
+            RecipientUser recipientUser = RecipientUser.builder()
+                    .email(userAccessInfo.email())
+                    .firstName(userAccessInfo.firstName())
+                    .lastName(userAccessInfo.lastName())
+                    .userId(userId)
+                    .build();
+            EmailSendingRequest<VerificationRequest> emailSendingRequest = EmailSendingRequest.<VerificationRequest>builder()
+                    .recipientUser(recipientUser)
+                    .htmlContent(htmlContent).subject("Verify email successfully")
+                    .data(VerificationRequest.builder().build())
+                    .build();
+            kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
+            redisService.delete("otp:" + email);
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }

@@ -32,5 +32,13 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         return templateEngine.process("forgot-password", context);
     }
 
+    @Override
+    public String buildEmailVerificationSuccess(String email, String fullName) {
+        Context context = new Context();
+        context.setVariable("email", email);
+        context.setVariable("fullName", fullName);
+        return templateEngine.process("email-verified", context);
+    }
+
 
 }
