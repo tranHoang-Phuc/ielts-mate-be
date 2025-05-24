@@ -22,6 +22,7 @@ public class Constants {
 
         public static final String VERIFY_EMAIL_RATE_LIMIT = "VERIFY_EMAIL_RATE_LIMIT";
         public static final String TOO_MANY_REQUEST = "TOO_MANY_REQUEST";
+        public static final String EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED";
     }
 
     public final class RedisKey {
@@ -51,5 +52,6 @@ public class Constants {
 
         public static final String TOO_MANY_REQUEST = "00024";
 
+        public static final String EMAIL_ALREADY_VERIFIED = "00025";
     }
 }

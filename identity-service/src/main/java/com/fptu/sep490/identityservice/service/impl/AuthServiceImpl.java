@@ -190,6 +190,10 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, email);
         }
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        if(userAccessInfo.emailVerified()) {
+            throw new ConflictException(Constants.ErrorCodeMessage.EMAIL_ALREADY_VERIFIED,
+                    Constants.ErrorCode.EMAIL_ALREADY_VERIFIED);
+        }
         String userId = userAccessInfo.id();
         String otp = generateAndStoreOtp(email);
         verifyEmailRateLimiter.recordAttempt(email);
