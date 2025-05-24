@@ -192,7 +192,7 @@ public class AuthServiceImpl implements AuthService {
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, email);
         if (userAccessInfos.isEmpty()) {
-            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, email);
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, Constants.ErrorCode.USER_NOT_FOUND);
         }
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
         if(userAccessInfo.emailVerified()) {
