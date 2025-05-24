@@ -99,6 +99,11 @@ public class AuthServiceImpl implements AuthService {
     String redirectUri;
     @Override
     public KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException {
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
+        }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
             form.add("grant_type", "password");
