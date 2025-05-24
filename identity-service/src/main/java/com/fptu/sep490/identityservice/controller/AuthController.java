@@ -24,8 +24,12 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +41,7 @@ import java.net.URISyntaxException;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class AuthController {
+
     AuthService authService;
 
     @PostMapping("/sign-in")
@@ -58,17 +63,16 @@ public class AuthController {
                     responseCode = "401",
                     description = "Unauthorized"
             )
-    }
-    )
+    })
     public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody @Valid LoginRequest loginRequest,
                                                                       HttpServletResponse response)
             throws JsonProcessingException {
         KeyCloakTokenResponse loginResponse = authService.login(loginRequest.email(), loginRequest.password());
-       CookieUtils.setTokenCookies(response, loginResponse);
+        CookieUtils.setTokenCookies(response, loginResponse);
 
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
-                        .data(loginResponse)
-                        .build());
+                .data(loginResponse)
+                .build());
 
     }
 
@@ -113,7 +117,7 @@ public class AuthController {
             description = "Logout the currently authenticated user by clearing the access and refresh tokens."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Logout successful"),
+            @ApiResponse(responseCode = "200", description = "Logout successful"),
             @ApiResponse(responseCode = "401", description = "Unauthorized or missing refresh token")
     })
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
@@ -125,7 +129,10 @@ public class AuthController {
         }
         authService.logout(accessToken, refreshToken);
         CookieUtils.clearCookie(response);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Logout successful")
+                .build());
     }
 
     @PostMapping("/introspect")
@@ -192,7 +199,10 @@ public class AuthController {
     public ResponseEntity<?> sendOtp(@RequestBody SendOtpRequest sendOtpRequest)
             throws JsonProcessingException {
         authService.sendVerifyEmail(sendOtpRequest.email());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("OTP sent successfully")
+                .build());
     }
 
     @PostMapping("/verify-email/verify")
@@ -208,7 +218,10 @@ public class AuthController {
     public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
             throws JsonProcessingException {
         authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .message("Email verified successfully")
+                .data(null)
+                .build());
     }
 
     @PostMapping("/reset-password")
@@ -224,7 +237,10 @@ public class AuthController {
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest)
             throws JsonProcessingException {
         authService.resetPassword(resetPasswordRequest);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Password reset successfully")
+                .build());
     }
 
     @PostMapping("/forgot-password")
@@ -239,7 +255,10 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest)
             throws JsonProcessingException {
         authService.forgotPassword(forgotPasswordRequest);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Forgot password email sent successfully")
+                .build());
     }
 
     @PostMapping("/verify-reset-token")
@@ -253,7 +272,10 @@ public class AuthController {
     })
     public ResponseEntity<?> verifyResetToken(@RequestBody VerifyResetTokenRequest verifyResetTokenRequest) {
         authService.verifyResetToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Reset token verified successfully")
+                .build());
     }
 
     @GetMapping("/me")
@@ -291,7 +313,6 @@ public class AuthController {
                 .location(new URI(authUrl))
                 .build();
     }
-
 
 
     private String extractAccessToken(HttpServletRequest request) {

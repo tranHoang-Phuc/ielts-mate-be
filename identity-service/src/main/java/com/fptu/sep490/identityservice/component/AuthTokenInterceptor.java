@@ -37,13 +37,10 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
     @NonFinal
     String clientSecret;
 
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-
         if(accessToken == null || refreshToken == null) {
             return true;
         }
@@ -61,7 +58,6 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
             throw new AccessDeniedException(Constants.ErrorCode.UNAUTHORIZED, Constants.ErrorCodeMessage.UNAUTHORIZED);
         }
         return true;
-
     }
 
     private boolean validateAccessToken(String accessToken) {

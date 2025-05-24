@@ -298,7 +298,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String email, String otp) throws JsonProcessingException {
-
         String otpInCache = redisService.getValue("otp:" + email, String.class);
         if (otpInCache == null) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
