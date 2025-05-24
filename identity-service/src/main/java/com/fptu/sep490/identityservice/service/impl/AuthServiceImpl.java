@@ -287,12 +287,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyEmail(String email, String otp) throws JsonProcessingException {
-        String userName = getEmailFromToken(otp);
-        if (!email.equals(userName)) {
-            throw new ConflictException(Constants.ErrorCode.EMAIL_NOT_MATCH,
-                    Constants.ErrorCodeMessage.EMAIL_NOT_MATCH);
+
+        String otpInCache = redisService.getValue("otp:" + email, String.class);
+        if (otpInCache == null) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
-        if (!isValidToken(otp, "verify-email", "email-verification")) {
+        if (!otpInCache.equals(otp)) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
@@ -313,7 +314,6 @@ public class AuthServiceImpl implements AuthService {
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
-
     }
 
     @Override
