@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
         if (userAccessInfos.isEmpty()) {
-            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, Constants.ErrorCode.USER_NOT_FOUND);
+            throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_SETUP, Constants.ErrorCode.EMAIL_NOT_SETUP);
         }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
