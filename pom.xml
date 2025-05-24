@@ -22,6 +22,7 @@
         <module>notification-service</module>
         <module>api-gateway</module>
         <module>discovery-service</module>
+        <module>file-service</module>
     </modules>
 
     <properties>
