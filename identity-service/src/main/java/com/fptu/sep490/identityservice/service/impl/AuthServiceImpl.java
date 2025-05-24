@@ -142,7 +142,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String createUser(UserCreationRequest request) throws JsonProcessingException {
+    public UserCreationProfile createUser(UserCreationRequest request) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
         UserCreationParam userCreationParam = UserCreationParam.builder()
                 .username(request.email())
@@ -164,7 +164,14 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
 
-            return extractUserId(creationResponse);
+            String id = extractUserId(creationResponse);
+            UserCreationProfile userCreationProfile = UserCreationProfile.builder()
+                    .id(id)
+                    .email(request.email())
+                    .firstName(request.firstName())
+                    .lastName(request.lastName())
+                    .build();
+            return userCreationProfile;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }

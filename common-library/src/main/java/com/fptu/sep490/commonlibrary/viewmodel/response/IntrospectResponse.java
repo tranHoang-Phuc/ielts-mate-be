@@ -49,7 +49,7 @@ public class IntrospectResponse {
     @JsonProperty("acr")
     private String acr;
 
-    @JsonProperty("allowed-origins")
+    @JsonProperty("allowedorigins")
     private List<String> allowedOrigins;
 
     @JsonProperty("realm_access")
