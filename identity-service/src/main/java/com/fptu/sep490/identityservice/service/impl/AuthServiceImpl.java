@@ -43,6 +43,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -162,6 +163,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
+
             return extractUserId(creationResponse);
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
@@ -182,13 +184,12 @@ public class AuthServiceImpl implements AuthService {
         }
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
         String userId = userAccessInfo.id();
-        String verifyToken = generateEmailVerifyToken(userId, email, "verify-email", "email-verification");
+        String otp = generateAndStoreOtp(email);
         verifyEmailRateLimiter.recordAttempt(email);
         VerificationRequest verificationRequest = VerificationRequest.builder()
-                .token(verifyToken)
+                .token(otp)
                 .build();
-        String htmlContent = emailTemplateService.buildVerificationEmail(clientDomain + "/verify-email?otp=" + verifyToken +
-                "&email=" + email);
+        String htmlContent = emailTemplateService.buildVerificationEmail(otp);
         RecipientUser recipientUser = RecipientUser.builder()
                 .email(email)
                 .firstName(userAccessInfo.firstName())
@@ -370,6 +371,20 @@ public class AuthServiceImpl implements AuthService {
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
     }
+    private String generateAndStoreOtp(String email) {
+        String otp = generateOTP();
+
+        String redisKey = "otp:" + email;
+        try {
+            redisService.saveValue(redisKey, otp, Duration.ofMinutes(10));
+        } catch (JsonProcessingException e) {
+            throw new InternalServerErrorException(
+                    Constants.ErrorCode.REDIS_ERROR,
+                    Constants.ErrorCodeMessage.REDIS_ERROR
+            );
+        }
+        return otp;
+    }
 
     public boolean isTokenValidInCache(String email, String action, String token) {
         String redisKey = getVerifyTokenKey(email, action);
@@ -401,7 +416,13 @@ public class AuthServiceImpl implements AuthService {
                     Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN);
         }
     }
-
+    private String generateOTP() {
+        StringBuilder otp = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            otp.append((int) (Math.random() * 10));
+        }
+        return otp.toString();
+    }
     private String generateEmailVerifyToken(String userId, String email, String action, String purpose) {
         Key key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
         Instant now = Instant.now();

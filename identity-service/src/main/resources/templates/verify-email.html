@@ -38,6 +38,18 @@
             margin: 15px 0;
         }
 
+        .otp-box {
+            display: inline-block;
+            background-color: #f4f1f8;
+            padding: 12px 20px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #333;
+        }
+
         .footer-note {
             color: #555;
             font-size: 13px;
@@ -57,19 +69,18 @@
 <body>
 
 <div class="container">
-    <h1>Please verify your email <span class="emoji"></span></h1>
-    <p>To use our service, click the verification button. This helps keep your account secure.</p>
+    <h1>Please verify your email <span class="emoji">🔒</span></h1>
+    <p>To complete your registration, please use the following one-time password (OTP):</p>
 
-    <a th:href="@{${verifyUrl}}"
-       style="display:inline-block;padding:12px 24px;background-color:#0070f3;color:#ffffff !important;text-decoration:none;border-radius:6px;font-weight:600;margin:20px 0;">
-        Verify my account
-    </a>
+    <div class="otp-box" th:text="${otp}"></div>
 
     <p class="footer-note">
-        You're receiving this email because you have an account in our service. If you are not sure why you're receiving this, please contact us by replying to this email.
+        You're receiving this email because you have an account in our service.
+        If you are not sure why you're receiving this, please contact us by replying to this email.
     </p>
     <div class="footer-box">
-        Email specialists use our intuitive tool to design emails for desktop and mobile, and let our smart algorithm generate HTML for use in their ESPs.
+        Email specialists use our intuitive tool to design emails for desktop and mobile,
+        and let our smart algorithm generate HTML for use in their ESPs.
     </div>
 </div>
 

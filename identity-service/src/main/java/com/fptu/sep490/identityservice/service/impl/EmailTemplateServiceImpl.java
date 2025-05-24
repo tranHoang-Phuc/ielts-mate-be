@@ -19,9 +19,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 
     @Override
-    public String buildVerificationEmail(String url) {
+    public String buildVerificationEmail(String otp) {
         Context context = new Context();
-        context.setVariable("verifyUrl", url);
+        context.setVariable("otp", otp);
         return templateEngine.process("verify-email", context);
     }
 
