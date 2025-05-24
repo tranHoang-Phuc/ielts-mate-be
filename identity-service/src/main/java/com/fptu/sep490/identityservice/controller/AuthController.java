@@ -156,10 +156,12 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
             @ApiResponse(responseCode = "409", description = "Username already exists", content = @Content)
     })
-    public ResponseEntity<UserCreationProfile> register(@RequestBody @Valid UserCreationRequest userCreationRequest)
+    public ResponseEntity<BaseResponse<UserCreationProfile>> register(@RequestBody @Valid UserCreationRequest userCreationRequest)
             throws JsonProcessingException {
         UserCreationProfile userProfile = authService.createUser(userCreationRequest);
-        return new ResponseEntity<>(userProfile, HttpStatus.CREATED);
+        return new ResponseEntity<>(BaseResponse.<UserCreationProfile>builder()
+                .data(userProfile)
+                .build(), HttpStatus.CREATED);
     }
 
 
