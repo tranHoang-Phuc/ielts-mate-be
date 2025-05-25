@@ -3,6 +3,7 @@ package com.fptu.sep490.identityservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.exceptions.*;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
+import com.fptu.sep490.commonlibrary.utils.AesSecretKeyUtils;
 import com.fptu.sep490.event.EmailSendingRequest;
 import com.fptu.sep490.event.RecipientUser;
 import com.fptu.sep490.identityservice.constants.Constants;
@@ -149,7 +150,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserCreationProfile createUser(UserCreationRequest request) throws JsonProcessingException {
+    public UserCreationProfile createUser(UserCreationRequest request) throws Exception {
         String clientToken = getCachedClientToken();
         UserCreationParam userCreationParam = UserCreationParam.builder()
                 .username(request.email())
@@ -170,8 +171,9 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
-
             String id = extractUserId(creationResponse);
+            String encryptedPassword = AesSecretKeyUtils.encrypt(request.password());
+            redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
             UserCreationProfile userCreationProfile = UserCreationProfile.builder()
                     .id(id)
                     .email(request.email())
@@ -304,7 +306,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyEmail(String email, String otp) throws JsonProcessingException {
+    public KeyCloakTokenResponse verifyEmail(String email, String otp) throws Exception {
         String otpInCache = redisService.getValue("otp:" + email, String.class);
         if (otpInCache == null) {
             throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
@@ -343,6 +345,11 @@ public class AuthServiceImpl implements AuthService {
                     .build();
             kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
             redisService.delete("otp:" + email);
+            String encryptedPassword = redisService.getValue(getPasswordKey(email), String.class);
+            String normalPassword = AesSecretKeyUtils.decrypt(encryptedPassword);
+            redisService.delete(getPasswordKey(email));
+            return login(email, normalPassword);
+
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
@@ -498,6 +505,9 @@ public class AuthServiceImpl implements AuthService {
         return token;
     }
 
+    private String getPasswordKey(String email) {
+        return String.format("password:%s", email);
+    }
     private String getVerifyTokenKey(String email, String action) {
         return String.format("verify-token:%s:%s", action, email);
     }

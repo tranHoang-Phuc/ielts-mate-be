@@ -160,7 +160,7 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Username already exists", content = @Content)
     })
     public ResponseEntity<BaseResponse<UserCreationProfile>> register(@RequestBody @Valid UserCreationRequest userCreationRequest)
-            throws JsonProcessingException {
+            throws Exception {
         UserCreationProfile userProfile = authService.createUser(userCreationRequest);
         return new ResponseEntity<>(BaseResponse.<UserCreationProfile>builder()
                 .data(userProfile)
@@ -211,12 +211,12 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Email not valid", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
     })
-    public ResponseEntity<?> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
-            throws JsonProcessingException {
-        authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
-        return ResponseEntity.ok(BaseResponse.<Void>builder()
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
+            throws Exception {
+        var response = authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
                 .message("Email verified successfully")
-                .data(null)
+                .data(response)
                 .build());
     }
 

@@ -14,7 +14,7 @@ public interface AuthService {
 
     IntrospectResponse introspect(String accessToken);
 
-    UserCreationProfile createUser(UserCreationRequest request) throws JsonProcessingException;
+    UserCreationProfile createUser(UserCreationRequest request) throws Exception;
 
     void sendVerifyEmail(String email) throws JsonProcessingException;
 
@@ -24,7 +24,7 @@ public interface AuthService {
 
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException;
 
-    void verifyEmail(String email, String otp) throws JsonProcessingException;
+    KeyCloakTokenResponse verifyEmail(String email, String otp) throws Exception;
 
     void verifyResetToken(String email, String otp);
 
