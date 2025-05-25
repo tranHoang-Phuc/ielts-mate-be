@@ -66,3 +66,10 @@ rate-limiter:
 app:
   oauth2:
     redirect-uri: http://${CLIENT_DOMAIN:localhost:3000}/oauth2/callback
+
+aes:
+  secret:
+    key: 72Gs15WEFAEQqF2web3cTmhBiZVlri9JqQStJhRsPYYXsmYAakrDEsFw9MU31CUr
+  algorithm: AES
+  cipher: AES/CBC/PKCS5Padding
+  iv-length: 16

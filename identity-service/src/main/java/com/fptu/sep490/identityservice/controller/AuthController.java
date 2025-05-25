@@ -269,7 +269,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
     })
     public ResponseEntity<?> verifyResetToken(@RequestBody VerifyResetTokenRequest verifyResetTokenRequest) {
-        authService.verifyResetToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
+        authService.checkResetPasswordToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
         return ResponseEntity.ok(BaseResponse.<Void>builder()
                 .data(null)
                 .message("Reset token verified successfully")

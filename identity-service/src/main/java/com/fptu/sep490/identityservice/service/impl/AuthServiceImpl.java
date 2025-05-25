@@ -359,7 +359,12 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyResetToken(String email, String otp) {
+
         isValidToken(otp, "reset-password", "reset-password");
+    }
+    @Override
+    public void checkResetPasswordToken(String email, String otp) {
+        isValidCheckedToken(otp, "reset-password", "reset-password");
     }
 
     @Override
@@ -393,7 +398,40 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    public boolean isValidCheckedToken(String token, String expectedAction, String expectedPurpose) {
+        String email = getEmailFromToken(token);
+        if (!isTokenValidInCache(email, expectedAction, token)) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
+                    .requireIssuer(issuerUri)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
+            Date expiration = claims.getExpiration();
+            if (expiration == null || expiration.before(new Date())) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.TIME_OUT_TOKEN,
+                        Constants.ErrorCode.TIME_OUT_TOKEN);
+            }
+
+            String action = claims.get("action", String.class);
+            String purpose = claims.get("purpose", String.class);
+
+            if (!expectedAction.equals(action) || !expectedPurpose.equals(purpose)) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                        Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+            }
+            return true;
+
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+    }
     public boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
         String email = getEmailFromToken(token);
         if (!isTokenValidInCache(email, expectedAction, token)) {
