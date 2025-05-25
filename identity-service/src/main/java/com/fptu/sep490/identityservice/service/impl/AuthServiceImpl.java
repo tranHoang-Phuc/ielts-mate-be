@@ -3,7 +3,7 @@ package com.fptu.sep490.identityservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.exceptions.*;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
-import com.fptu.sep490.commonlibrary.utils.AesSecretKeyUtils;
+import com.fptu.sep490.identityservice.component.AesSecretKey;
 import com.fptu.sep490.event.EmailSendingRequest;
 import com.fptu.sep490.event.RecipientUser;
 import com.fptu.sep490.identityservice.constants.Constants;
@@ -44,7 +44,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -58,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
     EmailTemplateService emailTemplateService;
     ForgotPasswordRateLimiter forgotPasswordRateLimiter;
     VerifyEmailRateLimiter verifyEmailRateLimiter;
-    AesSecretKeyUtils aesSecretKeyUtils;
+    AesSecretKey aesSecretKey;
 
     @Value("${keycloak.base-uri}")
     @NonFinal
@@ -173,7 +172,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
             String id = extractUserId(creationResponse);
-            String encryptedPassword = aesSecretKeyUtils.encrypt(request.password());
+            String encryptedPassword = aesSecretKey.encrypt(request.password());
             redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
             UserCreationProfile userCreationProfile = UserCreationProfile.builder()
                     .id(id)
@@ -347,7 +346,7 @@ public class AuthServiceImpl implements AuthService {
             kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
             redisService.delete("otp:" + email);
             String encryptedPassword = redisService.getValue(getPasswordKey(email), String.class);
-            String normalPassword = aesSecretKeyUtils.decrypt(encryptedPassword);
+            String normalPassword = aesSecretKey.decrypt(encryptedPassword);
             redisService.delete(getPasswordKey(email));
             return login(email, normalPassword);
 
