@@ -211,12 +211,14 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Email not valid", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
     })
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest,
+                                                                           HttpServletResponse response)
             throws Exception {
-        var response = authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        var data = authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        CookieUtils.setTokenCookies(response, data);
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
                 .message("Email verified successfully")
-                .data(response)
+                .data(data)
                 .build());
     }
 

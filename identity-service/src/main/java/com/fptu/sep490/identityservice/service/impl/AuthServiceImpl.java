@@ -289,9 +289,10 @@ public class AuthServiceImpl implements AuthService {
         VerificationRequest verificationRequest = VerificationRequest.builder()
                 .token(verifyToken)
                 .build();
-        String htmlContent = emailTemplateService.buildForgotPasswordEmail(clientDomain + "/reset?token=" + verifyToken +
-                "&email=" + forgotPasswordRequest.email());
-
+        String tokenParam = URLEncoder.encode(verifyToken, StandardCharsets.UTF_8);
+        String emailParam = URLEncoder.encode(forgotPasswordRequest.email(), StandardCharsets.UTF_8);
+        String url = clientDomain + "/reset?token=" + tokenParam + "&email=" + emailParam;
+        String htmlContent = emailTemplateService.buildForgotPasswordEmail(url);
         RecipientUser recipientUser = RecipientUser.builder()
                 .email(forgotPasswordRequest.email())
                 .firstName(userAccessInfo.firstName())
