@@ -80,6 +80,11 @@ public class RedisService {
         redisTemplate.delete(key);
     }
 
+    public <T> void saveValue(String key, T value) throws JsonProcessingException {
+        String json = objectMapper.writeValueAsString(value);
+        redisTemplate.opsForValue().set(key, json);
+    }
+
     public boolean hasKey(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
