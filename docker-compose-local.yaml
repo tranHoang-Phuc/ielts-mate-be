@@ -1,0 +1,128 @@
+version: "3.9"
+
+services:
+  nginx:
+    container_name: nginx
+    image:  nginx:1.27.2
+    restart: unless-stopped
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates
+      - ./nginx/configuration/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf
+    ports:
+      - "80:80"
+    networks:
+      - sep-network
+
+  identity:
+    container_name: identity
+    image: quay.io/keycloak/keycloak:26.0.2
+    command: 'start-dev --features=scripts --import-realm'
+    environment:
+      KC_FEATURES: scripts
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+      KC_HTTP_PORT: 80
+    volumes:
+      - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./identity/themes/sep/theme:/opt/keycloak/themes
+    networks:
+      - sep-network
+
+
+
+
+  postgres:
+    container_name: postgres
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    hostname: postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ./docker/postgres/postgresql.conf.sample:/usr/share/postgresql/postgresql.conf.sample
+      - ./postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
+      - postgres:/var/lib/postgresql/data
+    command: postgres -c 'config_file=/usr/share/postgresql/postgresql.conf.sample' -c 'max_connections=500'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_HOST_AUTH_METHOD: trust
+    networks:
+      - sep-network
+
+  registry:
+    container_name: registry-service
+    build:
+      context: ./registry-service
+      dockerfile: Dockerfile
+    hostname: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - sep-network
+    depends_on:
+      - identity
+      - postgres
+
+  identity-service:
+    container_name: identity-service
+    build:
+      context: /identity-service
+      dockerfile: Dockerfile
+    hostname: identity-service
+    ports:
+      - "8090:8090"
+    networks:
+      - sep-network
+    depends_on:
+      - identity
+      - registry
+      - redis
+
+  kafka:
+    image: 'bitnami/kafka:3.7.0'
+    container_name: kafka
+    hostname: ${KAFKA_SERVICE_HOST}
+    ports:
+      - ${KAFKA_SERVICE_PORT}:${KAFKA_SERVICE_PORT}
+      - "9093:9093"
+      - "9094:9094"
+    environment:
+      - KAFKA_CFG_NODE_ID=${KAFKA_CFG_NODE_ID}
+      - KAFKA_CFG_PROCESS_ROLES=${KAFKA_CFG_PROCESS_ROLES}
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=${KAFKA_CFG_CONTROLLER_QUORUM_VOTERS}
+      - KAFKA_CFG_LISTENERS=${KAFKA_CFG_LISTENERS}
+      - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_CFG_ADVERTISED_LISTENERS}
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP}
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=${KAFKA_CFG_CONTROLLER_LISTENER_NAMES}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+    networks:
+      - sep-network
+  redis:
+    container_name: redis
+    image: redis:7.4.1-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    environment:
+      - SPRING_DATA_REDIS_HOST=${SPRING_DATA_REDIS_HOST:-redis}
+      - SPRING_DATA_REDIS_PORT=${SPRING_DATA_REDIS_PORT:-6379}
+    volumes:
+      - redis:/data
+    networks:
+      - sep-network
+
+volumes:
+  postgres:
+    driver: local
+  redis:
+    driver: local
+
+networks:
+  sep-network:
+    driver: bridge
