@@ -28,6 +28,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -106,6 +107,10 @@ public class AuthServiceImpl implements AuthService {
         if (userAccessInfos.isEmpty() || userAccessInfos.getFirst() == null) {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
                     Constants.ErrorCode.USER_NOT_FOUND);
+        }
+        if(!userAccessInfos.getFirst().emailVerified()) {
+            throw new AppException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED,
+                    Constants.ErrorCode.EMAIL_NOT_VERIFIED, HttpStatus.UNAUTHORIZED.value());
         }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
