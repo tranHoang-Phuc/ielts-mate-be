@@ -58,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
     EmailTemplateService emailTemplateService;
     ForgotPasswordRateLimiter forgotPasswordRateLimiter;
     VerifyEmailRateLimiter verifyEmailRateLimiter;
+    AesSecretKeyUtils aesSecretKeyUtils;
 
     @Value("${keycloak.base-uri}")
     @NonFinal
@@ -172,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
             String id = extractUserId(creationResponse);
-            String encryptedPassword = AesSecretKeyUtils.encrypt(request.password());
+            String encryptedPassword = aesSecretKeyUtils.encrypt(request.password());
             redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
             UserCreationProfile userCreationProfile = UserCreationProfile.builder()
                     .id(id)
@@ -346,7 +347,7 @@ public class AuthServiceImpl implements AuthService {
             kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
             redisService.delete("otp:" + email);
             String encryptedPassword = redisService.getValue(getPasswordKey(email), String.class);
-            String normalPassword = AesSecretKeyUtils.decrypt(encryptedPassword);
+            String normalPassword = aesSecretKeyUtils.decrypt(encryptedPassword);
             redisService.delete(getPasswordKey(email));
             return login(email, normalPassword);
 
