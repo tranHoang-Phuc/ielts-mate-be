@@ -33,9 +33,7 @@ public class ErrorNormalizer {
     }
 
     public KeyCloakRuntimeException handleKeyCloakException(FeignException exception) throws JsonProcessingException {
-        if (exception.status() == Integer.parseInt(ApiConstant.CODE_401)) {
-            throw new UnauthorizedException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED);
-        }
+
         log.error(exception.getMessage(), exception);
         var response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
         String errorMessage = response.errorMessage();

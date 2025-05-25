@@ -199,6 +199,14 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(status, errorCode, message, null, ex, request, 500);
     }
 
+    @ExceptionHandler({AppException.class})
+    public ResponseEntity<ErrorVm> handleAppException(AppException ex, WebRequest request) {
+        HttpStatus status = HttpStatus.valueOf(ex.getHttpStatusCode());
+        String message = ex.getMessage();
+        String errorCode = ex.getBusinessErrorCode();
+        return buildErrorResponse(status, errorCode, message, null, ex, request, status.value());
+    }
+
     @ExceptionHandler({BrevoException.class})
     public ResponseEntity<ErrorVm> handleBrevoException(BrevoException ex, WebRequest request) {
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
@@ -230,13 +238,13 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ErrorVm> buildErrorResponse(HttpStatus status,String errorCode ,String message, List<String> errors,
                                                        Exception ex, WebRequest request, int statusCode) {
         boolean isDev = Arrays.asList(environment.getActiveProfiles()).contains("dev");
-
+        boolean isLocal = Arrays.asList(environment.getActiveProfiles()).contains("local");
         if (request != null) {
             log.error(ERROR_LOG_FORMAT, this.getServletPath(request), statusCode, message);
         }
         log.error(message, ex);
 
-        if (isDev) {
+        if (isDev || isLocal) {
             String stackTrace = Arrays.stream(ex.getStackTrace())
                     .map(StackTraceElement::toString)
                     .collect(Collectors.joining("\n"));

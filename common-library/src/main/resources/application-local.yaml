@@ -1,0 +1,32 @@
+server:
+  servlet:
+    context-path: /common-library
+
+spring:
+  application:
+    name: common-library
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8090/realms/SEP490
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: localhost:9094
+
+cors:
+  allowed-origins: '*'
+  allowed-methods: '*'
+  allowed-headers: '*'
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+keycloak:
+
+  token-uri: http://localhost:8090/realms/SEP490/protocol/openid-connect/token
+  scope: openid
