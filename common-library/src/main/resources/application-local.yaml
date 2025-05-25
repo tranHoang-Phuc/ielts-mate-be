@@ -27,6 +27,11 @@ logging:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 keycloak:
-
   token-uri: http://localhost:8090/realms/SEP490/protocol/openid-connect/token
   scope: openid
+aes:
+  secret:
+    key: 72Gs15WEFAEQqF2web3cTmhBiZVlri9JqQStJhRsPYYXsmYAakrDEsFw9MU31CUr
+  algorithm: AES
+  cipher: AES/CBC/PKCS5Padding
+  iv-length: 16
