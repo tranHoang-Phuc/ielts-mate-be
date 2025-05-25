@@ -180,6 +180,7 @@ public class AuthServiceImpl implements AuthService {
                     .firstName(request.firstName())
                     .lastName(request.lastName())
                     .build();
+            sendVerifyEmail(request.email());
             return userCreationProfile;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
