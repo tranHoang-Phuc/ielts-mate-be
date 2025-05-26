@@ -45,6 +45,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -370,6 +371,85 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void checkResetPasswordToken(String email, String otp) {
         isValidCheckedToken(otp, "reset-password", "reset-password");
+    }
+
+    @Override
+    public void changePassword(String accessToken, PasswordChange changePasswordRequest) throws JsonProcessingException {
+        String email = getEmailFromToken(accessToken);
+        try {
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("grant_type", "password");
+            form.add("client_id", clientId);
+            form.add("client_secret", clientSecret);
+            form.add("username", email);
+            form.add("password", changePasswordRequest.oldPassword());
+            form.add("scope", "openid");
+            keyCloakTokenClient.requestToken(form, realm);
+        } catch (FeignException exception) {
+            throw new AppException(Constants.ErrorCodeMessage.WRONG_OLD_PASSWORD,
+                    Constants.ErrorCode.WRONG_OLD_PASSWORD, HttpStatus.BAD_REQUEST.value());
+        }
+        if (!changePasswordRequest.newPassword().equals(changePasswordRequest.confirmNewPassword())) {
+            throw new ConflictException(Constants.ErrorCodeMessage.CONFLICT_PASSWORD,
+                    Constants.ErrorCode.CONFLICT_PASSWORD);
+        }
+
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer  " +
+                getCachedClientToken(), email);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
+                    Constants.ErrorCode.USER_NOT_FOUND, email);
+        }
+
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+
+        try {
+            keyCloakUserClient.resetPassword(realm, "Bearer " + clientToken, userId,
+                    ChangePasswordRequest.builder()
+                            .type("password")
+                            .temporary(false)
+                            .value(changePasswordRequest.newPassword())
+                            .build());
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
+
+    }
+
+    @Override
+    public UserCreationProfile updateUserProfile(String accessToken, UserUpdateRequest userUpdateRequest) throws JsonProcessingException {
+        String email = getEmailFromToken(accessToken);
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient
+                .getUserByEmail(realm, "Bearer " + clientToken, email);
+        if (userAccessInfos.isEmpty()) {
+            throw new AppException(Constants.ErrorCodeMessage.USER_NOT_FOUND, Constants.ErrorCode.USER_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value());
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        Map<String, Object> updates = Map.of(
+                "firstName", userUpdateRequest.firstName(),
+                "lastName", userUpdateRequest.lastName()
+        );
+        try {
+            ResponseEntity<?> response = keyCloakUserClient.updateUserProfile(realm, "Bearer " + clientToken,
+                    userId, updates);
+            if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
+                throw new InternalServerErrorException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR,
+                        Constants.ErrorCode.KEYCLOAK_ERROR);
+            }
+            return UserCreationProfile.builder()
+                    .id(userAccessInfo.id())
+                    .email(userAccessInfo.email())
+                    .firstName(userUpdateRequest.firstName())
+                    .lastName(userUpdateRequest.lastName())
+                    .build();
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
     }
 
     @Override

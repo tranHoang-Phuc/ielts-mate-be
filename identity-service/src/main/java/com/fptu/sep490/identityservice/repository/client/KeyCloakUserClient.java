@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @FeignClient(name = "keycloak-user-client", url = "${keycloak.base-uri}")
 public interface KeyCloakUserClient {
@@ -43,4 +44,11 @@ public interface KeyCloakUserClient {
                                   @RequestHeader("Authorization") String token,
                                   @PathVariable("userId") String userId,
                                   @RequestBody VerifyParam verifyParam);
+
+    @PutMapping(value = "/admin/realms/{realm}/users/{userId}",
+    consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> updateUserProfile(@PathVariable("realm") String realm,
+                                        @RequestHeader("Authorization") String token,
+                                        @PathVariable("userId") String userId,
+                                        @RequestBody Map<String, Object> updates);
 }

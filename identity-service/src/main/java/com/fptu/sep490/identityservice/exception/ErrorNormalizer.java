@@ -61,7 +61,6 @@ public class ErrorNormalizer {
                 default -> new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCodeMessage.KEYCLOAK_ERROR);
             };
         }
-
         return new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCode.KEYCLOAK_ERROR);
     }
 }

@@ -312,6 +312,47 @@ public class AuthController {
                 .build();
     }
 
+    @PutMapping("/change-password")
+    @Operation(
+            summary = "Change user password",
+            description = "Change the password of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> changePassword(@RequestBody @Valid PasswordChange changePasswordRequest,
+                                                              HttpServletRequest request) throws JsonProcessingException {
+        String accessToken = extractAccessToken(request);
+        authService.changePassword(accessToken, changePasswordRequest);
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Password changed successfully")
+                .build());
+    }
+
+    @PutMapping("/update-profile")
+    @Operation(
+            summary = "Update user profile",
+            description = "Update the profile of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserCreationProfile>> updateProfile(@RequestBody @Valid UserUpdateRequest userCreationRequest,
+                                                                 HttpServletRequest request) throws Exception {
+        String accessToken = extractAccessToken(request);
+        UserCreationProfile updatedProfile = authService.updateUserProfile(accessToken, userCreationRequest);
+        return ResponseEntity.ok(BaseResponse.<UserCreationProfile>builder()
+                .data(updatedProfile)
+                .message("Profile updated successfully")
+                .build());
+    }
 
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -336,5 +377,7 @@ public class AuthController {
                 com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED
         );
     }
+
+
 
 }
