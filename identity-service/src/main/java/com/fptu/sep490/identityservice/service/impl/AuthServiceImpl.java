@@ -3,7 +3,7 @@ package com.fptu.sep490.identityservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.exceptions.*;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
-import com.fptu.sep490.commonlibrary.utils.AesSecretKeyUtils;
+import com.fptu.sep490.identityservice.component.AesSecretKey;
 import com.fptu.sep490.event.EmailSendingRequest;
 import com.fptu.sep490.event.RecipientUser;
 import com.fptu.sep490.identityservice.constants.Constants;
@@ -28,6 +28,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -44,7 +45,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -58,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
     EmailTemplateService emailTemplateService;
     ForgotPasswordRateLimiter forgotPasswordRateLimiter;
     VerifyEmailRateLimiter verifyEmailRateLimiter;
-    AesSecretKeyUtils aesSecretKeyUtils;
+    AesSecretKey aesSecretKey;
 
     @Value("${keycloak.base-uri}")
     @NonFinal
@@ -107,6 +108,10 @@ public class AuthServiceImpl implements AuthService {
         if (userAccessInfos.isEmpty() || userAccessInfos.getFirst() == null) {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
                     Constants.ErrorCode.USER_NOT_FOUND);
+        }
+        if(!userAccessInfos.getFirst().emailVerified()) {
+            throw new AppException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED,
+                    Constants.ErrorCode.EMAIL_NOT_VERIFIED, HttpStatus.UNAUTHORIZED.value());
         }
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
@@ -173,7 +178,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
             String id = extractUserId(creationResponse);
-            String encryptedPassword = aesSecretKeyUtils.encrypt(request.password());
+            String encryptedPassword = aesSecretKey.encrypt(request.password());
             redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
             UserCreationProfile userCreationProfile = UserCreationProfile.builder()
                     .id(id)
@@ -181,6 +186,7 @@ public class AuthServiceImpl implements AuthService {
                     .firstName(request.firstName())
                     .lastName(request.lastName())
                     .build();
+            sendVerifyEmail(request.email());
             return userCreationProfile;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
@@ -289,9 +295,10 @@ public class AuthServiceImpl implements AuthService {
         VerificationRequest verificationRequest = VerificationRequest.builder()
                 .token(verifyToken)
                 .build();
-        String htmlContent = emailTemplateService.buildForgotPasswordEmail(clientDomain + "/reset?token=" + verifyToken +
-                "&email=" + forgotPasswordRequest.email());
-
+        String tokenParam = URLEncoder.encode(verifyToken, StandardCharsets.UTF_8);
+        String emailParam = URLEncoder.encode(forgotPasswordRequest.email(), StandardCharsets.UTF_8);
+        String url = clientDomain + "/reset?token=" + tokenParam + "&email=" + emailParam;
+        String htmlContent = emailTemplateService.buildForgotPasswordEmail(url);
         RecipientUser recipientUser = RecipientUser.builder()
                 .email(forgotPasswordRequest.email())
                 .firstName(userAccessInfo.firstName())
@@ -347,7 +354,7 @@ public class AuthServiceImpl implements AuthService {
             kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
             redisService.delete("otp:" + email);
             String encryptedPassword = redisService.getValue(getPasswordKey(email), String.class);
-            String normalPassword = aesSecretKeyUtils.decrypt(encryptedPassword);
+            String normalPassword = aesSecretKey.decrypt(encryptedPassword);
             redisService.delete(getPasswordKey(email));
             return login(email, normalPassword);
 
@@ -358,7 +365,91 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void verifyResetToken(String email, String otp) {
+
         isValidToken(otp, "reset-password", "reset-password");
+    }
+    @Override
+    public void checkResetPasswordToken(String email, String otp) {
+        isValidCheckedToken(otp, "reset-password", "reset-password");
+    }
+
+    @Override
+    public void changePassword(String accessToken, PasswordChange changePasswordRequest) throws JsonProcessingException {
+        String email = getEmailFromToken(accessToken);
+        try {
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("grant_type", "password");
+            form.add("client_id", clientId);
+            form.add("client_secret", clientSecret);
+            form.add("username", email);
+            form.add("password", changePasswordRequest.oldPassword());
+            form.add("scope", "openid");
+            keyCloakTokenClient.requestToken(form, realm);
+        } catch (FeignException exception) {
+            throw new AppException(Constants.ErrorCodeMessage.WRONG_OLD_PASSWORD,
+                    Constants.ErrorCode.WRONG_OLD_PASSWORD, HttpStatus.BAD_REQUEST.value());
+        }
+        if (!changePasswordRequest.newPassword().equals(changePasswordRequest.confirmNewPassword())) {
+            throw new ConflictException(Constants.ErrorCodeMessage.CONFLICT_PASSWORD,
+                    Constants.ErrorCode.CONFLICT_PASSWORD);
+        }
+
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer  " +
+                getCachedClientToken(), email);
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
+                    Constants.ErrorCode.USER_NOT_FOUND, email);
+        }
+
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+
+        try {
+            keyCloakUserClient.resetPassword(realm, "Bearer " + clientToken, userId,
+                    ChangePasswordRequest.builder()
+                            .type("password")
+                            .temporary(false)
+                            .value(changePasswordRequest.newPassword())
+                            .build());
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
+
+    }
+
+    @Override
+    public UserCreationProfile updateUserProfile(String accessToken, UserUpdateRequest userUpdateRequest) throws JsonProcessingException {
+        String email = getEmailFromToken(accessToken);
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient
+                .getUserByEmail(realm, "Bearer " + clientToken, email);
+        if (userAccessInfos.isEmpty()) {
+            throw new AppException(Constants.ErrorCodeMessage.USER_NOT_FOUND, Constants.ErrorCode.USER_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value());
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        Map<String, Object> updates = Map.of(
+                "firstName", userUpdateRequest.firstName(),
+                "lastName", userUpdateRequest.lastName()
+        );
+        try {
+            ResponseEntity<?> response = keyCloakUserClient.updateUserProfile(realm, "Bearer " + clientToken,
+                    userId, updates);
+            if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
+                throw new InternalServerErrorException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR,
+                        Constants.ErrorCode.KEYCLOAK_ERROR);
+            }
+            return UserCreationProfile.builder()
+                    .id(userAccessInfo.id())
+                    .email(userAccessInfo.email())
+                    .firstName(userUpdateRequest.firstName())
+                    .lastName(userUpdateRequest.lastName())
+                    .build();
+        } catch (FeignException exception) {
+            throw errorNormalizer.handleKeyCloakException(exception);
+        }
     }
 
     @Override
@@ -392,7 +483,40 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    public boolean isValidCheckedToken(String token, String expectedAction, String expectedPurpose) {
+        String email = getEmailFromToken(token);
+        if (!isTokenValidInCache(email, expectedAction, token)) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
+                    .requireIssuer(issuerUri)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
+            Date expiration = claims.getExpiration();
+            if (expiration == null || expiration.before(new Date())) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.TIME_OUT_TOKEN,
+                        Constants.ErrorCode.TIME_OUT_TOKEN);
+            }
+
+            String action = claims.get("action", String.class);
+            String purpose = claims.get("purpose", String.class);
+
+            if (!expectedAction.equals(action) || !expectedPurpose.equals(purpose)) {
+                throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                        Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+            }
+            return true;
+
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BadRequestException(Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+    }
     public boolean isValidToken(String token, String expectedAction, String expectedPurpose) {
         String email = getEmailFromToken(token);
         if (!isTokenValidInCache(email, expectedAction, token)) {

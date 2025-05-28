@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.constants.ApiConstant;
 import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
+import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.KeyCloakRuntimeException;
 import com.fptu.sep490.commonlibrary.exceptions.ResourceExistedException;
 import com.fptu.sep490.commonlibrary.exceptions.UnauthorizedException;
@@ -12,6 +13,7 @@ import com.fptu.sep490.identityservice.viewmodel.KeyCloakError;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -33,7 +35,10 @@ public class ErrorNormalizer {
     }
 
     public KeyCloakRuntimeException handleKeyCloakException(FeignException exception) throws JsonProcessingException {
-
+        if(exception.status() == HttpStatus.UNAUTHORIZED.value()) {
+            throw new AppException(Constants.ErrorCodeMessage.WRONG_PASSWORD, Constants.ErrorCode.WRONG_PASSWORD,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
         log.error(exception.getMessage(), exception);
         var response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
         String errorMessage = response.errorMessage();
@@ -56,7 +61,6 @@ public class ErrorNormalizer {
                 default -> new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCodeMessage.KEYCLOAK_ERROR);
             };
         }
-
         return new KeyCloakRuntimeException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR, Constants.ErrorCode.KEYCLOAK_ERROR);
     }
 }

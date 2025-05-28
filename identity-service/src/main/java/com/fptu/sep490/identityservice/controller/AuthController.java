@@ -211,12 +211,14 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Email not valid", content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
     })
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest)
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> verifyEmail(@RequestBody VerifyEmailRequest verifyEmailRequest,
+                                                                           HttpServletResponse response)
             throws Exception {
-        var response = authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        var data = authService.verifyEmail(verifyEmailRequest.email(), verifyEmailRequest.otp());
+        CookieUtils.setTokenCookies(response, data);
         return ResponseEntity.ok(BaseResponse.<KeyCloakTokenResponse>builder()
                 .message("Email verified successfully")
-                .data(response)
+                .data(data)
                 .build());
     }
 
@@ -267,7 +269,7 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
     })
     public ResponseEntity<?> verifyResetToken(@RequestBody VerifyResetTokenRequest verifyResetTokenRequest) {
-        authService.verifyResetToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
+        authService.checkResetPasswordToken(verifyResetTokenRequest.email(), verifyResetTokenRequest.otp());
         return ResponseEntity.ok(BaseResponse.<Void>builder()
                 .data(null)
                 .message("Reset token verified successfully")
@@ -310,6 +312,47 @@ public class AuthController {
                 .build();
     }
 
+    @PutMapping("/change-password")
+    @Operation(
+            summary = "Change user password",
+            description = "Change the password of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Password changed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> changePassword(@RequestBody @Valid PasswordChange changePasswordRequest,
+                                                              HttpServletRequest request) throws JsonProcessingException {
+        String accessToken = extractAccessToken(request);
+        authService.changePassword(accessToken, changePasswordRequest);
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Password changed successfully")
+                .build());
+    }
+
+    @PutMapping("/update-profile")
+    @Operation(
+            summary = "Update user profile",
+            description = "Update the profile of the currently authenticated user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Profile updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserCreationProfile>> updateProfile(@RequestBody @Valid UserUpdateRequest userCreationRequest,
+                                                                 HttpServletRequest request) throws Exception {
+        String accessToken = extractAccessToken(request);
+        UserCreationProfile updatedProfile = authService.updateUserProfile(accessToken, userCreationRequest);
+        return ResponseEntity.ok(BaseResponse.<UserCreationProfile>builder()
+                .data(updatedProfile)
+                .message("Profile updated successfully")
+                .build());
+    }
 
     private String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
@@ -334,5 +377,7 @@ public class AuthController {
                 com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage.ACCESS_DENIED
         );
     }
+
+
 
 }

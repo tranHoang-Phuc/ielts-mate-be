@@ -25,6 +25,8 @@ public class Constants {
         public static final String EMAIL_ALREADY_VERIFIED = "EMAIL_ALREADY_VERIFIED";
         public static final String EMAIL_NOT_SETUP = "EMAIL_NOT_SETUP";
         public static final String ACCOUNT_NOT_EXIST = "ACCOUNT_NOT_EXIST";
+        public static final String WRONG_PASSWORD = "WRONG_PASSWORD";
+        public static final String WRONG_OLD_PASSWORD = "WRONG_OLD_PASSWORD";
     }
 
     public final class RedisKey {
@@ -59,5 +61,11 @@ public class Constants {
         public static final String EMAIL_NOT_SETUP = "00026";
         public static final String ACCOUNT_NOT_EXIST = "00027";
         public static final String EMAIL_NOT_VERIFIED = "00028";
+
+        public static final String WRONG_PASSWORD = "00029";
+
+        public static final String WRONG_OLD_PASSWORD = "00030";
+
+
     }
 }

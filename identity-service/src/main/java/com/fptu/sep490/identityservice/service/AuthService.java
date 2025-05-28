@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.*;
+import jakarta.validation.Valid;
 
 public interface AuthService {
     KeyCloakTokenResponse login(String username, String password) throws JsonProcessingException;
@@ -31,4 +32,9 @@ public interface AuthService {
     String createGoogleUrl();
 
     UserCreationProfile getUserProfile(String accessToken) throws JsonProcessingException;
+    void checkResetPasswordToken(String email, String otp);
+
+    void changePassword(String accessToken, @Valid PasswordChange changePasswordRequest) throws JsonProcessingException;
+
+    UserCreationProfile updateUserProfile(String accessToken, @Valid UserUpdateRequest userUpdateRequest) throws JsonProcessingException;
 }

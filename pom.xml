@@ -23,6 +23,7 @@
         <module>api-gateway</module>
         <module>discovery-service</module>
         <module>file-service</module>
+        <module>reading-service</module>
     </modules>
 
     <properties>
