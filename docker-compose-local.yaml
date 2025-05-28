@@ -55,35 +55,6 @@ services:
     networks:
       - sep-network
 
-  registry:
-    container_name: registry-service
-    build:
-      context: ./registry-service
-      dockerfile: Dockerfile
-    hostname: eureka-server
-    ports:
-      - "8761:8761"
-    networks:
-      - sep-network
-    depends_on:
-      - identity
-      - postgres
-
-  identity-service:
-    container_name: identity-service
-    build:
-      context: /identity-service
-      dockerfile: Dockerfile
-    hostname: identity-service
-    ports:
-      - "8090:8090"
-    networks:
-      - sep-network
-    depends_on:
-      - identity
-      - registry
-      - redis
-
   kafka:
     image: 'bitnami/kafka:3.7.0'
     container_name: kafka
