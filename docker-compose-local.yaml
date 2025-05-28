@@ -29,6 +29,7 @@ services:
     volumes:
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./identity/themes/sep/theme:/opt/keycloak/themes
+      - keycloak_data:/var/lib/keycloak/data
     networks:
       - sep-network
 
@@ -92,6 +93,8 @@ volumes:
   postgres:
     driver: local
   redis:
+    driver: local
+  keycloak_data:
     driver: local
 
 networks:
