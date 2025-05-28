@@ -2,4 +2,31 @@ server:
   servlet:
     context-path: /resource
   port: 8070
+spring:
+  application:
+    name: identity-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/SEP490
+keycloak:
+  base-uri: http://localhost:8080
+  token-uri: http://localhost:8080/realms/SEP490/protocol/openid-connect/token
+  realm: SEP490
+  client-id: fptu_sep490
+  client-secret: csJfV0ielwCWBYKYzUZnQTTW25nkIKk2
+  scope: openid
+  redirect-uri: http://localhost:8080/realms/SEP490/broker/google/endpoint
 
+springdoc:
+  paths-to-match: /**
+  packages-to-scan: com.fptu.sep490.identityservice.controller
+  swagger-ui:
+    path: /swagger-ui
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: swagger-ui
+  oauth-flow:
+    authorization-url: http://localhost:8080/realms/SEP490/protocol/openid-connect/auth
+    token-url: http://localhost:8080/realms/SEP490/protocol/openid-connect/token

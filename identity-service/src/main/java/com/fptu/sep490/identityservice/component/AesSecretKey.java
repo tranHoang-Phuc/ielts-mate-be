@@ -1,4 +1,4 @@
-package com.fptu.sep490.commonlibrary.utils;
+package com.fptu.sep490.identityservice.component;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,13 +11,13 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 @Component
-public class AesSecretKeyUtils {
+public class AesSecretKey {
     private final String secretKey;
     private final String algorithm;
     private final String cipherMode;
     private final int ivLength;
 
-    public AesSecretKeyUtils(
+    public AesSecretKey(
             @Value("${aes.secret.key}") String secretKey,
             @Value("${aes.algorithm:AES}") String algorithm,
             @Value("${aes.cipher:AES/CBC/PKCS5Padding}") String cipherMode,
