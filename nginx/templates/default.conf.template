@@ -5,7 +5,7 @@ server {
     large_client_header_buffers 8 32k;
 
     location / {
-        proxy_pass http://identity:8080;
+        proxy_pass http://identity:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -17,35 +17,5 @@ server {
     }
 }
 
-
-server {
-    listen 80;
-    server_name registry.sep.local;
-
-    location / {
-        proxy_pass http://discovery-service:8761;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-server {
-    listen 443 ssl http2;
-    server_name tootsstore.online www.tootsstore.online;
-
-    ssl_certificate     /etc/letsencrypt/live/tootsstore.online/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/tootsstore.online/privkey.pem;
-    ssl_protocols       TLSv1.2 TLSv1.3;
-
-    location / {
-        proxy_pass         http://api-gateway:9191;
-        proxy_set_header   Host              $host;
-        proxy_set_header   X-Real-IP         $remote_addr;
-        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-    }
-}
 
 
