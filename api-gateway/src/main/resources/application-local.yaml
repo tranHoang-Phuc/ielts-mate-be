@@ -21,6 +21,10 @@ spring:
           uri: http://localhost:8090
           predicates:
             - Path=/identity/**
+        - id: reading-service
+          uri: http://localhost:9000
+          predicates:
+            - Path=/reading/**
       globalcors:
         cors-configurations:
           '[/**]':
@@ -47,6 +51,8 @@ springdoc:
     urls:
       - name: identity-service
         url: http://localhost:9191/identity/v3/api-docs
+      - name: reading-service
+        url: http://localhost:9191/reading/v3/api-docs
 
 eureka:
   client:
