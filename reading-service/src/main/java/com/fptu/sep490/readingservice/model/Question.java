@@ -44,7 +44,6 @@ public class Question {
     @Enumerated(EnumType.STRING)
     private Set<QuestionCategory> categories = new HashSet<>();
 
-    @Lob
     @Column(name = "explanation")
     private String explanation;
 
