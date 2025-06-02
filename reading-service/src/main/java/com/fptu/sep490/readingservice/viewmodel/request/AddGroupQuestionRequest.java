@@ -1,6 +1,5 @@
 package com.fptu.sep490.readingservice.viewmodel.request;
 
-import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
@@ -14,8 +13,8 @@ public record AddGroupQuestionRequest(
         String instruction,
         @JsonProperty("questions")
         List<QuestionCreationRequest> questions,
-        @JsonProperty("drag_item")
-        List<String> dragItem
+        @JsonProperty("drag_items")
+        List<String> dragItems
 ) {
 
 }

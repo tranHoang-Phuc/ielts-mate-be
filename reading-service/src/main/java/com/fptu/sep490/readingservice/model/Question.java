@@ -41,7 +41,7 @@ public class Question {
             joinColumns = @JoinColumn(name = "question_id")
     )
     @Column(name = "category", length = 50, nullable = false)
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private Set<QuestionCategory> categories = new HashSet<>();
 
     @Column(name = "explanation")
@@ -94,11 +94,12 @@ public class Question {
     )
     private List<Choice> choices = new ArrayList<>();
 
-    @OneToMany(
+    @OneToOne(
             mappedBy = "question",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            optional = false    // bảo đảm Question luôn có DragItem
     )
-    private List<DragItem> dragItems = new ArrayList<>();
+    private DragItem dragItem;
 }

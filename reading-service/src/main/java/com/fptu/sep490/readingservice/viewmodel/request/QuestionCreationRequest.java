@@ -35,5 +35,5 @@ public record QuestionCreationRequest(
         @JsonProperty("choices")
         List<ChoiceCreationRequest> choices,
         @JsonProperty("drag_item")
-        List<String> dragItem
+        String dragItem
 ) {}
