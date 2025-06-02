@@ -52,7 +52,13 @@ public class QuestionGroup {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
+    @OneToMany(
+            mappedBy = "questionGroup",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<Question> questions = new ArrayList<>();
     @OneToMany(
             mappedBy = "questionGroup",
             cascade = CascadeType.ALL,
