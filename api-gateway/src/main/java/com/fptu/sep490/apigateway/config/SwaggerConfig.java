@@ -35,8 +35,11 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url("https://tootsstore.online/identity")))
-                .info(new Info().title("Identity Service").version("1.0.0"));
+                .servers(List.of(
+                        new Server().url("http://localhost:9191/identity").description("Identity Service"),
+                        new Server().url("http://localhost:9191/reading").description("Reading Service")
+                ))
+                .info(new Info().title("SEP490").version("1.0.0"));
     }
 
 

@@ -29,6 +29,7 @@ services:
     volumes:
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./identity/themes/sep/theme:/opt/keycloak/themes
+      - keycloak_data:/var/lib/keycloak/data
     networks:
       - sep-network
 
@@ -55,35 +56,6 @@ services:
     networks:
       - sep-network
 
-  registry:
-    container_name: registry-service
-    build:
-      context: ./registry-service
-      dockerfile: Dockerfile
-    hostname: eureka-server
-    ports:
-      - "8761:8761"
-    networks:
-      - sep-network
-    depends_on:
-      - identity
-      - postgres
-
-  identity-service:
-    container_name: identity-service
-    build:
-      context: /identity-service
-      dockerfile: Dockerfile
-    hostname: identity-service
-    ports:
-      - "8090:8090"
-    networks:
-      - sep-network
-    depends_on:
-      - identity
-      - registry
-      - redis
-
   kafka:
     image: 'bitnami/kafka:3.7.0'
     container_name: kafka
@@ -93,14 +65,13 @@ services:
       - "9093:9093"
       - "9094:9094"
     environment:
-      - KAFKA_CFG_NODE_ID=${KAFKA_CFG_NODE_ID}
-      - KAFKA_CFG_PROCESS_ROLES=${KAFKA_CFG_PROCESS_ROLES}
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=${KAFKA_CFG_CONTROLLER_QUORUM_VOTERS}
-      - KAFKA_CFG_LISTENERS=${KAFKA_CFG_LISTENERS}
-      - KAFKA_CFG_ADVERTISED_LISTENERS=${KAFKA_CFG_ADVERTISED_LISTENERS}
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=${KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP}
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=${KAFKA_CFG_CONTROLLER_LISTENER_NAMES}
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR}
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       - sep-network
   redis:
@@ -117,10 +88,15 @@ services:
     networks:
       - sep-network
 
+
+
+
 volumes:
   postgres:
     driver: local
   redis:
+    driver: local
+  keycloak_data:
     driver: local
 
 networks:
