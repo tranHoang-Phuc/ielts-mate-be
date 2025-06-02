@@ -2,8 +2,10 @@ package com.fptu.sep490.readingservice.viewmodel.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
+import java.util.Set;
 
 @Builder
 public record QuestionCreationRequest(
