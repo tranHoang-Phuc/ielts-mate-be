@@ -69,6 +69,7 @@ public record QuestionCreationResponse(
     ) {
     }
 
+    @Builder
     public record DragItemResponse(
         @JsonProperty("drag_item_id")
         String dragItemId,

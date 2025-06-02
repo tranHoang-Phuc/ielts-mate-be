@@ -108,6 +108,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .questionGroup(questionGroup)
                         .instructionForChoice(question.instructionForChoice())
                         .build();
+                List<Choice> choices = new ArrayList<>();
                 for(QuestionCreationRequest.ChoiceRequest choice: question.choices()){
                     if(choice.isCorrect()) {
                         correctAnswersCount++;
@@ -118,8 +119,10 @@ public class QuestionServiceImpl implements QuestionService {
                             .choiceOrder(choice.choiceOrder())
                             .isCorrect(choice.isCorrect())
                             .build();
-                    savedQuestion.getChoices().add(savedChoice);
+                    choices.add(savedChoice);
+
                 }
+                savedQuestion.setChoices(choices);
                 if(question.numberOfCorrectAnswers() != correctAnswersCount) {
                     throw new AppException(Constants.ErrorCodeMessage.INVALID_NUMBER_OF_CORRECT_ANSWERS,
                             Constants.ErrorCode.INVALID_NUMBER_OF_CORRECT_ANSWERS, HttpStatus.BAD_REQUEST.value());
@@ -285,9 +288,64 @@ public class QuestionServiceImpl implements QuestionService {
                                         .build())
                                 .build());
             } else {
-//                var items = dragItemRepository.findDragItemByDragItemId(UUID.fromString(question.dragItemId())
-//                        .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-//                                Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value()));
+                var dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(question.dragItemId()))
+                        .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                                Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value()));
+
+
+                Question savedQuestion = Question.builder()
+                        .questionType(QuestionType.DRAG_AND_DROP)
+                        .point(question.point())
+                        .questionOrder(question.questionOrder())
+                        .zoneIndex(question.zoneIndex())
+                        .dragItems(List.of(dragItem))
+                        .categories(Set.copyOf(categories))
+                        .explanation(question.explanation())
+                        .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
+                        .zoneIndex(question.zoneIndex())
+                        .questionGroup(questionGroup)
+                        .build();
+                Question saved = questionRepository.save(savedQuestion);
+                String userId = getUserIdFromToken(request);
+                saved.setCreatedBy(userId);
+                saved.setUpdatedBy(userId);
+                UserProfileResponse userProfile = getUserProfileById(userId);
+                questionCreationResponseList.add(
+                        QuestionCreationResponse.builder()
+                                .questionId(saved.getQuestionId().toString())
+                                .questionOrder(saved.getQuestionOrder())
+                                .point(saved.getPoint())
+                                .questionType(saved.getQuestionType().ordinal())
+                                .questionCategories(saved.getCategories().stream()
+                                        .map(QuestionCategory::name)
+                                        .toList())
+                                .explanation(saved.getExplanation())
+                                .questionGroupId(saved.getQuestionGroup().getGroupId().toString())
+                                .numberOfCorrectAnswers(saved.getNumberOfCorrectAnswers())
+                                .instructionForChoice(saved.getInstructionForChoice())
+                                .zoneIndex(saved.getZoneIndex())
+                                .dragItems(List.of(
+                                      QuestionCreationResponse.DragItemResponse.builder()
+                                              .dragItemId(dragItem.getDragItemId().toString())
+                                              .content(dragItem.getContent())
+                                              .build()
+                                ))
+                                .createdBy(UserInformationResponse.builder()
+                                        .userId(userProfile.id())
+                                        .firstName(userProfile.firstName())
+                                        .lastName(userProfile.lastName())
+                                        .email(userProfile.email())
+                                        .build())
+                                .updatedBy(UserInformationResponse.builder()
+                                        .userId(userProfile.id())
+                                        .firstName(userProfile.firstName())
+                                        .lastName(userProfile.lastName())
+                                        .email(userProfile.email())
+                                        .build())
+                                .createdAt(saved.getCreatedAt().toString())
+                                .updatedAt(saved.getUpdatedAt().toString())
+                                .build()
+                );
 
             }
 

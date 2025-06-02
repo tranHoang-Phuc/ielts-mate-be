@@ -24,4 +24,5 @@ public interface PassageService {
     PassageDetailResponse getPassageById(UUID passageId);
 
     void deletePassage(UUID passageId);
+
 }
