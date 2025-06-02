@@ -72,6 +72,10 @@ public class Question {
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "question_group_id", nullable = false)
+    private QuestionGroup questionGroup;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
