@@ -20,6 +20,7 @@ import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -275,6 +276,19 @@ public class PassageServiceImpl implements PassageService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void deletePassage(UUID passageId) {
+        boolean exists = readingPassageRepository.existsById(passageId);
+        if (!exists) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                    Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        readingPassageRepository.deleteById(passageId);
+    }
 
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
@@ -316,6 +330,18 @@ public class PassageServiceImpl implements PassageService {
 
 
 
+
+
+    private <T extends Enum<T>> T safeEnumFromOrdinal(T[] values, int ordinal) {
+        if (ordinal < 0 || ordinal >= values.length) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        return values[ordinal];
+    }
     private String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
         if (token == null || token.isEmpty()) {
@@ -328,18 +354,6 @@ public class PassageServiceImpl implements PassageService {
                     HttpStatus.UNAUTHORIZED.value());
         }
     }
-
-    private <T extends Enum<T>> T safeEnumFromOrdinal(T[] values, int ordinal) {
-        if (ordinal < 0 || ordinal >= values.length) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.INVALID_REQUEST,
-                    Constants.ErrorCode.INVALID_REQUEST,
-                    HttpStatus.BAD_REQUEST.value()
-            );
-        }
-        return values[ordinal];
-    }
-
     private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
         return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
