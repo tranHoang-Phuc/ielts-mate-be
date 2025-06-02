@@ -5,9 +5,12 @@ import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
+import com.fptu.sep490.readingservice.viewmodel.request.AddGroupQuestionRequest;
 import com.fptu.sep490.readingservice.service.PassageService;
+import com.fptu.sep490.readingservice.service.GroupQuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageDetailResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageGetResponse;
@@ -22,7 +25,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,6 +41,7 @@ import java.util.UUID;
 public class ReadingPassageController {
 
     PassageService passageService;
+    GroupQuestionService groupQuestionService;
 
     /**
      * Get a list of reading passages based on specified conditions.
@@ -105,12 +108,12 @@ public class ReadingPassageController {
             summary = "Create a new passage",
             description = "This endpoint allows teachers to create a new reading passage. " +
                     "The request must contain the necessary details for the passage creation."
-     )
+    )
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "Passage creation request",
             required = true,
             content = @Content(schema = @Schema(implementation = PassageCreationRequest.class)
-    ))
+            ))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
                     description = "Passage created successfully"),
@@ -172,7 +175,7 @@ public class ReadingPassageController {
                     content = @Content(schema = @Schema(implementation = AppException.class)))
     })
     public ResponseEntity<BaseResponse<PassageDetailResponse>> updatePassage(@Valid @RequestBody
-                                                                                 UpdatedPassageRequest request,
+                                                                             UpdatedPassageRequest request,
                                                                              @PathVariable ("passage-id")
                                                                              UUID passageId,
                                                                              HttpServletRequest httpServletRequest) {
@@ -214,7 +217,7 @@ public class ReadingPassageController {
                     content = @Content(schema = @Schema(implementation = AppException.class)))
     })
     public ResponseEntity<BaseResponse<PassageDetailResponse>> getPassageById(@PathVariable("passage-id")
-                                                                                  UUID passageId) {
+                                                                              UUID passageId) {
         PassageDetailResponse passageDetail = passageService.getPassageById(passageId);
         BaseResponse<PassageDetailResponse> body = BaseResponse.<PassageDetailResponse>builder()
                 .data(passageDetail)
@@ -224,6 +227,159 @@ public class ReadingPassageController {
                 .status(HttpStatus.OK)
                 .body(body);
     }
+    @PostMapping("/{passageId}/groups")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Add a group of questions to a passage",
+            description = "Allows a TEACHER to add a group of questions to a specific reading passage."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Group question creation request",
+            required = true,
+            content = @Content(schema = @Schema(implementation = AddGroupQuestionRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Group question added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404", description = "Passage not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<AddGroupQuestionResponse>> addGroupQuestion(
+            @PathVariable("passageId") String passageId,
+            @RequestBody AddGroupQuestionRequest request,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        AddGroupQuestionResponse response = groupQuestionService.createGroupQuestion(passageId, request, httpServletRequest);
+        return ResponseEntity.ok(
+                BaseResponse.<AddGroupQuestionResponse>builder()
+                        .message("Add Group Question")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{passageId}/groups")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Get all passages for teacher",
+            description = "This endpoint retrieves all reading passages available for teachers."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Passages retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<List<AddGroupQuestionResponse>>> getAllQuestionsGroupsForTeacher(
+            @PathVariable("passageId") String passageId,
+            HttpServletRequest httpServletRequest
+
+    ) throws Exception {
+        // This method should return all question groups for teacher
+        // Implementation is not provided in the original code, so returning an empty list for now
+        List<AddGroupQuestionResponse> response = groupQuestionService.getAllQuestionsGroupsOfPassages(passageId, httpServletRequest);
+        BaseResponse<List<AddGroupQuestionResponse>> body = BaseResponse.<List<AddGroupQuestionResponse>>builder()
+                .data(response)
+                .message("Successfully retrieved all question groups")
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
+
+    @PutMapping("/{passageId}/groups/{groupId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Update a group of questions in a passage",
+            description = "Allows a TEACHER to update an existing group of questions in a specific reading passage."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Group question update request",
+            required = true,
+            content = @Content(schema = @Schema(implementation = AddGroupQuestionRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Group question updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404", description = "Passage or group not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<AddGroupQuestionResponse>> updateGroupQuestion(
+            @PathVariable("passageId") String passageId,
+            @PathVariable("groupId") String groupId,
+            @RequestBody AddGroupQuestionRequest request,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        AddGroupQuestionResponse response = groupQuestionService.updateGroupQuestion(passageId, groupId, request, httpServletRequest);
+        return ResponseEntity.ok(
+                BaseResponse.<AddGroupQuestionResponse>builder()
+                        .message("Update Group Question")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/{passageId}/groups/{groupId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Delete a group of questions from a passage",
+            description = "Allows a TEACHER to delete a specific group of questions from a reading passage."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Group question deleted successfully"),
+
+            @ApiResponse(responseCode = "404", description = "Passage or group not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<Void>> deleteGroupQuestion(
+            @PathVariable("passageId") String passageId,
+            @PathVariable("groupId") String groupId,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        groupQuestionService.deleteGroupQuestion(passageId, groupId, httpServletRequest);
+
+        return ResponseEntity.ok(
+                BaseResponse.<Void>builder()
+                        .message("Delete group question successfully")
+                        .data(null)
+                        .build()
+        );
+    }
+
+    @GetMapping("/{passageId}/groups/{groupId}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Get a specific group of questions from a passage",
+            description = "Allows a TEACHER to retrieve a specific group of questions from a reading passage."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Group question retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Passage or group not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<AddGroupQuestionResponse>> getGroupQuestionById(
+            @PathVariable("passageId") String passageId,
+            @PathVariable("groupId") String groupId,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        AddGroupQuestionResponse response = groupQuestionService.getAllQuestionsGroupsOfPassages(passageId, httpServletRequest)
+                .stream()
+                .filter(group -> group.groupId().equals(groupId))
+                .findFirst()
+                .orElseThrow(() -> new AppException("Group not found", "GROUP_NOT_FOUND", HttpStatus.NOT_FOUND.value()));
+
+        return ResponseEntity.ok(
+                BaseResponse.<AddGroupQuestionResponse>builder()
+                        .message("Get Group Question")
+                        .data(response)
+                        .build()
+        );
+    }
+
 
 
 }

@@ -23,8 +23,8 @@ public class Constants {
         public static final String UNAUTHORIZED = "100001";
         public static final String INVALID_REQUEST = "100002";
         public static final String PASSAGE_NOT_FOUND = "100003";
+        public static final String QUESTION_GROUP_NOT_FOUND = "100004";
 
-        public static final String QUESTION_GROUP_NOT_FOUND = "100020";
         public static final String QUESTION_NOT_FOUND = "100021";
         public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "100022";
         public static final String DRAG_ITEM_NOT_FOUND = "100023";
