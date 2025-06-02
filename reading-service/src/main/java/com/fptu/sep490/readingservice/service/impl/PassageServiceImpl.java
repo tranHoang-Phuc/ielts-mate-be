@@ -230,6 +230,53 @@ public class PassageServiceImpl implements PassageService {
                 .build();
     }
 
+    @Override
+    public PassageDetailResponse getPassageById(UUID passageId) {
+        var readingPassage = readingPassageRepository.findById(passageId)
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        UserProfileResponse createdByProfile;
+        UserProfileResponse updatedByProfile;
+        try {
+            createdByProfile = getUserProfileById(readingPassage.getCreatedBy());
+            updatedByProfile = getUserProfileById(readingPassage.getUpdatedBy());
+        } catch (JsonProcessingException e) {
+            throw new InternalServerErrorException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+        UserInformationResponse createdBy = UserInformationResponse.builder()
+                .userId(createdByProfile.id())
+                .lastName(createdByProfile.lastName())
+                .firstName(createdByProfile.firstName())
+                .email(createdByProfile.email())
+                .build();
+        UserInformationResponse updatedBy = UserInformationResponse.builder()
+                .userId(updatedByProfile.id())
+                .lastName(updatedByProfile.lastName())
+                .firstName(updatedByProfile.firstName())
+                .email(updatedByProfile.email())
+                .build();
+        return PassageDetailResponse.builder()
+                .passageId(readingPassage.getPassageId().toString())
+                .title(readingPassage.getTitle())
+                .ieltsType(readingPassage.getIeltsType().ordinal())
+                .partNumber(readingPassage.getPartNumber().ordinal())
+                .content(readingPassage.getContent())
+                .contentWithHighlightKeywords(readingPassage.getContentWithHighlightKeyword())
+                .instruction(readingPassage.getInstruction())
+                .passageStatus(readingPassage.getPassageStatus().ordinal())
+                .createdBy(createdBy)
+                .updatedBy(updatedBy)
+                .createdAt(readingPassage.getCreatedAt().toString())
+                .updatedAt(readingPassage.getUpdatedAt().toString())
+                .build();
+    }
+
+
+
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;
         UserProfileResponse updatedByProfile;
