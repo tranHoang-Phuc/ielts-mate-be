@@ -7,7 +7,9 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageCreationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.PassageDetailResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/passages")
@@ -36,6 +39,19 @@ import java.util.List;
 public class ReadingPassageController {
 
     PassageService passageService;
+
+    /**
+     * Get a list of reading passages based on specified conditions.
+     *
+     * @param page the page number to retrieve
+     * @param size the number of items per page
+     * @param ieltsType the type of IELTS (optional)
+     * @param status the status of the passage (optional)
+     * @param partNumber the part number of the passage (optional)
+     * @param questionCategory the category of questions (optional)
+     * @return a response entity containing a list of passages and pagination information
+     * @throws JsonProcessingException if there is an error processing JSON
+     */
     @GetMapping
     @Operation(
             summary = "Get list of passages by condition",
@@ -96,11 +112,20 @@ public class ReadingPassageController {
             content = @Content(schema = @Schema(implementation = PassageCreationRequest.class)
     ))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Passage created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
-            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
-            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+            @ApiResponse(responseCode = "201",
+                    description = "Passage created successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = AppException.class)))
     })
     public ResponseEntity<BaseResponse<PassageCreationResponse>> createPassage(@Valid @RequestBody PassageCreationRequest request, HttpServletRequest httpServletRequest) throws JsonProcessingException {
         var data = passageService.createPassage(request, httpServletRequest);
@@ -113,4 +138,52 @@ public class ReadingPassageController {
                 .body(body);
 
     }
+
+
+    @PutMapping("/{passage-id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Update an existing passage",
+            description = "This endpoint allows teachers to update an existing reading passage. " +
+                    "The request must contain the updated details for the passage."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Passage update request",
+            required = true,
+            content = @Content(schema = @Schema(implementation = UpdatedPassageRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Passage updated successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Passage not found",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<PassageDetailResponse>> updatePassage(@Valid @RequestBody
+                                                                                 UpdatedPassageRequest request,
+                                                                             @PathVariable ("passage-id")
+                                                                             UUID passageId,
+                                                                             HttpServletRequest httpServletRequest) {
+        PassageDetailResponse updatedPassage = passageService.updatePassage(passageId, request, httpServletRequest);
+        BaseResponse<PassageDetailResponse> body = BaseResponse.<PassageDetailResponse>builder()
+                .data(updatedPassage)
+                .message("Successfully updated Passage")
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
+
 }
