@@ -27,7 +27,10 @@ public class DragItem {
     @JoinColumn(name = "group_id", nullable = false)
     private QuestionGroup questionGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id")
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "question_id",
+            unique = true         // đảm bảo mỗi question_id chỉ dùng cho đúng 1 DragItem
+    )
     private Question question;
 }
