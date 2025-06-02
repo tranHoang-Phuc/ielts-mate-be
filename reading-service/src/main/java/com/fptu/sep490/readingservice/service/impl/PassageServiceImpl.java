@@ -2,6 +2,7 @@ package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
@@ -16,6 +17,8 @@ import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.repository.specification.PassageSpecifications;
 import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageGetResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
@@ -37,6 +40,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -124,6 +128,158 @@ public class PassageServiceImpl implements PassageService {
 
         return pageResult.map(this::toPassageGetResponse);
     }
+
+    @Override
+    public PassageDetailResponse updatePassage(UUID passageId, UpdatedPassageRequest request,
+                                               HttpServletRequest httpServletRequest) {
+        String userId = getUserIdFromToken(httpServletRequest);
+        ReadingPassage entity  = readingPassageRepository.findById(passageId)
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+
+        if (request.title() != null) {
+            entity.setTitle(request.title());
+        }
+
+        if (request.ieltsType() != null) {
+            int ordinal = request.ieltsType();
+            if (ordinal < 0 || ordinal >= IeltsType.values().length) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            entity.setIeltsType(IeltsType.values()[ordinal]);
+        }
+
+        if (request.partNumber() != null) {
+            int ordinal = request.partNumber();
+            if (ordinal < 0 || ordinal >= PartNumber.values().length) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            entity.setPartNumber(PartNumber.values()[ordinal]);
+        }
+
+        if (request.content() != null) {
+            entity.setContent(request.content());
+        }
+
+        if (request.contentWithHighlightKeywords() != null) {
+            entity.setContentWithHighlightKeyword(request.contentWithHighlightKeywords());
+        }
+
+        if (request.instruction() != null) {
+            entity.setInstruction(request.instruction());
+        }
+
+        if (request.passageStatus() != null) {
+            int ordinal = request.passageStatus();
+            if (ordinal < 0 || ordinal >= Status.values().length) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            entity.setPassageStatus(Status.values()[ordinal]);
+        }
+        entity.setUpdatedBy(userId);
+        ReadingPassage updated = readingPassageRepository.save(entity);
+
+        UserProfileResponse createdProfile;
+        UserProfileResponse updatedProfile;
+        try {
+            createdProfile = getUserProfileById(updated.getCreatedBy());
+            updatedProfile = getUserProfileById(updated.getUpdatedBy());
+        } catch (JsonProcessingException e) {
+            throw new InternalServerErrorException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+
+        UserInformationResponse createdByResp = UserInformationResponse.builder()
+                .userId(createdProfile.id())
+                .firstName(createdProfile.firstName())
+                .lastName(createdProfile.lastName())
+                .email(createdProfile.email())
+                .build();
+
+        UserInformationResponse updatedByResp = UserInformationResponse.builder()
+                .userId(updatedProfile.id())
+                .firstName(updatedProfile.firstName())
+                .lastName(updatedProfile.lastName())
+                .email(updatedProfile.email())
+                .build();
+
+        return PassageDetailResponse.builder()
+                .passageId(updated.getPassageId().toString())
+                .title(updated.getTitle())
+                .ieltsType(updated.getIeltsType().ordinal())
+                .partNumber(updated.getPartNumber().ordinal())
+                .content(updated.getContent())
+                .contentWithHighlightKeywords(updated.getContentWithHighlightKeyword())
+                .instruction(updated.getInstruction())
+                .passageStatus(updated.getPassageStatus().ordinal())
+                .createdBy(createdByResp)
+                .updatedBy(updatedByResp)
+                .createdAt(updated.getCreatedAt().toString())
+                .updatedAt(updated.getUpdatedAt().toString())
+                .build();
+    }
+
+    @Override
+    public PassageDetailResponse getPassageById(UUID passageId) {
+        var readingPassage = readingPassageRepository.findById(passageId)
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        UserProfileResponse createdByProfile;
+        UserProfileResponse updatedByProfile;
+        try {
+            createdByProfile = getUserProfileById(readingPassage.getCreatedBy());
+            updatedByProfile = getUserProfileById(readingPassage.getUpdatedBy());
+        } catch (JsonProcessingException e) {
+            throw new InternalServerErrorException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+        UserInformationResponse createdBy = UserInformationResponse.builder()
+                .userId(createdByProfile.id())
+                .lastName(createdByProfile.lastName())
+                .firstName(createdByProfile.firstName())
+                .email(createdByProfile.email())
+                .build();
+        UserInformationResponse updatedBy = UserInformationResponse.builder()
+                .userId(updatedByProfile.id())
+                .lastName(updatedByProfile.lastName())
+                .firstName(updatedByProfile.firstName())
+                .email(updatedByProfile.email())
+                .build();
+        return PassageDetailResponse.builder()
+                .passageId(readingPassage.getPassageId().toString())
+                .title(readingPassage.getTitle())
+                .ieltsType(readingPassage.getIeltsType().ordinal())
+                .partNumber(readingPassage.getPartNumber().ordinal())
+                .content(readingPassage.getContent())
+                .contentWithHighlightKeywords(readingPassage.getContentWithHighlightKeyword())
+                .instruction(readingPassage.getInstruction())
+                .passageStatus(readingPassage.getPassageStatus().ordinal())
+                .createdBy(createdBy)
+                .updatedBy(updatedBy)
+                .createdAt(readingPassage.getCreatedAt().toString())
+                .updatedAt(readingPassage.getUpdatedAt().toString())
+                .build();
+    }
+
+
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;
