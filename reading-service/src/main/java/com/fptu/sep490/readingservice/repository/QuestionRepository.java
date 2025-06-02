@@ -14,15 +14,4 @@ import java.util.UUID;
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
-//    /**
-//     * Lấy tất cả Question theo question_group_id, order by question_order.
-//     */
-//    List<Question> findAllByQuestionGroupIdOrderByQuestionOrder(UUID groupId);
-//
-//    /**
-//     * Tìm Question theo question_id & question_group_id.
-//     */
-//    Optional<Question> findByQuestionIdAndQuestionGroupId(UUID questionId, UUID groupId);
-
-//    Optional<Question> findByQuestionId(UUID questionId);
 }

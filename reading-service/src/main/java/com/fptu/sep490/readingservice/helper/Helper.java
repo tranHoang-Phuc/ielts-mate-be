@@ -42,12 +42,12 @@ public class Helper {
     String clientSecret;
 
 
-    private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
+    public UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
         return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
     }
-    private String getCachedClientToken() throws JsonProcessingException {
+    public String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
 
         String cachedToken = redisService.getValue(cacheKey, String.class);
@@ -67,7 +67,7 @@ public class Helper {
         return newToken;
     }
 
-    private String getUserIdFromToken(HttpServletRequest request) {
+    public String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
         if (token == null || token.isEmpty()) {
             return null;
@@ -86,7 +86,7 @@ public class Helper {
                 request.sectionLabel(),
                 request.instruction(),
                 request.questions(),
-                request.dragItem()
+                request.dragItems()
         );
     }
 }

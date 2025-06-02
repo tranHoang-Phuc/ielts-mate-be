@@ -220,10 +220,7 @@ public class DragItemServiceImpl implements DragItemService {
         DragItemListResponse response = DragItemListResponse.builder()
                 .group_id(groupId.toString())
                 .items(items.stream()
-                        .map(item -> DragItemListResponse.DragItemSummaryResponse.builder()
-                                .item_id(item.getDragItemId().toString())
-                                .item_content(item.getContent())
-                                .build())
+                        .map(item -> new DragItemListResponse.DragItemSummaryResponse(item.getDragItemId().toString(), item.getContent()))
                         .toList())
                 .build();
 

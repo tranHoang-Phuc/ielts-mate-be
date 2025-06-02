@@ -23,8 +23,7 @@ public class DragItemListResponse {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
-    public class DragItemSummaryResponse {
+    public static class DragItemSummaryResponse {
         private String item_id;
         private String item_content;
     }

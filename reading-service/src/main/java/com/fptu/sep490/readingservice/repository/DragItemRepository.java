@@ -14,22 +14,6 @@ import java.util.UUID;
  */
 @Repository
 public interface DragItemRepository extends JpaRepository<DragItem, UUID> {
-
-    /**
-     * Lấy tất cả DragItem theo group_id (order by drag_item_id để cố định thứ tự).
-     */
-//    List<DragItem> findAllByGroupIdOrderById(UUID groupId);
-//
-//    /**
-//     * Tìm một DragItem theo drag_item_id & group_id.
-//     */
-//    Optional<DragItem> findByIdAndGroupId(UUID id, UUID groupId);
-//
-//    /**
-//     * Xóa DragItem theo id & group_id.
-//     */
-//    void deleteByIdAndGroupId(UUID id, UUID groupId);
-
     Optional<DragItem> findByDragItemIdAndQuestionGroup_GroupId(UUID dragItemId, UUID groupId);
     List<DragItem> findAllByQuestionGroup_GroupId(UUID groupId);
 }
