@@ -1,6 +1,7 @@
 package com.fptu.sep490.readingservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.services.GroupQuestionService;
@@ -8,6 +9,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageCreationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.PassageGetResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +34,8 @@ import com.fptu.sep490.readingservice.Dto.AddGroupQuestionRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/passages")
 @RequiredArgsConstructor
@@ -40,14 +45,42 @@ public class ReadingPassageController {
 
     GroupQuestionService groupQuestionService;
     @GetMapping
-    public ResponseEntity<BaseResponse<String>> test() {
-        return ResponseEntity.ok(
-                BaseResponse.<String>builder()
-                        .message("Reading Passage Service is running")
-                        .data("Hello, World!")
-
-                        .build()
-        );
+    @Operation(
+            summary = "Get list of passages by condition",
+            description = "This endpoint retrieves a list of reading passages based on the specified conditions. " +
+                    "It supports pagination and filtering by IELTS type, status, part number, and question category."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of passages retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getListPassageByCondition(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "ieltsType", required = false) Integer ieltsType,
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "partNumber", required = false) Integer partNumber,
+            @RequestParam(value = "questionCategory", required = false) String questionCategory
+    ) throws JsonProcessingException {
+        var pageablePassages = passageService.getPassages(page, size, ieltsType, status, partNumber, questionCategory);
+        var pagination = Pagination.builder()
+                .currentPage(pageablePassages.getNumber() + 1)
+                .totalPages(pageablePassages.getTotalPages())
+                .pageSize(pageablePassages.getSize())
+                .totalItems((int)pageablePassages.getTotalElements())
+                .hasNextPage(pageablePassages.hasNext())
+                .hasPreviousPage(pageablePassages.hasPrevious())
+                .build();
+        BaseResponse<List<PassageGetResponse>> body = BaseResponse.<List<PassageGetResponse>>builder()
+                .data(pageablePassages.getContent())
+                .pagination(pagination)
+                .message(null)
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
     }
 
     /**
