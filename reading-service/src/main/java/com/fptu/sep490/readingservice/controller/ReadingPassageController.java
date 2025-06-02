@@ -186,4 +186,44 @@ public class ReadingPassageController {
                 .body(body);
     }
 
+
+    @GetMapping("/{passage-id}")
+    @PreAuthorize("hasRole('USER')")
+    @Operation(
+            summary = "Get passage by ID",
+            description = "This endpoint retrieves a reading passage by its unique identifier (ID). " +
+                    "It returns the details of the passage including its content, title, and other metadata."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Passage retrieved successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid passage ID",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Passage not found",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<PassageDetailResponse>> getPassageById(@PathVariable("passage-id")
+                                                                                  UUID passageId) {
+        PassageDetailResponse passageDetail = passageService.getPassageById(passageId);
+        BaseResponse<PassageDetailResponse> body = BaseResponse.<PassageDetailResponse>builder()
+                .data(passageDetail)
+                .message(null)
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
+
+
 }

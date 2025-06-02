@@ -20,4 +20,7 @@ public interface PassageService {
                                          Integer partNumber,
                                          String questionCategory) throws JsonProcessingException;
     PassageDetailResponse updatePassage(UUID passageId, UpdatedPassageRequest request, HttpServletRequest httpServletRequest);
+
+    PassageDetailResponse getPassageById(UUID passageId);
+
 }
