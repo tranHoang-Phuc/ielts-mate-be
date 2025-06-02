@@ -41,7 +41,7 @@ public class Question {
             joinColumns = @JoinColumn(name = "question_id")
     )
     @Column(name = "category", length = 50, nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private Set<QuestionCategory> categories = new HashSet<>();
 
     @Lob
