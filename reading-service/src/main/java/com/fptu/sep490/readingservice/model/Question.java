@@ -44,7 +44,6 @@ public class Question {
     @Enumerated(EnumType.STRING)
     private Set<QuestionCategory> categories = new HashSet<>();
 
-    @Lob
     @Column(name = "explanation")
     private String explanation;
 
@@ -95,11 +94,12 @@ public class Question {
     )
     private List<Choice> choices = new ArrayList<>();
 
-    @OneToMany(
+    @OneToOne(
             mappedBy = "question",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            optional = false
     )
-    private List<DragItem> dragItems = new ArrayList<>();
+    private DragItem dragItem;
 }
