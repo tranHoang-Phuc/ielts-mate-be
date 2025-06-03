@@ -27,7 +27,6 @@ import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -524,6 +524,56 @@ public class QuestionServiceImpl implements QuestionService {
         if(informationRequest.numberOfCorrectAnswers() != null && informationRequest.numberOfCorrectAnswers() > 0) {
             question.setNumberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers());
         }
+
+        if(informationRequest.instructionForChoice() != null && !informationRequest.instructionForChoice().isEmpty()) {
+            question.setInstructionForChoice(informationRequest.instructionForChoice());
+        }
+        if(informationRequest.blankIndex() != null && informationRequest.blankIndex() >= 0) {
+            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setBlankIndex(informationRequest.blankIndex());
+        }
+        if(informationRequest.correctAnswer() != null && !informationRequest.correctAnswer().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setCorrectAnswer(informationRequest.correctAnswer());
+        }
+        if(informationRequest.instructionForMatching() != null && !informationRequest.instructionForMatching().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.MATCHING) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setInstructionForMatching(informationRequest.instructionForMatching());
+        }
+        if(informationRequest.correctAnswerForMatching() != null && !informationRequest.correctAnswerForMatching().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.MATCHING) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setCorrectAnswerForMatching(informationRequest.correctAnswerForMatching());
+        }
+        if(informationRequest.zoneIndex() != null && informationRequest.zoneIndex() >= 0) {
+            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setZoneIndex(informationRequest.zoneIndex());
+        }
+        if(informationRequest.dragItemId() != null && !informationRequest.dragItemId().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            DragItem dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(informationRequest.dragItemId()))
+                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
+                            Constants.ErrorCode.DRAG_ITEM_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+            question.setDragItem(dragItem);
+        }
+
         question.setUpdatedBy(userInformation.id());
         Question savedQuestion = questionRepository.save(question);
         UserProfileResponse createdUser = getUserProfileById(savedQuestion.getCreatedBy().toString());

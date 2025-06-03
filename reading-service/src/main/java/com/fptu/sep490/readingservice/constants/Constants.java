@@ -16,6 +16,8 @@ public class Constants {
         public static final String QUESTION_NOT_FOUND = "QUESTION_NOT_FOUND";
         public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "QUESTION_ALREADY_HAS_DRAG_ITEM";
         public static final String DRAG_ITEM_NOT_FOUND = "DRAG_ITEM_NOT_FOUND";
+        public static final String CHOICE_NOT_FOUND = "CHOICE_NOT_FOUND";
+        public static final String CHOICE_NOT_IN_THIS_QUESTION = "CHOICE_NOT_IN_THIS_QUESTION";
     }
 
     public final class RedisKey {
@@ -34,6 +36,7 @@ public class Constants {
         public static final String CHOICES_LIST_EMPTY = "100007";
         public static final String INVALID_BLANK_INDEX = "100008";
         public static final String QUESTION_GROUP_NOT_FOUND = "100009";
+        public static final String CHOICE_NOT_FOUND = "100010";
 
 
 

@@ -13,6 +13,22 @@ public record InformationUpdatedQuestionRequest(
     @JsonProperty("question_categories")
     List<String> questionCategories,
     @JsonProperty("number_of_correct_answers")
-    Integer numberOfCorrectAnswers
+    Integer numberOfCorrectAnswers,
+
+    @JsonProperty("instruction_for_choice")
+    String instructionForChoice,
+        @JsonProperty("blank_index")
+    Integer blankIndex,
+    @JsonProperty("correct_answer")
+    String correctAnswer,
+    @JsonProperty("instruction_for_matching")
+    String instructionForMatching,
+    @JsonProperty("correct_answer_for_matching")
+    String correctAnswerForMatching,
+    @JsonProperty("zone_index")
+    Integer zoneIndex,
+    @JsonProperty("drag_item_id")
+    String dragItemId
+
 ) {
 }
