@@ -5,4 +5,6 @@ public enum Status {
     PUBLISHED,
     DEACTIVATED,
     FINISHED,
+
+    TEST
 }
