@@ -18,6 +18,7 @@ import com.fptu.sep490.readingservice.repository.QuestionRepository;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.service.QuestionService;
+import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
@@ -25,6 +26,7 @@ import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -369,7 +371,125 @@ public class QuestionServiceImpl implements QuestionService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        return null;
+        if (questionCreationRequest.questionType() < 0 || questionCreationRequest.questionType() >= QuestionType.values().length) {
+            throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
+                    Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
+        }
+        List<QuestionCategory> categories = questionCreationRequest.questionCategories().stream()
+                .map(QuestionCategory::valueOf)
+                .toList();
+    return null;
+
+    }
+
+    @Override
+    @Transactional
+    public UpdatedQuestionResponse updateOrder(
+            String questionId,
+            String groupId,
+            OrderUpdatedQuestionRequest questionCreationRequest,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        String userId = getUserIdFromToken(request);
+        UserProfileResponse userInformation = getUserProfileById(userId);
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        List<Question> questions = questionRepository
+                .findAllByQuestionGroupOrderByQuestionOrderAsc(questionGroup);
+        if (questions.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
+                    Constants.ErrorCode.QUESTION_LIST_EMPTY,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        UUID targetQuestionUuid;
+        try {
+            targetQuestionUuid = UUID.fromString(questionId);
+        } catch (IllegalArgumentException ex) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        Question targetQuestion = null;
+        for (Question q : questions) {
+            if (q.getQuestionId().equals(targetQuestionUuid)) {
+                targetQuestion = q;
+                break;
+            }
+        }
+        if (targetQuestion == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        int newOrder = questionCreationRequest.order();
+        if (newOrder < 1) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        questions.remove(targetQuestion);
+        int insertIndex = newOrder - 1;
+        if (insertIndex > questions.size()) {
+            insertIndex = questions.size();
+        }
+
+        questions.add(insertIndex, targetQuestion);
+        List<Question> toSave = new ArrayList<>();
+        for (int i = 0; i < questions.size(); i++) {
+            Question q = questions.get(i);
+            int recalculatedOrder = i + 1;
+            if (q.getQuestionOrder() != recalculatedOrder) {
+                q.setQuestionOrder(recalculatedOrder);
+                q.setUpdatedBy(userInformation.id());
+                toSave.add(q);
+            }
+        }
+
+
+        if (!toSave.isEmpty()) {
+            questionRepository.saveAll(toSave);
+        }
+        UserProfileResponse createdUser = getUserProfileById(toSave.getFirst().getCreatedBy().toString());
+        UserProfileResponse updatedUser = getUserProfileById(userInformation.id());
+        return UpdatedQuestionResponse.builder()
+                .questionId(targetQuestion.getQuestionId().toString())
+                .questionOrder(targetQuestion.getQuestionOrder())
+                .point(targetQuestion.getPoint())
+                .questionType(targetQuestion.getQuestionType().ordinal())
+                .questionCategories(targetQuestion.getCategories().stream()
+                        .map(QuestionCategory::name)
+                        .toList())
+                .explanation(targetQuestion.getExplanation())
+                .questionGroupId(targetQuestion.getQuestionGroup().getGroupId().toString())
+                .numberOfCorrectAnswers(targetQuestion.getNumberOfCorrectAnswers())
+                .instructionForChoice(targetQuestion.getInstructionForChoice())
+                .createdBy(UserInformationResponse.builder()
+                        .userId(createdUser.id())
+                        .firstName(createdUser.firstName())
+                        .lastName(createdUser.lastName())
+                        .email(createdUser.email())
+                        .build())
+                .updatedBy(UserInformationResponse.builder()
+                        .userId(updatedUser.id())
+                        .firstName(updatedUser.firstName())
+                        .lastName(updatedUser.lastName())
+                        .email(updatedUser.email())
+                        .build())
+                .createdAt(targetQuestion.getCreatedAt().toString())
+                .updatedAt(targetQuestion.getUpdatedAt().toString())
+                .build();
     }
 
     private String getUserIdFromToken(HttpServletRequest request) {

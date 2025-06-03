@@ -19,7 +19,9 @@ public record PassageGetResponse(
         UserInformationResponse createdBy,
         @JsonProperty("updated_by")
         UserInformationResponse updatedBy,
+        @JsonProperty("created_at")
         String createdAt,
+        @JsonProperty("updated_at")
         String updatedAt
 ) {
 }

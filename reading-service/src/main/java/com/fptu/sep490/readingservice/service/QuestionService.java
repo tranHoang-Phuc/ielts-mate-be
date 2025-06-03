@@ -1,6 +1,7 @@
 package com.fptu.sep490.readingservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
@@ -13,4 +14,8 @@ public interface QuestionService {
     List<QuestionCreationResponse> createQuestions(List<QuestionCreationRequest> questionCreationResponses, HttpServletRequest request) throws JsonProcessingException;
 
     UpdatedQuestionResponse updateQuestion(String questionId, UpdatedQuestionRequest questionCreationRequest, HttpServletRequest request);
+
+    UpdatedQuestionResponse updateOrder(String questionId, String groupId, OrderUpdatedQuestionRequest questionCreationRequest, HttpServletRequest request) throws JsonProcessingException;
+
+    UpdatedQuestionResponse updateInformation(String questionId, String groupId, OrderUpdatedQuestionRequest orderRequest, HttpServletRequest request);
 }
