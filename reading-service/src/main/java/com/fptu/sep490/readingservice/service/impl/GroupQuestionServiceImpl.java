@@ -13,6 +13,7 @@ import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.service.GroupQuestionService;
+import com.fptu.sep490.readingservice.viewmodel.request.ChoiceCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -149,45 +150,59 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
     @Override
     public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
-//        String userId = getUserIdFromToken(httpsRequest);
-//        ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
-//                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
-//                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-//        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
-//        if (questionGroups.isEmpty()) {
-//            throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
-//                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
-//        }
-//        return questionGroups.stream()
-//                .map(group -> Helper.mapToGroupQuestionResponse(group, new AddGroupQuestionRequest(
-//                        group.getSectionOrder(),
-//                        group.getSectionLabel(),
-//                        group.getInstruction(),
-//                        group.getQuestions().stream()
-//                                .map(q -> new QuestionCreationRequest(
-//                                        q.getQuestionOrder(),
-//                                        q.getPoint(),
-//                                        q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
-//                                        q.getCategories() != null ? q.getCategories().stream()
-//                                                .map(Enum::name)
-//                                                .collect(Collectors.toSet()) : null,
-//                                        q.getExplanation(),
-//                                        q.getNumberOfCorrectAnswers(),
-//                                        q.getInstructionForChoice(),
-//                                        q.getBlankIndex(),
-//                                        q.getCorrectAnswer(),
-//                                        q.getInstructionForMatching(),
-//                                        q.getCorrectAnswerForMatching(),
-//                                        q.getZoneIndex(),
-//                                        q.getChoices().stream()
-//                                                .map(c -> new ChoiceCreationRequest(c.getLabel(), c.getContent(),c.getChoiceOrder(), c.isCorrect()))
-//                                                .toList(),
-//                                        q.getDragItem() != null ? q.getDragItem().getContent() : null
-//                                )).toList(),
-//                        group.getDragItems().stream().map(DragItem::getContent).toList()
-//                )))
-//                .toList();
-        return null;
+        String userId = getUserIdFromToken(httpsRequest);
+        ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
+        if (questionGroups.isEmpty()) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
+        }
+        return questionGroups.stream()
+                .map(group -> Helper.mapToGroupQuestionResponse(
+                        group,
+                        new AddGroupQuestionRequest(
+                                group.getSectionOrder(),
+                                group.getSectionLabel(),
+                                group.getInstruction(),
+                                group.getQuestions().stream()
+                                        .map(q -> new QuestionCreationRequest(
+                                                q.getQuestionOrder(),
+                                                q.getPoint(),
+                                                q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
+                                                group.getGroupId().toString(),
+                                                q.getCategories() != null
+                                                        ? q.getCategories().stream()
+                                                        .map(Enum::name)
+                                                        .collect(Collectors.toList())
+                                                        : null,
+                                                q.getExplanation(),
+                                                q.getNumberOfCorrectAnswers(),
+                                                q.getInstructionForChoice(),
+                                                q.getChoices().stream()
+                                                        .map(c -> new QuestionCreationRequest.ChoiceRequest(
+                                                                c.getLabel(),
+                                                                c.getContent(),
+                                                                c.getChoiceOrder(),
+                                                                c.isCorrect()))
+                                                        .toList(),
+                                                q.getBlankIndex(),
+                                                q.getCorrectAnswer(),
+                                                q.getInstructionForMatching(),
+                                                q.getCorrectAnswerForMatching(),
+                                                q.getZoneIndex(),
+                                                q.getDragItem() != null
+                                                        ? q.getDragItem().getContent()
+                                                        : null
+                                        ))
+                                        .toList(),
+                                group.getDragItems().stream()
+                                        .map(DragItem::getContent)
+                                        .toList()
+                        )
+                ))
+                .toList();
     }
 
     @Override
