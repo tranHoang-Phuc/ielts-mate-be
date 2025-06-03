@@ -380,6 +380,44 @@ public class ReadingPassageController {
         );
     }
 
+    @DeleteMapping("/{passage-id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(
+            summary = "Delete a passage",
+            description = "This endpoint allows teachers to delete a reading passage by its unique identifier (ID). " +
+                    "Once deleted, the passage cannot be recovered."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Passage deleted successfully"),
+            @ApiResponse(responseCode = "400",
+                    description = "Invalid passage ID",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401",
+                    description = "Unauthorized access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403",
+                    description = "Forbidden access",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Passage not found",
+                    content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Internal server error",
+                    content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<Void>> deletePassage(@PathVariable("passage-id") UUID passageId) {
+        passageService.deletePassage(passageId);
+        BaseResponse<Void> body = BaseResponse.<Void>builder()
+                .data(null)
+                .message("Successfully deleted Passage")
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
+
+
 
 
 }

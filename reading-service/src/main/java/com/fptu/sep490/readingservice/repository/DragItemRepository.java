@@ -14,6 +14,7 @@ import java.util.UUID;
  */
 @Repository
 public interface DragItemRepository extends JpaRepository<DragItem, UUID> {
+    Optional<DragItem> findDragItemByDragItemId(UUID dragItemId);
     Optional<DragItem> findByDragItemIdAndQuestionGroup_GroupId(UUID dragItemId, UUID groupId);
     List<DragItem> findAllByQuestionGroup_GroupId(UUID groupId);
 }

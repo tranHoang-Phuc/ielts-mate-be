@@ -1,4 +1,3 @@
-// reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionGroupRepository.java
 package com.fptu.sep490.readingservice.repository;
 
 import com.fptu.sep490.readingservice.model.DragItem;
