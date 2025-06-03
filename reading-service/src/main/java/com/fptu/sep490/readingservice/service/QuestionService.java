@@ -19,4 +19,6 @@ public interface QuestionService {
     UpdatedQuestionResponse updateOrder(String questionId, String groupId, OrderUpdatedQuestionRequest questionCreationRequest, HttpServletRequest request) throws JsonProcessingException;
 
     UpdatedQuestionResponse updateInformation(String questionId, String groupId, InformationUpdatedQuestionRequest informationRequest, HttpServletRequest request) throws JsonProcessingException;
+
+    void deleteQuestion(String questionId, String groupId, HttpServletRequest request);
 }

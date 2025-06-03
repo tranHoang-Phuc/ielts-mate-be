@@ -607,6 +607,24 @@ public class QuestionServiceImpl implements QuestionService {
                 .build();
     }
 
+    @Override
+    @Transactional
+    public void deleteQuestion(String questionId, String groupId, HttpServletRequest request) {
+        String userId = getUserIdFromToken(request);
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        if (!question.getQuestionGroup().equals(questionGroup)) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
+                    Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
+        }
+        questionRepository.delete(question);
+        question.setUpdatedBy(userId);
+        questionRepository.save(question);
+    }
 
 
     private String getUserIdFromToken(HttpServletRequest request) {
