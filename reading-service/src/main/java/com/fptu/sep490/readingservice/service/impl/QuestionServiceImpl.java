@@ -19,7 +19,9 @@ import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.service.QuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -127,10 +129,11 @@ public class QuestionServiceImpl implements QuestionService {
                     throw new AppException(Constants.ErrorCodeMessage.INVALID_NUMBER_OF_CORRECT_ANSWERS,
                             Constants.ErrorCode.INVALID_NUMBER_OF_CORRECT_ANSWERS, HttpStatus.BAD_REQUEST.value());
                 }
+                String userId = getUserIdFromToken(request);
+                savedQuestion.setCreatedBy(userId);
+                savedQuestion.setUpdatedBy(userId);
 
                 Question saved = questionRepository.save(savedQuestion);
-                String userId = getUserIdFromToken(request);
-
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
@@ -192,9 +195,10 @@ public class QuestionServiceImpl implements QuestionService {
                         .explanation(question.explanation())
                         .questionGroup(questionGroup)
                         .build();
-
-                Question saved = questionRepository.save(savedQuestion);
                 String userId = getUserIdFromToken(request);
+                savedQuestion.setCreatedBy(userId);
+                savedQuestion.setUpdatedBy(userId);
+                Question saved = questionRepository.save(savedQuestion);
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
@@ -253,9 +257,10 @@ public class QuestionServiceImpl implements QuestionService {
                         .explanation(question.explanation())
                         .questionGroup(questionGroup)
                         .build();
-
-                Question saved = questionRepository.save(savedQuestion);
                 String userId = getUserIdFromToken(request);
+                savedQuestion.setCreatedBy(userId);
+                savedQuestion.setUpdatedBy(userId);
+                Question saved = questionRepository.save(savedQuestion);
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
@@ -298,15 +303,17 @@ public class QuestionServiceImpl implements QuestionService {
                         .point(question.point())
                         .questionOrder(question.questionOrder())
                         .zoneIndex(question.zoneIndex())
-                        .dragItems(List.of(dragItem))
+                        .dragItem(dragItem)
                         .categories(Set.copyOf(categories))
                         .explanation(question.explanation())
                         .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
                         .zoneIndex(question.zoneIndex())
                         .questionGroup(questionGroup)
                         .build();
-                Question saved = questionRepository.save(savedQuestion);
                 String userId = getUserIdFromToken(request);
+                savedQuestion.setCreatedBy(userId);
+                savedQuestion.setUpdatedBy(userId);
+                Question saved = questionRepository.save(savedQuestion);
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
@@ -351,6 +358,18 @@ public class QuestionServiceImpl implements QuestionService {
 
         }
         return questionCreationResponseList;
+    }
+
+    @Override
+    public UpdatedQuestionResponse updateQuestion(String questionId, UpdatedQuestionRequest questionCreationRequest, HttpServletRequest request) {
+        if( questionCreationRequest == null) {
+            throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+        }
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        return null;
     }
 
     private String getUserIdFromToken(HttpServletRequest request) {

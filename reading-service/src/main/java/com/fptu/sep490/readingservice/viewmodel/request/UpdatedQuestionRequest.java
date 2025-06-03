@@ -1,17 +1,14 @@
 package com.fptu.sep490.readingservice.viewmodel.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
 
 import java.util.List;
-import java.util.Set;
 
-public record QuestionCreationRequest(
+public record UpdatedQuestionRequest(
         @JsonProperty("question_order")
-        int questionOrder,
+        Integer questionOrder,
         @JsonProperty("point")
-        int point,
+        Integer point,
         @JsonProperty("question_type")
         Integer questionType,
         @JsonProperty("question_group_id")
@@ -26,7 +23,7 @@ public record QuestionCreationRequest(
         @JsonProperty("instruction_for_choice")
         String instructionForChoice,
         @JsonProperty("choices")
-        List<ChoiceRequest> choices,
+        List<QuestionCreationRequest.ChoiceRequest> choices,
 
         @JsonProperty("blank_index")
         Integer blankIndex,
@@ -43,16 +40,4 @@ public record QuestionCreationRequest(
         @JsonProperty("drag_item_id")
         String dragItemId
 ) {
-    public record ChoiceRequest(
-            @JsonProperty("label")
-            String label,
-            @JsonProperty("content")
-            String content,
-            @JsonProperty("choice_order")
-            int choiceOrder,
-            @JsonProperty("is_correct")
-            boolean isCorrect
-    ) {
-    }
-
 }

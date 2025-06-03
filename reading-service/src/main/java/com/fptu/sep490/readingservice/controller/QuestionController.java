@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.QuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -40,5 +39,19 @@ public class QuestionController {
                 .message("Questions created successfully")
                 .build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{question-id}")
+    public ResponseEntity<BaseResponse<UpdatedQuestionResponse>> updateQuestion(
+            @PathVariable("question-id") String questionId,
+            @RequestBody UpdatedQuestionRequest questionCreationRequest,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        UpdatedQuestionResponse data = questionService.updateQuestion(questionId, questionCreationRequest, request);
+        BaseResponse<UpdatedQuestionResponse> response = BaseResponse.<UpdatedQuestionResponse>builder()
+                .data(data)
+                .message("Question updated successfully")
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

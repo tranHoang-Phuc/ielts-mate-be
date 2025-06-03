@@ -77,11 +77,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         questionDto.questionType() == null ? null : QuestionType.values()[questionDto.questionType()]
                 );
                 // Map Set<Integer> to Set<QuestionCategory>
-                if (questionDto.questionCategory() != null) {
+                if (questionDto.questionCategories() != null) {
                     Set<QuestionCategory> categories =
-                            questionDto.questionCategory().stream()
+                            questionDto.questionCategories().stream()
                                     .filter(java.util.Objects::nonNull)
-                                    .map(str -> QuestionCategory.valueOf(str))
+                                    .map(QuestionCategory::valueOf)
                                     .collect(java.util.stream.Collectors.toSet());
                     question.setCategories(categories);
                 } else {
@@ -103,7 +103,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 // Handle choices
                 if (questionDto.choices() != null && !questionDto.choices().isEmpty()) {
                     List<Choice> choices = new ArrayList<>();
-                    for (ChoiceCreationRequest choiceDto : questionDto.choices()) {
+                    for (QuestionCreationRequest.ChoiceRequest choiceDto : questionDto.choices()) {
                         Choice choice = new Choice();
                         choice.setContent(choiceDto.content());
                         choice.setLabel(choiceDto.label());
@@ -234,11 +234,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         questionDto.questionType() == null ? null : QuestionType.values()[questionDto.questionType()]
                 );
                 // Map Set<Integer> to Set<QuestionCategory>
-                if (questionDto.questionCategory() != null) {
+                if (questionDto.questionCategories() != null) {
                     Set<QuestionCategory> categories =
-                            questionDto.questionCategory().stream()
+                            questionDto.questionCategories().stream()
                                     .filter(java.util.Objects::nonNull)
-                                    .map(str -> QuestionCategory.valueOf(str))
+                                    .map(QuestionCategory::valueOf)
                                     .collect(java.util.stream.Collectors.toSet());
                     question.setCategories(categories);
                 } else {
@@ -259,7 +259,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 // Handle choices
                 if (questionDto.choices() != null && !questionDto.choices().isEmpty()) {
                     List<Choice> choices = new ArrayList<>();
-                    for (ChoiceCreationRequest choiceDto : questionDto.choices()) {
+                    for (QuestionCreationRequest.ChoiceRequest choiceDto : questionDto.choices()) {
                         Choice choice = new Choice();
                         choice.setContent(choiceDto.content());
                         choice.setLabel(choiceDto.label());
@@ -271,7 +271,6 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 } else {
                     question.setChoices(null);
                 }
-                // Handle question-level drag items
                 if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
                         DragItem dragItem = new DragItem();
                         dragItem.setContent(questionDto.dragItem());
