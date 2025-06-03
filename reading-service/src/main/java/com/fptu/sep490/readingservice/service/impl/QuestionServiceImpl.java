@@ -18,6 +18,7 @@ import com.fptu.sep490.readingservice.repository.QuestionRepository;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.service.QuestionService;
+import com.fptu.sep490.readingservice.viewmodel.request.InformationUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
@@ -491,6 +492,72 @@ public class QuestionServiceImpl implements QuestionService {
                 .updatedAt(targetQuestion.getUpdatedAt().toString())
                 .build();
     }
+
+    @Override
+    public UpdatedQuestionResponse updateInformation(String questionId, String groupId,
+                                                     InformationUpdatedQuestionRequest informationRequest,
+                                                     HttpServletRequest request) throws JsonProcessingException {
+        String userId = getUserIdFromToken(request);
+        UserProfileResponse userInformation = getUserProfileById(userId);
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (informationRequest == null) {
+            throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+        }
+        if(informationRequest.explanation() != null || !informationRequest.explanation().isEmpty()) {
+            question.setExplanation(informationRequest.explanation());
+        }
+        if(informationRequest.point() != null && informationRequest.point() > 0) {
+            question.setPoint(informationRequest.point());
+        }
+        if(informationRequest.questionCategories() != null && !informationRequest.questionCategories().isEmpty()) {
+            List<QuestionCategory> categories = informationRequest.questionCategories().stream()
+                    .map(QuestionCategory::valueOf)
+                    .toList();
+            question.setCategories(Set.copyOf(categories));
+        }
+        if(informationRequest.numberOfCorrectAnswers() != null && informationRequest.numberOfCorrectAnswers() > 0) {
+            question.setNumberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers());
+        }
+        question.setUpdatedBy(userInformation.id());
+        Question savedQuestion = questionRepository.save(question);
+        UserProfileResponse createdUser = getUserProfileById(savedQuestion.getCreatedBy().toString());
+        UserProfileResponse updatedUser = getUserProfileById(userInformation.id());
+        return UpdatedQuestionResponse.builder()
+                .questionId(savedQuestion.getQuestionId().toString())
+                .questionOrder(savedQuestion.getQuestionOrder())
+                .point(savedQuestion.getPoint())
+                .questionType(savedQuestion.getQuestionType().ordinal())
+                .questionCategories(savedQuestion.getCategories().stream()
+                        .map(QuestionCategory::name)
+                        .toList())
+                .explanation(savedQuestion.getExplanation())
+                .questionGroupId(savedQuestion.getQuestionGroup().getGroupId().toString())
+                .numberOfCorrectAnswers(savedQuestion.getNumberOfCorrectAnswers())
+                .instructionForChoice(savedQuestion.getInstructionForChoice())
+                .createdBy(UserInformationResponse.builder()
+                        .userId(createdUser.id())
+                        .firstName(createdUser.firstName())
+                        .lastName(createdUser.lastName())
+                        .email(createdUser.email())
+                        .build())
+                .updatedBy(UserInformationResponse.builder()
+                        .userId(updatedUser.id())
+                        .firstName(updatedUser.firstName())
+                        .lastName(updatedUser.lastName())
+                        .email(updatedUser.email())
+                        .build())
+                .createdAt(savedQuestion.getCreatedAt().toString())
+                .updatedAt(savedQuestion.getUpdatedAt().toString())
+                .build();
+    }
+
+
 
     private String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
