@@ -108,4 +108,23 @@ public class QuestionController {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{question-id}")
+    @PreAuthorize("hasRole('TEACHER')")
+    @Operation(summary = "Delete a question from a group",
+            description = "This endpoint allows teachers to delete a specific question from a group.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Question deleted successfully"),
+            @ApiResponse(responseCode = "403", description = "Access denied, only teachers can delete questions"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<Void>> deleteQuestion(
+            @PathVariable("group-id") String groupId,
+            @PathVariable("question-id") String questionId, HttpServletRequest request) {
+        questionService.deleteQuestion(questionId, groupId, request);
+        BaseResponse<Void> response = BaseResponse.<Void>builder()
+                .message("Question deleted successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

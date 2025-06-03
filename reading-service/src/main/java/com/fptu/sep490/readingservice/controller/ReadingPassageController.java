@@ -43,18 +43,7 @@ public class ReadingPassageController {
     PassageService passageService;
     GroupQuestionService groupQuestionService;
 
-    /**
-     * Get a list of reading passages based on specified conditions.
-     *
-     * @param page the page number to retrieve
-     * @param size the number of items per page
-     * @param ieltsType the type of IELTS (optional)
-     * @param status the status of the passage (optional)
-     * @param partNumber the part number of the passage (optional)
-     * @param questionCategory the category of questions (optional)
-     * @return a response entity containing a list of passages and pagination information
-     * @throws JsonProcessingException if there is an error processing JSON
-     */
+
     @GetMapping
     @Operation(
             summary = "Get list of passages by condition",
@@ -94,14 +83,7 @@ public class ReadingPassageController {
                 .body(body);
     }
 
-    /**
-     * Create a new passage.
-     *
-     * @param request the request containing passage creation details
-     * @param httpServletRequest the HTTP servlet request
-     * @return a response entity containing the created passage details
-     * @throws JsonProcessingException if there is an error processing JSON
-     */
+
     @PostMapping
     @PreAuthorize("hasRole('TEACHER')")
     @Operation(
