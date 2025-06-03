@@ -12,6 +12,10 @@ public class Constants {
         public static final String CHOICES_LIST_EMPTY = "CHOICES_LIST_EMPTY";
         public static final String INVALID_BLANK_INDEX = "INVALID_BLANK_INDEX";
         public static final String QUESTION_GROUP_NOT_FOUND = "QUESTION_GROUP_NOT_FOUND";
+
+        public static final String QUESTION_NOT_FOUND = "QUESTION_NOT_FOUND";
+        public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "QUESTION_ALREADY_HAS_DRAG_ITEM";
+        public static final String DRAG_ITEM_NOT_FOUND = "DRAG_ITEM_NOT_FOUND";
     }
 
     public final class RedisKey {

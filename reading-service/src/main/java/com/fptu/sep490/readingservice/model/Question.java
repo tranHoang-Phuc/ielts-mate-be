@@ -99,7 +99,7 @@ public class Question {
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.LAZY,
-            optional = false    // bảo đảm Question luôn có DragItem
+            optional = false
     )
     private DragItem dragItem;
 }

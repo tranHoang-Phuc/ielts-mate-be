@@ -1,6 +1,7 @@
 package com.fptu.sep490.readingservice.repository;
 
 import com.fptu.sep490.readingservice.model.Question;
+import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,5 @@ import java.util.UUID;
  */
 @Repository
 public interface QuestionRepository extends JpaRepository<Question, UUID> {
-
+    List<Question> findAllByQuestionGroupOrderByQuestionOrderAsc(QuestionGroup questionGroup);
 }

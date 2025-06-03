@@ -77,11 +77,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         questionDto.questionType() == null ? null : QuestionType.values()[questionDto.questionType()]
                 );
                 // Map Set<Integer> to Set<QuestionCategory>
-                if (questionDto.questionCategory() != null) {
+                if (questionDto.questionCategories() != null) {
                     Set<QuestionCategory> categories =
-                            questionDto.questionCategory().stream()
+                            questionDto.questionCategories().stream()
                                     .filter(java.util.Objects::nonNull)
-                                    .map(str -> QuestionCategory.valueOf(str))
+                                    .map(QuestionCategory::valueOf)
                                     .collect(java.util.stream.Collectors.toSet());
                     question.setCategories(categories);
                 } else {
@@ -103,7 +103,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 // Handle choices
                 if (questionDto.choices() != null && !questionDto.choices().isEmpty()) {
                     List<Choice> choices = new ArrayList<>();
-                    for (ChoiceCreationRequest choiceDto : questionDto.choices()) {
+                    for (QuestionCreationRequest.ChoiceRequest choiceDto : questionDto.choices()) {
                         Choice choice = new Choice();
                         choice.setContent(choiceDto.content());
                         choice.setLabel(choiceDto.label());
@@ -115,10 +115,10 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 }
 
                 // Handle question-level drag items
-                if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
+                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
 
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(questionDto.dragItem());
+                        dragItem.setContent(questionDto.dragItemId());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
 
@@ -150,46 +150,46 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
     }
 
     @Override
-    public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(
-            String passageId, HttpServletRequest httpsRequest) throws Exception {
-        String userId = getUserIdFromToken(httpsRequest);
-        ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
-                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
-                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
-        if (questionGroups.isEmpty()) {
-            throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
-                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
-        }
-        return questionGroups.stream()
-                .map(group -> Helper.mapToGroupQuestionResponse(group, new AddGroupQuestionRequest(
-                        group.getSectionOrder(),
-                        group.getSectionLabel(),
-                        group.getInstruction(),
-                        group.getQuestions().stream()
-                                .map(q -> new QuestionCreationRequest(
-                                        q.getQuestionOrder(),
-                                        q.getPoint(),
-                                        q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
-                                        q.getCategories() != null ? q.getCategories().stream()
-                                                .map(Enum::name)
-                                                .collect(Collectors.toSet()) : null,
-                                        q.getExplanation(),
-                                        q.getNumberOfCorrectAnswers(),
-                                        q.getInstructionForChoice(),
-                                        q.getBlankIndex(),
-                                        q.getCorrectAnswer(),
-                                        q.getInstructionForMatching(),
-                                        q.getCorrectAnswerForMatching(),
-                                        q.getZoneIndex(),
-                                        q.getChoices().stream()
-                                                .map(c -> new ChoiceCreationRequest(c.getLabel(), c.getContent(),c.getChoiceOrder(), c.isCorrect()))
-                                                .toList(),
-                                        q.getDragItem() != null ? q.getDragItem().getContent() : null
-                                )).toList(),
-                        group.getDragItems().stream().map(DragItem::getContent).toList()
-                )))
-                .toList();
+    public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
+//        String userId = getUserIdFromToken(httpsRequest);
+//        ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
+//                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+//                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+//        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
+//        if (questionGroups.isEmpty()) {
+//            throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+//                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
+//        }
+//        return questionGroups.stream()
+//                .map(group -> Helper.mapToGroupQuestionResponse(group, new AddGroupQuestionRequest(
+//                        group.getSectionOrder(),
+//                        group.getSectionLabel(),
+//                        group.getInstruction(),
+//                        group.getQuestions().stream()
+//                                .map(q -> new QuestionCreationRequest(
+//                                        q.getQuestionOrder(),
+//                                        q.getPoint(),
+//                                        q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
+//                                        q.getCategories() != null ? q.getCategories().stream()
+//                                                .map(Enum::name)
+//                                                .collect(Collectors.toSet()) : null,
+//                                        q.getExplanation(),
+//                                        q.getNumberOfCorrectAnswers(),
+//                                        q.getInstructionForChoice(),
+//                                        q.getBlankIndex(),
+//                                        q.getCorrectAnswer(),
+//                                        q.getInstructionForMatching(),
+//                                        q.getCorrectAnswerForMatching(),
+//                                        q.getZoneIndex(),
+//                                        q.getChoices().stream()
+//                                                .map(c -> new ChoiceCreationRequest(c.getLabel(), c.getContent(),c.getChoiceOrder(), c.isCorrect()))
+//                                                .toList(),
+//                                        q.getDragItem() != null ? q.getDragItem().getContent() : null
+//                                )).toList(),
+//                        group.getDragItems().stream().map(DragItem::getContent).toList()
+//                )))
+//                .toList();
+        return null;
     }
 
     @Override
@@ -234,11 +234,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         questionDto.questionType() == null ? null : QuestionType.values()[questionDto.questionType()]
                 );
                 // Map Set<Integer> to Set<QuestionCategory>
-                if (questionDto.questionCategory() != null) {
+                if (questionDto.questionCategories() != null) {
                     Set<QuestionCategory> categories =
-                            questionDto.questionCategory().stream()
+                            questionDto.questionCategories().stream()
                                     .filter(java.util.Objects::nonNull)
-                                    .map(str -> QuestionCategory.valueOf(str))
+                                    .map(QuestionCategory::valueOf)
                                     .collect(java.util.stream.Collectors.toSet());
                     question.setCategories(categories);
                 } else {
@@ -259,7 +259,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 // Handle choices
                 if (questionDto.choices() != null && !questionDto.choices().isEmpty()) {
                     List<Choice> choices = new ArrayList<>();
-                    for (ChoiceCreationRequest choiceDto : questionDto.choices()) {
+                    for (QuestionCreationRequest.ChoiceRequest choiceDto : questionDto.choices()) {
                         Choice choice = new Choice();
                         choice.setContent(choiceDto.content());
                         choice.setLabel(choiceDto.label());
@@ -271,10 +271,9 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 } else {
                     question.setChoices(null);
                 }
-                // Handle question-level drag items
-                if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
+                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(questionDto.dragItem());
+                        dragItem.setContent(questionDto.dragItemId());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
 
