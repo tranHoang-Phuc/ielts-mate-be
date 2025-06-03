@@ -55,9 +55,9 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setReadingPassage(readingPassage);
 
         // Handle group-level drag items
-        if (request.dragItem() != null && !request.dragItem().isEmpty()) {
+        if (request.dragItems() != null && !request.dragItems().isEmpty()) {
             List<DragItem> listDragItem = new ArrayList<>();
-            for (String item : request.dragItem()) {
+            for (String item : request.dragItems()) {
                 DragItem dragItem = new DragItem();
                 dragItem.setContent(item);
                 dragItem.setQuestionGroup(group);
@@ -116,15 +116,13 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
                 // Handle question-level drag items
                 if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
-                    List<DragItem> dragItems = new ArrayList<>();
-                    for (String item : questionDto.dragItem()) {
+
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(item);
+                        dragItem.setContent(questionDto.dragItem());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
-                        dragItems.add(dragItem);
-                    }
-                    question.setDragItems(dragItems);
+
+                    question.setDragItem(dragItem);
                 }
 
                 questions.add(question);
@@ -187,8 +185,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                         q.getChoices().stream()
                                                 .map(c -> new ChoiceCreationRequest(c.getLabel(), c.getContent(),c.getChoiceOrder(), c.isCorrect()))
                                                 .toList(),
-                                        q.getDragItems().stream()
-                                                .map(DragItem::getContent).toList()
+                                        q.getDragItem() != null ? q.getDragItem().getContent() : null
                                 )).toList(),
                         group.getDragItems().stream().map(DragItem::getContent).toList()
                 )))
@@ -212,9 +209,9 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setReadingPassage(readingPassage);
 
         // Handle group-level drag items
-        if (request.dragItem() != null && !request.dragItem().isEmpty()) {
+        if (request.dragItems() != null && !request.dragItems().isEmpty()) {
             List<DragItem> listDragItem = new ArrayList<>();
-            for (String item : request.dragItem()) {
+            for (String item : request.dragItems()) {
                 DragItem dragItem = new DragItem();
                 dragItem.setContent(item);
                 dragItem.setQuestionGroup(group);
@@ -276,19 +273,14 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 }
                 // Handle question-level drag items
                 if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
-                    List<DragItem> dragItems = new ArrayList<>();
-                    for (String item : questionDto.dragItem()) {
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(item);
+                        dragItem.setContent(questionDto.dragItem());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
-                        dragItems.add(dragItem);
-                    }
-                    question.getDragItems().clear();
 
-                    question.getDragItems().addAll(dragItems);
+                    question.setDragItem(dragItem);
                 } else {
-                    question.getDragItems().clear();
+                    question.setDragItem(null);
                 }
                 questions.add(question);
             }

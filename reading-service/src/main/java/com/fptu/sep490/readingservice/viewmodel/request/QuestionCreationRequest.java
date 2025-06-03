@@ -7,7 +7,6 @@ import lombok.Data;
 import java.util.List;
 import java.util.Set;
 
-@Builder
 public record QuestionCreationRequest(
         @JsonProperty("question_order")
         int questionOrder,

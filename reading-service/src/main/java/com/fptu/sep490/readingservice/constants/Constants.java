@@ -34,6 +34,11 @@ public class Constants {
 
 
 
+
+        public static final String QUESTION_NOT_FOUND = "100021";
+        public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "100022";
+        public static final String DRAG_ITEM_NOT_FOUND = "100023";
+
         public static final String INTERNAL_SERVER_ERROR = "100999";
 
     }

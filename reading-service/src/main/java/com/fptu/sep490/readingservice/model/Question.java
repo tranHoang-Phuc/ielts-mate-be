@@ -94,11 +94,12 @@ public class Question {
     )
     private List<Choice> choices = new ArrayList<>();
 
-    @OneToMany(
+    @OneToOne(
             mappedBy = "question",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.LAZY
+            fetch = FetchType.LAZY,
+            optional = false    // bảo đảm Question luôn có DragItem
     )
-    private List<DragItem> dragItems = new ArrayList<>();
+    private DragItem dragItem;
 }
