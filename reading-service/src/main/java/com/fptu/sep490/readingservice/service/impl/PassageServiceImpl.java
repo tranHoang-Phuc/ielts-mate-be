@@ -76,6 +76,7 @@ public class PassageServiceImpl implements PassageService {
                 .title(passageCreationRequest.title())
                 .ieltsType(ieltsType)
                 .partNumber(partNumber)
+                .passageStatus(Status.DRAFT)
                 .instruction(passageCreationRequest.instruction())
                 .content(passageCreationRequest.content())
                 .contentWithHighlightKeyword(passageCreationRequest.contentWithHighlightKeywords())
