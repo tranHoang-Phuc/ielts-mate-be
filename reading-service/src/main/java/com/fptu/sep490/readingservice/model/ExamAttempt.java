@@ -23,11 +23,11 @@ public class ExamAttempt {
     @Column(name = "exam_attempt_id", updatable = false, nullable = false)
     private UUID examAttemptId;
 
-    @Column(name = "duration", nullable = false)
-    private int duration;
+    @Column(name = "duration")
+    private Integer duration;
 
-    @Column(name = "total_question", nullable = false)
-    private int totalPoint;
+    @Column(name = "total_question")
+    private Integer totalPoint;
 
     @Column(name = "history", columnDefinition = "JSONB")
     private String history;

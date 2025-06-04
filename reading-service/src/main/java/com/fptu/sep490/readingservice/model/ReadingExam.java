@@ -25,6 +25,12 @@ public class ReadingExam {
     @Column(name = "reading_exam_id", updatable = false, nullable = false)
     private UUID readingExamId;
 
+    @Column(name = "exam_name", nullable = false, length = 255)
+    private String examName;
+
+    @Column(name = "url_slug", nullable = false, length = 255, unique = true)
+    private String urlSlug;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "part1_id", nullable = false)
     private ReadingPassage part1;
