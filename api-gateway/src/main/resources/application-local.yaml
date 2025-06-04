@@ -20,11 +20,15 @@ spring:
         - id: identity-service
           uri: http://localhost:8090
           predicates:
-            - Path=/identity/**
+            - Path=/api/v1/identity/**
+          filters:
+              - StripPrefix=2
         - id: reading-service
           uri: http://localhost:9000
           predicates:
-            - Path=/reading/**
+            - Path=/api/v1/reading/**
+          filters:
+            - StripPrefix=2
       globalcors:
         cors-configurations:
           '[/**]':
@@ -50,9 +54,9 @@ springdoc:
     path: /swagger-ui
     urls:
       - name: identity-service
-        url: http://localhost:9191/identity/v3/api-docs
+        url: http://localhost:9191/api/v1/identity/v3/api-docs
       - name: reading-service
-        url: http://localhost:9191/reading/v3/api-docs
+        url: http://localhost:9191/api/v1/reading/v3/api-docs
 
 eureka:
   client:
