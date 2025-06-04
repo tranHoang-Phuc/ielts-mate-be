@@ -20,6 +20,7 @@ public class Constants {
         public static final String CHOICE_NOT_IN_THIS_QUESTION = "CHOICE_NOT_IN_THIS_QUESTION";
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "QUESTION_NOT_BELONG_TO_GROUP";
 
+        public static final String PASSAGE_NOT_ACTIVE = "PASSAGE_NOT_ACTIVE";
     }
 
     public final class RedisKey {
@@ -41,7 +42,7 @@ public class Constants {
         public static final String CHOICE_NOT_FOUND = "100010";
         public static final String CHOICE_NOT_IN_THIS_QUESTION = "100011";
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "100012";
-
+        public  static final String PASSAGE_NOT_ACTIVE = "100013";
 
 
 

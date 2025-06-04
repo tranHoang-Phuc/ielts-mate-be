@@ -54,7 +54,8 @@ public record UpdatedQuestionResponse(
         String createdAt,
         @JsonProperty("updated_at")
         String updatedAt
-) {
+) { @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
     public record ChoiceResponse(
             @JsonProperty("choice_id")
             String choiceId,
@@ -69,15 +70,12 @@ public record UpdatedQuestionResponse(
     ) {
 
     }
+    @Builder
     public record DragItemResponse(
-            @JsonProperty("user_id")
-            String userId,
-            @JsonProperty("first_name")
-            String firstName,
-            @JsonProperty("last_name")
-            String lastName,
-            @JsonProperty("email")
-            String email
+            @JsonProperty("drag_item_id")
+            String dragItemId,
+            @JsonProperty("content")
+            String content
     ) {
 
     }

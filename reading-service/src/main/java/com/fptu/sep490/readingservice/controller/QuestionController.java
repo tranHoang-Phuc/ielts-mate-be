@@ -28,7 +28,7 @@ import java.util.List;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/groups/{group-id}/questions")
+@RequestMapping("/groups/{group-id}/questions")
 public class QuestionController {
 
     QuestionService questionService;

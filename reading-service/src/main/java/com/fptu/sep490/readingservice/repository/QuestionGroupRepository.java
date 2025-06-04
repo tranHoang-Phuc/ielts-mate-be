@@ -2,6 +2,7 @@ package com.fptu.sep490.readingservice.repository;
 
 import com.fptu.sep490.readingservice.model.DragItem;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
+import com.fptu.sep490.readingservice.model.ReadingPassage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,6 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
         JpaSpecificationExecutor<QuestionGroup> {
     @Query("SELECT qg FROM QuestionGroup qg JOIN qg.readingPassage rp WHERE rp.passageId = :passageId")
     List<QuestionGroup> findAllByReadingPassageByPassageId(@Param("passageId") UUID passageId);
+
 }
 

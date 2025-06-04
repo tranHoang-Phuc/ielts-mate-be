@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/groups/{group-id}/items")
+@RequestMapping("/groups/{group-id}/items")
 @Tag(name = "Drag Items", description = "API cho Drag & Drop Items dưới QuestionGroup")
 public class DragItemController {
 

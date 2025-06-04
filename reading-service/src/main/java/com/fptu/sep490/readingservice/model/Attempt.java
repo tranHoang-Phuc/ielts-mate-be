@@ -1,7 +1,9 @@
 package com.fptu.sep490.readingservice.model;
 
+import com.fptu.sep490.readingservice.model.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,14 @@ public class Attempt {
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
+
+    @Column(name = "status", length = 50)
+    @Enumerated(EnumType.ORDINAL)
+    private Status status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name ="finished_at")
     private LocalDateTime finishedAt;
