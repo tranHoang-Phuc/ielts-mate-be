@@ -286,6 +286,15 @@ public class PassageServiceImpl implements PassageService {
         log.info("Passage with ID {} has been deleted successfully", passageId);
     }
 
+    @Override
+    public Page<PassageGetResponse> getActivePassages(int page, int size, Integer ieltsType, Integer partNumber, String questionCategory) {
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = PassageSpecifications.byConditions(ieltsType, 1,partNumber, questionCategory);
+        Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
+
+        return pageResult.map(this::toPassageGetResponse);
+    }
+
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;

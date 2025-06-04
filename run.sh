@@ -36,7 +36,6 @@ echo "✅ Build parent & all modules thành công."
 echo "============================================"
 echo
 
-# 2. Sau khi build thành công, loop qua từng module để chạy jar
 for module in "${modules[@]}"; do
   echo "============================================"
   echo "🚀 Entering module: $module"
@@ -48,7 +47,6 @@ for module in "${modules[@]}"; do
 
   cd "$module" || { echo "❌ Cannot cd into $module"; exit 1; }
 
-  # Vì đã build ở bước trước, jar sẽ nằm trong target/
   jar_file=$(find target -maxdepth 1 -type f -name "*.jar" | head -n 1)
   if [ -z "$jar_file" ]; then
     echo "⚠️ No *.jar file found in ${module}/target."

@@ -25,6 +25,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,19 +44,61 @@ public class ReadingPassageController {
     PassageService passageService;
     GroupQuestionService groupQuestionService;
 
-
     @GetMapping
+    @PreAuthorize("permitAll()")
     @Operation(
-            summary = "Get list of passages by condition",
+            summary = "Get list of active reading passages",
+            description = "This endpoint retrieves a list of active reading passages based on the specified conditions. " +
+                    "It supports pagination and filtering by IELTS type, part number, and question category."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of active passages retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getActiveReadingPassages(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "ieltsType", required = false) Integer ieltsType,
+            @RequestParam(value = "partNumber", required = false) Integer partNumber,
+            @RequestParam(value = "questionCategory", required = false) String questionCategory
+    ) {
+        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page, size, ieltsType, partNumber, questionCategory);
+        Pagination pagination = Pagination.builder()
+                .currentPage(pageablePassages.getNumber() + 1)
+                .totalPages(pageablePassages.getTotalPages())
+                .pageSize(pageablePassages.getSize())
+                .totalItems((int) pageablePassages.getTotalElements())
+                .hasNextPage(pageablePassages.hasNext())
+                .hasPreviousPage(pageablePassages.hasPrevious())
+                .build();
+        BaseResponse<List<PassageGetResponse>> body = BaseResponse.<List<PassageGetResponse>>builder()
+                .data(pageablePassages.getContent())
+                .pagination(pagination)
+                .message(null)
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
+
+
+    @GetMapping("/teacher")
+    @Operation(
+            summary = "Get list of passages by condition for teacher",
             description = "This endpoint retrieves a list of reading passages based on the specified conditions. " +
                     "It supports pagination and filtering by IELTS type, status, part number, and question category."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of passages retrieved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
     })
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("hasRole('TEACHER')")
     public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getListPassageByCondition(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,

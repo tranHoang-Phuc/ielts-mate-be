@@ -21,11 +21,11 @@ public class Attempt {
     @Column(name = "attempt_id", updatable = false, nullable = false)
     private UUID attemptId;
 
-    @Column(name = "duration")
-    private long duration;
+    @Column(name = "duration" )
+    private Long duration;
 
     @Column(name="total_points")
-    private int totalPoints;
+    private Integer totalPoints;
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
