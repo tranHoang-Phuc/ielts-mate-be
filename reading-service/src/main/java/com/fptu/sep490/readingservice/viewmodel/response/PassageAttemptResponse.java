@@ -69,12 +69,19 @@ public record PassageAttemptResponse(
                     int questionType,
                     @JsonProperty("question_categories")
                     int numberOfCorrectAnswers,
+                    @JsonProperty("instruction_for_choice")
                     String instructionForChoice,
+                    @JsonProperty("choices")
                     List<UpdatedQuestionResponse.ChoiceResponse> choices,
+                    @JsonProperty("blank_index")
                     Integer blankIndex,
+                    @JsonProperty("correct_answer")
                     String correctAnswer,
+                    @JsonProperty("instruction_for_matching")
                     String instructionForMatching,
+                    @JsonProperty("correct_answer_for_matching")
                     String correctAnswerForMatching,
+                    @JsonProperty("zone_index")
                     Integer zoneIndex
             ) {
 
