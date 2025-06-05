@@ -65,7 +65,7 @@ public class ReadingPassageController {
             @RequestParam(value = "partNumber", required = false) Integer partNumber,
             @RequestParam(value = "questionCategory", required = false) String questionCategory
     ) {
-        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page, size, ieltsType, partNumber, questionCategory);
+        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsType, partNumber, questionCategory);
         Pagination pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())
@@ -107,7 +107,7 @@ public class ReadingPassageController {
             @RequestParam(value = "partNumber", required = false) Integer partNumber,
             @RequestParam(value = "questionCategory", required = false) String questionCategory
     ) throws JsonProcessingException {
-        var pageablePassages = passageService.getPassages(page, size, ieltsType, status, partNumber, questionCategory);
+        var pageablePassages = passageService.getPassages(page -1, size, ieltsType, status, partNumber, questionCategory);
         var pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())
