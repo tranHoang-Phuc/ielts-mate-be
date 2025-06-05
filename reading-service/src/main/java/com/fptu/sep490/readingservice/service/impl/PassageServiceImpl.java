@@ -362,8 +362,23 @@ public class PassageServiceImpl implements PassageService {
 
     private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
+        UserProfileResponse cachedProfile = getFromCache(userId);
+        if (cachedProfile != null) {
+            return cachedProfile;
+        }
+        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
+        if (profileResponse == null) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
+        return profileResponse;
+    }
+    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
+        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
+        return cachedProfile;
     }
 
     private String getCachedClientToken() throws JsonProcessingException {
