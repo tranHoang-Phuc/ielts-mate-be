@@ -123,6 +123,7 @@ public class QuestionServiceImpl implements QuestionService {
                             .content(choice.content())
                             .choiceOrder(choice.choiceOrder())
                             .isCorrect(choice.isCorrect())
+                            .question(savedQuestion)
                             .build();
                     choices.add(savedChoice);
 

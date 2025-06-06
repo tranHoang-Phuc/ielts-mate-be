@@ -3,6 +3,8 @@ package com.fptu.sep490.readingservice.viewmodel.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
+import java.util.List;
+
 @Builder
 public record PassageDetailResponse(
         @JsonProperty("passage_id")
@@ -28,6 +30,9 @@ public record PassageDetailResponse(
         @JsonProperty("created_at")
         String createdAt,
         @JsonProperty("updated_at")
-        String updatedAt
+        String updatedAt,
+
+        @JsonProperty("question_groups")
+        List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse> questionGroups
 ) {
 }
