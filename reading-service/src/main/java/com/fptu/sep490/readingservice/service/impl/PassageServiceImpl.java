@@ -116,13 +116,17 @@ public class PassageServiceImpl implements PassageService {
     public Page<PassageGetResponse> getPassages(
             int page,
             int size,
-            Integer ieltsType,
-            Integer status,
-            Integer partNumber,
-            String questionCategory
+            List<Integer> ieltsType,
+            List<Integer> status,
+            List<Integer> partNumber,
+            String questionCategory,
+            String sortBy,
+            String sortDirection,
+            String title,
+            String createdBy
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        var spec = PassageSpecifications.byConditions(ieltsType, status, partNumber, questionCategory);
+        var spec = PassageSpecifications.byConditions(ieltsType, status, partNumber, questionCategory, sortBy, sortDirection, title, createdBy);
         Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
 
         return pageResult.map(this::toPassageGetResponse);
@@ -332,9 +336,24 @@ public class PassageServiceImpl implements PassageService {
     @Override
     public Page<PassageGetResponse> getActivePassages(int page, int size, Integer ieltsType, Integer partNumber, String questionCategory) {
         Pageable pageable = PageRequest.of(page, size);
-        var spec = PassageSpecifications.byConditions(ieltsType, 1,partNumber, questionCategory);
-        Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
 
+        // Convert single integers to lists and provide missing parameters
+        List<Integer> ieltsTypeList = ieltsType != null ? List.of(ieltsType) : null;
+        List<Integer> statusList = List.of(1); // Active status
+        List<Integer> partNumberList = partNumber != null ? List.of(partNumber) : null;
+
+        var spec = PassageSpecifications.byConditions(
+                ieltsTypeList,
+                statusList,
+                partNumberList,
+                questionCategory,
+                null,  // sortBy - will use default "updatedAt"
+                null,  // sortDirection - will use default "desc"
+                null,  // title
+                null   // createdBy
+        );
+
+        Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
         return pageResult.map(this::toPassageGetResponse);
     }
 
