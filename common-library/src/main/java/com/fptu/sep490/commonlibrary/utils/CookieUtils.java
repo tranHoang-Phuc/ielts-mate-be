@@ -29,6 +29,25 @@ public class CookieUtils {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
+    public static void revokeTokenCookies(HttpServletResponse response) {
+        ResponseCookie accessCookie = ResponseCookie.from("Authorization", null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+    }
     public static void clearCookie(HttpServletResponse response) {
         Cookie accessToken = new Cookie("Authorization", null);
         accessToken.setMaxAge(0);

@@ -119,12 +119,8 @@ public class AuthController {
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = extractAccessToken(request);
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-        if (refreshToken == null || refreshToken.isBlank()) {
-            throw new UnauthorizedException(Constants.ErrorCodeMessage.UNAUTHORIZED,
-                    Constants.ErrorCode.UNAUTHORIZED);
-        }
         authService.logout(accessToken, refreshToken);
-        CookieUtils.clearCookie(response);
+        CookieUtils.revokeTokenCookies(response);
         return ResponseEntity.ok(BaseResponse.<Void>builder()
                 .data(null)
                 .message("Logout successful")
