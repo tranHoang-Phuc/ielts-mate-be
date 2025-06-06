@@ -31,7 +31,7 @@ public interface AuthService {
 
     String createGoogleUrl();
 
-    UserCreationProfile getUserProfile(String accessToken) throws JsonProcessingException;
+    UserProfileMappingRoles getUserProfile(String accessToken) throws JsonProcessingException;
     void checkResetPasswordToken(String email, String otp);
 
     void changePassword(String accessToken, @Valid PasswordChange changePasswordRequest) throws JsonProcessingException;

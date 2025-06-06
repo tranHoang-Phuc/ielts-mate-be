@@ -38,6 +38,10 @@ public class QuestionGroup {
     @Column(name = "instruction", length = 1000)
     private String instruction;
 
+    @Lob
+    @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
+    private String sentenceWithBlanks;
+
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
