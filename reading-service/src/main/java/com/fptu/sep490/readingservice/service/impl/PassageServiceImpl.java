@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
@@ -36,6 +37,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -260,6 +262,9 @@ public class PassageServiceImpl implements PassageService {
                 .firstName(updatedByProfile.firstName())
                 .email(updatedByProfile.email())
                 .build();
+
+        List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
+
         return PassageDetailResponse.builder()
                 .passageId(readingPassage.getPassageId().toString())
                 .title(readingPassage.getTitle())
@@ -273,6 +278,43 @@ public class PassageServiceImpl implements PassageService {
                 .updatedBy(updatedBy)
                 .createdAt(readingPassage.getCreatedAt().toString())
                 .updatedAt(readingPassage.getUpdatedAt().toString())
+                .questionGroups(questionGroups.stream().map(
+                        g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
+                                .groupId(g.getGroupId().toString())
+                                .sectionLabel(g.getSectionLabel())
+                                .sectionOrder(g.getSectionOrder())
+                                .instruction(g.getInstruction())
+                                .dragItems(g.getDragItems().stream()
+                                        .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
+                                                .dragItemId(d.getDragItemId().toString())
+                                                .content(d.getContent())
+                                                .build())
+                                        .toList())
+                                .questions(g.getQuestions().stream().map(
+                                        q -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                                .questionId(q.getQuestionId().toString())
+                                                .questionOrder(q.getQuestionOrder())
+                                                .questionType(q.getQuestionType().ordinal())
+                                                .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                                .instructionForChoice(q.getInstructionForChoice())
+                                                .choices(q.getChoices().stream().map(
+                                                        c -> UpdatedQuestionResponse.ChoiceResponse.builder()
+                                                                .choiceId(c.getChoiceId().toString())
+                                                                .label(c.getLabel())
+                                                                .choiceOrder(c.getChoiceOrder())
+                                                                .content(c.getContent())
+                                                                .build()
+                                                ).toList())
+                                                .blankIndex(q.getBlankIndex())
+                                                .correctAnswer(q.getCorrectAnswer())
+                                                .instructionForMatching(q.getInstructionForMatching())
+                                                .correctAnswerForMatching(q.getCorrectAnswerForMatching())
+                                                .zoneIndex(q.getZoneIndex())
+                                                .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId().toString())
+                                                .build()
+                                ).toList())
+                                .build()
+                ).toList())
                 .build();
     }
 

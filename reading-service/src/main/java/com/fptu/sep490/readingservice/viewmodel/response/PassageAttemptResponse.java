@@ -58,7 +58,7 @@ public record PassageAttemptResponse(
                 @JsonProperty("questions")
                 List<QuestionResponse> questions
         ) {
-            @JsonInclude(JsonInclude.Include.NON_NULL)
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
             @Builder
             public record QuestionResponse(
                     @JsonProperty("question_id")
@@ -82,7 +82,9 @@ public record PassageAttemptResponse(
                     @JsonProperty("correct_answer_for_matching")
                     String correctAnswerForMatching,
                     @JsonProperty("zone_index")
-                    Integer zoneIndex
+                    Integer zoneIndex,
+                    @JsonProperty("drag_item_id")
+                    String dragItemId
             ) {
 
             }
