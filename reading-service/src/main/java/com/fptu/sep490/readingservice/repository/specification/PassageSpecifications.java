@@ -18,24 +18,37 @@ import java.util.List;
 public class PassageSpecifications {
 
     public static Specification<ReadingPassage> byConditions(
-            Integer ieltsType,
-            Integer status,
-            Integer partNumber,
-            String questionCategory
+            List<Integer> ieltsType,
+            List<Integer> status,
+            List<Integer> partNumber,
+            String questionCategory,
+            String sortBy,
+            String sortDirection,
+            String title,
+            String createdBy
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (ieltsType != null) {
-                IeltsType typeEnum = IeltsType.values()[ieltsType];
-                predicates.add(cb.equal(root.get("ieltsType"), typeEnum));
+            
+            if (ieltsType != null && !ieltsType.isEmpty()) {
+                List<IeltsType> typeEnums = ieltsType.stream()
+                    .map(i -> IeltsType.values()[i])
+                    .toList();
+                predicates.add(root.get("ieltsType").in(typeEnums));
             }
-            if (status != null) {
-                Status statusEnum = Status.values()[status];
-                predicates.add(cb.equal(root.get("passageStatus"), statusEnum));
+            
+            if (status != null && !status.isEmpty()) {
+                List<Status> statusEnums = status.stream()
+                    .map(i -> Status.values()[i])
+                    .toList();
+                predicates.add(root.get("passageStatus").in(statusEnums));
             }
-            if (partNumber != null) {
-                PartNumber partEnum = PartNumber.values()[partNumber];
-                predicates.add(cb.equal(root.get("partNumber"), partEnum));
+            
+            if (partNumber != null && !partNumber.isEmpty()) {
+                List<PartNumber> partEnums = partNumber.stream()
+                    .map(i -> PartNumber.values()[i])
+                    .toList();
+                predicates.add(root.get("partNumber").in(partEnums));
             }
             if (questionCategory != null && !questionCategory.isBlank()) {
                 Join<ReadingPassage, QuestionGroup> joinGroup =
@@ -55,6 +68,28 @@ public class PassageSpecifications {
 
                 query.distinct(true);
             }
+            
+            // Filter by title (case-insensitive partial match)
+            if (title != null && !title.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
+            }
+            
+            // Filter by created by (case-insensitive partial match)
+            if (createdBy != null && !createdBy.isBlank()) {
+                predicates.add(cb.like(cb.lower(root.get("createdBy")), "%" + createdBy.toLowerCase() + "%"));
+            }
+
+            // Default to sort by updated_at in descending order
+            final String finalSortField = sortBy != null ? sortBy : "updatedAt";
+            final String finalSortDirection = sortDirection != null ? sortDirection : "desc";
+
+            // Apply sorting
+            if ("asc".equalsIgnoreCase(finalSortDirection)) {
+                query.orderBy(cb.asc(root.get(finalSortField)));
+            } else {
+                query.orderBy(cb.desc(root.get(finalSortField)));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

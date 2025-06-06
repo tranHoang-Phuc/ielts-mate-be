@@ -31,8 +31,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/passages")
@@ -61,11 +64,16 @@ public class ReadingPassageController {
     public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getActiveReadingPassages(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(value = "ieltsType", required = false) Integer ieltsType,
-            @RequestParam(value = "partNumber", required = false) Integer partNumber,
+            @RequestParam(value = "ieltsType", required = false) String ieltsType,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "partNumber", required = false) String partNumber,
             @RequestParam(value = "questionCategory", required = false) String questionCategory
     ) {
-        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsType, partNumber, questionCategory);
+        // Parse comma-separated strings to get first value for active passages (public endpoint)
+        Integer ieltsTypeValue = parseFirstInteger(ieltsType);
+        Integer partNumberValue = parseFirstInteger(partNumber);
+        
+        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsTypeValue, partNumberValue, questionCategory);
         Pagination pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())
@@ -89,7 +97,8 @@ public class ReadingPassageController {
     @Operation(
             summary = "Get list of passages by condition for teacher",
             description = "This endpoint retrieves a list of reading passages based on the specified conditions. " +
-                    "It supports pagination and filtering by IELTS type, status, part number, and question category."
+                    "It supports pagination and filtering by IELTS type, status, part number, and question category. " +
+                    "Results can be sorted by any field (default: updatedAt) in ascending or descending order (default: desc)."
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of passages retrieved successfully"),
@@ -102,12 +111,21 @@ public class ReadingPassageController {
     public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getListPassageByCondition(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(value = "ieltsType", required = false) Integer ieltsType,
-            @RequestParam(value = "status", required = false) Integer status,
-            @RequestParam(value = "partNumber", required = false) Integer partNumber,
-            @RequestParam(value = "questionCategory", required = false) String questionCategory
+            @RequestParam(value = "ieltsType", required = false) String ieltsType,
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "partNumber", required = false) String partNumber,
+            @RequestParam(value = "questionCategory", required = false) String questionCategory,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "createdBy", required = false) String createdBy
     ) throws JsonProcessingException {
-        var pageablePassages = passageService.getPassages(page -1, size, ieltsType, status, partNumber, questionCategory);
+        // Parse comma-separated strings to Lists
+        List<Integer> ieltsTypeList = parseCommaSeparatedIntegers(ieltsType);
+        List<Integer> statusList = parseCommaSeparatedIntegers(status);
+        List<Integer> partNumberList = parseCommaSeparatedIntegers(partNumber);
+        
+        var pageablePassages = passageService.getPassages(page -1, size, ieltsTypeList, statusList, partNumberList, questionCategory, sortBy, sortDirection, title, createdBy);
         var pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())
@@ -442,7 +460,31 @@ public class ReadingPassageController {
                 .body(body);
     }
 
+    private List<Integer> parseCommaSeparatedIntegers(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Arrays.stream(input.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
-
+    private Integer parseFirstInteger(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            String firstValue = input.split(",")[0].trim();
+            return firstValue.isEmpty() ? null : Integer.parseInt(firstValue);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 
 }
