@@ -98,7 +98,7 @@ public class ReadingPassageController {
             @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
     })
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<List<PassageGetResponse>>> getListPassageByCondition(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
@@ -128,7 +128,7 @@ public class ReadingPassageController {
 
 
     @PostMapping
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Create a new passage",
             description = "This endpoint allows teachers to create a new reading passage. " +
@@ -169,7 +169,7 @@ public class ReadingPassageController {
 
 
     @PutMapping("/{passage-id}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Update an existing passage",
             description = "This endpoint allows teachers to update an existing reading passage. " +
@@ -253,7 +253,7 @@ public class ReadingPassageController {
                 .body(body);
     }
     @PostMapping("/{passageId}/groups")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Add a group of questions to a passage",
             description = "Allows a TEACHER to add a group of questions to a specific reading passage."
@@ -286,7 +286,7 @@ public class ReadingPassageController {
     }
 
     @GetMapping("/{passageId}/groups")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get all passages for teacher",
             description = "This endpoint retrieves all reading passages available for teachers."
@@ -315,7 +315,7 @@ public class ReadingPassageController {
     }
 
     @PutMapping("/{passageId}/groups/{groupId}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Update a group of questions in a passage",
             description = "Allows a TEACHER to update an existing group of questions in a specific reading passage."
@@ -349,7 +349,7 @@ public class ReadingPassageController {
     }
 
     @DeleteMapping("/{passageId}/groups/{groupId}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Delete a group of questions from a passage",
             description = "Allows a TEACHER to delete a specific group of questions from a reading passage."
@@ -376,7 +376,7 @@ public class ReadingPassageController {
     }
 
     @GetMapping("/{passageId}/groups/{groupId}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get a specific group of questions from a passage",
             description = "Allows a TEACHER to retrieve a specific group of questions from a reading passage."
@@ -406,7 +406,7 @@ public class ReadingPassageController {
     }
 
     @DeleteMapping("/{passage-id}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Delete a passage",
             description = "This endpoint allows teachers to delete a reading passage by its unique identifier (ID). " +

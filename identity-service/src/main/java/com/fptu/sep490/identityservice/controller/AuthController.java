@@ -287,10 +287,10 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<UserCreationProfile>> getProfile(HttpServletRequest request) throws JsonProcessingException {
+    public ResponseEntity<BaseResponse<UserProfileMappingRoles>> getProfile(HttpServletRequest request) throws JsonProcessingException {
         String accessToken = extractAccessToken(request);
-        UserCreationProfile userAccessInfo = authService.getUserProfile(accessToken);
-        return ResponseEntity.ok(BaseResponse.<UserCreationProfile>builder()
+        UserProfileMappingRoles userAccessInfo = authService.getUserProfile(accessToken);
+        return ResponseEntity.ok(BaseResponse.<UserProfileMappingRoles>builder()
                 .data(userAccessInfo)
                 .build());
     }

@@ -34,7 +34,7 @@ public class QuestionController {
     QuestionService questionService;
 
     @PostMapping
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(summary = "Create questions for a group"
     , description = "This endpoint allows teachers to create multiple questions for a specific group. " +
             "The request body should contain a list of question creation requests.")
@@ -58,7 +58,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{question-id}/order")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(summary = "Update the order of a question in a group",
             description = "This endpoint allows teachers to update the order of a specific question within a group. " +
                     "The request body should contain the new order information.")
@@ -84,7 +84,7 @@ public class QuestionController {
     }
 
     @PutMapping("/{question-id}/info")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(summary = "Update information of a question in a group",
             description = "This endpoint allows teachers to update the information of a specific question within a group. " +
                     "The request body should contain the new information.")
@@ -110,7 +110,7 @@ public class QuestionController {
     }
 
     @DeleteMapping("/{question-id}")
-    @PreAuthorize("hasRole('TEACHER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(summary = "Delete a question from a group",
             description = "This endpoint allows teachers to delete a specific question from a group.")
     @ApiResponses(value = {

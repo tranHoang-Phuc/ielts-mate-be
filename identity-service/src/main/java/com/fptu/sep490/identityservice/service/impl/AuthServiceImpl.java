@@ -467,7 +467,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public UserCreationProfile getUserProfile(String accessToken) throws JsonProcessingException {
+    public UserProfileMappingRoles getUserProfile(String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
@@ -475,12 +475,19 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
         }
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
-        return UserCreationProfile.builder()
+        var defaultRoles = keyCloakUserClient.getDefaultRole(realm, "Bearer " + clientToken);
+        var userRoles = keyCloakUserClient.getUserRoleMappings(realm, "Bearer " + clientToken, userAccessInfo.id());
+        defaultRoles.addAll(userRoles.realmMappings());
+
+       return UserProfileMappingRoles.builder()
                 .id(userAccessInfo.id())
                 .email(userAccessInfo.email())
                 .firstName(userAccessInfo.firstName())
                 .lastName(userAccessInfo.lastName())
+                .roles(defaultRoles.stream().map(RoleMappingResponse::name).toList())
                 .build();
+
+
     }
 
     public boolean isValidCheckedToken(String token, String expectedAction, String expectedPurpose) {
