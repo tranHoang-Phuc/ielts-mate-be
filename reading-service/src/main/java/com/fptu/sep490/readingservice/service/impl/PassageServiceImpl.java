@@ -302,6 +302,7 @@ public class PassageServiceImpl implements PassageService {
                                                                 .choiceId(c.getChoiceId().toString())
                                                                 .label(c.getLabel())
                                                                 .choiceOrder(c.getChoiceOrder())
+                                                                .isCorrect(c.isCorrect())
                                                                 .content(c.getContent())
                                                                 .build()
                                                 ).toList())
