@@ -13,11 +13,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class AnswerAttemptId implements Serializable {
 
     @Column(name = "attempt_id", updatable = false, nullable = false)
     private UUID attemptId;
 
-    @Column(name = "reading_passage_id", updatable = false, nullable = false)
-    private UUID readingPassageId;
+    @Column(name = "question_id", updatable = false, nullable = false)
+    private UUID questionId;
 }

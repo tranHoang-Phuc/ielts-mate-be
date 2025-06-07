@@ -7,12 +7,14 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.*;
+import com.fptu.sep490.readingservice.model.embedded.AnswerAttemptId;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.service.AttemptService;
+import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
@@ -28,8 +30,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -46,6 +50,7 @@ public class AttemptServiceImpl implements AttemptService {
     QuestionRepository questionRepository;
     DragItemRepository dragItemRepository;
     ChoiceRepository choiceRepository;
+    AnswerAttemptRepository answerAttemptRepository;
 
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
@@ -209,8 +214,89 @@ public class AttemptServiceImpl implements AttemptService {
                 .build();
     }
 
+    @Override
+    public void saveAttempt(String attemptId, HttpServletRequest request, List<SavedAnswersRequest> answers) {
+        Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.ATTEMPT_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        String userId = getUserIdFromToken(request);
+        if(!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(Constants.ErrorCodeMessage.FORBIDDEN, Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value());
+        }
+        if(attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT, Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        if (CollectionUtils.isEmpty(answers) || answers.stream().anyMatch(Objects::isNull)) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY, Constants.ErrorCode.QUESTION_LIST_EMPTY,
+                    HttpStatus.BAD_REQUEST.value());
+        }
 
+        for(SavedAnswersRequest answer : answers) {
+            Question question = questionRepository.findById(answer.questionId())
+                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+            AnswerAttempt existedAnswerAttempt = answerAttemptRepository
+                    .findAnswerAttemptById(AnswerAttemptId.builder()
+                            .attemptId(UUID.fromString(attemptId))
+                            .questionId(question.getQuestionId())
+                            .build());
+            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
 
+                if (existedAnswerAttempt != null) {
+                    existedAnswerAttempt.setChoices(answer.choices());
+                    answerAttemptRepository.save(existedAnswerAttempt);
+                } else {
+                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .question(question)
+                            .choices(answer.choices())
+                            .build();
+                    answerAttemptRepository.save(answerAttempt);
+                }
+            } else if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                if(existedAnswerAttempt != null) {
+                    existedAnswerAttempt.setDataFilled(answer.dataFilled());
+                    answerAttemptRepository.save(existedAnswerAttempt);
+                } else {
+                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .question(question)
+                            .dataFilled(answer.dataFilled())
+                            .build();
+                    answerAttemptRepository.save(answerAttempt);
+                }
+            } else if (question.getQuestionType() == QuestionType.MATCHING) {
+                if (existedAnswerAttempt != null) {
+                    existedAnswerAttempt.setDataMatched(answer.dataMatched());
+                    answerAttemptRepository.save(existedAnswerAttempt);
+                } else {
+                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .question(question)
+                            .dataMatched(answer.dataMatched())
+                            .build();
+                    answerAttemptRepository.save(answerAttempt);
+                }
+            } else if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                if (existedAnswerAttempt != null) {
+                    existedAnswerAttempt.setDragItemId(answer.dragItemId());
+                    answerAttemptRepository.save(existedAnswerAttempt);
+                } else {
+                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .question(question)
+                            .dragItemId(answer.dragItemId())
+                            .build();
+                    answerAttemptRepository.save(answerAttempt);
+                }
+            } else {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
+                        Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
+            }
+        }
+    }
 
 
     private String getUserIdFromToken(HttpServletRequest request) {

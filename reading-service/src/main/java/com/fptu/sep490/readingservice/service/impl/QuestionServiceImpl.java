@@ -74,15 +74,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionCreationResponse> createQuestions(
-            List<QuestionCreationRequest> questionCreationResponses, HttpServletRequest request) throws JsonProcessingException {
+            List<QuestionCreationRequest> questionCreationRequest, HttpServletRequest request) throws JsonProcessingException {
         List<QuestionCreationResponse> questionCreationResponseList = new ArrayList<>();
-        if (questionCreationResponses == null || questionCreationResponses.isEmpty()) {
+        if (questionCreationRequest == null || questionCreationRequest.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
                     Constants.ErrorCode.QUESTION_LIST_EMPTY, HttpStatus.BAD_REQUEST.value());
         }
 
         int correctAnswersCount = 0;
-        for(QuestionCreationRequest question : questionCreationResponses){
+        for(QuestionCreationRequest question : questionCreationRequest){
             if (question.questionType() < 0 || question.questionType() >= QuestionType.values().length) {
                 throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
                         Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
