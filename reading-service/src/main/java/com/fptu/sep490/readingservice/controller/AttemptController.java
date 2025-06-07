@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.AttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.UserDataAttempt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -47,11 +49,24 @@ public class AttemptController {
     public ResponseEntity<BaseResponse<Void>> saveAttempt(
             @PathVariable("attempt-id") String attemptId,
             HttpServletRequest request,
-            @RequestBody List<SavedAnswersRequest> answers
+            @RequestBody SavedAnswersRequestList answers
     ) {
         attemptService.saveAttempt(attemptId, request, answers);
         return ResponseEntity.ok(BaseResponse.<Void>builder().data(null)
                 .message("Save attempt successfully")
+                .build());
+    }
+
+    @GetMapping("/load/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserDataAttempt>> loadAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            HttpServletRequest request
+    ) {
+        UserDataAttempt data = attemptService.loadAttempt(attemptId, request);
+        return ResponseEntity.ok(BaseResponse.<UserDataAttempt>builder()
+                .data(data)
+                .message(null)
                 .build());
     }
 }

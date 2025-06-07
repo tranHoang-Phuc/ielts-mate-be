@@ -15,10 +15,8 @@ import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.service.AttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
+import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -215,87 +213,123 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
-    public void saveAttempt(String attemptId, HttpServletRequest request, List<SavedAnswersRequest> answers) {
+    @Transactional
+    public void saveAttempt(String attemptId,
+                            HttpServletRequest request,
+                            SavedAnswersRequestList answers) {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
-                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
-                        Constants.ErrorCode.ATTEMPT_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
         String userId = getUserIdFromToken(request);
-        if(!attempt.getCreatedBy().equals(userId)) {
-            throw new AppException(Constants.ErrorCodeMessage.FORBIDDEN, Constants.ErrorCode.FORBIDDEN,
-                    HttpStatus.FORBIDDEN.value());
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
         }
-        if(attempt.getStatus() != Status.DRAFT) {
-            throw new AppException(Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT, Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
-                    HttpStatus.BAD_REQUEST.value());
-        }
-        if (CollectionUtils.isEmpty(answers) || answers.stream().anyMatch(Objects::isNull)) {
-            throw new AppException(Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY, Constants.ErrorCode.QUESTION_LIST_EMPTY,
-                    HttpStatus.BAD_REQUEST.value());
+        if (attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
 
-        for(SavedAnswersRequest answer : answers) {
-            Question question = questionRepository.findById(answer.questionId())
-                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                            Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-            AnswerAttempt existedAnswerAttempt = answerAttemptRepository
-                    .findAnswerAttemptById(AnswerAttemptId.builder()
-                            .attemptId(UUID.fromString(attemptId))
-                            .questionId(question.getQuestionId())
-                            .build());
-            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+         attempt.setDuration(attempt.getDuration());
 
-                if (existedAnswerAttempt != null) {
-                    existedAnswerAttempt.setChoices(answer.choices());
-                    answerAttemptRepository.save(existedAnswerAttempt);
-                } else {
-                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
+        for (SavedAnswersRequest ans : answers.answers()) {
+            Question question = questionRepository.findById(ans.questionId())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+
+            AnswerAttemptId key = AnswerAttemptId.builder()
+                    .attemptId(UUID.fromString(attemptId))
+                    .questionId(question.getQuestionId())
+                    .build();
+
+            AnswerAttempt attemptAnswer = Optional.ofNullable(answerAttemptRepository.findAnswerAttemptById(key))
+                    .orElseGet(() -> AnswerAttempt.builder()
                             .attempt(attempt)
                             .question(question)
-                            .choices(answer.choices())
-                            .build();
-                    answerAttemptRepository.save(answerAttempt);
-                }
-            } else if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
-                if(existedAnswerAttempt != null) {
-                    existedAnswerAttempt.setDataFilled(answer.dataFilled());
-                    answerAttemptRepository.save(existedAnswerAttempt);
-                } else {
-                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
-                            .attempt(attempt)
-                            .question(question)
-                            .dataFilled(answer.dataFilled())
-                            .build();
-                    answerAttemptRepository.save(answerAttempt);
-                }
-            } else if (question.getQuestionType() == QuestionType.MATCHING) {
-                if (existedAnswerAttempt != null) {
-                    existedAnswerAttempt.setDataMatched(answer.dataMatched());
-                    answerAttemptRepository.save(existedAnswerAttempt);
-                } else {
-                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
-                            .attempt(attempt)
-                            .question(question)
-                            .dataMatched(answer.dataMatched())
-                            .build();
-                    answerAttemptRepository.save(answerAttempt);
-                }
-            } else if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
-                if (existedAnswerAttempt != null) {
-                    existedAnswerAttempt.setDragItemId(answer.dragItemId());
-                    answerAttemptRepository.save(existedAnswerAttempt);
-                } else {
-                    AnswerAttempt answerAttempt = AnswerAttempt.builder()
-                            .attempt(attempt)
-                            .question(question)
-                            .dragItemId(answer.dragItemId())
-                            .build();
-                    answerAttemptRepository.save(answerAttempt);
-                }
-            } else {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
-                        Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
+                            .build()
+                    );
+
+            switch (question.getQuestionType()) {
+                case MULTIPLE_CHOICE:
+                    attemptAnswer.setChoices(ans.choices());
+                    break;
+                case FILL_IN_THE_BLANKS:
+                    attemptAnswer.setDataFilled(ans.dataFilled());
+                    break;
+                case MATCHING:
+                    attemptAnswer.setDataMatched(ans.dataMatched());
+                    break;
+                case DRAG_AND_DROP:
+                    attemptAnswer.setDragItemId(ans.dragItemId());
+                    break;
+                default:
+                    throw new AppException(
+                            Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
+                            Constants.ErrorCode.INVALID_QUESTION_TYPE,
+                            HttpStatus.BAD_REQUEST.value()
+                    );
             }
+
+            answerAttemptRepository.save(attemptAnswer);
         }
+    }
+
+    @Override
+    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) {
+        Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        String userId = getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        if (attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
+
+        List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
+
+        for (AnswerAttempt answerAttempt : answerAttempts) {
+            UserDataAttempt.AnswerChoice answerChoice = UserDataAttempt.AnswerChoice.builder()
+                    .questionId(answerAttempt.getQuestion() != null ? answerAttempt.getQuestion().getQuestionId() : null)
+                    .dragItemId(answerAttempt.getDragItemId() != null ? answerAttempt.getDragItemId() : null)
+                    .filledTextAnswer(answerAttempt.getDataFilled() != null ? answerAttempt.getDataFilled() : null)
+                    .matchedTextAnswer(answerAttempt.getDataMatched() != null ? answerAttempt.getDataMatched() : null)
+                    .choiceIds(answerAttempt.getChoices() != null ? answerAttempt.getChoices() : Collections.emptyList())
+                    .build();
+            answerChoices.add(answerChoice);
+        }
+        return UserDataAttempt.builder()
+                .attemptId(attempt.getAttemptId())
+                .answers(answerChoices)
+                .duration(attempt.getDuration())
+                .build();
     }
 
 
