@@ -3,6 +3,7 @@ package com.fptu.sep490.readingservice.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.AttemptService;
+import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -12,10 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/attempts")
@@ -40,5 +40,18 @@ public class AttemptController {
                         .build(),
                 HttpStatus.CREATED
         );
+    }
+
+    @PutMapping("/save/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> saveAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            HttpServletRequest request,
+            @RequestBody List<SavedAnswersRequest> answers
+    ) {
+        attemptService.saveAttempt(attemptId, request, answers);
+        return ResponseEntity.ok(BaseResponse.<Void>builder().data(null)
+                .message("Save attempt successfully")
+                .build());
     }
 }
