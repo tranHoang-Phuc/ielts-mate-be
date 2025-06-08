@@ -67,6 +67,8 @@ public record PassageAttemptResponse(
                     int questionOrder,
                     @JsonProperty("question_type")
                     int questionType,
+                    @JsonProperty("point")
+                    int point,
                     @JsonProperty("question_categories")
                     int numberOfCorrectAnswers,
                     @JsonProperty("instruction_for_choice")
