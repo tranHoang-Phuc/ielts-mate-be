@@ -60,7 +60,7 @@ public class AuthController {
                     description = "Unauthorized"
             )
     })
-    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody @Valid LoginRequest loginRequest,
+    public ResponseEntity<BaseResponse<KeyCloakTokenResponse>> signIn(@RequestBody LoginRequest loginRequest,
                                                                       HttpServletResponse response)
             throws JsonProcessingException {
         KeyCloakTokenResponse loginResponse = authService.login(loginRequest.email(), loginRequest.password());
@@ -155,7 +155,8 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
             @ApiResponse(responseCode = "409", description = "Username already exists", content = @Content)
     })
-    public ResponseEntity<BaseResponse<UserCreationProfile>> register(@RequestBody @Valid UserCreationRequest userCreationRequest)
+    public ResponseEntity<BaseResponse<UserCreationProfile>> register(@RequestBody
+                                                                          UserCreationRequest userCreationRequest)
             throws Exception {
         UserCreationProfile userProfile = authService.createUser(userCreationRequest);
         return new ResponseEntity<>(BaseResponse.<UserCreationProfile>builder()
@@ -319,7 +320,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<Void>> changePassword(@RequestBody @Valid PasswordChange changePasswordRequest,
+    public ResponseEntity<BaseResponse<Void>> changePassword(@RequestBody  PasswordChange changePasswordRequest,
                                                               HttpServletRequest request) throws JsonProcessingException {
         String accessToken = extractAccessToken(request);
         authService.changePassword(accessToken, changePasswordRequest);
@@ -340,7 +341,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<UserCreationProfile>> updateProfile(@RequestBody @Valid UserUpdateRequest userCreationRequest,
+    public ResponseEntity<BaseResponse<UserCreationProfile>> updateProfile(@RequestBody  UserUpdateRequest userCreationRequest,
                                                                  HttpServletRequest request) throws Exception {
         String accessToken = extractAccessToken(request);
         UserCreationProfile updatedProfile = authService.updateUserProfile(accessToken, userCreationRequest);

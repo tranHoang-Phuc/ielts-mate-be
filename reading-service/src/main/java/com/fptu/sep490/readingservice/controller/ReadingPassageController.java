@@ -65,15 +65,19 @@ public class ReadingPassageController {
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(value = "ieltsType", required = false) String ieltsType,
-            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "partNumber", required = false) String partNumber,
-            @RequestParam(value = "questionCategory", required = false) String questionCategory
+            @RequestParam(value = "questionCategory", required = false) String questionCategory,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "createdBy", required = false) String createdBy
     ) {
         // Parse comma-separated strings to get first value for active passages (public endpoint)
-        Integer ieltsTypeValue = parseFirstInteger(ieltsType);
-        Integer partNumberValue = parseFirstInteger(partNumber);
+        List<Integer> ieltsTypeList = parseCommaSeparatedIntegers(ieltsType);
+        List<Integer> partNumberList = parseCommaSeparatedIntegers(partNumber);
         
-        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsTypeValue, partNumberValue, questionCategory);
+        Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsTypeList,
+                partNumberList, questionCategory, sortBy, sortDirection, title, createdBy);
         Pagination pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())

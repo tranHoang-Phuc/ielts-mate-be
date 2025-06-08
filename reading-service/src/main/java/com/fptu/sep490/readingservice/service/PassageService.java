@@ -57,5 +57,13 @@ public interface PassageService {
 
     void deletePassage(UUID passageId);
 
-    Page<PassageGetResponse> getActivePassages(int page, int size, Integer ieltsType, Integer partNumber, String questionCategory);
+    Page<PassageGetResponse> getActivePassages(int page,
+                                               int size,
+                                               List<Integer> ieltsType,
+                                               List<Integer> partNumber,
+                                               String questionCategory,
+                                               String sortBy,
+                                               String sortDirection,
+                                               String title,
+                                               String createdBy);
 }
