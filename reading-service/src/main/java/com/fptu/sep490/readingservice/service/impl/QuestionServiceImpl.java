@@ -111,6 +111,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .explanation(question.explanation())
                         .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
                         .questionGroup(questionGroup)
+                        .point(question.point())
                         .instructionForChoice(question.instructionForChoice())
                         .build();
                 List<Choice> choices = new ArrayList<>();
