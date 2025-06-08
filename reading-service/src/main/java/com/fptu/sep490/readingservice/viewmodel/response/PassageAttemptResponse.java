@@ -69,7 +69,7 @@ public record PassageAttemptResponse(
                     int questionType,
                     @JsonProperty("point")
                     int point,
-                    @JsonProperty("question_categories")
+                    @JsonProperty("numberOfCorrectAnswers")
                     int numberOfCorrectAnswers,
                     @JsonProperty("instruction_for_choice")
                     String instructionForChoice,
