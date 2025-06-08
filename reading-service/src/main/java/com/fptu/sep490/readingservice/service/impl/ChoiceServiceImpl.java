@@ -164,7 +164,6 @@ public class ChoiceServiceImpl implements ChoiceService {
         }
         question.setUpdatedBy(userId);
         Choice newChoice = Choice.builder()
-                .choiceId(UUID.randomUUID())
                 .content(choice.content())
                 .choiceOrder(choice.choiceOrder())
                 .isCorrect(choice.isCorrect())
