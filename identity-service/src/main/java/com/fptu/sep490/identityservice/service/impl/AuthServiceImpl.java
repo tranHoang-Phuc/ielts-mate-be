@@ -178,16 +178,12 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
             String id = extractUserId(creationResponse);
-            String encryptedPassword = aesSecretKey.encrypt(request.password());
-            redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
-            UserCreationProfile userCreationProfile = UserCreationProfile.builder()
+            return UserCreationProfile.builder()
                     .id(id)
                     .email(request.email())
                     .firstName(request.firstName())
                     .lastName(request.lastName())
                     .build();
-            sendVerifyEmail(request.email());
-            return userCreationProfile;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
