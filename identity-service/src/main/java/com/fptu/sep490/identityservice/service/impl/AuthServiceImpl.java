@@ -178,6 +178,8 @@ public class AuthServiceImpl implements AuthService {
         try {
             var creationResponse = keyCloakUserClient.createUser(realm, "Bearer " + clientToken, userCreationParam);
             String id = extractUserId(creationResponse);
+            String encryptedPassword = aesSecretKey.encrypt(request.password());
+            redisService.saveValue(getPasswordKey(request.email()), encryptedPassword);
             return UserCreationProfile.builder()
                     .id(id)
                     .email(request.email())
