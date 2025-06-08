@@ -301,6 +301,7 @@ public class PassageServiceImpl implements PassageService {
                                                 .questionOrder(q.getQuestionOrder())
                                                 .questionType(q.getQuestionType().ordinal())
                                                 .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                                .explanation(q.getExplanation())
                                                 .point(q.getPoint())
                                                 .instructionForChoice(q.getInstructionForChoice())
                                                 .choices(q.getChoices().stream().map(

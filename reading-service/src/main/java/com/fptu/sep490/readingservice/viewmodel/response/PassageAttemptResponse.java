@@ -39,8 +39,10 @@ public record PassageAttemptResponse(
             String content,
             @JsonProperty("part_number")
             int partNumber,
+
             @JsonProperty("question_groups")
             List<QuestionGroupResponse> questionGroups
+
     ) {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @Builder
@@ -69,6 +71,8 @@ public record PassageAttemptResponse(
                     int questionType,
                     @JsonProperty("point")
                     int point,
+                    @JsonProperty("explanation")
+                    String explanation,
                     @JsonProperty("number_of_correct_answers")
                     int numberOfCorrectAnswers,
                     @JsonProperty("instruction_for_choice")
