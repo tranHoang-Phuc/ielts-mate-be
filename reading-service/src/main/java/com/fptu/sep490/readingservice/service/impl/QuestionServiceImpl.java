@@ -623,9 +623,11 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
                     Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
         }
+        questionGroup.getQuestions().remove(question);
+        question.setQuestionGroup(null);
         questionRepository.delete(question);
-        question.setUpdatedBy(userId);
-        questionRepository.save(question);
+        questionGroup.setUpdatedBy(userId);
+        questionGroupRepository.save(questionGroup);
     }
 
 
