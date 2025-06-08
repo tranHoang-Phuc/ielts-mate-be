@@ -285,6 +285,7 @@ public class PassageServiceImpl implements PassageService {
                 .questionGroups(questionGroups.stream().map(
                         g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
                                 .groupId(g.getGroupId().toString())
+
                                 .sectionLabel(g.getSectionLabel())
                                 .sectionOrder(g.getSectionOrder())
                                 .instruction(g.getInstruction())
@@ -300,6 +301,7 @@ public class PassageServiceImpl implements PassageService {
                                                 .questionOrder(q.getQuestionOrder())
                                                 .questionType(q.getQuestionType().ordinal())
                                                 .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                                .point(q.getPoint())
                                                 .instructionForChoice(q.getInstructionForChoice())
                                                 .choices(q.getChoices().stream().map(
                                                         c -> UpdatedQuestionResponse.ChoiceResponse.builder()

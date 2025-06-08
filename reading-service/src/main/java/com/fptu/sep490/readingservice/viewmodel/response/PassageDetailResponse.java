@@ -1,11 +1,13 @@
 package com.fptu.sep490.readingservice.viewmodel.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.util.List;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public record PassageDetailResponse(
         @JsonProperty("passage_id")
         String passageId,
