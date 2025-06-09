@@ -11,12 +11,11 @@ import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.repository.QuestionGroupRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
 import com.fptu.sep490.readingservice.helper.Helper;
-import com.fptu.sep490.readingservice.viewmodel.request.ChoiceCreationRequest;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.service.GroupQuestionService;
+import com.fptu.sep490.readingservice.viewmodel.request.ChoiceCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +52,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setSectionLabel(request.sectionLabel());
         group.setInstruction(request.instruction());
         group.setReadingPassage(readingPassage);
+        group.setCreatedBy(userId);
 
         // Handle group-level drag items
         if (request.dragItems() != null && !request.dragItems().isEmpty()) {
@@ -115,10 +115,10 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 }
 
                 // Handle question-level drag items
-                if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
+                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
 
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(questionDto.dragItem());
+                        dragItem.setContent(questionDto.dragItemId());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
 
@@ -150,8 +150,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
     }
 
     @Override
-    public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(
-            String passageId, HttpServletRequest httpsRequest) throws Exception {
+    public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
         String userId = getUserIdFromToken(httpsRequest);
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
@@ -162,33 +161,48 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                     Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
         }
         return questionGroups.stream()
-                .map(group -> Helper.mapToGroupQuestionResponse(group, new AddGroupQuestionRequest(
-                        group.getSectionOrder(),
-                        group.getSectionLabel(),
-                        group.getInstruction(),
-                        group.getQuestions().stream()
-                                .map(q -> new QuestionCreationRequest(
-                                        q.getQuestionOrder(),
-                                        q.getPoint(),
-                                        q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
-                                        q.getCategories() != null ? q.getCategories().stream()
-                                                .map(Enum::name)
-                                                .collect(Collectors.toSet()) : null,
-                                        q.getExplanation(),
-                                        q.getNumberOfCorrectAnswers(),
-                                        q.getInstructionForChoice(),
-                                        q.getBlankIndex(),
-                                        q.getCorrectAnswer(),
-                                        q.getInstructionForMatching(),
-                                        q.getCorrectAnswerForMatching(),
-                                        q.getZoneIndex(),
-                                        q.getChoices().stream()
-                                                .map(c -> new ChoiceCreationRequest(c.getLabel(), c.getContent(),c.getChoiceOrder(), c.isCorrect()))
-                                                .toList(),
-                                        q.getDragItem() != null ? q.getDragItem().getContent() : null
-                                )).toList(),
-                        group.getDragItems().stream().map(DragItem::getContent).toList()
-                )))
+                .map(group -> Helper.mapToGroupQuestionResponse(
+                        group,
+                        new AddGroupQuestionRequest(
+                                group.getSectionOrder(),
+                                group.getSectionLabel(),
+                                group.getInstruction(),
+                                group.getQuestions().stream()
+                                        .map(q -> new QuestionCreationRequest(
+                                                q.getQuestionOrder(),
+                                                q.getPoint(),
+                                                q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
+                                                group.getGroupId().toString(),
+                                                q.getCategories() != null
+                                                        ? q.getCategories().stream()
+                                                        .map(Enum::name)
+                                                        .collect(Collectors.toList())
+                                                        : null,
+                                                q.getExplanation(),
+                                                q.getNumberOfCorrectAnswers(),
+                                                q.getInstructionForChoice(),
+                                                q.getChoices().stream()
+                                                        .map(c -> new QuestionCreationRequest.ChoiceRequest(
+                                                                c.getLabel(),
+                                                                c.getContent(),
+                                                                c.getChoiceOrder(),
+                                                                c.isCorrect()))
+                                                        .toList(),
+                                                q.getBlankIndex(),
+                                                q.getCorrectAnswer(),
+                                                q.getInstructionForMatching(),
+                                                q.getCorrectAnswerForMatching(),
+                                                q.getZoneIndex(),
+                                                q.getDragItem() != null
+                                                        ? q.getDragItem().getContent()
+                                                        : null
+                                        ))
+                                        .toList(),
+                                group.getDragItems().stream()
+                                        .map(DragItem::getContent)
+                                        .toList()
+                        )
+                ))
                 .toList();
     }
 
@@ -207,6 +221,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setSectionLabel(request.sectionLabel());
         group.setInstruction(request.instruction());
         group.setReadingPassage(readingPassage);
+        group.setUpdatedBy(userId);
 
         // Handle group-level drag items
         if (request.dragItems() != null && !request.dragItems().isEmpty()) {
@@ -271,9 +286,9 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 } else {
                     question.setChoices(null);
                 }
-                if (questionDto.dragItem() != null && !questionDto.dragItem().isEmpty()) {
+                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
                         DragItem dragItem = new DragItem();
-                        dragItem.setContent(questionDto.dragItem());
+                        dragItem.setContent(questionDto.dragItemId());
                         dragItem.setQuestion(question);
                         dragItem.setQuestionGroup(group);
 

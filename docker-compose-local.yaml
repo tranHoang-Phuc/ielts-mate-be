@@ -22,10 +22,11 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: admin
-      KC_DB_PASSWORD: admin
+      KC_DB_URL: jdbc:postgresql://ep-summer-scene-a1di24n8-pooler.ap-southeast-1.aws.neon.tech:5432/keycloak?sslmode=require
+      KC_DB_USERNAME: neondb_owner
+      KC_DB_PASSWORD: npg_1qJYk3avVWKE
       KC_HTTP_PORT: 80
+      KC_HTTP_ENABLED: "true"
     volumes:
       - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
       - ./identity/themes/sep/theme:/opt/keycloak/themes
@@ -36,25 +37,6 @@ services:
 
 
 
-  postgres:
-    container_name: postgres
-    build:
-      context: ./docker/postgres
-      dockerfile: Dockerfile
-    hostname: postgres
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - ./docker/postgres/postgresql.conf.sample:/usr/share/postgresql/postgresql.conf.sample
-      - ./postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
-      - postgres:/var/lib/postgresql/data
-    command: postgres -c 'config_file=/usr/share/postgresql/postgresql.conf.sample' -c 'max_connections=500'
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_HOST_AUTH_METHOD: trust
-    networks:
-      - sep-network
 
   kafka:
     image: 'bitnami/kafka:3.7.0'

@@ -55,6 +55,7 @@ public record QuestionCreationResponse(
     @JsonProperty("updated_at")
     String updatedAt
 ) {
+    @Builder
     public record ChoiceResponse(
         @JsonProperty("choice_id")
         String choiceId,

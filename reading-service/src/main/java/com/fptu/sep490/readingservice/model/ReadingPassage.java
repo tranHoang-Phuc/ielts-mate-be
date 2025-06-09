@@ -84,4 +84,30 @@ public class ReadingPassage {
             fetch = FetchType.LAZY
     )
     private List<Attempt> attempts = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part1",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ReadingExam> readingExamsPart1 = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part2",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ReadingExam> readingExamsPart2 = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part3",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ReadingExam> readingExamsPart3 = new ArrayList<>();
+
+
 }
