@@ -46,24 +46,33 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         if(!readingExamCreationRequest.readingPassageIdPart1().isEmpty()){
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
             if(readingPassagePart1.isEmpty()){
-                throw new IllegalArgumentException("Reading passage part 1 does not exist");
-            }
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );            }
             readingExam.setPart1(readingPassagePart1.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart2().isEmpty()){
             Optional<ReadingPassage> readingPassagePart2 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart2()));
 
             if(readingPassagePart2.isEmpty()){
-                throw new IllegalArgumentException("Reading passage part 2 does not exist");
-            }
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );            }
             readingExam.setPart2(readingPassagePart2.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart3().isEmpty()){
             Optional<ReadingPassage> readingPassagePart3 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart3()));
 
             if(readingPassagePart3.isEmpty()){
-                throw new IllegalArgumentException("Reading passage part 3 does not exist");
-            }
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );            }
             readingExam.setPart3(readingPassagePart3.get());
         }
         readingExam.setCreatedBy(userId);
@@ -112,7 +121,8 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                     Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
                     Constants.ErrorCode.READING_EXAM_NOT_FOUND,
                     HttpStatus.NOT_FOUND.value()
-            );        }
+            );
+        }
         ReadingExam readingExam = existingReadingExam.get();
         readingExam.setUpdatedBy(userId);
         readingExam.setExamName(readingExamCreationRequest.readingExamName());
