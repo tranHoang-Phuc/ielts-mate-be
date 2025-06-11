@@ -1,9 +1,15 @@
 package com.fptu.sep490.readingservice.service;
 
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamCreationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface ReadingExamService {
-    public ReadingExamCreationResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception;
+    public ReadingExamResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception;
+
+    public ReadingExamResponse updateReadingExam(String readingExamId, ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest httpServletRequest) throws Exception;
+
+    public ReadingExamResponse getReadingExam(String readingExamId, HttpServletRequest httpServletRequest) throws Exception;
+
+
 }

@@ -2,7 +2,7 @@ package com.fptu.sep490.readingservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record ReadingExamCreationResponse(
+public record ReadingExamResponse(
 
         @JsonProperty("reading_exam_id")
         String readingExamId,
