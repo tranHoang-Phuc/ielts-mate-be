@@ -110,4 +110,30 @@ public class ReadingPassage {
     private List<ReadingExam> readingExamsPart3 = new ArrayList<>();
 
 
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(
+            name = "display_version_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_reading_passage_display")
+    )
+    private ReadingPassage displayVersion;
+
+    @OneToOne(mappedBy = "displayVersion", fetch = FetchType.LAZY)
+    private ReadingPassage originalPassage;
+
+    @Column(name = "is_original", nullable = false)
+    private boolean isOriginal;
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_reading_passage_parent")
+    )
+    private ReadingPassage parent;
+
+    @OneToOne(mappedBy = "parent", fetch = FetchType.LAZY)
+    private ReadingPassage child;
+
 }

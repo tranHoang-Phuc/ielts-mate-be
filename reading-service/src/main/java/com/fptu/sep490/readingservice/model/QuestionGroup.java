@@ -69,4 +69,30 @@ public class QuestionGroup {
             fetch = FetchType.LAZY
     )
     private List<DragItem> dragItems = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "display_question_group_id",
+    unique = true,
+    foreignKey = @ForeignKey(name = "fk_question_group_display"))
+    private QuestionGroup questionGroup;
+
+    @OneToOne(mappedBy = "questionGroup", fetch = FetchType.LAZY)
+    private QuestionGroup originalQuestionGroup;
+
+    @Column(name = "is_original")
+    private boolean isOriginal;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_question_group_parent")
+    )
+    private QuestionGroup parent;
+
+    @OneToOne(
+            mappedBy = "parent",
+            fetch = FetchType.LAZY
+    )
+    private QuestionGroup child;
 }
