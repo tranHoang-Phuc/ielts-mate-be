@@ -103,19 +103,15 @@ public class Question {
     )
     private DragItem dragItem;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "display_version_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_question_display_version")
-    )
-    private Question displayVersion;
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
 
-    @OneToOne(mappedBy = "displayVersion", fetch = FetchType.LAZY)
-    private Question originalQuestion;
+    @Column(name = "display_version")
+    private Integer version = 1;
 
-    @Column(name = "is_original")
-    private boolean isOriginal;
+    @Column(name = "is_original", nullable = false)
+    private boolean isOriginal = true;
+
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
