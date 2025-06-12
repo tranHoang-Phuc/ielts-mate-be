@@ -102,4 +102,31 @@ public class Question {
             optional = false
     )
     private DragItem dragItem;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "display_version_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_question_display_version")
+    )
+    private Question displayVersion;
+
+    @OneToOne(mappedBy = "displayVersion", fetch = FetchType.LAZY)
+    private Question originalQuestion;
+
+    @Column(name = "is_original")
+    private boolean isOriginal;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_question_parent")
+    )
+    private Question parent;
+    @OneToOne(
+            mappedBy = "parent",
+            fetch = FetchType.LAZY
+    )
+    private Question child;
 }
