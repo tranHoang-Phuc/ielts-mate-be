@@ -70,17 +70,15 @@ public class QuestionGroup {
     )
     private List<DragItem> dragItems = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "display_question_group_id",
-    unique = true,
-    foreignKey = @ForeignKey(name = "fk_question_group_display"))
-    private QuestionGroup questionGroup;
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
 
-    @OneToOne(mappedBy = "questionGroup", fetch = FetchType.LAZY)
-    private QuestionGroup originalQuestionGroup;
+    @Column(name = "display_version")
+    private Integer version = 1;
 
     @Column(name = "is_original")
-    private boolean isOriginal;
+    private Boolean isOriginal = true;
+
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(

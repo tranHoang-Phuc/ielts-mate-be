@@ -66,18 +66,15 @@ public class ReadingExam {
     )
     private List<ExamAttempt> examAttempts = new ArrayList<>();
 
-    @OneToOne(fetch =  FetchType.LAZY)
-    @JoinColumn(
-            name = "display_version_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_reading_exam_display_version")
-    )
-    private ReadingExam displayVersion;
-    @OneToOne(mappedBy = "displayVersion", fetch = FetchType.LAZY)
-    private ReadingExam originalExam;
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
+
+    @Column(name = "display_version")
+    private Integer version = 1;
 
     @Column(name = "is_original")
-    private boolean isOriginal;
+    private Boolean isOriginal = true;
+
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
