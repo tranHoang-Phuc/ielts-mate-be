@@ -35,8 +35,12 @@ public class QuestionGroup {
     @Column(name = "section_label", length = 255)
     private String sectionLabel;
 
-    @Column(name = "instruction")
+    @Column(name = "instruction", length = 5000)
     private String instruction;
+
+    @Lob
+    @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
+    private String sentenceWithBlanks;
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
@@ -65,4 +69,28 @@ public class QuestionGroup {
             fetch = FetchType.LAZY
     )
     private List<DragItem> dragItems = new ArrayList<>();
+
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
+
+    @Column(name = "display_version")
+    private Integer version = 1;
+
+    @Column(name = "is_original")
+    private Boolean isOriginal = true;
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_question_group_parent")
+    )
+    private QuestionGroup parent;
+
+    @OneToOne(
+            mappedBy = "parent",
+            fetch = FetchType.LAZY
+    )
+    private QuestionGroup child;
 }

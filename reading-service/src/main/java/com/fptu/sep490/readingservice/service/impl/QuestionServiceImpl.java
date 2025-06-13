@@ -74,15 +74,15 @@ public class QuestionServiceImpl implements QuestionService {
 
     @Override
     public List<QuestionCreationResponse> createQuestions(
-            List<QuestionCreationRequest> questionCreationResponses, HttpServletRequest request) throws JsonProcessingException {
+            List<QuestionCreationRequest> questionCreationRequest, HttpServletRequest request) throws JsonProcessingException {
         List<QuestionCreationResponse> questionCreationResponseList = new ArrayList<>();
-        if (questionCreationResponses == null || questionCreationResponses.isEmpty()) {
+        if (questionCreationRequest == null || questionCreationRequest.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
                     Constants.ErrorCode.QUESTION_LIST_EMPTY, HttpStatus.BAD_REQUEST.value());
         }
 
         int correctAnswersCount = 0;
-        for(QuestionCreationRequest question : questionCreationResponses){
+        for(QuestionCreationRequest question : questionCreationRequest){
             if (question.questionType() < 0 || question.questionType() >= QuestionType.values().length) {
                 throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
                         Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
@@ -111,6 +111,7 @@ public class QuestionServiceImpl implements QuestionService {
                         .explanation(question.explanation())
                         .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
                         .questionGroup(questionGroup)
+                        .point(question.point())
                         .instructionForChoice(question.instructionForChoice())
                         .build();
                 List<Choice> choices = new ArrayList<>();
@@ -123,6 +124,7 @@ public class QuestionServiceImpl implements QuestionService {
                             .content(choice.content())
                             .choiceOrder(choice.choiceOrder())
                             .isCorrect(choice.isCorrect())
+                            .question(savedQuestion)
                             .build();
                     choices.add(savedChoice);
 
@@ -621,9 +623,11 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
                     Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
         }
+        questionGroup.getQuestions().remove(question);
+        question.setQuestionGroup(null);
         questionRepository.delete(question);
-        question.setUpdatedBy(userId);
-        questionRepository.save(question);
+        questionGroup.setUpdatedBy(userId);
+        questionGroupRepository.save(questionGroup);
     }
 
 
@@ -642,10 +646,24 @@ public class QuestionServiceImpl implements QuestionService {
 
     private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
+        UserProfileResponse cachedProfile = getFromCache(userId);
+        if (cachedProfile != null) {
+            return cachedProfile;
+        }
+        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
+        if (profileResponse == null) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
+        return profileResponse;
     }
-
+    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
+        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
+        return cachedProfile;
+    }
     private String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
 

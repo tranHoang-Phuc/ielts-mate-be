@@ -35,16 +35,21 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 public interface PassageService {
     PassageCreationResponse createPassage(PassageCreationRequest passageCreationRequest, HttpServletRequest request) throws JsonProcessingException;
     Page<PassageGetResponse> getPassages(int page,
                                          int size,
-                                         Integer ieltsType,
-                                         Integer status,
-                                         Integer partNumber,
-                                         String questionCategory) throws JsonProcessingException;
+                                         List<Integer> ieltsType,
+                                         List<Integer> status,
+                                         List<Integer> partNumber,
+                                         String questionCategory,
+                                         String sortBy,
+                                         String sortDirection,
+                                         String title,
+                                         String createdBy) throws JsonProcessingException;
     PassageDetailResponse updatePassage(UUID passageId, UpdatedPassageRequest request, HttpServletRequest httpServletRequest);
 
     PassageDetailResponse getPassageById(UUID passageId);
@@ -52,5 +57,13 @@ public interface PassageService {
 
     void deletePassage(UUID passageId);
 
-    Page<PassageGetResponse> getActivePassages(int page, int size, Integer ieltsType, Integer partNumber, String questionCategory);
+    Page<PassageGetResponse> getActivePassages(int page,
+                                               int size,
+                                               List<Integer> ieltsType,
+                                               List<Integer> partNumber,
+                                               String questionCategory,
+                                               String sortBy,
+                                               String sortDirection,
+                                               String title,
+                                               String createdBy);
 }

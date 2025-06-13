@@ -102,4 +102,27 @@ public class Question {
             optional = false
     )
     private DragItem dragItem;
+
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
+
+    @Column(name = "display_version")
+    private Integer version = 1;
+
+    @Column(name = "is_original")
+    private Boolean isOriginal = true;
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "parent_id",
+            unique = true,
+            foreignKey = @ForeignKey(name = "fk_question_parent")
+    )
+    private Question parent;
+    @OneToOne(
+            mappedBy = "parent",
+            fetch = FetchType.LAZY
+    )
+    private Question child;
 }

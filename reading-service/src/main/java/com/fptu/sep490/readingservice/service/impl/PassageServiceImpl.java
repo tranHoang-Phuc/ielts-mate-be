@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
@@ -36,6 +37,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -76,6 +78,7 @@ public class PassageServiceImpl implements PassageService {
                 .title(passageCreationRequest.title())
                 .ieltsType(ieltsType)
                 .partNumber(partNumber)
+                .passageStatus(Status.DRAFT)
                 .instruction(passageCreationRequest.instruction())
                 .content(passageCreationRequest.content())
                 .contentWithHighlightKeyword(passageCreationRequest.contentWithHighlightKeywords())
@@ -113,13 +116,17 @@ public class PassageServiceImpl implements PassageService {
     public Page<PassageGetResponse> getPassages(
             int page,
             int size,
-            Integer ieltsType,
-            Integer status,
-            Integer partNumber,
-            String questionCategory
+            List<Integer> ieltsType,
+            List<Integer> status,
+            List<Integer> partNumber,
+            String questionCategory,
+            String sortBy,
+            String sortDirection,
+            String title,
+            String createdBy
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        var spec = PassageSpecifications.byConditions(ieltsType, status, partNumber, questionCategory);
+        var spec = PassageSpecifications.byConditions(ieltsType, status, partNumber, questionCategory, sortBy, sortDirection, title, createdBy);
         Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
 
         return pageResult.map(this::toPassageGetResponse);
@@ -259,6 +266,9 @@ public class PassageServiceImpl implements PassageService {
                 .firstName(updatedByProfile.firstName())
                 .email(updatedByProfile.email())
                 .build();
+
+        List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
+
         return PassageDetailResponse.builder()
                 .passageId(readingPassage.getPassageId().toString())
                 .title(readingPassage.getTitle())
@@ -272,6 +282,47 @@ public class PassageServiceImpl implements PassageService {
                 .updatedBy(updatedBy)
                 .createdAt(readingPassage.getCreatedAt().toString())
                 .updatedAt(readingPassage.getUpdatedAt().toString())
+                .questionGroups(questionGroups.stream().map(
+                        g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
+                                .groupId(g.getGroupId().toString())
+
+                                .sectionLabel(g.getSectionLabel())
+                                .sectionOrder(g.getSectionOrder())
+                                .instruction(g.getInstruction())
+                                .dragItems(g.getDragItems().stream()
+                                        .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
+                                                .dragItemId(d.getDragItemId().toString())
+                                                .content(d.getContent())
+                                                .build())
+                                        .toList())
+                                .questions(g.getQuestions().stream().map(
+                                        q -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                                .questionId(q.getQuestionId().toString())
+                                                .questionOrder(q.getQuestionOrder())
+                                                .questionType(q.getQuestionType().ordinal())
+                                                .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                                .explanation(q.getExplanation())
+                                                .point(q.getPoint())
+                                                .instructionForChoice(q.getInstructionForChoice())
+                                                .choices(q.getChoices().stream().map(
+                                                        c -> UpdatedQuestionResponse.ChoiceResponse.builder()
+                                                                .choiceId(c.getChoiceId().toString())
+                                                                .label(c.getLabel())
+                                                                .choiceOrder(c.getChoiceOrder())
+                                                                .isCorrect(c.isCorrect())
+                                                                .content(c.getContent())
+                                                                .build()
+                                                ).toList())
+                                                .blankIndex(q.getBlankIndex())
+                                                .correctAnswer(q.getCorrectAnswer())
+                                                .instructionForMatching(q.getInstructionForMatching())
+                                                .correctAnswerForMatching(q.getCorrectAnswerForMatching())
+                                                .zoneIndex(q.getZoneIndex())
+                                                .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId().toString())
+                                                .build()
+                                ).toList())
+                                .build()
+                ).toList())
                 .build();
     }
 
@@ -287,9 +338,18 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
-    public Page<PassageGetResponse> getActivePassages(int page, int size, Integer ieltsType, Integer partNumber, String questionCategory) {
+    public Page<PassageGetResponse> getActivePassages(int page,
+                                                      int size,
+                                                      List<Integer> ieltsType,
+                                                      List<Integer> partNumber,
+                                                      String questionCategory,
+                                                      String sortBy,
+                                                      String sortDirection,
+                                                      String title,
+                                                      String createdBy) {
+
         Pageable pageable = PageRequest.of(page, size);
-        var spec = PassageSpecifications.byConditions(ieltsType, 1,partNumber, questionCategory);
+        var spec = PassageSpecifications.byConditions(ieltsType, List.of(1), partNumber, questionCategory, sortBy, sortDirection, title, createdBy);
         Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
 
         return pageResult.map(this::toPassageGetResponse);
@@ -361,8 +421,23 @@ public class PassageServiceImpl implements PassageService {
 
     private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
+        UserProfileResponse cachedProfile = getFromCache(userId);
+        if (cachedProfile != null) {
+            return cachedProfile;
+        }
+        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
+        if (profileResponse == null) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
+        return profileResponse;
+    }
+    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
+        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
+        return cachedProfile;
     }
 
     private String getCachedClientToken() throws JsonProcessingException {

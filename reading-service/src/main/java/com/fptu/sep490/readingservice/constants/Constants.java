@@ -21,11 +21,16 @@ public class Constants {
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "QUESTION_NOT_BELONG_TO_GROUP";
         public static final String INVALID_INPUT = "INVALID_INPUT";
 
+        public static final String PASSAGE_NOT_ACTIVE = "PASSAGE_NOT_ACTIVE";
+        public static final String ATTEMPT_NOT_FOUND = "ATTEMPT_NOT_FOUND";
+        public static final String FORBIDDEN = "FORBIDDEN";
+        public static final String ATTEMPT_NOT_DRAFT = "ATTEMPT_NOT_DRAFT";
     }
 
     public final class RedisKey {
 
         public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
+        public static final String USER_PROFILE = "user-profile";
     }
 
     public final class ErrorCode {
@@ -42,8 +47,10 @@ public class Constants {
         public static final String CHOICE_NOT_FOUND = "100010";
         public static final String CHOICE_NOT_IN_THIS_QUESTION = "100011";
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "100012";
-
-
+        public  static final String PASSAGE_NOT_ACTIVE = "100013";
+        public static final String ATTEMPT_NOT_FOUND = "100014";
+        public static final String FORBIDDEN = "100015";
+        public static final String ATTEMPT_NOT_DRAFT = "100016";
 
 
 

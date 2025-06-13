@@ -33,7 +33,7 @@ public class ExamAttempt {
     private String history;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reading_exam_id", nullable = false)
+    @JoinColumn(name = "reading_exam_id")
     private ReadingExam readingExam;
 
     @Column(name = "created_by", length = 100)
@@ -49,4 +49,6 @@ public class ExamAttempt {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+
 }

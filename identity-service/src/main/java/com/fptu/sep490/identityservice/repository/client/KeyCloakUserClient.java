@@ -51,4 +51,17 @@ public interface KeyCloakUserClient {
                                         @RequestHeader("Authorization") String token,
                                         @PathVariable("userId") String userId,
                                         @RequestBody Map<String, Object> updates);
+
+    @GetMapping(value = "/admin/realms/{realm}/users/{user-id}/role-mappings",
+    consumes = MediaType.APPLICATION_JSON_VALUE)
+    KeyCloakRoleResponse getUserRoleMappings(@PathVariable("realm") String realm,
+                                                  @RequestHeader("Authorization") String token,
+                                                  @PathVariable("user-id") String userId);
+
+    @GetMapping(value = "/admin/realms/{realm}/roles/default-roles-sep490/composites",
+    consumes = MediaType.APPLICATION_JSON_VALUE)
+    List<RoleMappingResponse> getDefaultRole(@PathVariable("realm") String realm,
+                                             @RequestHeader("Authorization") String token);
+
+
 }

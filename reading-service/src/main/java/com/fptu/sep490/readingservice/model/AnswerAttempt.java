@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -23,16 +24,16 @@ public class AnswerAttempt {
     @JoinColumn(name = "attempt_id", nullable = false)
     private Attempt attempt;
 
-    @MapsId("readingPassageId")
+    @MapsId("questionId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "reading_passage_id", nullable = false)
-    private ReadingPassage readingPassage;
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
 
-    @Column(name = "isCorrect")
-    private boolean isCorrect;
+    @Column(name = "is_correct")
+    private Boolean isCorrect;
 
-    @Column(name = "labal")
-    private String label;
+    @Column(name = "choices")
+    private List<UUID> choices;
 
     @Column(name = "data_filled")
     private String dataFilled;
