@@ -28,6 +28,9 @@ public class ReadingExam {
     @Column(name = "exam_name", nullable = false, length = 255)
     private String examName;
 
+    @Column(name = "exam_description", columnDefinition = "TEXT")
+    private String examDescription;
+
     @Column(name = "url_slug", nullable = false, length = 255, unique = true)
     private String urlSlug;
 
@@ -73,7 +76,10 @@ public class ReadingExam {
     private Integer version = 1;
 
     @Column(name = "is_original")
-    private Boolean isOriginal = true;
+    private Boolean isOriginal = false;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
 
     @OneToOne(fetch = FetchType.LAZY)

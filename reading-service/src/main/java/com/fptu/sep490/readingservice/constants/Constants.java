@@ -12,13 +12,14 @@ public class Constants {
         public static final String CHOICES_LIST_EMPTY = "CHOICES_LIST_EMPTY";
         public static final String INVALID_BLANK_INDEX = "INVALID_BLANK_INDEX";
         public static final String QUESTION_GROUP_NOT_FOUND = "QUESTION_GROUP_NOT_FOUND";
-
+        public static final String READING_EXAM_NOT_FOUND = "READING_EXAM_NOT_FOUND";
         public static final String QUESTION_NOT_FOUND = "QUESTION_NOT_FOUND";
         public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "QUESTION_ALREADY_HAS_DRAG_ITEM";
         public static final String DRAG_ITEM_NOT_FOUND = "DRAG_ITEM_NOT_FOUND";
         public static final String CHOICE_NOT_FOUND = "CHOICE_NOT_FOUND";
         public static final String CHOICE_NOT_IN_THIS_QUESTION = "CHOICE_NOT_IN_THIS_QUESTION";
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "QUESTION_NOT_BELONG_TO_GROUP";
+        public static final String INVALID_INPUT = "INVALID_INPUT";
 
         public static final String PASSAGE_NOT_ACTIVE = "PASSAGE_NOT_ACTIVE";
         public static final String ATTEMPT_NOT_FOUND = "ATTEMPT_NOT_FOUND";
@@ -56,7 +57,8 @@ public class Constants {
         public static final String QUESTION_NOT_FOUND = "100021";
         public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "100022";
         public static final String DRAG_ITEM_NOT_FOUND = "100023";
-
+        public static final String READING_EXAM_NOT_FOUND="100024";
+        public static final String INVALID_INPUT = "100025";
         public static final String INTERNAL_SERVER_ERROR = "100999";
 
     }

@@ -52,6 +52,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setSectionLabel(request.sectionLabel());
         group.setInstruction(request.instruction());
         group.setReadingPassage(readingPassage);
+        group.setCreatedBy(userId);
 
         // Handle group-level drag items
         if (request.dragItems() != null && !request.dragItems().isEmpty()) {
@@ -220,6 +221,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setSectionLabel(request.sectionLabel());
         group.setInstruction(request.instruction());
         group.setReadingPassage(readingPassage);
+        group.setUpdatedBy(userId);
 
         // Handle group-level drag items
         if (request.dragItems() != null && !request.dragItems().isEmpty()) {
