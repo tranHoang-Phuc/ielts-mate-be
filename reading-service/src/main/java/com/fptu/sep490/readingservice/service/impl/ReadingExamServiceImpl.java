@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Service
 @Slf4j
@@ -42,6 +43,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
         readingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
         readingExam.setCreatedBy(userId);
+        readingExam.setIsOriginal(true);
 
         if(!readingExamCreationRequest.readingPassageIdPart1().isEmpty()){
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
@@ -123,11 +125,16 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                     HttpStatus.NOT_FOUND.value()
             );
         }
+
         ReadingExam readingExam = existingReadingExam.get();
-        readingExam.setUpdatedBy(userId);
-        readingExam.setExamName(readingExamCreationRequest.readingExamName());
-        readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        readingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        readingExam.setIsCurrent(false);
+        ReadingExam newReadingExam = new ReadingExam();
+        newReadingExam.setExamName(readingExamCreationRequest.readingExamName());
+        newReadingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
+        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        newReadingExam.setUpdatedBy(userId);
+        newReadingExam.setUpdatedAt(LocalDateTime.now());
+        newReadingExam.setParent(readingExam);
 
         if (!readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
@@ -138,7 +145,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                         HttpStatus.NOT_FOUND.value()
                 );
             }
-            readingExam.setPart1(readingPassagePart1.get());
+            newReadingExam.setPart1(readingPassagePart1.get());
         }
         if (!readingExamCreationRequest.readingPassageIdPart2().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart2 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart2()));
@@ -149,7 +156,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 );            }
-            readingExam.setPart2(readingPassagePart2.get());
+            newReadingExam.setPart2(readingPassagePart2.get());
         }
         if (!readingExamCreationRequest.readingPassageIdPart3().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart3 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart3()));
@@ -160,28 +167,29 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 );              }
-            readingExam.setPart3(readingPassagePart3.get());
+            newReadingExam.setPart3(readingPassagePart3.get());
         }
         readingExamRepository.save(readingExam);
+        readingExamRepository.save(newReadingExam);
         ReadingExamResponse response = new ReadingExamResponse(
-                readingExam.getReadingExamId().toString(),
-                readingExam.getExamName(),
-                readingExam.getExamDescription(),
-                readingExam.getUrlSlug(),
+                newReadingExam.getReadingExamId().toString(),
+                newReadingExam.getExamName(),
+                newReadingExam.getExamDescription(),
+                newReadingExam.getUrlSlug(),
                 new ReadingExamResponse.ReadingPassageResponse(
-                        readingExam.getPart1().getPassageId().toString(),
-                        readingExam.getPart1().getTitle(),
-                        readingExam.getPart1().getContent()
+                        newReadingExam.getPart1().getPassageId().toString(),
+                        newReadingExam.getPart1().getTitle(),
+                        newReadingExam.getPart1().getContent()
                 ),
                 new ReadingExamResponse.ReadingPassageResponse(
-                        readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
-                        readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
-                        readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                        newReadingExam.getPart2() != null ? newReadingExam.getPart2().getPassageId().toString() : null,
+                        newReadingExam.getPart2() != null ? newReadingExam.getPart2().getTitle() : null,
+                        newReadingExam.getPart2() != null ? newReadingExam.getPart2().getContent() : null
                 ),
                 new ReadingExamResponse.ReadingPassageResponse(
-                        readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
-                        readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
-                        readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                        newReadingExam.getPart3() != null ? newReadingExam.getPart3().getPassageId().toString() : null,
+                        newReadingExam.getPart3() != null ? newReadingExam.getPart3().getTitle() : null,
+                        newReadingExam.getPart3() != null ? newReadingExam.getPart3().getContent() : null
                 )
         );
         return response;
@@ -193,6 +201,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         String userId = helper.getUserIdFromToken(httpServletRequest);
 
         Optional<ReadingExam> readingExamOptional = readingExamRepository.findById(UUID.fromString(readingExamId));
+
         if(readingExamOptional.isEmpty()){
             throw new AppException(
                     Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
@@ -200,8 +209,66 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                     HttpStatus.NOT_FOUND.value()
             );
         }
+        ReadingExam finalReadingExam ;
         ReadingExam readingExam = readingExamOptional.get();
+        if(readingExam.getIsCurrent()) {
+            finalReadingExam = readingExam;
 
+        }else{
+            Optional<ReadingExam> readingExamOptional1 = readingExamRepository.findCurrentChildByParentId(readingExam.getReadingExamId());
+            if(readingExamOptional1.isEmpty()){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
+                        Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );
+            }
+            ReadingExam readingExam1 = readingExamOptional1.get();
+            finalReadingExam = readingExam1;
+        }
+
+        ReadingExamResponse response = new ReadingExamResponse(
+                finalReadingExam.getReadingExamId().toString(),
+                finalReadingExam.getExamName(),
+                finalReadingExam.getExamDescription(),
+                finalReadingExam.getUrlSlug(),
+                new ReadingExamResponse.ReadingPassageResponse(
+                        finalReadingExam.getPart1().getPassageId().toString(),
+                        finalReadingExam.getPart1().getTitle(),
+                        finalReadingExam.getPart1().getContent()
+                ),
+                new ReadingExamResponse.ReadingPassageResponse(
+                        finalReadingExam.getPart2() != null ? finalReadingExam.getPart2().getPassageId().toString() : null,
+                        finalReadingExam.getPart2() != null ? finalReadingExam.getPart2().getTitle() : null,
+                        finalReadingExam.getPart2() != null ? finalReadingExam.getPart2().getContent() : null
+                ),
+                new ReadingExamResponse.ReadingPassageResponse(
+                        finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getPassageId().toString() : null,
+                        finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getTitle() : null,
+                        finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getContent() : null
+                )
+        );
+        return response;
+
+    }
+
+
+    @Override
+    public ReadingExamResponse deleteReadingExam(String readingExamId, HttpServletRequest httpServletRequest){
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+        Optional<ReadingExam> readingExamOptional = readingExamRepository.findById(UUID.fromString(readingExamId));
+        if(readingExamOptional.isEmpty()){
+            throw new AppException(
+                    Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
+                    Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        ReadingExam finalReadingExam ;
+        ReadingExam readingExam = readingExamOptional.get();
+        readingExam.setIsDeleted(true);
+        readingExam.setUpdatedBy(userId);
+        readingExam.setUpdatedAt(LocalDateTime.now());
         ReadingExamResponse response = new ReadingExamResponse(
                 readingExam.getReadingExamId().toString(),
                 readingExam.getExamName(),
@@ -224,6 +291,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                 )
         );
         return response;
-
     }
+
+
 }

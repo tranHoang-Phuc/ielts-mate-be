@@ -76,7 +76,10 @@ public class ReadingExam {
     private Integer version = 1;
 
     @Column(name = "is_original")
-    private Boolean isOriginal = true;
+    private Boolean isOriginal = false;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
 
     @OneToOne(fetch = FetchType.LAZY)

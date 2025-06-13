@@ -11,5 +11,5 @@ public interface ReadingExamService {
 
     public ReadingExamResponse getReadingExam(String readingExamId, HttpServletRequest httpServletRequest) throws Exception;
 
-
+    public ReadingExamResponse deleteReadingExam(String readingExamId, HttpServletRequest httpServletRequest) throws Exception;
 }
