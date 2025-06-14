@@ -39,10 +39,10 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
     ReadingPassageRepository readingPassageRepository;
     QuestionGroupRepository questionGroupRepository;
-
+    Helper helper;
     @Override
     public AddGroupQuestionResponse createGroupQuestion(String passageId, AddGroupQuestionRequest request, HttpServletRequest httpsRequest) throws Exception {
-        String userId = getUserIdFromToken(httpsRequest);
+        String userId = helper.getUserIdFromToken(httpsRequest);
 
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
@@ -136,31 +136,43 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         return response;
     }
 
-    private String getUserIdFromToken(HttpServletRequest request) {
-        String token = CookieUtils.getCookieValue(request, "Authorization");
-        if (token == null || token.isEmpty()) {
-            return null;
+
+
+    private QuestionGroup getLatestCurrentGroup(QuestionGroup group) {
+        QuestionGroup current = group;
+        while (current.getChild() != null) {
+            if (Boolean.TRUE.equals(current.getChild().getIsCurrent()) && Boolean.FALSE.equals(current.getChild().getIsDeleted())) {
+                current = current.getChild();
+            } else {
+                break;
+            }
         }
-        try {
-            return SecurityContextHolder.getContext().getAuthentication().getName();
-        } catch (Exception e) {
-            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
-                    HttpStatus.UNAUTHORIZED.value());
+        if (Boolean.TRUE.equals(current.getIsCurrent()) && Boolean.FALSE.equals(current.getIsDeleted())) {
+            return current;
         }
+        return null;
     }
 
     @Override
     public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
-        String userId = getUserIdFromToken(httpsRequest);
+        String userId = helper.getUserIdFromToken(httpsRequest);
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
-        if (questionGroups.isEmpty()) {
+        List<QuestionGroup> result = new ArrayList<>();
+        for (QuestionGroup group : questionGroups) {
+            QuestionGroup latest = getLatestCurrentGroup(group);
+            if (latest != null) {
+                result.add(latest);
+            }
+        }
+        if (result.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                     Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
         }
-        return questionGroups.stream()
+
+        return result.stream()
                 .map(group -> Helper.mapToGroupQuestionResponse(
                         group,
                         new AddGroupQuestionRequest(
@@ -206,41 +218,67 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 .toList();
     }
 
+
     @Override
     public AddGroupQuestionResponse updateGroupQuestion(String passageId, String groupId, AddGroupQuestionRequest request, HttpServletRequest httpsRequest) throws Exception {
-        String userId = getUserIdFromToken(httpsRequest);
+        String userId = helper.getUserIdFromToken(httpsRequest);
+
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        QuestionGroup group = questionGroupRepository.findById(UUID.fromString(groupId))
+
+        QuestionGroup originalGroup = questionGroupRepository.findById(UUID.fromString(groupId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
 
-        // Update group properties
-        group.setSectionOrder(request.sectionOrder());
-        group.setSectionLabel(request.sectionLabel());
-        group.setInstruction(request.instruction());
-        group.setReadingPassage(readingPassage);
-        group.setUpdatedBy(userId);
+        // Get the latest current, not deleted version
+        QuestionGroup latestCurrentGroup = getLatestCurrentGroup(originalGroup);
+        if (latestCurrentGroup == null) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
+        }
+
+        // Mark the current group as not current
+        latestCurrentGroup.setIsCurrent(false);
+
+        // Create new group as a new version (child)
+        QuestionGroup newGroup = new QuestionGroup();
+        newGroup.setReadingPassage(readingPassage);
+        newGroup.setCreatedBy(userId);
+        newGroup.setIsCurrent(true);
+        newGroup.setIsDeleted(false);
+        newGroup.setIsOriginal(false);
+        newGroup.setVersion(latestCurrentGroup.getVersion() + 1);
+        newGroup.setParent(latestCurrentGroup);
+
+        // Only update fields present in request, otherwise copy from previous version
+        newGroup.setSectionOrder(request.sectionOrder() != null ? request.sectionOrder() : latestCurrentGroup.getSectionOrder());
+        newGroup.setSectionLabel(request.sectionLabel() != null ? request.sectionLabel() : latestCurrentGroup.getSectionLabel());
+        newGroup.setInstruction(request.instruction() != null ? request.instruction() : latestCurrentGroup.getInstruction());
 
         // Handle group-level drag items
-        if (request.dragItems() != null && !request.dragItems().isEmpty()) {
-            List<DragItem> listDragItem = new ArrayList<>();
+        List<DragItem> groupDragItems = new ArrayList<>();
+        if (request.dragItems() != null) {
             for (String item : request.dragItems()) {
                 DragItem dragItem = new DragItem();
                 dragItem.setContent(item);
-                dragItem.setQuestionGroup(group);
-                listDragItem.add(dragItem);
+                dragItem.setQuestionGroup(newGroup);
+                groupDragItems.add(dragItem);
             }
-            group.getDragItems().clear();
-            group.getDragItems().addAll(listDragItem);
         } else {
-            group.getDragItems().clear();
+            // Copy from previous version if not present in request
+            for (DragItem oldItem : latestCurrentGroup.getDragItems()) {
+                DragItem dragItem = new DragItem();
+                dragItem.setContent(oldItem.getContent());
+                dragItem.setQuestionGroup(newGroup);
+                groupDragItems.add(dragItem);
+            }
         }
+        newGroup.setDragItems(groupDragItems);
 
         // Handle questions
         List<Question> questions = new ArrayList<>();
-        if (request.questions() != null && !request.questions().isEmpty()) {
+        if (request.questions() != null) {
             for (QuestionCreationRequest questionDto : request.questions()) {
                 Question question = new Question();
                 question.setQuestionOrder(questionDto.questionOrder());
@@ -248,13 +286,12 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 question.setQuestionType(
                         questionDto.questionType() == null ? null : QuestionType.values()[questionDto.questionType()]
                 );
-                // Map Set<Integer> to Set<QuestionCategory>
                 if (questionDto.questionCategories() != null) {
                     Set<QuestionCategory> categories =
                             questionDto.questionCategories().stream()
                                     .filter(java.util.Objects::nonNull)
                                     .map(QuestionCategory::valueOf)
-                                    .collect(java.util.stream.Collectors.toSet());
+                                    .collect(Collectors.toSet());
                     question.setCategories(categories);
                 } else {
                     question.setCategories(null);
@@ -270,10 +307,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 question.setCorrectAnswerForMatching(questionDto.correctAnswerForMatching());
                 question.setZoneIndex(questionDto.zoneIndex());
                 question.setCreatedBy(userId);
-                question.setQuestionGroup(group);
+                question.setQuestionGroup(newGroup);
+
                 // Handle choices
-                if (questionDto.choices() != null && !questionDto.choices().isEmpty()) {
-                    List<Choice> choices = new ArrayList<>();
+                List<Choice> choices = new ArrayList<>();
+                if (questionDto.choices() != null) {
                     for (QuestionCreationRequest.ChoiceRequest choiceDto : questionDto.choices()) {
                         Choice choice = new Choice();
                         choice.setContent(choiceDto.content());
@@ -282,16 +320,58 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         choice.setQuestion(question);
                         choices.add(choice);
                     }
-                    question.setChoices(choices);
-                } else {
-                    question.setChoices(null);
                 }
-                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
-                        DragItem dragItem = new DragItem();
-                        dragItem.setContent(questionDto.dragItemId());
-                        dragItem.setQuestion(question);
-                        dragItem.setQuestionGroup(group);
+                question.setChoices(choices);
 
+                // Handle question-level drag item
+                if (questionDto.dragItemId() != null && !questionDto.dragItemId().isEmpty()) {
+                    DragItem dragItem = new DragItem();
+                    dragItem.setContent(questionDto.dragItemId());
+                    dragItem.setQuestion(question);
+                    dragItem.setQuestionGroup(newGroup);
+                    question.setDragItem(dragItem);
+                } else {
+                    question.setDragItem(null);
+                }
+                questions.add(question);
+            }
+        } else {
+            // Copy questions from previous version if not present in request
+            for (Question oldQ : latestCurrentGroup.getQuestions()) {
+                Question question = new Question();
+                question.setQuestionOrder(oldQ.getQuestionOrder());
+                question.setPoint(oldQ.getPoint());
+                question.setQuestionType(oldQ.getQuestionType());
+                question.setCategories(oldQ.getCategories());
+                question.setExplanation(oldQ.getExplanation());
+                question.setNumberOfCorrectAnswers(oldQ.getNumberOfCorrectAnswers());
+                question.setInstructionForChoice(oldQ.getInstructionForChoice());
+                question.setBlankIndex(oldQ.getBlankIndex());
+                question.setCorrectAnswer(oldQ.getCorrectAnswer());
+                question.setInstructionForMatching(oldQ.getInstructionForMatching());
+                question.setCorrectAnswerForMatching(oldQ.getCorrectAnswerForMatching());
+                question.setZoneIndex(oldQ.getZoneIndex());
+                question.setCreatedBy(userId);
+                question.setQuestionGroup(newGroup);
+
+                // Copy choices
+                List<Choice> choices = new ArrayList<>();
+                for (Choice oldC : oldQ.getChoices()) {
+                    Choice choice = new Choice();
+                    choice.setContent(oldC.getContent());
+                    choice.setLabel(oldC.getLabel());
+                    choice.setCorrect(oldC.isCorrect());
+                    choice.setQuestion(question);
+                    choices.add(choice);
+                }
+                question.setChoices(choices);
+
+                // Copy drag item
+                if (oldQ.getDragItem() != null) {
+                    DragItem dragItem = new DragItem();
+                    dragItem.setContent(oldQ.getDragItem().getContent());
+                    dragItem.setQuestion(question);
+                    dragItem.setQuestionGroup(newGroup);
                     question.setDragItem(dragItem);
                 } else {
                     question.setDragItem(null);
@@ -299,17 +379,21 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 questions.add(question);
             }
         }
-        group.getQuestions().clear();
-        group.getQuestions().addAll(questions);
-        // Save the group (cascade saves questions, choices, drag items)
-        questionGroupRepository.save(group);
-        AddGroupQuestionResponse response = Helper.mapToGroupQuestionResponse(group, request);
+        newGroup.setQuestions(questions);
+
+        // Bidirectional link
+        latestCurrentGroup.setChild(newGroup);
+
+        // Save both parent and new group (cascade saves children)
+        questionGroupRepository.save(latestCurrentGroup);
+        QuestionGroup savedGroup = questionGroupRepository.save(newGroup);
+
+        AddGroupQuestionResponse response = Helper.mapToGroupQuestionResponse(savedGroup, request);
         return response;
     }
-
     @Override
     public void deleteGroupQuestion(String passageId, String groupId, HttpServletRequest httpsRequest) throws Exception {
-        String userId = getUserIdFromToken(httpsRequest);
+        String userId = helper.getUserIdFromToken(httpsRequest);
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
