@@ -73,6 +73,9 @@ public class QuestionGroup {
     @Column(name = "is_current")
     private Boolean isCurrent = true;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     @Column(name = "display_version")
     private Integer version = 1;
 
