@@ -119,16 +119,15 @@ public class ReadingPassage {
     @Column(name = "is_original")
     private Boolean isOriginal = true;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "parent_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_reading_passage_parent")
-    )
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
     private ReadingPassage parent;
 
-    @OneToOne(mappedBy = "parent", fetch = FetchType.LAZY)
-    private ReadingPassage child;
-
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ReadingPassage> children = new ArrayList<>();
 }
