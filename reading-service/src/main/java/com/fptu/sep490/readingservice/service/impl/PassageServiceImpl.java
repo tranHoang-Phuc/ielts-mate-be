@@ -7,15 +7,19 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.model.Question;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.repository.QuestionGroupRepository;
+import com.fptu.sep490.readingservice.repository.QuestionRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.readingservice.repository.specification.PassageSpecifications;
+import com.fptu.sep490.readingservice.service.GroupQuestionService;
 import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
@@ -33,12 +37,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.sql.Timestamp;
 import java.time.Duration;
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,7 +53,9 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PassageServiceImpl implements PassageService {
 
+    QuestionGroupRepository questionGroupRepository;
     ReadingPassageRepository readingPassageRepository;
+    QuestionRepository questionRepository;
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
     RedisService redisService;
@@ -83,6 +92,10 @@ public class PassageServiceImpl implements PassageService {
                 .content(passageCreationRequest.content())
                 .contentWithHighlightKeyword(passageCreationRequest.contentWithHighlightKeywords())
                 .passageStatus(passageStatus)
+                .isCurrent(true)
+                .version(1)
+                .isOriginal(true)
+                .isDeleted(false)
                 .createdBy(userId)
                 .updatedBy(userId)
                 .build();
@@ -140,11 +153,15 @@ public class PassageServiceImpl implements PassageService {
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
 
-        if (request.title() != null) {
-            entity.setTitle(request.title());
+        if (request.title()== null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
 
-        if (request.ieltsType() != null) {
+        if (request.ieltsType() == null) {
             int ordinal = request.ieltsType();
             if (ordinal < 0 || ordinal >= IeltsType.values().length) {
                 throw new AppException(
@@ -153,10 +170,9 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.BAD_REQUEST.value()
                 );
             }
-            entity.setIeltsType(IeltsType.values()[ordinal]);
         }
 
-        if (request.partNumber() != null) {
+        if (request.partNumber() == null) {
             int ordinal = request.partNumber();
             if (ordinal < 0 || ordinal >= PartNumber.values().length) {
                 throw new AppException(
@@ -165,22 +181,32 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.BAD_REQUEST.value()
                 );
             }
-            entity.setPartNumber(PartNumber.values()[ordinal]);
         }
 
-        if (request.content() != null) {
-            entity.setContent(request.content());
+        if (request.content() == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
 
-        if (request.contentWithHighlightKeywords() != null) {
-            entity.setContentWithHighlightKeyword(request.contentWithHighlightKeywords());
+        if (request.contentWithHighlightKeywords() == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
 
-        if (request.instruction() != null) {
-            entity.setInstruction(request.instruction());
-        }
+        if (request.instruction() == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );        }
 
-        if (request.passageStatus() != null) {
+        if (request.passageStatus() == null) {
             int ordinal = request.passageStatus();
             if (ordinal < 0 || ordinal >= Status.values().length) {
                 throw new AppException(
@@ -189,16 +215,37 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.BAD_REQUEST.value()
                 );
             }
-            entity.setPassageStatus(Status.values()[ordinal]);
         }
         entity.setUpdatedBy(userId);
-        ReadingPassage updated = readingPassageRepository.save(entity);
 
+        ReadingPassage updatedVersion = ReadingPassage.builder()
+                .instruction(request.instruction())
+                .content(request.content())
+                .contentWithHighlightKeyword(request.contentWithHighlightKeywords())
+                .ieltsType(request.ieltsType() == null ? entity.getIeltsType() : safeEnumFromOrdinal(IeltsType.values(), request.ieltsType()))
+                .partNumber(request.partNumber() == null ? entity.getPartNumber() : safeEnumFromOrdinal(PartNumber.values(), request.partNumber()))
+                .passageStatus(request.passageStatus() == null ? entity.getPassageStatus() : safeEnumFromOrdinal(Status.values(), request.passageStatus()))
+                .title(request.title() == null ? entity.getTitle() : request.title())
+                .createdBy(userId)
+                .updatedBy(userId)
+                .isCurrent(true)
+                .version(entity.getVersion() + 1)
+                .isDeleted(false)
+                .isOriginal(false)
+                .parent(entity)
+                .build();
+
+
+        entity.setIsCurrent(false);
+        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedBy(userId);
+        ReadingPassage updated = readingPassageRepository.save(entity);
+        ReadingPassage saved = readingPassageRepository.save(updatedVersion);
         UserProfileResponse createdProfile;
         UserProfileResponse updatedProfile;
         try {
             createdProfile = getUserProfileById(updated.getCreatedBy());
-            updatedProfile = getUserProfileById(updated.getUpdatedBy());
+            updatedProfile = getUserProfileById(saved.getUpdatedBy());
         } catch (JsonProcessingException e) {
             throw new InternalServerErrorException(
                     Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
@@ -223,13 +270,13 @@ public class PassageServiceImpl implements PassageService {
 
         return PassageDetailResponse.builder()
                 .passageId(updated.getPassageId().toString())
-                .title(updated.getTitle())
-                .ieltsType(updated.getIeltsType().ordinal())
-                .partNumber(updated.getPartNumber().ordinal())
-                .content(updated.getContent())
-                .contentWithHighlightKeywords(updated.getContentWithHighlightKeyword())
-                .instruction(updated.getInstruction())
-                .passageStatus(updated.getPassageStatus().ordinal())
+                .title(saved.getTitle())
+                .ieltsType(saved.getIeltsType().ordinal())
+                .partNumber(saved.getPartNumber().ordinal())
+                .content(saved.getContent())
+                .contentWithHighlightKeywords(saved.getContentWithHighlightKeyword())
+                .instruction(saved.getInstruction())
+                .passageStatus(saved.getPassageStatus().ordinal())
                 .createdBy(createdByResp)
                 .updatedBy(updatedByResp)
                 .createdAt(updated.getCreatedAt().toString())
@@ -238,15 +285,41 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
+    @Transactional
     public PassageDetailResponse getPassageById(UUID passageId) {
         var readingPassage = readingPassageRepository.findById(passageId)
-                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
-                        Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        var passage = readingPassageRepository.findCurrentVersionById(passageId)
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
+
+        Map<QuestionGroup, List<Question>> questionGroupMap = new HashMap<>();
+
+        for (QuestionGroup group : questionGroups) {
+            List<Question> filteredQuestions = group.getQuestions().stream()
+                    .filter(Objects::nonNull)
+                    .filter(q -> (q.getParent() == null && Boolean.TRUE.equals(q.getIsOriginal()))
+                            || Boolean.TRUE.equals(q.getIsCurrent()))
+                    .collect(Collectors.toList());
+
+            questionGroupMap.put(group, filteredQuestions);
+        }
+
         UserProfileResponse createdByProfile;
         UserProfileResponse updatedByProfile;
         try {
             createdByProfile = getUserProfileById(readingPassage.getCreatedBy());
-            updatedByProfile = getUserProfileById(readingPassage.getUpdatedBy());
+            updatedByProfile = getUserProfileById(passage.getUpdatedBy());
         } catch (JsonProcessingException e) {
             throw new InternalServerErrorException(
                     Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
@@ -254,12 +327,14 @@ public class PassageServiceImpl implements PassageService {
                     HttpStatus.INTERNAL_SERVER_ERROR.value()
             );
         }
+
         UserInformationResponse createdBy = UserInformationResponse.builder()
                 .userId(createdByProfile.id())
                 .lastName(createdByProfile.lastName())
                 .firstName(createdByProfile.firstName())
                 .email(createdByProfile.email())
                 .build();
+
         UserInformationResponse updatedBy = UserInformationResponse.builder()
                 .userId(updatedByProfile.id())
                 .lastName(updatedByProfile.lastName())
@@ -267,64 +342,76 @@ public class PassageServiceImpl implements PassageService {
                 .email(updatedByProfile.email())
                 .build();
 
-        List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
-
         return PassageDetailResponse.builder()
-                .passageId(readingPassage.getPassageId().toString())
-                .title(readingPassage.getTitle())
-                .ieltsType(readingPassage.getIeltsType().ordinal())
-                .partNumber(readingPassage.getPartNumber().ordinal())
-                .content(readingPassage.getContent())
-                .contentWithHighlightKeywords(readingPassage.getContentWithHighlightKeyword())
-                .instruction(readingPassage.getInstruction())
-                .passageStatus(readingPassage.getPassageStatus().ordinal())
+                .passageId(passage.getPassageId().toString())
+                .title(passage.getTitle())
+                .ieltsType(passage.getIeltsType().ordinal())
+                .partNumber(passage.getPartNumber().ordinal())
+                .content(passage.getContent())
+                .contentWithHighlightKeywords(passage.getContentWithHighlightKeyword())
+                .instruction(passage.getInstruction())
+                .passageStatus(passage.getPassageStatus().ordinal())
                 .createdBy(createdBy)
                 .updatedBy(updatedBy)
                 .createdAt(readingPassage.getCreatedAt().toString())
-                .updatedAt(readingPassage.getUpdatedAt().toString())
-                .questionGroups(questionGroups.stream().map(
-                        g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
-                                .groupId(g.getGroupId().toString())
-
-                                .sectionLabel(g.getSectionLabel())
-                                .sectionOrder(g.getSectionOrder())
-                                .instruction(g.getInstruction())
-                                .dragItems(g.getDragItems().stream()
-                                        .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
-                                                .dragItemId(d.getDragItemId().toString())
-                                                .content(d.getContent())
-                                                .build())
-                                        .toList())
-                                .questions(g.getQuestions().stream().map(
-                                        q -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
-                                                .questionId(q.getQuestionId().toString())
-                                                .questionOrder(q.getQuestionOrder())
-                                                .questionType(q.getQuestionType().ordinal())
-                                                .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
-                                                .explanation(q.getExplanation())
-                                                .point(q.getPoint())
-                                                .instructionForChoice(q.getInstructionForChoice())
-                                                .choices(q.getChoices().stream().map(
-                                                        c -> UpdatedQuestionResponse.ChoiceResponse.builder()
-                                                                .choiceId(c.getChoiceId().toString())
-                                                                .label(c.getLabel())
-                                                                .choiceOrder(c.getChoiceOrder())
-                                                                .isCorrect(c.isCorrect())
-                                                                .content(c.getContent())
-                                                                .build()
-                                                ).toList())
-                                                .blankIndex(q.getBlankIndex())
-                                                .correctAnswer(q.getCorrectAnswer())
-                                                .instructionForMatching(q.getInstructionForMatching())
-                                                .correctAnswerForMatching(q.getCorrectAnswerForMatching())
-                                                .zoneIndex(q.getZoneIndex())
-                                                .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId().toString())
-                                                .build()
-                                ).toList())
-                                .build()
-                ).toList())
+                .updatedAt(passage.getUpdatedAt().toString())
+                .questionGroups(
+                        questionGroups.stream()
+                                .map(g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
+                                        .groupId(g.getGroupId().toString())
+                                        .sectionLabel(g.getSectionLabel())
+                                        .sectionOrder(g.getSectionOrder())
+                                        .instruction(g.getInstruction())
+                                        .dragItems(
+                                                g.getDragItems().stream()
+                                                        .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
+                                                                .dragItemId(d.getDragItemId().toString())
+                                                                .content(d.getContent())
+                                                                .build())
+                                                        .toList()
+                                        )
+                                        .questions(
+                                                questionGroupMap.getOrDefault(g, Collections.emptyList()).stream()
+                                                        .filter(Question::getIsCurrent)
+                                                        .map(q -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                                                .questionId(q.getParent() == null
+                                                                        ? q.getQuestionId().toString()
+                                                                        : q.getParent().getQuestionId().toString())
+                                                                .questionOrder(q.getQuestionOrder())
+                                                                .questionType(q.getQuestionType().ordinal())
+                                                                .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                                                .explanation(q.getExplanation())
+                                                                .point(q.getPoint())
+                                                                .instructionForChoice(q.getInstructionForChoice())
+                                                                .choices(
+                                                                        q.getChoices().stream()
+                                                                                .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
+                                                                                        .choiceId(c.getChoiceId().toString())
+                                                                                        .label(c.getLabel())
+                                                                                        .choiceOrder(c.getChoiceOrder())
+                                                                                        .isCorrect(c.isCorrect())
+                                                                                        .content(c.getContent())
+                                                                                        .build())
+                                                                                .toList()
+                                                                )
+                                                                .blankIndex(q.getBlankIndex())
+                                                                .correctAnswer(q.getCorrectAnswer())
+                                                                .instructionForMatching(q.getInstructionForMatching())
+                                                                .correctAnswerForMatching(q.getCorrectAnswerForMatching())
+                                                                .zoneIndex(q.getZoneIndex())
+                                                                .dragItemId(q.getDragItem() == null
+                                                                        ? null
+                                                                        : q.getDragItem().getDragItemId().toString())
+                                                                .build())
+                                                        .toList()
+                                        )
+                                        .build())
+                                .toList()
+                )
                 .build();
     }
+
+
 
     @Override
     public void deletePassage(UUID passageId) {

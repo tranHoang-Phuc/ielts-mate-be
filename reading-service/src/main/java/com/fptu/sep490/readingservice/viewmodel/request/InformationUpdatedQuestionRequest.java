@@ -5,8 +5,7 @@ import com.fptu.sep490.readingservice.model.enumeration.QuestionCategory;
 
 import java.util.List;
 
-public record InformationUpdatedQuestionRequest(
-        @JsonProperty("explanation")
+public record InformationUpdatedQuestionRequest(@JsonProperty("explanation")
     String explanation,
     @JsonProperty("point")
     Integer point,

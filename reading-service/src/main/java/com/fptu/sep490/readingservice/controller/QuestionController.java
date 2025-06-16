@@ -6,7 +6,6 @@ import com.fptu.sep490.readingservice.service.QuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.InformationUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
-import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -28,14 +28,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -330,6 +329,88 @@ public class AttemptServiceImpl implements AttemptService {
                 .answers(answerChoices)
                 .duration(attempt.getDuration())
                 .build();
+    }
+
+    @Override
+    public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) {
+
+
+        Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        List<Question> questions = questionRepository.findAllByReadingPassage(attempt.getReadingPassage());
+
+        Map<UUID, QuestionAttempt> correctAnswers = getCorrectAnswer(questions);
+        String userId = getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if (attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        attempt.setStatus(Status.FINISHED);
+        attempt.setDuration(answers.duration());
+
+        attempt.setFinishedAt(LocalDateTime.now());
+        return null;
+    }
+
+    private Map<UUID, QuestionAttempt> getCorrectAnswer(List<Question> questions) {
+        Map<UUID, QuestionAttempt> correctAnswers = new HashMap<>();
+        for (Question q : questions) {
+
+            QuestionAttempt questionAttempt = QuestionAttempt.builder()
+                    .questionType(q.getQuestionType().ordinal())
+                    .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                    .build();
+
+            switch (q.getQuestionType()) {
+                case MULTIPLE_CHOICE -> {
+                    List<String> correctIdStrings = choiceRepository.findCorrectChoiceByQuestion(q).stream()
+                            .map(Choice::getChoiceId)
+                            .map(UUID::toString)
+                            .collect(Collectors.toList());
+                    questionAttempt.setCorrectAnswer(correctIdStrings);
+                    correctAnswers.put(q.getQuestionId(), questionAttempt);
+                }
+
+                case FILL_IN_THE_BLANKS -> {
+                    questionAttempt.setCorrectAnswer(Collections.singletonList(q.getCorrectAnswer()));
+                    correctAnswers.put(q.getQuestionId(), questionAttempt);
+                }
+
+                case MATCHING -> {
+                    String correctAnswerForMatching = q.getCorrectAnswerForMatching();
+                    questionAttempt.setCorrectAnswer(Collections.singletonList(correctAnswerForMatching));
+                    correctAnswers.put(q.getQuestionId(), questionAttempt);
+                }
+
+                case DRAG_AND_DROP -> {
+                    DragItem dragItems = dragItemRepository.findByQuestion(q).orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
+                            Constants.ErrorCode.DRAG_ITEM_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+
+                    questionAttempt.setCorrectAnswer(Collections.singletonList(dragItems.getDragItemId().toString()));
+                    correctAnswers.put(q.getQuestionId(), questionAttempt);
+                }
+            }
+
+        }
+        return correctAnswers;
     }
 
 

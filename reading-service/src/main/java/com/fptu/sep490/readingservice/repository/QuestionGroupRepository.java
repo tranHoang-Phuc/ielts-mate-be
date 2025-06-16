@@ -18,5 +18,6 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
     @Query("SELECT qg FROM QuestionGroup qg JOIN qg.readingPassage rp WHERE rp.passageId = :passageId")
     List<QuestionGroup> findAllByReadingPassageByPassageId(@Param("passageId") UUID passageId);
 
+
 }
 

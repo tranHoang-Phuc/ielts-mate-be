@@ -6,6 +6,7 @@ import com.fptu.sep490.readingservice.service.AttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserDataAttempt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -69,4 +70,19 @@ public class AttemptController {
                 .message(null)
                 .build());
     }
+
+    @PutMapping("/submit/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            HttpServletRequest request,
+            @RequestBody SavedAnswersRequestList answers
+    ) {
+        SubmittedAttemptResponse data = attemptService.submitAttempt(attemptId, request, answers);
+        return ResponseEntity.ok(BaseResponse.<SubmittedAttemptResponse>builder()
+                .data(data)
+                .message("Submit attempt successfully")
+                .build());
+    }
+
 }
