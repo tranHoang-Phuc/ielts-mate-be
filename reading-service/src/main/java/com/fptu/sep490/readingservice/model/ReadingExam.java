@@ -82,18 +82,10 @@ public class ReadingExam {
     private Boolean isDeleted = false;
 
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "parent_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_reading_exam_parent")
-    )
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
     private ReadingExam parent;
 
-    @OneToOne(
-            mappedBy = "parent",
-            fetch = FetchType.LAZY
-    )
-    private ReadingExam child;
-
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ReadingExam> children = new ArrayList<>();
 }
