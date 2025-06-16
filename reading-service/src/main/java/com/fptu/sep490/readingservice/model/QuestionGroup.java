@@ -39,6 +39,7 @@ public class QuestionGroup {
     private String instruction;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
     private String sentenceWithBlanks;
 
