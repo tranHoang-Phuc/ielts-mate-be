@@ -17,4 +17,16 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
     Page<ReadingPassage> findAll(Specification<ReadingPassage> spec, Pageable pageable);
     Optional<ReadingPassage> findById(UUID passageId);
 
+    @Query("""
+    SELECT p FROM ReadingPassage p
+    WHERE p.parent = :parent AND p.isCurrent = true
+    """
+    )
+    Optional<ReadingPassage> findCurrentVersionByParent(ReadingPassage parent);
+
+    @Query("""
+        SELECT p FROM ReadingPassage p 
+        WHERE (p.passageId = :passageId OR p.parent.passageId = :passageId )AND p.isCurrent = true
+    """)
+    Optional<ReadingPassage> findCurrentVersionById(UUID passageId);
 }

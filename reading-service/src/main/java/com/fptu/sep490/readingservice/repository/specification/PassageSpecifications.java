@@ -69,17 +69,15 @@ public class PassageSpecifications {
                 query.distinct(true);
             }
             
-            // Filter by title (case-insensitive partial match)
             if (title != null && !title.isBlank()) {
                 predicates.add(cb.like(cb.lower(root.get("title")), "%" + title.toLowerCase() + "%"));
             }
             
-            // Filter by created by (case-insensitive partial match)
             if (createdBy != null && !createdBy.isBlank()) {
                 predicates.add(cb.like(cb.lower(root.get("createdBy")), "%" + createdBy.toLowerCase() + "%"));
             }
-
-            // Default to sort by updated_at in descending order
+            predicates.add(cb.isFalse(root.get("isDeleted")));
+            predicates.add(cb.isTrue(root.get("isOriginal")));
             final String finalSortField = sortBy != null ? sortBy : "updatedAt";
             final String finalSortDirection = sortDirection != null ? sortDirection : "desc";
 
