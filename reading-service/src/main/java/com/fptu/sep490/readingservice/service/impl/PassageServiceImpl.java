@@ -160,6 +160,7 @@ public class PassageServiceImpl implements PassageService {
                 passage.setTitle(lastVersion.getTitle());
                 passage.setIeltsType(lastVersion.getIeltsType());
                 passage.setPartNumber(lastVersion.getPartNumber());
+                passage.setPassageStatus(lastVersion.getPassageStatus());
             }
         }
 
@@ -437,17 +438,22 @@ public class PassageServiceImpl implements PassageService {
                                                                                 .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
                                                                                         .choiceId(c.getChoiceId().toString())
                                                                                         .label(c.getLabel())
+                                                                                        .choiceOrder(c.getChoiceOrder())
                                                                                         .content(c.getContent())
                                                                                         .isCorrect(c.isCorrect())
                                                                                         .build())
+                                                                                .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
                                                                                 .toList()
                                                                         : q.getParent().getChoices().stream()
                                                                         .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
                                                                         .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
                                                                                 .choiceId(c.getChoiceId().toString())
+                                                                                .label(c.getLabel())
+                                                                                .choiceOrder(c.getChoiceOrder())
                                                                                 .content(c.getContent())
                                                                                 .isCorrect(c.isCorrect())
                                                                                 .build())
+                                                                        .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
                                                                         .toList()
                                                                 )
                                                                 .blankIndex(q.getBlankIndex())
@@ -459,9 +465,14 @@ public class PassageServiceImpl implements PassageService {
                                                                         ? null
                                                                         : q.getDragItem().getDragItemId().toString())
                                                                 .build())
+                                                        .sorted(Comparator.comparing(PassageAttemptResponse.
+                                                                ReadingPassageResponse.QuestionGroupResponse.
+                                                                QuestionResponse::questionOrder))
                                                         .toList()
                                         )
                                         .build())
+                                .sorted(Comparator.comparing(PassageAttemptResponse.ReadingPassageResponse.
+                                        QuestionGroupResponse::sectionOrder))
                                 .toList()
                 )
                 .build();
