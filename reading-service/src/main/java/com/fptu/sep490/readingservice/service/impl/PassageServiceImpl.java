@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.model.Choice;
 import com.fptu.sep490.readingservice.model.Question;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
@@ -146,12 +147,23 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
+    @Transactional
     public PassageDetailResponse updatePassage(UUID passageId, UpdatedPassageRequest request,
                                                HttpServletRequest httpServletRequest) {
         String userId = getUserIdFromToken(httpServletRequest);
         ReadingPassage entity  = readingPassageRepository.findById(passageId)
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+
+        List<ReadingPassage> allVersions = readingPassageRepository.findAllVersion(entity.getPassageId());
+        int currentVersion = 0;
+        for (ReadingPassage version : allVersions) {
+            version.setIsCurrent(false);
+            if(version.getVersion() > currentVersion) {
+                currentVersion = version.getVersion();
+            }
+        }
+        readingPassageRepository.saveAll(allVersions);
 
         if (request.title()== null) {
             throw new AppException(
@@ -229,7 +241,7 @@ public class PassageServiceImpl implements PassageService {
                 .createdBy(userId)
                 .updatedBy(userId)
                 .isCurrent(true)
-                .version(entity.getVersion() + 1)
+                .version(currentVersion + 1)
                 .isDeleted(false)
                 .isOriginal(false)
                 .parent(entity)
@@ -304,13 +316,25 @@ public class PassageServiceImpl implements PassageService {
         List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
 
         Map<QuestionGroup, List<Question>> questionGroupMap = new HashMap<>();
+        Map<UUID, List<Choice>> choiceMap = new HashMap<>();
 
         for (QuestionGroup group : questionGroups) {
             List<Question> filteredQuestions = group.getQuestions().stream()
                     .filter(Objects::nonNull)
                     .filter(q -> (q.getParent() == null && Boolean.TRUE.equals(q.getIsOriginal()))
                             || Boolean.TRUE.equals(q.getIsCurrent()))
+                    .filter(q -> !Boolean.TRUE.equals(q.getIsDeleted()))
                     .collect(Collectors.toList());
+
+            for (Question q : filteredQuestions) {
+                List<Choice> filteredChoices = q.getChoices().stream()
+                        .filter(Objects::nonNull)
+                        .filter(c -> (c.getParent() == null && Boolean.TRUE.equals(c.getIsOriginal()))
+                                || Boolean.TRUE.equals(c.getIsCurrent()))
+                        .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
+                        .collect(Collectors.toList());
+                choiceMap.put(q.getQuestionId(), filteredChoices);
+            }
 
             questionGroupMap.put(group, filteredQuestions);
         }
@@ -383,16 +407,24 @@ public class PassageServiceImpl implements PassageService {
                                                                 .explanation(q.getExplanation())
                                                                 .point(q.getPoint())
                                                                 .instructionForChoice(q.getInstructionForChoice())
-                                                                .choices(
+                                                                .choices((q.getParent() == null && Boolean.TRUE.equals(g.getIsCurrent())) ?
                                                                         q.getChoices().stream()
+                                                                                .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
                                                                                 .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
                                                                                         .choiceId(c.getChoiceId().toString())
                                                                                         .label(c.getLabel())
-                                                                                        .choiceOrder(c.getChoiceOrder())
-                                                                                        .isCorrect(c.isCorrect())
                                                                                         .content(c.getContent())
+                                                                                        .isCorrect(c.isCorrect())
                                                                                         .build())
                                                                                 .toList()
+                                                                        : q.getParent().getChoices().stream()
+                                                                        .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
+                                                                        .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
+                                                                                .choiceId(c.getChoiceId().toString())
+                                                                                .content(c.getContent())
+                                                                                .isCorrect(c.isCorrect())
+                                                                                .build())
+                                                                        .toList()
                                                                 )
                                                                 .blankIndex(q.getBlankIndex())
                                                                 .correctAnswer(q.getCorrectAnswer())
@@ -413,14 +445,17 @@ public class PassageServiceImpl implements PassageService {
 
 
 
+
     @Override
     public void deletePassage(UUID passageId) {
-        var existingPassage = readingPassageRepository.existsById(passageId);
-        if (!existingPassage) {
-            throw new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
-                    Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value());
-        }
-        readingPassageRepository.deleteById(passageId);
+        var existingPassage = readingPassageRepository.findById(passageId)
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        existingPassage.setIsDeleted(true);
+        readingPassageRepository.save(existingPassage);
         log.info("Passage with ID {} has been deleted successfully", passageId);
     }
 

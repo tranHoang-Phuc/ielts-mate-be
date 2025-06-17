@@ -324,8 +324,6 @@ public class ReadingPassageController {
             HttpServletRequest httpServletRequest
 
     ) throws Exception {
-        // This method should return all question groups for teacher
-        // Implementation is not provided in the original code, so returning an empty list for now
         List<AddGroupQuestionResponse> response = groupQuestionService.getAllQuestionsGroupsOfPassages(passageId, httpServletRequest);
         BaseResponse<List<AddGroupQuestionResponse>> body = BaseResponse.<List<AddGroupQuestionResponse>>builder()
                 .data(response)

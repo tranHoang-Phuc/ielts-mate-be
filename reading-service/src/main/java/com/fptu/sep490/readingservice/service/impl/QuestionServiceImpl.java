@@ -126,6 +126,10 @@ public class QuestionServiceImpl implements QuestionService {
                             .content(choice.content())
                             .choiceOrder(choice.choiceOrder())
                             .isCorrect(choice.isCorrect())
+                            .isOriginal(true)
+                            .isCurrent(true)
+                            .version(1)
+                            .isDeleted(false)
                             .question(savedQuestion)
                             .build();
                     choices.add(savedChoice);
@@ -392,9 +396,21 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
                     Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
         }
+
+
         List<QuestionCategory> categories = questionCreationRequest.questionCategories().stream()
                 .map(QuestionCategory::valueOf)
                 .toList();
+
+        List<Question> previousVersions = questionRepository.findAllVersionByQuestionId(question);
+
+        int currentVersion =0;
+        for(Question previousVersion : previousVersions) {
+            previousVersion.setIsCurrent(false);
+            if(previousVersion.getVersion() > currentVersion) {
+                currentVersion = previousVersion.getVersion();
+            }
+        }
 
         if (questionCreationRequest.questionType() == QuestionType.MULTIPLE_CHOICE.ordinal()) {
 
@@ -411,7 +427,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .isCurrent(true)
                     .isDeleted(false)
                     .parent(question)
-                    .version(question.getVersion() + 1)
+                    .version(currentVersion + 1)
                     .point(questionCreationRequest.point())
                     .instructionForChoice(questionCreationRequest.instructionForChoice())
                     .build();
@@ -459,7 +475,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .isCurrent(true)
                     .isDeleted(false)
                     .parent(question)
-                    .version(question.getVersion() + 1)
+                    .version(currentVersion + 1)
                     .build();
 
         question.setIsCurrent(false);
@@ -498,7 +514,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .isCurrent(true)
                     .isDeleted(false)
                     .parent(question)
-                    .version(question.getVersion() + 1)
+                    .version(currentVersion + 1)
                     .build();
 
             question.setIsCurrent(false);
@@ -542,7 +558,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .isCurrent(true)
                     .isDeleted(false)
                     .parent(question)
-                    .version(question.getVersion() + 1)
+                    .version(currentVersion + 1)
                     .build();
 
             question.setIsCurrent(false);
@@ -728,12 +744,12 @@ public class QuestionServiceImpl implements QuestionService {
                             .collect(Collectors.toSet()))
                     .instructionForChoice(informationRequest.instructionForChoice())
                     .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers())
-                    .categories(question.getCategories())
                     .parent(question)
                     .questionGroup(question.getQuestionGroup())
                     .version(lastVersion + 1)
                     .isOriginal(false)
                     .isCurrent(true)
+                    .isDeleted(false)
                     .createdBy(userId)
                     .updatedBy(userId)
                     .build();
@@ -759,6 +775,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .version(lastVersion + 1)
                     .isOriginal(false)
                     .isCurrent(true)
+                    .isDeleted(false)
                     .createdBy(userId)
                     .updatedBy(userId)
                     .build();
@@ -783,6 +800,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .version(lastVersion + 1)
                     .isOriginal(false)
                     .isCurrent(true)
+                    .isDeleted(false)
                     .createdBy(userId)
                     .updatedBy(userId)
                     .build();
@@ -813,6 +831,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .version(lastVersion + 1)
                     .isOriginal(false)
                     .isCurrent(true)
+                    .isDeleted(false)
                     .createdBy(userId)
                     .updatedBy(userId)
                     .build();

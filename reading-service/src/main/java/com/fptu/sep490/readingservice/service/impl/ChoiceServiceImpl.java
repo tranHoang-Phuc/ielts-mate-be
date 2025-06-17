@@ -122,7 +122,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<Choice> choices = choiceRepository.findByQuestion(question);
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question, false);
         if (choices.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.CHOICES_LIST_EMPTY,
                     Constants.ErrorCode.CHOICES_LIST_EMPTY, HttpStatus.NOT_FOUND.value());
@@ -147,7 +147,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<Choice> choices = choiceRepository.findByQuestion(question);
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question, false);
         if (!choices.isEmpty()) {
             for (Choice existingChoice : choices) {
                 if (existingChoice.isCorrect()) {
@@ -168,6 +168,10 @@ public class ChoiceServiceImpl implements ChoiceService {
                 .choiceOrder(choice.choiceOrder())
                 .isCorrect(choice.isCorrect())
                 .label(choice.label())
+                .isDeleted(false)
+                .isOriginal(true)
+                .isCurrent(true)
+                .version(1)
                 .question(question)
                 .build();
         Choice saved = choiceRepository.save(newChoice);
@@ -191,9 +195,19 @@ public class ChoiceServiceImpl implements ChoiceService {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                     Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value());
         }
-        String userId = getUserIdFromToken(request);
+
+        int currentVersion = 0;
+        List<Choice> previousVersions = choiceRepository.findAllVersion(existingChoice.getChoiceId());
+        for(Choice c : previousVersions) {
+            c.setIsDeleted(false);
+            if(c.getVersion() > currentVersion) {
+                currentVersion = c.getVersion();
+            }
+        }
+        choiceRepository.saveAll(previousVersions);
+
         int numberOfCorrectAnswers = 0;
-        List<Choice> choices = choiceRepository.findByQuestion(existingChoice.getQuestion());
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(existingChoice.getQuestion(), false);
         for (Choice existing : choices) {
             if (existing.isCorrect()) {
                 numberOfCorrectAnswers++;
@@ -206,26 +220,55 @@ public class ChoiceServiceImpl implements ChoiceService {
             throw new AppException(Constants.ErrorCodeMessage.INVALID_NUMBER_OF_CORRECT_ANSWERS,
                     Constants.ErrorCode.INVALID_NUMBER_OF_CORRECT_ANSWERS, HttpStatus.BAD_REQUEST.value());
         }
-        if(choice.label() != null || !choice.label().isEmpty()) {
-            existingChoice.setLabel(choice.label());
+        if(choice.label() == null || choice.label().isEmpty()) {
+           throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
-        if(choice.content() != null || !choice.content().isEmpty()) {
-            existingChoice.setContent(choice.content());
+        if(choice.content() == null || choice.content().isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
-        if(choice.choiceOrder() != null || choice.choiceOrder() >= 0) {
-            reOrderChoices(choices , choice.choiceOrder(), existingChoice);
+        if(choice.choiceOrder() == null || choice.choiceOrder() < 0) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
         if (choice.isCorrect() != null) {
-            existingChoice.setCorrect(choice.isCorrect());
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
         }
 
-        choiceRepository.save(existingChoice);
+        Choice newVersion = Choice.builder()
+                .choiceId(existingChoice.getChoiceId())
+                .content(choice.content())
+                .choiceOrder(choice.choiceOrder())
+                .isCorrect(choice.isCorrect())
+                .label(choice.label())
+                .isDeleted(false)
+                .isOriginal(false)
+                .isCurrent(true)
+                .version(currentVersion + 1)
+                .question(existingChoice.getQuestion())
+                .build();
+
+        choiceRepository.save(newVersion);
         return QuestionCreationResponse.ChoiceResponse.builder()
                 .choiceId(existingChoice.getChoiceId().toString())
-                .content(existingChoice.getContent())
-                .choiceOrder(existingChoice.getChoiceOrder())
-                .isCorrect(existingChoice.isCorrect())
-                .label(existingChoice.getLabel())
+                .content(newVersion.getContent())
+                .choiceOrder(newVersion.getChoiceOrder())
+                .isCorrect(newVersion.isCorrect())
+                .label(newVersion.getLabel())
                 .build();
     }
 
@@ -273,9 +316,10 @@ public class ChoiceServiceImpl implements ChoiceService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        choiceRepository.delete(choice);
+        choice.setIsDeleted(true);
+        choiceRepository.save(choice);
         question.getChoices().removeIf(c -> c.getChoiceId().equals(choiceUuid));
-        List<Choice> remainingChoices = choiceRepository.findByQuestion(question);
+        List<Choice> remainingChoices = choiceRepository.findByQuestionAndIsDeleted(question, false);
         remainingChoices.sort(Comparator.comparingInt(Choice::getChoiceOrder));
         for (int i = 0; i < remainingChoices.size(); i++) {
             remainingChoices.get(i).setChoiceOrder(i + 1);

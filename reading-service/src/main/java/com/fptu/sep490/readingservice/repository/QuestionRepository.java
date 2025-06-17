@@ -35,4 +35,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
             WHERE q.questionId = :questionId OR q.parent.questionId = :questionId
     """)
     List<Question> findAllPreviousVersion(UUID questionId);
+
+    @Query("""
+        SELECT q FROM Question q
+        WHERE q.questionId = :questionId OR q.parent.questionId = :questionId
+    """)
+    List<Question> findAllVersionByQuestionId(Question question);
 }
