@@ -216,9 +216,10 @@ public class ChoiceServiceImpl implements ChoiceService {
         if (choice.isCorrect()) {
             numberOfCorrectAnswers++;
         }
-        if (numberOfCorrectAnswers > existingChoice.getQuestion().getNumberOfCorrectAnswers()) {
-            throw new AppException(Constants.ErrorCodeMessage.INVALID_NUMBER_OF_CORRECT_ANSWERS,
-                    Constants.ErrorCode.INVALID_NUMBER_OF_CORRECT_ANSWERS, HttpStatus.BAD_REQUEST.value());
+        if (numberOfCorrectAnswers != existingChoice.getQuestion().getNumberOfCorrectAnswers()) {
+            // update the number of correct answers in the question
+            existingChoice.getQuestion().setNumberOfCorrectAnswers(numberOfCorrectAnswers);
+            questionRepository.save(existingChoice.getQuestion());
         }
         if(choice.label() == null || choice.label().isEmpty()) {
            throw new AppException(
