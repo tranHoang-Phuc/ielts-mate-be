@@ -122,7 +122,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question, false);
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question, false);
         if (choices.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.CHOICES_LIST_EMPTY,
                     Constants.ErrorCode.CHOICES_LIST_EMPTY, HttpStatus.NOT_FOUND.value());
@@ -147,7 +147,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question, false);
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question, false);
         if (!choices.isEmpty()) {
             for (Choice existingChoice : choices) {
                 if (existingChoice.isCorrect()) {
@@ -207,7 +207,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         choiceRepository.saveAll(previousVersions);
 
         int numberOfCorrectAnswers = 0;
-        List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(existingChoice.getQuestion(), false);
+        List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(existingChoice.getQuestion(), false);
         for (Choice existing : choices) {
             if (existing.isCorrect()) {
                 numberOfCorrectAnswers++;
@@ -241,7 +241,7 @@ public class ChoiceServiceImpl implements ChoiceService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        if (choice.isCorrect() != null) {
+        if (choice.isCorrect() == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST,
@@ -319,7 +319,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         choice.setIsDeleted(true);
         choiceRepository.save(choice);
         question.getChoices().removeIf(c -> c.getChoiceId().equals(choiceUuid));
-        List<Choice> remainingChoices = choiceRepository.findByQuestionAndIsDeleted(question, false);
+        List<Choice> remainingChoices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question, false);
         remainingChoices.sort(Comparator.comparingInt(Choice::getChoiceOrder));
         for (int i = 0; i < remainingChoices.size(); i++) {
             remainingChoices.get(i).setChoiceOrder(i + 1);

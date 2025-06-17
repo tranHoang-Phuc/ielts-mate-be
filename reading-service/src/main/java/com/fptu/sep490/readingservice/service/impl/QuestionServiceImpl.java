@@ -902,7 +902,9 @@ public class QuestionServiceImpl implements QuestionService {
         }
         questionGroup.getQuestions().remove(question);
         question.setQuestionGroup(null);
-        questionRepository.delete(question);
+        question.setIsDeleted(false);
+        question.setIsCurrent(false);
+        questionRepository.save(question);
         questionGroup.setUpdatedBy(userId);
         questionGroupRepository.save(questionGroup);
     }

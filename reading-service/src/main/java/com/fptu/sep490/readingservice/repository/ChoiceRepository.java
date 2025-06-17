@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
-    List<Choice> findByQuestionAndIsDeleted(Question question, boolean isDeleted);
+    List<Choice> findByQuestionAndIsDeletedOrderByChoiceOrderAsc(Question question, Boolean isDeleted);
 
     @Query("""
         SELECT c FROM Choice c JOIN Question q ON c.question = q

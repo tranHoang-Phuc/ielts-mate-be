@@ -19,5 +19,12 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
     List<QuestionGroup> findAllByReadingPassageByPassageId(@Param("passageId") UUID passageId);
 
 
+    @Query("""
+        SELECT qg FROM QuestionGroup qg 
+        WHERE (qg.readingPassage.passageId = :passageId AND qg.isCurrent = true) 
+            OR 
+              (qg.readingPassage.parent.passageId = :passageId AND qg.isCurrent = true)      
+    """)
+    List<QuestionGroup> findAllCurrentVersionGroupsByPassageId(UUID passageId);
 }
 

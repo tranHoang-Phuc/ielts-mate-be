@@ -43,7 +43,12 @@ public class Attempt {
     @Column(name ="finished_at")
     private LocalDateTime finishedAt;
 
+    @Column(name= "version",  columnDefinition = "JSONB")
+    private String version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "reading_passage_id", nullable = false)
     private ReadingPassage readingPassage;
+
+
 }

@@ -19,6 +19,7 @@ import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
+import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -75,6 +76,13 @@ public class AttemptServiceImpl implements AttemptService {
                         HttpStatus.NOT_FOUND.value()
                 ));
 
+        ReadingPassage currentVersion = readingPassageRepository.findCurrentVersionById(passage.getPassageId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
         if (passage.getPassageStatus() == null || passage.getPassageStatus() != Status.PUBLISHED) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PASSAGE_NOT_ACTIVE,
@@ -82,6 +90,9 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
+
+        List<QuestionGroup> currentVersionGroups = questionGroupRepository.findAllCurrentVersionGroupsByPassageId(passage.getPassageId());
+
 
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(passage.getPassageId());
         if (questionGroups.isEmpty()) {
@@ -109,7 +120,7 @@ public class AttemptServiceImpl implements AttemptService {
 
             for (Question question : questions) {
                 if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
-                    List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question,false);
+                    List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question,false);
                     choicesByQuestion.put(question.getQuestionId(), choices);
                 }
                 dragItemRepository.findByQuestion(question).ifPresent(di -> {
