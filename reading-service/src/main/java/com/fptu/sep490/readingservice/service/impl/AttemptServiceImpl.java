@@ -109,7 +109,7 @@ public class AttemptServiceImpl implements AttemptService {
 
             for (Question question : questions) {
                 if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
-                    List<Choice> choices = choiceRepository.findByQuestion(question);
+                    List<Choice> choices = choiceRepository.findByQuestionAndIsDeleted(question,false);
                     choicesByQuestion.put(question.getQuestionId(), choices);
                 }
                 dragItemRepository.findByQuestion(question).ifPresent(di -> {

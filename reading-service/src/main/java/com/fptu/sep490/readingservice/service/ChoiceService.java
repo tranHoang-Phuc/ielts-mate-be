@@ -12,9 +12,11 @@ public interface ChoiceService {
 
     List<QuestionCreationResponse.ChoiceResponse> getAllChoicesOfQuestion(String questionId);
 
-    QuestionCreationResponse.ChoiceResponse createChoice(String questionId, ChoiceCreation choice, HttpServletRequest request) throws JsonProcessingException;
+    QuestionCreationResponse.ChoiceResponse
+        createChoice(String questionId, ChoiceCreation choice, HttpServletRequest request) throws JsonProcessingException;
 
-    QuestionCreationResponse.ChoiceResponse updateChoice(String questionId, String choiceId, UpdatedChoiceRequest choice, HttpServletRequest request);
+    QuestionCreationResponse.ChoiceResponse
+        updateChoice(String questionId, String choiceId, UpdatedChoiceRequest choice, HttpServletRequest request);
 
     void deleteChoice(String questionId, String choiceId, HttpServletRequest request);
 }

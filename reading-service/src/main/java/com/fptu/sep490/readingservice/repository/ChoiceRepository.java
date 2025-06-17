@@ -9,11 +9,17 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
-    List<Choice> findByQuestion(Question question);
+    List<Choice> findByQuestionAndIsDeleted(Question question, boolean isDeleted);
 
     @Query("""
         SELECT c FROM Choice c JOIN Question q ON c.question = q
         WHERE q = :q AND c.isCorrect = true
     """)
     List<Choice> findCorrectChoiceByQuestion(Question q);
+
+    @Query("""
+        SELECT c FROM Choice c
+        WHERE c.choiceId = :choiceId OR c.parent.choiceId = :choiceId
+    """)
+    List<Choice> findAllVersion(UUID choiceId);
 }

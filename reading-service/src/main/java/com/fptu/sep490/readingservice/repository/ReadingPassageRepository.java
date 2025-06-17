@@ -39,4 +39,10 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
         (rp.parent.passageId IN :ids AND rp.isCurrent = true)
     """)
     List<ReadingPassage> findCurrentVersionsByIds(@Param("ids") List<UUID> ids);
+
+    @Query("""
+    SELECT p FROM ReadingPassage p
+    WHERE p.passageId = :id OR p.parent.passageId = :id
+""")
+    List<ReadingPassage> findAllVersion(@Param("id") UUID passageId);
 }
