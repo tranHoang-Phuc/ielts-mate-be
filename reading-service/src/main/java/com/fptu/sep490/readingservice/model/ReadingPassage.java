@@ -44,6 +44,7 @@ public class ReadingPassage {
     private String title;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     @Column(name = "content", nullable = false)
     private String content;
 
@@ -52,6 +53,7 @@ public class ReadingPassage {
     private Status passageStatus;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     @Column(name = "content_with_highlight_keyword")
     private String contentWithHighlightKeyword;
 

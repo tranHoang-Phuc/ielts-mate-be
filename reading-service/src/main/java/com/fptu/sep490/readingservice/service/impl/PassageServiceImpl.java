@@ -32,9 +32,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -46,6 +44,7 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -127,6 +126,7 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PassageGetResponse> getPassages(
             int page,
             int size,
@@ -142,8 +142,32 @@ public class PassageServiceImpl implements PassageService {
         Pageable pageable = PageRequest.of(page, size);
         var spec = PassageSpecifications.byConditions(ieltsType, status, partNumber, questionCategory, sortBy, sortDirection, title, createdBy);
         Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
+        List<ReadingPassage> passages = pageResult.getContent();
 
-        return pageResult.map(this::toPassageGetResponse);
+        List<UUID> passageIds = passages.stream()
+                .map(ReadingPassage::getPassageId)
+                .toList();
+
+        Map<UUID, ReadingPassage> latestVersions = readingPassageRepository
+                .findCurrentVersionsByIds(passageIds)
+                .stream()
+                .collect(Collectors.toMap(rp -> rp.getParent() == null ? rp.getPassageId() :
+                        rp.getParent().getPassageId(), Function.identity()));
+
+        for (ReadingPassage passage : passages) {
+            ReadingPassage lastVersion = latestVersions.get(passage.getPassageId());
+            if (lastVersion != null) {
+                passage.setTitle(lastVersion.getTitle());
+                passage.setIeltsType(lastVersion.getIeltsType());
+                passage.setPartNumber(lastVersion.getPartNumber());
+            }
+        }
+
+        List<PassageGetResponse> responseList = passages.stream()
+                .map(this::toPassageGetResponse)
+                .toList();
+
+        return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
     }
 
     @Override
@@ -460,6 +484,7 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PassageGetResponse> getActivePassages(int page,
                                                       int size,
                                                       List<Integer> ieltsType,
@@ -471,11 +496,39 @@ public class PassageServiceImpl implements PassageService {
                                                       String createdBy) {
 
         Pageable pageable = PageRequest.of(page, size);
-        var spec = PassageSpecifications.byConditions(ieltsType, List.of(1), partNumber, questionCategory, sortBy, sortDirection, title, createdBy);
-        Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
+        var spec = PassageSpecifications.byConditions(
+                ieltsType, List.of(1), partNumber, questionCategory,
+                sortBy, sortDirection, title, createdBy
+        );
 
-        return pageResult.map(this::toPassageGetResponse);
+        Page<ReadingPassage> pageResult = readingPassageRepository.findAll(spec, pageable);
+        List<ReadingPassage> passages = pageResult.getContent();
+
+        List<UUID> passageIds = passages.stream()
+                .map(ReadingPassage::getPassageId)
+                .toList();
+
+        Map<UUID, ReadingPassage> latestVersions = readingPassageRepository
+                .findCurrentVersionsByIds(passageIds)
+                .stream()
+                .collect(Collectors.toMap(ReadingPassage::getPassageId, Function.identity()));
+
+        for (ReadingPassage passage : passages) {
+            ReadingPassage lastVersion = latestVersions.get(passage.getPassageId());
+            if (lastVersion != null) {
+                passage.setTitle(lastVersion.getTitle());
+                passage.setIeltsType(lastVersion.getIeltsType());
+                passage.setPartNumber(lastVersion.getPartNumber());
+            }
+        }
+
+        List<PassageGetResponse> responseList = passages.stream()
+                .map(this::toPassageGetResponse)
+                .toList();
+
+        return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
     }
+
 
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
