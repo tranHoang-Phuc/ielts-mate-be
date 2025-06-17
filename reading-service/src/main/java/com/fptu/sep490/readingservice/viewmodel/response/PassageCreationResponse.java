@@ -16,6 +16,10 @@ public record PassageCreationResponse(
         int passageStatus,
         @JsonProperty("title")
         String title,
+        @JsonProperty("content")
+        String content,
+        @JsonProperty("content_with_highlight_keyword")
+        String contentWithHighlightKeyword,
         @JsonProperty("created_by")
         UserInformationResponse createdBy,
         @JsonProperty("updated_by")
