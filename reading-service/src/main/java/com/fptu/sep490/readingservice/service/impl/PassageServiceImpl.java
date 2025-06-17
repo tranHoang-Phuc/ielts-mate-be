@@ -107,6 +107,8 @@ public class PassageServiceImpl implements PassageService {
                 .ieltsType(saved.getIeltsType().ordinal())
                 .partNumber(saved.getPartNumber().ordinal())
                 .passageStatus(saved.getPassageStatus().ordinal())
+                .content(saved.getContent())
+                .contentWithHighlightKeyword(saved.getContentWithHighlightKeyword())
                 .title(saved.getTitle())
                 .createdBy(UserInformationResponse.builder()
                         .userId(createdUserProfileResponse.id())
