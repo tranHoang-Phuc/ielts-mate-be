@@ -219,6 +219,7 @@ public class AttemptServiceImpl implements AttemptService {
                                                         .questionId(question.getQuestionId())
                                                         .questionOrder(question.getQuestionOrder())
                                                         .questionType(question.getQuestionType().ordinal())
+                                                        .instructionForChoice(question.getInstructionForChoice())
                                                         .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
                                                         .instructionForMatching(question.getInstructionForMatching())
                                                         .choices(choiceResponses)
