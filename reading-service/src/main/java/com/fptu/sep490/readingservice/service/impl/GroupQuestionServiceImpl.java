@@ -140,18 +140,29 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
     private QuestionGroup getLatestCurrentGroup(QuestionGroup group) {
         QuestionGroup current = group;
-        while (current.getChild() != null) {
-            if (Boolean.TRUE.equals(current.getChild().getIsCurrent()) && Boolean.FALSE.equals(current.getChild().getIsDeleted())) {
-                current = current.getChild();
-            } else {
-                break;
+
+        while (current.getChildren() != null && !current.getChildren().isEmpty()) {
+            boolean found = false;
+            for (QuestionGroup child : current.getChildren()) {
+                if (Boolean.TRUE.equals(child.getIsCurrent()) && Boolean.FALSE.equals(child.getIsDeleted())) {
+                    current = child;  // cập nhật current để duyệt tiếp
+                    found = true;
+                    break; // chỉ lấy 1 nhánh đầu tiên hợp lệ (giống logic cũ)
+                }
+            }
+
+            if (!found) {
+                break; // nếu không có child nào hợp lệ, thoát vòng lặp
             }
         }
+
         if (Boolean.TRUE.equals(current.getIsCurrent()) && Boolean.FALSE.equals(current.getIsDeleted())) {
             return current;
         }
+
         return null;
     }
+
 
     @Override
     public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
@@ -231,7 +242,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
 
-        // Get the latest current, not deleted version
+        // Find the latest current, not deleted version among originalGroup's children (or itself)
         QuestionGroup latestCurrentGroup = getLatestCurrentGroup(originalGroup);
         if (latestCurrentGroup == null) {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
@@ -241,7 +252,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         // Mark the current group as not current
         latestCurrentGroup.setIsCurrent(false);
 
-        // Create new group as a new version (child)
+        // Create new group as a new version (child of originalGroup)
         QuestionGroup newGroup = new QuestionGroup();
         newGroup.setReadingPassage(readingPassage);
         newGroup.setCreatedBy(userId);
@@ -249,7 +260,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         newGroup.setIsDeleted(false);
         newGroup.setIsOriginal(false);
         newGroup.setVersion(latestCurrentGroup.getVersion() + 1);
-        newGroup.setParent(latestCurrentGroup);
+        newGroup.setParent(originalGroup);
 
         // Only update fields present in request, otherwise copy from previous version
         newGroup.setSectionOrder(request.sectionOrder() != null ? request.sectionOrder() : latestCurrentGroup.getSectionOrder());
@@ -266,7 +277,6 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 groupDragItems.add(dragItem);
             }
         } else {
-            // Copy from previous version if not present in request
             for (DragItem oldItem : latestCurrentGroup.getDragItems()) {
                 DragItem dragItem = new DragItem();
                 dragItem.setContent(oldItem.getContent());
@@ -336,7 +346,6 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                 questions.add(question);
             }
         } else {
-            // Copy questions from previous version if not present in request
             for (Question oldQ : latestCurrentGroup.getQuestions()) {
                 Question question = new Question();
                 question.setQuestionOrder(oldQ.getQuestionOrder());
@@ -381,15 +390,14 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         }
         newGroup.setQuestions(questions);
 
-        // Bidirectional link
-        latestCurrentGroup.setChild(newGroup);
+        // Add newGroup to originalGroup's children
+        originalGroup.getChildren().add(newGroup);
 
-        // Save both parent and new group (cascade saves children)
-        questionGroupRepository.save(latestCurrentGroup);
+        // Save both parent and new group
+        questionGroupRepository.save(originalGroup);
         QuestionGroup savedGroup = questionGroupRepository.save(newGroup);
 
-        AddGroupQuestionResponse response = Helper.mapToGroupQuestionResponse(savedGroup, request);
-        return response;
+        return Helper.mapToGroupQuestionResponse(savedGroup, request);
     }
     @Override
     public void deleteGroupQuestion(String passageId, String groupId, HttpServletRequest httpsRequest) throws Exception {

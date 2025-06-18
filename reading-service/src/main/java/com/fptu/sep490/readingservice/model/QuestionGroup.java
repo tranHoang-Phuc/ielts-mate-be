@@ -82,8 +82,6 @@ public class QuestionGroup {
 
     @Column(name = "is_original")
     private Boolean isOriginal = true;
-    @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
