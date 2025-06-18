@@ -22,10 +22,7 @@ import com.fptu.sep490.readingservice.viewmodel.request.InformationUpdatedQuesti
 import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -630,6 +627,77 @@ public class QuestionServiceImpl implements QuestionService {
         questionGroupRepository.save(questionGroup);
     }
 
+    @Override
+    public CustGetListQuestionsByGroupIdResponse getListQuestionsByGroupId(String groupId, HttpServletRequest request) throws JsonProcessingException {
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+
+        List<Question> questions = questionRepository.findAllByQuestionGroupOrderByQuestionOrderAsc(questionGroup);
+        //data cho phép trả về mảng rỗng
+//        if (questions.isEmpty()) {
+//            throw new AppException(Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
+//                    Constants.ErrorCode.QUESTION_LIST_EMPTY, HttpStatus.NOT_FOUND.value());
+//        }
+
+        List<CustGetListQuestionsByGroupIdResponse.Question> responseQuestions = questions.stream()
+                .map(q -> new CustGetListQuestionsByGroupIdResponse.Question(
+                        q.getQuestionId().toString(),
+                        q.getQuestionOrder(),
+                        q.getPoint(),
+                        q.getQuestionType().ordinal(),
+                        q.getCategories().stream()
+                                .map(QuestionCategory::name)
+                                .toList(),
+                        q.getNumberOfCorrectAnswers(),
+                        q.getChoices().stream()
+                                .map(c -> new CustGetListQuestionsByGroupIdResponse.Question.Choice(
+                                        c.getChoiceId().toString(),
+                                        c.getLabel(),
+                                        c.getContent(),
+                                        c.getChoiceOrder()))
+                                .toList(),
+                        q.getBlankIndex(),
+                        q.getInstructionForMatching(),
+                        q.getZoneIndex()
+                )).toList();
+        return new CustGetListQuestionsByGroupIdResponse(questionGroup.getGroupId().toString(), responseQuestions);
+    }
+
+    @Override
+    public CustGetQuestionByIdResponse getQuestionById(String questionId, String groupId, HttpServletRequest request) throws JsonProcessingException {
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        if (!question.getQuestionGroup().equals(questionGroup)) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
+                    Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
+        }
+        CustGetQuestionByIdResponse response = CustGetQuestionByIdResponse.builder()
+                .questionId(question.getQuestionId().toString())
+                .questionOrder(question.getQuestionOrder())
+                .point(question.getPoint())
+                .questionType(question.getQuestionType().ordinal())
+                .questionCategory(question.getCategories().stream()
+                        .map(QuestionCategory::name)
+                        .toList())
+                .numberOfCorrectAnswer(question.getNumberOfCorrectAnswers())
+                .blankIndex(question.getBlankIndex())
+                .instructionForMatching(question.getInstructionForMatching())
+                .zoneIndex(question.getZoneIndex())
+                .choice(question.getChoices().stream()
+                        .map(c -> CustGetQuestionByIdResponse.Choice.builder()
+                                .choiceId(c.getChoiceId().toString())
+                                .label(c.getLabel())
+                                .content(c.getContent())
+                                .choiceOrder(c.getChoiceOrder())
+                                .build()).toList())
+                .build();
+        return response;
+    }
 
     private String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
@@ -683,4 +751,6 @@ public class QuestionServiceImpl implements QuestionService {
         redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
         return newToken;
     }
+
+
 }

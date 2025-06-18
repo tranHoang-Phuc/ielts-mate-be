@@ -6,7 +6,8 @@ import com.fptu.sep490.readingservice.service.QuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.InformationUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
-import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.CustGetListQuestionsByGroupIdResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.CustGetQuestionByIdResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -126,5 +127,51 @@ public class QuestionController {
                 .message("Question deleted successfully")
                 .build();
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    @Operation(
+            summary = "User Lấy danh sách câu hỏi của một group",
+            description = "Trả về toàn bộ câu hỏi, bao gồm các thông tin chi tiết và lựa chọn."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lấy câu hỏi thành công"),
+            @ApiResponse(responseCode = "404", description = "Group không tồn tại"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public ResponseEntity<BaseResponse<CustGetListQuestionsByGroupIdResponse>> getQuestions(
+            @PathVariable("group-id") String groupId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        CustGetListQuestionsByGroupIdResponse questions = questionService.getListQuestionsByGroupId(groupId, request);
+
+        BaseResponse<CustGetListQuestionsByGroupIdResponse> resp =
+                BaseResponse.<CustGetListQuestionsByGroupIdResponse>builder()
+                        .message("Lấy danh sách câu hỏi thành công")
+                        .data(questions)
+                        .build();
+        return ResponseEntity.ok(resp);
+    }
+
+    @GetMapping("/{question-id}")
+    @Operation(summary = "User Lấy chi tiết một câu hỏi trong group",
+            description = "Trả về thông tin đầy đủ của một câu hỏi theo group-id và question-id.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lấy câu hỏi thành công"),
+            @ApiResponse(responseCode = "404", description = "Group hoặc Question không tồn tại"),
+            @ApiResponse(responseCode = "400", description = "Question không thuộc group"),
+            @ApiResponse(responseCode = "500", description = "Lỗi server")
+    })
+    public ResponseEntity<BaseResponse<CustGetQuestionByIdResponse>> getById(
+            @PathVariable("group-id")    String groupId,
+            @PathVariable("question-id") String questionId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        CustGetQuestionByIdResponse data = questionService.getQuestionById(groupId, questionId, request);
+        BaseResponse<CustGetQuestionByIdResponse> resp = BaseResponse.<CustGetQuestionByIdResponse>builder()
+                .message("Lấy câu hỏi thành công")
+                .data(data)
+                .build();
+        return ResponseEntity.ok(resp);
     }
 }

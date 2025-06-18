@@ -5,6 +5,8 @@ import com.fptu.sep490.readingservice.viewmodel.request.InformationUpdatedQuesti
 import com.fptu.sep490.readingservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedQuestionRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.CustGetListQuestionsByGroupIdResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.CustGetQuestionByIdResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UpdatedQuestionResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,4 +23,9 @@ public interface QuestionService {
     UpdatedQuestionResponse updateInformation(String questionId, String groupId, InformationUpdatedQuestionRequest informationRequest, HttpServletRequest request) throws JsonProcessingException;
 
     void deleteQuestion(String questionId, String groupId, HttpServletRequest request);
+
+    CustGetListQuestionsByGroupIdResponse getListQuestionsByGroupId(String groupId, HttpServletRequest request) throws JsonProcessingException;
+
+    CustGetQuestionByIdResponse getQuestionById(String questionId, String groupId, HttpServletRequest request) throws JsonProcessingException;
+
 }
