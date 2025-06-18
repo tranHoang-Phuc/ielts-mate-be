@@ -112,17 +112,13 @@ public class Question {
     @Column(name = "is_original")
     private Boolean isOriginal = true;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "parent_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_question_parent")
-    )
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
     private Question parent;
-    @OneToOne(
-            mappedBy = "parent",
-            fetch = FetchType.LAZY
-    )
-    private Question child;
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Question> children = new ArrayList<>();
 }

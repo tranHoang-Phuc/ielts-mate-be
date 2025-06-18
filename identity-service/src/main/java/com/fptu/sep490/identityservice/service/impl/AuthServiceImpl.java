@@ -590,13 +590,10 @@ public class AuthServiceImpl implements AuthService {
 
     public String getEmailFromToken(String accessToken) {
         try {
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8)))
-                    .build()
-                    .parseClaimsJws(accessToken)
-                    .getBody();
+            Jwt jwt = JwtDecoders.fromIssuerLocation(issuerUri).decode(accessToken);
 
-            return claims.get("email", String.class);
+
+            return jwt.getClaimAsString("email");
         } catch (JwtException e) {
             throw new BadRequestException(Constants.ErrorCode.INVALID_VERIFIED_TOKEN,
                     Constants.ErrorCodeMessage.INVALID_VERIFIED_TOKEN);

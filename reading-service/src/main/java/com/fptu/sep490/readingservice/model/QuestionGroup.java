@@ -39,6 +39,7 @@ public class QuestionGroup {
     private String instruction;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
     private String sentenceWithBlanks;
 
@@ -81,19 +82,13 @@ public class QuestionGroup {
 
     @Column(name = "is_original")
     private Boolean isOriginal = true;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
 
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "parent_id",
-            unique = true,
-            foreignKey = @ForeignKey(name = "fk_question_group_parent")
-    )
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
     private QuestionGroup parent;
 
-    @OneToOne(
-            mappedBy = "parent",
-            fetch = FetchType.LAZY
-    )
-    private QuestionGroup child;
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<QuestionGroup> children = new ArrayList<>();
 }

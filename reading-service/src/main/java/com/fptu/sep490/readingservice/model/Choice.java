@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -35,4 +37,26 @@ public class Choice {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     private Question question;
+
+
+    @Column(name = "is_current")
+    private Boolean isCurrent = true;
+
+    @Column(name = "display_version")
+    private Integer version = 1;
+
+    @Column(name = "is_original")
+    private Boolean isOriginal = true;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_choice_parent"))
+    private Choice parent;
+
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Choice> children = new ArrayList<>();
 }
