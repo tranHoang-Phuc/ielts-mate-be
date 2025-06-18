@@ -1,5 +1,6 @@
 package com.fptu.sep490.readingservice.viewmodel.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record AttemptResponse(
         @JsonProperty("attempt_id")
         UUID attemptId,
@@ -24,6 +26,7 @@ public record AttemptResponse(
         List<QuestionGroupAttemptResponse> questionGroups
 ) {
     @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record QuestionGroupAttemptResponse(
             @JsonProperty("question_group_id")
             UUID questionGroupId,
@@ -39,6 +42,7 @@ public record AttemptResponse(
             List<QuestionAttemptResponse> questions
     ) {
         @Builder
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
         public record QuestionAttemptResponse(
                 @JsonProperty("question_id")
                 UUID questionId,
@@ -50,6 +54,8 @@ public record AttemptResponse(
                 Integer numberOfCorrectAnswers,
                 @JsonProperty("blank_index")
                 Integer blankIndex,
+                @JsonProperty("instruction_for_choice")
+                String instructionForChoice,
                 @JsonProperty("instruction_for_matching")
                 String instructionForMatching,
                 @JsonProperty("zone_index")
@@ -58,6 +64,7 @@ public record AttemptResponse(
                 List<ChoiceAttemptResponse> choices
         ) {
             @Builder
+            @JsonInclude(JsonInclude.Include.NON_EMPTY)
             public record ChoiceAttemptResponse(
                     @JsonProperty("choice_id")
                     UUID choiceId,
