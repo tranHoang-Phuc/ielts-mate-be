@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.AttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
+import com.fptu.sep490.readingservice.viewmodel.response.AttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.PassageAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserDataAttempt;
@@ -31,13 +32,13 @@ public class AttemptController {
 
     @PostMapping("/passages/{passage-id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<PassageAttemptResponse>> createdAttempt(
+    public ResponseEntity<BaseResponse<AttemptResponse>> createdAttempt(
             @PathVariable("passage-id") String passageId,
             HttpServletRequest request
     ) throws JsonProcessingException {
-        PassageAttemptResponse data = attemptService.createAttempt(passageId, request);
+        AttemptResponse data = attemptService.createAttempt(passageId, request);
         return new ResponseEntity<>(
-                BaseResponse.<PassageAttemptResponse>builder()
+                BaseResponse.<AttemptResponse>builder()
                         .data(data)
                         .message("Attempt created successfully")
                         .build(),

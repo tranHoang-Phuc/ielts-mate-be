@@ -43,7 +43,8 @@ public class Attempt {
     @Column(name ="finished_at")
     private LocalDateTime finishedAt;
 
-    @Column(name= "version",  columnDefinition = "JSONB")
+    @Lob
+    @Column(name= "version", columnDefinition = "TEXT")
     private String version;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
