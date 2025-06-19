@@ -39,7 +39,9 @@ public record AttemptResponse(
             @JsonProperty("sentence_with_blanks")
             String sentenceWithBlanks,
             @JsonProperty("questions")
-            List<QuestionAttemptResponse> questions
+            List<QuestionAttemptResponse> questions,
+            @JsonProperty("drag_items")
+            List<UpdatedQuestionResponse.DragItemResponse> dragItems
     ) {
         @Builder
         @JsonInclude(JsonInclude.Include.NON_EMPTY)

@@ -103,8 +103,11 @@ public class AttemptServiceImpl implements AttemptService {
             );
         }
         Map<QuestionGroup, Map<Question, List<Choice>>> currentVersionChoicesByGroup = new HashMap<>();
+        Map<QuestionGroup, List<DragItem>> currentVersionDragItemsByGroup = new HashMap<>();
         for (QuestionGroup group : questionGroups) {
             List<Question> currentVersionQuestions = questionRepository.findCurrentVersionByGroup(group.getGroupId());
+            List<DragItem> currentVersionDragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId());
+            currentVersionDragItemsByGroup.put(group, currentVersionDragItems);
             Map<Question, List<Choice>> currentVersionChoicesByQuestion = new HashMap<>();
             for (Question currentVersionQuestion : currentVersionQuestions) {
                 QuestionVersion questionVersion = QuestionVersion.builder()
@@ -233,7 +236,16 @@ public class AttemptServiceImpl implements AttemptService {
                                     group.getSectionLabel(),
                                     group.getInstruction(),
                                     group.getSentenceWithBlanks(),
-                                    questionResponses
+                                    questionResponses,
+                                    currentVersionDragItemsByGroup.getOrDefault(group, Collections.emptyList()).stream()
+                                            .filter(DragItem::getIsCurrent)
+                                            .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
+                                                    .dragItemId(d.getParent() == null
+                                                            ? d.getDragItemId().toString()
+                                                            : d.getParent().getDragItemId().toString())
+                                                    .content(d.getContent())
+                                                    .build())
+                                            .toList()
                             );
                         })
                         .collect(Collectors.toList());

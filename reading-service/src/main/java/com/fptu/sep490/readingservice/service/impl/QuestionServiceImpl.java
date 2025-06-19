@@ -333,10 +333,13 @@ public class QuestionServiceImpl implements QuestionService {
                         .zoneIndex(question.zoneIndex())
                         .questionGroup(questionGroup)
                         .build();
+                dragItem.setQuestion(savedQuestion);
                 String userId = getUserIdFromToken(request);
                 savedQuestion.setCreatedBy(userId);
                 savedQuestion.setUpdatedBy(userId);
                 Question saved = questionRepository.save(savedQuestion);
+                dragItemRepository.save(dragItem);
+
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
