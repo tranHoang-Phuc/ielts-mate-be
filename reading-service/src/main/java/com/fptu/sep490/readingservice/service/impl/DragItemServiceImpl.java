@@ -53,8 +53,8 @@ public class DragItemServiceImpl implements DragItemService {
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
         List<DragItem> dragItemList = new ArrayList<>();
-        for (String item : request.getItems()) {
-            if (item == null || item.trim().isEmpty()) {
+
+            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
                 throw new AppException(
                         Constants.ErrorCodeMessage.INVALID_REQUEST,
                         Constants.ErrorCode.INVALID_REQUEST,
@@ -64,19 +64,13 @@ public class DragItemServiceImpl implements DragItemService {
 
             DragItem entity = DragItem.builder()
                     .questionGroup(group)
-                    .content(item.trim())
+                    .content(request.getContent().trim())
                     .isCurrent(true)
                     .version(1)
                     .isOriginal(true)
                     .isDeleted(false)
                     .build();
-
             dragItemList.add(entity);
-        }
-
-
-
-
 
 
         List<DragItem> data =  dragItemRepository.saveAll(dragItemList);
@@ -156,6 +150,7 @@ public class DragItemServiceImpl implements DragItemService {
                 .questionGroup(group)
                 .isCurrent(true)
                 .version(currentVersion + 1)
+                .parent(existing)
                 .isOriginal(false)
                 .isDeleted(false)
                 .build();

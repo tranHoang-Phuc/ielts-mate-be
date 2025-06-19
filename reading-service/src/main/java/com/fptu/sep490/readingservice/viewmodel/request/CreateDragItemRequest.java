@@ -20,5 +20,5 @@ import java.util.List;
 @Builder
 public class CreateDragItemRequest {
 
-    List<String> items;
+    String content;
 }

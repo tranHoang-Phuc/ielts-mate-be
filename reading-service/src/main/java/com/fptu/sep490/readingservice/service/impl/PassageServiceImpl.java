@@ -7,13 +7,11 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
-import com.fptu.sep490.readingservice.model.Choice;
-import com.fptu.sep490.readingservice.model.Question;
-import com.fptu.sep490.readingservice.model.QuestionGroup;
-import com.fptu.sep490.readingservice.model.ReadingPassage;
+import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.repository.DragItemRepository;
 import com.fptu.sep490.readingservice.repository.QuestionGroupRepository;
 import com.fptu.sep490.readingservice.repository.QuestionRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
@@ -58,6 +56,7 @@ public class PassageServiceImpl implements PassageService {
     QuestionRepository questionRepository;
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
+    DragItemRepository dragItemRepository;
     RedisService redisService;
 
 
@@ -344,7 +343,7 @@ public class PassageServiceImpl implements PassageService {
 
         Map<QuestionGroup, List<Question>> questionGroupMap = new HashMap<>();
         Map<UUID, List<Choice>> choiceMap = new HashMap<>();
-
+        Map<QuestionGroup, List<DragItem>> dragItemMap = new HashMap<>();
         for (QuestionGroup group : questionGroups) {
             List<Question> filteredQuestions = group.getQuestions().stream()
                     .filter(Objects::nonNull)
@@ -352,6 +351,15 @@ public class PassageServiceImpl implements PassageService {
                             || Boolean.TRUE.equals(q.getIsCurrent()))
                     .filter(q -> !Boolean.TRUE.equals(q.getIsDeleted()))
                     .collect(Collectors.toList());
+
+            List<DragItem> dragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId())
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .filter(d -> (d.getParent() == null && Boolean.TRUE.equals(d.getIsOriginal()))
+                            || Boolean.TRUE.equals(d.getIsCurrent()))
+                    .filter(d -> !Boolean.TRUE.equals(d.getIsDeleted()))
+                    .collect(Collectors.toList());
+
 
             for (Question q : filteredQuestions) {
                 List<Choice> filteredChoices = q.getChoices().stream()
@@ -362,7 +370,7 @@ public class PassageServiceImpl implements PassageService {
                         .collect(Collectors.toList());
                 choiceMap.put(q.getQuestionId(), filteredChoices);
             }
-
+            dragItemMap.put(group, dragItems);
             questionGroupMap.put(group, filteredQuestions);
         }
 
@@ -414,9 +422,13 @@ public class PassageServiceImpl implements PassageService {
                                         .sectionOrder(g.getSectionOrder())
                                         .instruction(g.getInstruction())
                                         .dragItems(
-                                                g.getDragItems().stream()
+
+                                                dragItemMap.getOrDefault(g, Collections.emptyList()).stream()
+                                                        .filter(DragItem::getIsCurrent)
                                                         .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
-                                                                .dragItemId(d.getDragItemId().toString())
+                                                                .dragItemId(d.getParent() == null
+                                                                        ? d.getDragItemId().toString()
+                                                                        : d.getParent().getDragItemId().toString())
                                                                 .content(d.getContent())
                                                                 .build())
                                                         .toList()
