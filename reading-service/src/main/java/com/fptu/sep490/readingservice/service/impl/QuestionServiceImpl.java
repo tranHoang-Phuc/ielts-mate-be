@@ -746,7 +746,7 @@ public class QuestionServiceImpl implements QuestionService {
                             .map(QuestionCategory::valueOf)
                             .collect(Collectors.toSet()))
                     .instructionForChoice(informationRequest.instructionForChoice())
-                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
                     .parent(question)
                     .questionGroup(question.getQuestionGroup())
                     .version(lastVersion + 1)
@@ -827,8 +827,10 @@ public class QuestionServiceImpl implements QuestionService {
                     .questionGroup(question.getQuestionGroup())
                     .zoneIndex(informationRequest.zoneIndex())
                     .dragItem(dragItem)
-                    .categories(question.getCategories())
-                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers())
+                    .categories(question.getCategories() != null ?
+                              Set.copyOf(question.getCategories()) :
+                              Set.of())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
                     .zoneIndex(informationRequest.zoneIndex())
                     .parent(question)
                     .version(lastVersion + 1)
