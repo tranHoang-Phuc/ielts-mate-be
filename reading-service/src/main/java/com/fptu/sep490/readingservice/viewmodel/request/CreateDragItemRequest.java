@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 
 /**
  * Request body để tạo mới một DragItem.
@@ -18,9 +20,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CreateDragItemRequest {
 
-    @NotBlank(message = "content cannot be blank")
-    private String content;
-
-    @JsonProperty("question_id")
-    private String questionId;
+    List<String> items;
 }

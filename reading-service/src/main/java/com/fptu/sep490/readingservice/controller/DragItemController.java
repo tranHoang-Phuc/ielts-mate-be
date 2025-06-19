@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,13 +30,13 @@ public class DragItemController {
 
     @Operation(summary = "Tạo mới một drag item")
     @PostMapping
-    public ResponseEntity<BaseResponse<DragItemResponse>> createDragItem(
+    public ResponseEntity<BaseResponse<List<DragItemResponse>>> createDragItem(
             @PathVariable("group-id") UUID groupId,
             @Valid @RequestBody CreateDragItemRequest request,
             HttpServletRequest httpServletRequest
     ) throws AppException {
-        DragItemResponse response = dragItemService.createDragItem(groupId, request, httpServletRequest);
-        BaseResponse<DragItemResponse> body = BaseResponse.<DragItemResponse>builder()
+        List<DragItemResponse> response = dragItemService.createDragItem(groupId, request, httpServletRequest);
+        BaseResponse<List<DragItemResponse>> body = BaseResponse.<List<DragItemResponse>>builder()
                 .message("Create drag and drop item successfully")
                 .data(response)
                 .build();
