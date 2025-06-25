@@ -66,4 +66,6 @@ public interface PassageService {
                                                String sortDirection,
                                                String title,
                                                String createdBy);
+
+    CreateExamAttemptResponse.ReadingExamResponse.ReadingPassageResponse fromReadingPassage(String passageId);
 }

@@ -9,6 +9,7 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.request.AddGroupQuestionRequest;
@@ -88,5 +89,15 @@ public class Helper {
                 request.questions(),
                 request.dragItems()
         );
+    }
+
+    public UserInformationResponse getUserInformationResponse(String userId) throws JsonProcessingException {
+        UserProfileResponse user = getUserProfileById(userId);
+        return UserInformationResponse.builder()
+                .userId(user.id())
+                .email(user.email())
+                .firstName(user.firstName())
+                .lastName(user.lastName())
+                .build();
     }
 }
