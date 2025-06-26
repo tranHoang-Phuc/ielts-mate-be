@@ -68,5 +68,20 @@ public class ReadingExamController {
                         .build()
         );
     }
+    @DeleteMapping("/{readingExamId}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+    public ResponseEntity<BaseResponse<ReadingExamResponse>> deleteReadingExam(
+            @PathVariable("readingExamId") String readingExamId,
+            HttpServletRequest httpServletRequest
+    ) throws Exception{
+        ReadingExamResponse response = readingExamService.deleteReadingExam(readingExamId, httpServletRequest);
+        return ResponseEntity.ok(
+                BaseResponse.<ReadingExamResponse>builder()
+                        .message("Delete Group Question")
+                        .data(response)
+                        .build()
+        );
+    }
+
 
 }
