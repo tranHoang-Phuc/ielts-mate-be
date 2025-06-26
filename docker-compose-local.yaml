@@ -22,9 +22,9 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://ep-summer-scene-a1di24n8-pooler.ap-southeast-1.aws.neon.tech:5432/keycloak?sslmode=require
+      KC_DB_URL: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/keycloak?sslmode=require
       KC_DB_USERNAME: neondb_owner
-      KC_DB_PASSWORD: npg_1qJYk3avVWKE
+      KC_DB_PASSWORD: npg_9abzQo8sNRpq
       KC_HTTP_PORT: 80
       KC_HTTP_ENABLED: "true"
     volumes:
