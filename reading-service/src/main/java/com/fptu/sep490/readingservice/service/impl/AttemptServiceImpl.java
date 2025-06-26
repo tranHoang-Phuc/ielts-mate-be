@@ -1,6 +1,7 @@
 package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
@@ -305,6 +306,7 @@ public class AttemptServiceImpl implements AttemptService {
 
             AnswerAttempt attemptAnswer = Optional.ofNullable(answerAttemptRepository.findAnswerAttemptById(key))
                     .orElseGet(() -> AnswerAttempt.builder()
+                            .id(key)
                             .attempt(attempt)
                             .question(question)
                             .build()
@@ -332,6 +334,7 @@ public class AttemptServiceImpl implements AttemptService {
             }
 
             answerAttemptRepository.save(attemptAnswer);
+            attemptRepository.save(attempt);
         }
     }
 
@@ -382,9 +385,7 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
-    public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) {
-
-
+    public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) throws JsonProcessingException {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
@@ -392,28 +393,13 @@ public class AttemptServiceImpl implements AttemptService {
                         HttpStatus.NOT_FOUND.value()
                 ));
 
-        List<Question> questions = questionRepository.findAllByReadingPassage(attempt.getReadingPassage());
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
 
-        Map<UUID, QuestionAttempt> correctAnswers = getCorrectAnswer(questions);
-        String userId = getUserIdFromToken(request);
-        if (!attempt.getCreatedBy().equals(userId)) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.FORBIDDEN,
-                    Constants.ErrorCode.FORBIDDEN,
-                    HttpStatus.FORBIDDEN.value()
-            );
-        }
-        if (attempt.getStatus() != Status.DRAFT) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
-                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
-                    HttpStatus.BAD_REQUEST.value()
-            );
-        }
-        attempt.setStatus(Status.FINISHED);
-        attempt.setDuration(answers.duration());
+// Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
 
-        attempt.setFinishedAt(LocalDateTime.now());
+// Bước 2: map node sang AttemptVersion
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
         return null;
     }
 

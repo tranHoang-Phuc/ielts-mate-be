@@ -43,7 +43,6 @@ public class Attempt {
     @Column(name ="finished_at")
     private LocalDateTime finishedAt;
 
-    @Lob
     @Column(name= "version", columnDefinition = "TEXT")
     private String version;
 
