@@ -6,6 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ExamAttemptService {
-    @Transactional
+
     CreateExamAttemptResponse createExamAttempt (String urlSlug, HttpServletRequest request) throws JsonProcessingException;
 }

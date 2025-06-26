@@ -26,7 +26,7 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
     Optional<ReadingExam> findCurrentByReadingExamId(@Param("urlSlug") String urlSlug);
 
     Optional<ReadingExam> findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(String urlSlug);
-    Optional<ReadingExam> findByParentReadingExamReadingExamIdAndIsCurrentTrue(UUID parentId);
+//    Optional<ReadingExam> findByParentReadingExamReadingExamIdAndIsCurrentTrue(UUID parentId);
 
 //    Optional<ReadingPassage> findByParentPassageIdAndIsCurrentTrue(UUID parentId);
 }

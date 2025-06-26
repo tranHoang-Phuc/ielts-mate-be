@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 public class ExamAttemptServiceImpl implements ExamAttemptService {
     // Implementation of methods for ExamAttemptService will go here
 
-    private final ReadingExamRepository readingExamRepo;
-    private final ReadingPassageRepository passageRepo;
-    private final ExamAttemptRepository examAttemptRepo;
-    private final Helper helper;
-    private final PassageServiceImpl passageServiceImpl;
+    ReadingExamRepository readingExamRepo;
+    ReadingPassageRepository passageRepo;
+    ExamAttemptRepository examAttemptRepo;
+    Helper helper;
+    PassageServiceImpl passageServiceImpl;
 
     @Transactional
     @Override
