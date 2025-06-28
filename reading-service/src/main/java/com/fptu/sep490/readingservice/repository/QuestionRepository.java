@@ -47,4 +47,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         WHERE q.questionGroup.groupId = :groupId AND q.isCurrent = true
     """)
     List<Question> findCurrentVersionByGroup(UUID groupId);
+
+    @Query("""
+        SELECT q FROM Question q
+        WHERE q.questionId IN :collect
+    """)
+    List<Question> findQuestionsByIds(List<UUID> collect);
 }

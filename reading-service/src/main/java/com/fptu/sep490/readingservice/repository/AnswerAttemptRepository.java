@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, AnswerAttemptId> {
@@ -20,4 +21,9 @@ public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, An
         WHERE aa.attempt.attemptId = :attemptId
     """)
     List<Question> findAllQuestionsByAttempt(UUID attemptId);
+
+    @Query("""
+        select at from AnswerAttempt at where at.id = :id
+    """)
+    Optional<AnswerAttempt> findAnswerAttemptByAttemptId(AnswerAttemptId id);
 }

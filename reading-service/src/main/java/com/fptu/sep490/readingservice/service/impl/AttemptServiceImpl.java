@@ -23,7 +23,6 @@ import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
-import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -36,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.xml.transform.Result;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -385,6 +385,7 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
+    @Transactional
     public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) throws JsonProcessingException {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
                 .orElseThrow(() -> new AppException(
@@ -395,12 +396,146 @@ public class AttemptServiceImpl implements AttemptService {
 
         String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
 
-// Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
+        // Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
         JsonNode decodedNode = objectMapper.readTree(rawJson);
 
-// Bước 2: map node sang AttemptVersion
+        // Bước 2: map node sang AttemptVersion
         AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
-        return null;
+
+        // Lấy list question của bài đọc
+        List<Question> questions = new ArrayList<>();
+        questionVersion.getGroupMappingQuestion().forEach((groupId, questionVersions) -> {
+            List<Question> currentQuestions = questionRepository.findQuestionsByIds(
+                    questionVersions.stream()
+                            .map(QuestionVersion::getQuestionId)
+                            .collect(Collectors.toList()));
+            questions.addAll(currentQuestions);
+        });
+
+        // Tạo hashMap answers để compare
+        Map<UUID, SavedAnswersRequest> savedAnswers = new HashMap<>();
+        for(SavedAnswersRequest savedAnswer : answers.answers()) {
+            savedAnswers.put(savedAnswer.questionId(), savedAnswer);
+        }
+        List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
+
+        for(Question question : questions) {
+            SavedAnswersRequest answer = savedAnswers.get(question.getQuestionId());
+            AnswerAttemptId answerAttemptId = AnswerAttemptId.builder()
+                    .questionId(question.getQuestionId())
+                    .attemptId(attempt.getAttemptId())
+                    .build();
+
+            AnswerAttempt answerAttempt = answerAttemptRepository.findAnswerAttemptByAttemptId(answerAttemptId)
+                    .orElse(AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .id(answerAttemptId)
+                            .question(question)
+                            .build());
+
+            if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                SubmittedAttemptResponse.ResultSet result = scoreMultipleChoiceQuestion(answer, question);
+                resultSets.add(result);
+                answerAttempt.setChoices(answer.choices());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            if(question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswer().equalsIgnoreCase(answer.dataFilled())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDataFilled(answer.dataFilled());
+                answerAttempt.setIsCorrect(result.isCorrect());
+
+            }
+            if(question.getQuestionType() == QuestionType.MATCHING) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDataMatched(answer.dataMatched());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            if(question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getDragItem().getContent()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getDragItem().getDragItemId().equals(answer.dragItemId())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDragItemId(answer.dragItemId());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            answerAttemptRepository.save(answerAttempt);
+        }
+
+        attempt.setFinishedAt(LocalDateTime.now());
+        attempt.setStatus(Status.FINISHED);
+        attempt.setDuration(answers.duration());
+        attemptRepository.save(attempt);
+
+
+        return SubmittedAttemptResponse.builder()
+                .duration(answers.duration())
+                .resultSets(resultSets)
+                .build();
+    }
+
+    private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
+        List<Choice> correctAnswers = new ArrayList<>();
+        List<String> userAnswers= choiceRepository.getChoicesByIds(answer.choices());
+        SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
+                .questionIndex(question.getQuestionOrder())
+                .userAnswer(userAnswers)
+
+                .explanation(question.getExplanation())
+                .build();
+        if(question.getIsOriginal()) {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+        } else {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+        }
+
+        List<UUID> userChoice = answer.choices();
+        List<String> correctLabel = new ArrayList<>();
+        for(Choice correctAnswer : correctAnswers) {
+
+            if( userChoice.contains(correctAnswer.getChoiceId())) {
+                correctLabel.add(correctAnswer.getLabel());
+            }
+        }
+        resultSet.setCorrectAnswer(correctLabel);
+        boolean isCorrect =false;
+        int numberOfCorrect = 0;
+        for(String userAnswer : userAnswers) {
+            if(correctLabel.contains(userAnswer)) {
+                numberOfCorrect++;
+            }
+        }
+        isCorrect = numberOfCorrect == correctAnswers.size();
+        resultSet.setCorrect(isCorrect);
+        return resultSet;
     }
 
     private Map<UUID, QuestionAttempt> getCorrectAnswer(List<Question> questions) {
