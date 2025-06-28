@@ -78,7 +78,7 @@ public class AttemptController {
             @PathVariable("attempt-id") String attemptId,
             HttpServletRequest request,
             @RequestBody SavedAnswersRequestList answers
-    ) {
+    ) throws JsonProcessingException {
         SubmittedAttemptResponse data = attemptService.submitAttempt(attemptId, request, answers);
         return ResponseEntity.ok(BaseResponse.<SubmittedAttemptResponse>builder()
                 .data(data)

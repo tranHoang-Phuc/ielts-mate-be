@@ -35,7 +35,7 @@ public class QuestionGroup {
     @Column(name = "section_label", length = 255)
     private String sectionLabel;
 
-    @Column(name = "instruction", length = 5000)
+    @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
 
     @Lob

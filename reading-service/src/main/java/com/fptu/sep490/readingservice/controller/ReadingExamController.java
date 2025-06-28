@@ -24,7 +24,7 @@ public class ReadingExamController {
     ReadingExamService readingExamService;
 
     @PostMapping("/")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ReadingExamResponse>> createReadingExam(
             @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
             HttpServletRequest httpServletRequest
@@ -39,7 +39,7 @@ public class ReadingExamController {
         );
     }
     @PutMapping("/{readingExamId}")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ReadingExamResponse>> updateReadingExam(
             @PathVariable("readingExamId") String readingExamId,
             @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
@@ -54,8 +54,9 @@ public class ReadingExamController {
                         .build()
         );
     }
+
     @GetMapping("/{readingExamId}")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ReadingExamResponse>> getReadingExam(
             @PathVariable("readingExamId") String readingExamId,
             HttpServletRequest httpServletRequest
@@ -68,6 +69,7 @@ public class ReadingExamController {
                         .build()
         );
     }
+
     @DeleteMapping("/{readingExamId}")
     @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
     public ResponseEntity<BaseResponse<ReadingExamResponse>> deleteReadingExam(

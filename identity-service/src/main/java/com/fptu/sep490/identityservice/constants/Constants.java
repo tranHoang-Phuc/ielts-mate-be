@@ -30,7 +30,7 @@ public class Constants {
     }
 
     public final class RedisKey {
-        public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
+            public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
         public static final String USER_PENDING_VERIFY = "keycloak-client-refresh-token";
     }
 
