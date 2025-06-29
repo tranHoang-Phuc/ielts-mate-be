@@ -25,12 +25,12 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
     private final String[] WHITE_LIST = {
             "/v3/api-docs/**",
+            "/v3/api-docs",
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/webjars/**",
-            "/api/v1/files/**",
-
     };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
                                            BearerTokenResolver bearerTokenResolver,
@@ -44,14 +44,15 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .bearerTokenResolver(bearerTokenResolver)
-                        .jwt(jwt  -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak)))
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverterForKeycloak)))
                 .build();
     }
 
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         return new BearerTokenResolver() {
-            private final DefaultBearerTokenResolver defaultResolver  = new DefaultBearerTokenResolver();
+            private final DefaultBearerTokenResolver defaultResolver = new DefaultBearerTokenResolver();
+
             @Override
             public String resolve(HttpServletRequest request) {
                 String token = defaultResolver.resolve(request);
