@@ -1,11 +1,6 @@
-server:
-  servlet:
-    context-path: /resource
-  port: 8070
-
 spring:
   application:
-    name: file-service
+    name: listening-service
   security:
     oauth2:
       resourceserver:
@@ -22,12 +17,21 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/file-service?sslmode=require&prepareThreshold=0
+    url: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/listening_service?sslmode=require&prepareThreshold=0
     username: neondb_owner
     password: npg_9abzQo8sNRpq
     hikari:
       data-source-properties:
         prepareThreshold: 0
+
+server:
+  port: 8071
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate: debug
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 keycloak:
   base-uri: http://identity.sep.local
@@ -40,22 +44,13 @@ keycloak:
 
 springdoc:
   paths-to-match: /**
-  packages-to-scan: com.fptu.sep490.fileservice.controller
+  packages-to-scan: com.fptu.sep490.listeningservice.controller
   swagger-ui:
     path: /swagger-ui
     oauth:
       use-pkce-with-authorization-code-grant: true
       client-id: swagger-ui
   oauth-flow:
-    authorization-url: http://localhost:8080/realms/SEP490/protocol/openid-connect/auth
-    token-url: http://localhost:8080/realms/SEP490/protocol/openid-connect/token
+    authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
+    token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka
-
-cloudinary:
-  cloud-name: dbrm5eowo
-  api-key: 566182576423582
-  api-secret: mYJD0DbR4oXl4oD8g22RtvJx9kU
