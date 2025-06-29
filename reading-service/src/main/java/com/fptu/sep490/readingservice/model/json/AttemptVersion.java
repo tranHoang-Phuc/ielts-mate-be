@@ -16,4 +16,5 @@ import java.util.UUID;
 public class AttemptVersion {
     private UUID readingPassageId;
     private Map<UUID, List<QuestionVersion>> groupMappingQuestion;
+    private Map<UUID, List<UUID>> groupMappingDragItem;
 }

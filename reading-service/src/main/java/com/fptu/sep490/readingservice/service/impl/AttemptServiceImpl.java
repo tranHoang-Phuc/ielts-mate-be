@@ -339,7 +339,7 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
-    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) {
+    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) throws JsonProcessingException {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
@@ -363,6 +363,76 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
+
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
+
+        // Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        // Bước 2: map node sang AttemptVersion
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        ReadingPassage readingPassage = readingPassageRepository.findById(questionVersion.getReadingPassageId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        Map<UUID, List<QuestionVersion>> groupMappingQuestion = questionVersion.getGroupMappingQuestion();
+
+        List<QuestionGroup> questionGroups = new ArrayList<>();
+
+        groupMappingQuestion.forEach((key, value) -> {
+            QuestionGroup questionGroup = questionGroupRepository.findById(key)
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+
+            Map<Question, List<Choice>> questionChoices = new HashMap<>();
+            List<Question> questions = questionRepository.findQuestionsByIds(
+                    value.stream()
+                            .map(QuestionVersion::getQuestionId)
+                            .collect(Collectors.toList())
+            );
+
+           for(QuestionVersion qv : value) {
+               Question question = questions.stream()
+                       .filter(q -> q.getQuestionId().equals(qv.getQuestionId()))
+                       .findFirst()
+                       .orElseThrow(() -> new AppException(
+                               Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                               Constants.ErrorCode.QUESTION_NOT_FOUND,
+                               HttpStatus.NOT_FOUND.value()
+                       ));
+               if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                   List<Choice> choices = choiceRepository.getChoicesByIds(qv.getChoiceMapping())
+                           .stream()
+                           .map(choiceId -> choiceRepository.findById(UUID.fromString(choiceId))
+                                   .orElseThrow(() -> new AppException(
+                                           Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                           Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                           HttpStatus.NOT_FOUND.value()
+                                   )))
+                           .toList();
+                   questionChoices.put(question, choices);
+               }
+               if(question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                     questionChoices.put(question, Collections.emptyList());
+               }
+                if(question.getQuestionType() == QuestionType.MATCHING) {
+                     questionChoices.put(question, Collections.emptyList());
+                }
+                if(question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                    questionChoices.put(question, Collections.emptyList());
+
+                }
+           }
+
+        });
+
         List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
 
         List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
@@ -393,6 +463,21 @@ public class AttemptServiceImpl implements AttemptService {
                         Constants.ErrorCode.ATTEMPT_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+        String userId = getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if(attempt.getStatus().equals(Status.FINISHED)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_ALREADY_SUBMITTED,
+                    Constants.ErrorCode.ATTEMPT_ALREADY_SUBMITTED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
 
         String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
 
@@ -421,6 +506,9 @@ public class AttemptServiceImpl implements AttemptService {
 
         for(Question question : questions) {
             SavedAnswersRequest answer = savedAnswers.get(question.getQuestionId());
+            if(Objects.isNull(answer)) {
+                continue;
+            }
             AnswerAttemptId answerAttemptId = AnswerAttemptId.builder()
                     .questionId(question.getQuestionId())
                     .attemptId(attempt.getAttemptId())
@@ -496,7 +584,7 @@ public class AttemptServiceImpl implements AttemptService {
 
         return SubmittedAttemptResponse.builder()
                 .duration(answers.duration())
-                .resultSets(resultSets)
+                .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedAttemptResponse.ResultSet::getQuestionIndex)).collect(Collectors.toList()))
                 .build();
     }
 
