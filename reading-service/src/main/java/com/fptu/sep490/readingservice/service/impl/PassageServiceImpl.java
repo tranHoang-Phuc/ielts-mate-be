@@ -10,6 +10,7 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
+import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
 import com.fptu.sep490.readingservice.repository.DragItemRepository;
 import com.fptu.sep490.readingservice.repository.QuestionGroupRepository;
@@ -476,9 +477,13 @@ public class PassageServiceImpl implements PassageService {
                                                                 .instructionForMatching(q.getInstructionForMatching())
                                                                 .correctAnswerForMatching(q.getCorrectAnswerForMatching())
                                                                 .zoneIndex(q.getZoneIndex())
-                                                                .dragItemId(q.getDragItem() == null
-                                                                        ? null
-                                                                        : q.getDragItem().getDragItemId().toString())
+                                                                .dragItemId(
+                                                                        q.getQuestionType() == QuestionType.DRAG_AND_DROP ?
+                                                                        q.getIsOriginal()?
+                                                                                (dragItemRepository.findByQuestionId(q.getQuestionId()).getDragItemId().toString())
+                                                                                :
+                                                                                (dragItemRepository.findByQuestionId(q.getParent().getQuestionId()).getDragItemId().toString())
+                                                                                        : null)
                                                                 .build())
                                                         .sorted(Comparator.comparing(PassageAttemptResponse.
                                                                 ReadingPassageResponse.QuestionGroupResponse.
