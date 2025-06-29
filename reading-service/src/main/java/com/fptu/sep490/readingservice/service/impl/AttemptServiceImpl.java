@@ -188,7 +188,7 @@ public class AttemptServiceImpl implements AttemptService {
         version.setGroupMappingQuestion(questionVersions);
 
         Attempt attempt = Attempt.builder()
-                .readingPassage(passage)
+                .readingPassage(currentVersion)
                 .createdBy(getUserIdFromToken(request))
                 .status(Status.DRAFT)
                 .version(objectMapper.writeValueAsString(version))
