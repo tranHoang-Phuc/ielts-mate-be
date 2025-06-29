@@ -3,7 +3,7 @@ package com.fptu.sep490.fileservice.constants;
 public class Constants {
     public final class ErrorCodeMessage {
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
-
+        public static final String FILE_NOT_FOUND = "FILE_NOT_FOUND";
     }
 
     public final class RedisKey {
@@ -14,7 +14,8 @@ public class Constants {
     public final class ErrorCode {
 
 
-        public static final String UNAUTHORIZED = "00014";
+        public static final String UNAUTHORIZED = "300001";
+        public static final String FILE_NOT_FOUND = "300002";
 
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-@FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
     AuthTokenInterceptor authTokenInterceptor;

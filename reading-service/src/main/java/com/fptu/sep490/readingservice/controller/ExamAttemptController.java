@@ -1,5 +1,6 @@
 package com.fptu.sep490.readingservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/exam/attempts")
@@ -30,7 +32,7 @@ public class ExamAttemptController {
             @PathVariable("attempt-id") String attemptId,
             ExamAttemptAnswersRequest answers,
             HttpServletRequest request
-    ) {
+    ) throws JsonProcessingException {
         SubmittedAttemptResponse response = examAttemptService.submittedExam(attemptId, answers, request);
         BaseResponse<SubmittedAttemptResponse> baseResponse = BaseResponse.<SubmittedAttemptResponse>builder()
                 .data(response)
