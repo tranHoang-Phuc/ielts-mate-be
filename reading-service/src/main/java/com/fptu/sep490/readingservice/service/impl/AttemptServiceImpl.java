@@ -188,7 +188,7 @@ public class AttemptServiceImpl implements AttemptService {
         version.setGroupMappingQuestion(questionVersions);
 
         Attempt attempt = Attempt.builder()
-                .readingPassage(passage)
+                .readingPassage(currentVersion)
                 .createdBy(getUserIdFromToken(request))
                 .status(Status.DRAFT)
                 .version(objectMapper.writeValueAsString(version))
@@ -249,15 +249,15 @@ public class AttemptServiceImpl implements AttemptService {
                                             .toList()
                             );
                         })
-                        .collect(Collectors.toList());
+                        .sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse::sectionOrder)).collect(Collectors.toList());
 
         return new AttemptResponse(
                 attempt.getAttemptId(),
-                passage.getPassageId(),
-                passage.getIeltsType().ordinal(),
-                passage.getPartNumber().ordinal(),
-                passage.getInstruction(),
-                passage.getContent(),
+                currentVersion.getPassageId(),
+                currentVersion.getIeltsType().ordinal(),
+                currentVersion.getPartNumber().ordinal(),
+                currentVersion.getInstruction(),
+                currentVersion.getContent(),
                 questionGroupResponses
         );
     }
