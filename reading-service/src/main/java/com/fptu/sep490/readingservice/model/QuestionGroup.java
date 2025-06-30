@@ -85,4 +85,9 @@ public class QuestionGroup {
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionGroup> children = new ArrayList<>();
+
+    @Lob
+    @Basic(fetch = FetchType.EAGER)
+    @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
+    private String sentenceWithBlanks;
 }
