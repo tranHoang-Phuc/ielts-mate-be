@@ -14,6 +14,9 @@ import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.request.AddGroupQuestionRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -25,6 +28,8 @@ import org.springframework.util.MultiValueMap;
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Helper {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
@@ -45,8 +50,24 @@ public class Helper {
 
     public UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
+        UserProfileResponse cachedProfile = getFromCache(userId);
+        if (cachedProfile != null) {
+            return cachedProfile;
+        }
+        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
+        if (profileResponse == null) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
+        return profileResponse;
+    }
+
+    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
+        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
+        return cachedProfile;
     }
     public String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;

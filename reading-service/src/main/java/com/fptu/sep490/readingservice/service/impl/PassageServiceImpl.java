@@ -560,6 +560,7 @@ public class PassageServiceImpl implements PassageService {
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+        //Không cần find current nua vi exam da luu phien ban tai thoi diem tao cua passage r
         ReadingPassage currentVersion = readingPassageRepository.findCurrentVersionById(passage.getPassageId())
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,

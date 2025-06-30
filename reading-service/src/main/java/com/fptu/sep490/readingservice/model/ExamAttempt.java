@@ -29,7 +29,7 @@ public class ExamAttempt {
     @Column(name = "total_question")
     private Integer totalPoint;
 
-    @Column(name = "history", columnDefinition = "JSONB")
+    @Column(name = "history", columnDefinition = "TEXT")
     private String history;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

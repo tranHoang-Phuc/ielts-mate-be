@@ -56,11 +56,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         //get reading exam has parent.readingExamId = readingExamId and isCurrent=true
         // 2. Lấy bản current, nếu ko có current bắn lỗi
         ReadingExam currentExam = readingExamRepo.findCurrentChildByParentId(originalExam.getReadingExamId())
-                .orElseThrow(() -> new AppException(
-                        Constants.ErrorCode.READING_EXAM_NOT_FOUND,
-                        Constants.ErrorCode.READING_EXAM_NOT_FOUND,
-                        HttpStatus.NOT_FOUND.value()
-                ));
+                .orElse(originalExam);
 
         String userId = helper.getUserIdFromToken(request);
         UserInformationResponse user = helper.getUserInformationResponse(userId);
@@ -73,7 +69,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .updatedBy(userId)
                 .build();
         //save examAttempt
-        examAttempt = examAttemptRepo.save(examAttempt);
+        examAttempt = examAttemptRepo.saveAndFlush(examAttempt);
 
         //create CreateExamAttemptResponse
 
