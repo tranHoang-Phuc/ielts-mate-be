@@ -4,6 +4,8 @@ import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationReque
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 public interface ReadingExamService {
     public ReadingExamResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception;
 
@@ -12,4 +14,8 @@ public interface ReadingExamService {
     public ReadingExamResponse getReadingExam(String readingExamId, HttpServletRequest httpServletRequest) throws Exception;
 
     public ReadingExamResponse deleteReadingExam(String readingExamId, HttpServletRequest httpServletRequest) throws Exception;
+
+    List<ReadingExamResponse> getAllReadingExamsForCreator(HttpServletRequest httpServletRequest) throws Exception;
+
+    List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception;
 }
