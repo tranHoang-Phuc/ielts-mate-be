@@ -39,7 +39,8 @@ public class SwaggerConfig {
                         new Server().url("http://localhost:9191/api/v1/identity").description("Identity Service"),
                         new Server().url("http://localhost:9191/api/v1/reading").description("Reading Service"),
                         new Server().url("http://localhost:9191/api/v1/resource").description("File Service"),
-                        new Server().url("http://localhost:9191/api/v1/listening").description("Listening Service")
+                        new Server().url("http://localhost:9191/api/v1/listening").description("Listening Service"),
+                        new Server().url("http://localhost:9191/api/v1/notification").description("Notification Service")
                 ))
                 .info(new Info().title("SEP490").version("1.0.0"));
     }

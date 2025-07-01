@@ -41,6 +41,12 @@ spring:
             - Path=/api/v1/listening/**
           filters:
             - StripPrefix=2
+        - id: notification-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/notification/**
+          filters:
+            - StripPrefix=2
       globalcors:
         cors-configurations:
           '[/**]':
@@ -73,6 +79,8 @@ springdoc:
         url: http://localhost:9191/api/v1/resource/v3/api-docs
       - name: listening-service
         url: http://localhost:9191/api/v1/listening/v3/api-docs
+      - name: notification-service
+        url: http://localhost:9191/api/v1/notification/v3/api-docs
 
 eureka:
   client:
