@@ -20,6 +20,22 @@ spring:
     hibernate:
       ddl-auto: update
 
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        max.request.size: 10485760
+
+    consumer:
+      group-id: file-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/file-service?sslmode=require&prepareThreshold=0
@@ -59,3 +75,8 @@ cloudinary:
   cloud-name: dbrm5eowo
   api-key: 566182576423582
   api-secret: mYJD0DbR4oXl4oD8g22RtvJx9kU
+
+
+topic:
+  upload-audio: upload-audio-topic
+  update-listening-audio: update-listening-audio-topic

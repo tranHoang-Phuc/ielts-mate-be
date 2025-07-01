@@ -5,18 +5,64 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="fix: missing idea">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/event/AudioFileUpload.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/event/UpdateTaskEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/listener/FileListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/event/AudioFileUpload.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/event/SseEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/event/UpdateTaskEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/config/AsyncConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/config/CloudinaryConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/config/OpenApiConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/config/SecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/config/WebConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/helper/Helper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/FileService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ListeningTaskService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/FileServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/request/ListeningTaskCreationRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskCreationResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/event/SseEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/listener/SseListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/service/SseService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/service/impl/SseServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/viewmodel/event/BaseMessageResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/java/com/fptu/sep490/apigateway/config/SwaggerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/java/com/fptu/sep490/apigateway/config/SwaggerConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ListeningTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ListeningTask.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notification-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/QuestionGroup.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/QuestionGroup.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Record" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="local" />
+        <entry key="$PROJECT_DIR$" value="fix/missing-idea" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -33,21 +79,41 @@
     &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 0
 }</component>
   <component name="ProjectId" id="2zEH7s7NOalY5HLqPqKf6epxzmZ" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "fix/missing-idea",
+    "Spring Boot.ApiGatewayApplication.executor": "Debug",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.FileServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Debug",
+    "Spring Boot.ListeningServiceApplication.executor": "Debug",
+    "Spring Boot.NotificationServiceApplication.executor": "Debug",
+    "Spring Boot.ReadingServiceApplication.executor": "Run",
+    "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -57,6 +123,19 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\listening-service\src\main\java\com\fptu\sep490\listeningservice" />
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\listening-service\src\main\java\com\fptu\sep490\listeningservice\config" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.fptu.sep490.event" />
+      <recent name="com.fptu.sep490.listeningservice.config" />
+    </key>
+  </component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -66,8 +145,19 @@
         <option value="SpringBootApplicationConfigurationType" />
       </set>
     </option>
+    <option name="hiddenConfigurations">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <set>
+              <option value="ReadingServiceApplication" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ApiGatewayApplication">
+  <component name="RunManager" selected="Spring Boot.ListeningServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -106,6 +196,7 @@
       </method>
     </configuration>
     <configuration name="ListeningServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="listening-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.listeningservice.ListeningServiceApplication" />
       <method v="2">
@@ -126,6 +217,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Spring Boot.ApiGatewayApplication" />
+      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
+      <item itemvalue="Spring Boot.FileServiceApplication" />
+      <item itemvalue="Spring Boot.IdentityServiceApplication" />
+      <item itemvalue="Spring Boot.ListeningServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
+      <item itemvalue="Spring Boot.ReadingServiceApplication" />
+    </list>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -143,7 +243,9 @@
       <option name="presentableId" value="Default" />
       <updated>1751289150344</updated>
       <workItem from="1751289153560" duration="736000" />
-      <workItem from="1751289913840" duration="784000" />
+      <workItem from="1751289913840" duration="6224000" />
+      <workItem from="1751332750957" duration="6000" />
+      <workItem from="1751379395002" duration="8244000" />
     </task>
     <task id="LOCAL-00001" summary="fix: missing idea">
       <option name="closed" value="true" />
@@ -177,7 +279,23 @@
       <option name="project" value="LOCAL" />
       <updated>1751290601094</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fix: missing idea">
+      <option name="closed" value="true" />
+      <created>1751290931144</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751290931144</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fix: missing idea">
+      <option name="closed" value="true" />
+      <created>1751290951787</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1751290951787</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -186,5 +304,31 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix: missing idea" />
     <option name="LAST_COMMIT_MESSAGE" value="fix: missing idea" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java</url>
+          <line>48</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
+          <line>66</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/FileServiceImpl.java</url>
+          <line>39</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/service/impl/SseServiceImpl.java</url>
+          <line>41</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -42,3 +42,5 @@ eureka:
 kafka:
   topic:
     user-verification: user-verification-topic
+    send-notification: send-notification-topic
+
