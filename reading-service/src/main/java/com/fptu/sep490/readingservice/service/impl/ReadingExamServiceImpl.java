@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -291,6 +293,160 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                 )
         );
         return response;
+    }
+
+    @Override
+    public List<ReadingExamResponse> getAllReadingExamsForCreator(HttpServletRequest httpServletRequest) throws Exception {
+        if (httpServletRequest == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String userId;
+
+        userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null || userId.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        List<ReadingExam> readingExams;
+        try {
+            readingExams = readingExamRepository.findByCreatedBy(userId);
+        } catch (Exception e) {
+            log.error("Database error when fetching exams for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+
+        // 3. Filter out deleted exams (soft delete)
+        List<ReadingExamResponse> readingExamResponses = new ArrayList<>();
+        for (ReadingExam readingExam : readingExams) {
+            if (Boolean.TRUE.equals(readingExam.getIsDeleted())) {
+                continue;
+            }
+            // 4. Validate required fields
+            if (readingExam.getPart1() == null) {
+                log.warn("ReadingExam {} missing part1, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart2() == null) {
+                log.warn("ReadingExam {} missing part2, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart3() == null) {
+                log.warn("ReadingExam {} missing part3, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            ReadingExamResponse response = new ReadingExamResponse(
+                    readingExam.getReadingExamId().toString(),
+                    readingExam.getExamName(),
+                    readingExam.getExamDescription(),
+                    readingExam.getUrlSlug(),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart1().getPassageId().toString(),
+                            readingExam.getPart1().getTitle(),
+                            readingExam.getPart1().getContent()
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                    )
+            );
+            readingExamResponses.add(response);
+        }
+        return readingExamResponses;
+    }
+
+    @Override
+    public List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception {
+        if (httpServletRequest == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String userId;
+
+        userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null || userId.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        List<ReadingExam> readingExams;
+        try {
+            readingExams = readingExamRepository.findAll();
+        } catch (Exception e) {
+            log.error("Database error when fetching exams for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+
+        // 3. Filter out deleted exams (soft delete)
+        List<ReadingExamResponse> readingExamResponses = new ArrayList<>();
+        for (ReadingExam readingExam : readingExams) {
+            if (Boolean.TRUE.equals(readingExam.getIsDeleted())) {
+                continue;
+            }
+            // 4. Validate required fields
+            if (readingExam.getPart1() == null) {
+                log.warn("ReadingExam {} missing part1, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart2() == null) {
+                log.warn("ReadingExam {} missing part2, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart3() == null) {
+                log.warn("ReadingExam {} missing part3, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            ReadingExamResponse response = new ReadingExamResponse(
+                    readingExam.getReadingExamId().toString(),
+                    readingExam.getExamName(),
+                    readingExam.getExamDescription(),
+                    readingExam.getUrlSlug(),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart1().getPassageId().toString(),
+                            readingExam.getPart1().getTitle(),
+                            readingExam.getPart1().getContent()
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                    )
+            );
+            readingExamResponses.add(response);
+        }
+        return readingExamResponses;
     }
 
 
