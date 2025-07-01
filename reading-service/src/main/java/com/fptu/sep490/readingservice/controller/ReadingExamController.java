@@ -1,5 +1,6 @@
 package com.fptu.sep490.readingservice.controller;
 
+
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.ReadingExamService;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
@@ -28,7 +29,7 @@ import java.util.List;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/reading-exams")
+@RequestMapping("/api/v1/reading-exams")
 public class ReadingExamController {
 
     ReadingExamService readingExamService;
@@ -52,7 +53,8 @@ public class ReadingExamController {
     public ResponseEntity<BaseResponse<ReadingExamResponse>> createReadingExam(
             @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
             HttpServletRequest httpServletRequest
-    ) throws Exception {
+    )
+    throws Exception{
         ReadingExamResponse response = readingExamService.createReadingExam(readingExamCreationRequest, httpServletRequest);
         return ResponseEntity.ok(
                 BaseResponse.<ReadingExamResponse>builder()
@@ -82,8 +84,9 @@ public class ReadingExamController {
             @PathVariable("readingExamId") String readingExamId,
             @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
             HttpServletRequest httpServletRequest
-    ) throws Exception {
-        ReadingExamResponse response = readingExamService.updateReadingExam(readingExamId, readingExamCreationRequest, httpServletRequest);
+    )
+        throws Exception{
+        ReadingExamResponse response = readingExamService.updateReadingExam(readingExamId,readingExamCreationRequest, httpServletRequest);
         return ResponseEntity.ok(
                 BaseResponse.<ReadingExamResponse>builder()
                         .message("Update Group Question")
@@ -107,8 +110,8 @@ public class ReadingExamController {
     public ResponseEntity<BaseResponse<ReadingExamResponse>> getReadingExam(
             @PathVariable("readingExamId") String readingExamId,
             HttpServletRequest httpServletRequest
-    ) throws Exception {
-        ReadingExamResponse response = readingExamService.getReadingExam(readingExamId, httpServletRequest);
+    ) throws Exception{
+        ReadingExamResponse response= readingExamService.getReadingExam(readingExamId, httpServletRequest);
         return ResponseEntity.ok(
                 BaseResponse.<ReadingExamResponse>builder()
                         .message("Update Group Question")

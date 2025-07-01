@@ -17,9 +17,9 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ep-summer-scene-a1di24n8-pooler.ap-southeast-1.aws.neon.tech:5432/reading_service?sslmode=require&prepareThreshold=0
+    url: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/reading_service?sslmode=require&prepareThreshold=0
     username: neondb_owner
-    password: npg_1qJYk3avVWKE
+    password: npg_9abzQo8sNRpq
     hikari:
       data-source-properties:
         prepareThreshold: 0
@@ -36,6 +36,7 @@ server:
 logging:
   level:
     org.hibernate.type.descriptor.sql: trace
+    org.hibernate: debug
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
@@ -45,7 +46,7 @@ keycloak:
   token-uri: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
   realm: SEP490
   client-id: fptu_sep490
-  client-secret: 7OlXDLOgMKh0n5iyDTqXzUz2E6HAxatE
+  client-secret: Y6mBJ0SUomyVdgf7XiKZLgH71n7m5V6P
   scope: openid
   redirect-uri: http://identity.sep.local/realms/SEP490/broker/google/endpoint
 

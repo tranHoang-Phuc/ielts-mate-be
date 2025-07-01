@@ -322,21 +322,24 @@ public class QuestionServiceImpl implements QuestionService {
                         .point(question.point())
                         .questionOrder(question.questionOrder())
                         .zoneIndex(question.zoneIndex())
-                        .dragItem(dragItem)
                         .categories(Set.copyOf(categories))
                         .explanation(question.explanation())
                         .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
                         .isOriginal(true)
                         .isCurrent(true)
+                        .questionGroup(questionGroup)
+                        .dragItem(dragItem)
                         .isDeleted(false)
                         .version(1)
                         .zoneIndex(question.zoneIndex())
-                        .questionGroup(questionGroup)
                         .build();
+                dragItem.setQuestion(savedQuestion);
                 String userId = getUserIdFromToken(request);
                 savedQuestion.setCreatedBy(userId);
                 savedQuestion.setUpdatedBy(userId);
+
                 Question saved = questionRepository.save(savedQuestion);
+                dragItemRepository.save(dragItem);
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);
@@ -743,7 +746,7 @@ public class QuestionServiceImpl implements QuestionService {
                             .map(QuestionCategory::valueOf)
                             .collect(Collectors.toSet()))
                     .instructionForChoice(informationRequest.instructionForChoice())
-                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
                     .parent(question)
                     .questionGroup(question.getQuestionGroup())
                     .version(lastVersion + 1)
@@ -824,8 +827,10 @@ public class QuestionServiceImpl implements QuestionService {
                     .questionGroup(question.getQuestionGroup())
                     .zoneIndex(informationRequest.zoneIndex())
                     .dragItem(dragItem)
-                    .categories(question.getCategories())
-                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers())
+                    .categories(question.getCategories() != null ?
+                              Set.copyOf(question.getCategories()) :
+                              Set.of())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
                     .zoneIndex(informationRequest.zoneIndex())
                     .parent(question)
                     .version(lastVersion + 1)

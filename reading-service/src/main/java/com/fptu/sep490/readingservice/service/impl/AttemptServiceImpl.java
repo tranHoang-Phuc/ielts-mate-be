@@ -1,6 +1,8 @@
 package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
@@ -10,6 +12,8 @@ import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.embedded.AnswerAttemptId;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.model.json.AttemptVersion;
+import com.fptu.sep490.readingservice.model.json.QuestionVersion;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
@@ -19,7 +23,6 @@ import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
-import lombok.Locked;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -32,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.xml.transform.Result;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -49,7 +53,7 @@ public class AttemptServiceImpl implements AttemptService {
     DragItemRepository dragItemRepository;
     ChoiceRepository choiceRepository;
     AnswerAttemptRepository answerAttemptRepository;
-
+    ObjectMapper objectMapper;
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
     RedisService redisService;
@@ -68,14 +72,13 @@ public class AttemptServiceImpl implements AttemptService {
 
     @Override
     @Transactional
-    public PassageAttemptResponse createAttempt(String passageId, HttpServletRequest request) throws JsonProcessingException {
+    public AttemptResponse createAttempt(String passageId, HttpServletRequest request) throws JsonProcessingException {
         ReadingPassage passage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
-
         ReadingPassage currentVersion = readingPassageRepository.findCurrentVersionById(passage.getPassageId())
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
@@ -83,16 +86,14 @@ public class AttemptServiceImpl implements AttemptService {
                         HttpStatus.NOT_FOUND.value()
                 ));
 
-        if (passage.getPassageStatus() == null || passage.getPassageStatus() != Status.PUBLISHED) {
+
+        if (currentVersion.getPassageStatus() == null || currentVersion.getPassageStatus() != Status.PUBLISHED) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PASSAGE_NOT_ACTIVE,
                     Constants.ErrorCode.PASSAGE_NOT_ACTIVE,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-
-        List<QuestionGroup> currentVersionGroups = questionGroupRepository.findAllCurrentVersionGroupsByPassageId(passage.getPassageId());
-
 
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(passage.getPassageId());
         if (questionGroups.isEmpty()) {
@@ -102,124 +103,163 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.NOT_FOUND.value()
             );
         }
-
-        Map<UUID, List<Question>> questionsByGroup = new HashMap<>();
-        Map<UUID, List<Choice>> choicesByQuestion = new HashMap<>();
-        Map<UUID, List<DragItem>> dragItemsByGroup = new HashMap<>();
-
+        Map<QuestionGroup, Map<Question, List<Choice>>> currentVersionChoicesByGroup = new HashMap<>();
+        Map<QuestionGroup, List<DragItem>> currentVersionDragItemsByGroup = new HashMap<>();
         for (QuestionGroup group : questionGroups) {
-            List<Question> questions = questionRepository.findAllByQuestionGroupOrderByQuestionOrderAsc(group);
-            if (questions.isEmpty()) {
-                throw new AppException(
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCode.QUESTION_NOT_FOUND,
-                        HttpStatus.NOT_FOUND.value()
-                );
-            }
-            questionsByGroup.put(group.getGroupId(), questions);
+            List<Question> currentVersionQuestions = questionRepository.findCurrentVersionByGroup(group.getGroupId());
+            List<DragItem> currentVersionDragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId());
+            currentVersionDragItemsByGroup.put(group, currentVersionDragItems);
+            Map<Question, List<Choice>> currentVersionChoicesByQuestion = new HashMap<>();
+            for (Question currentVersionQuestion : currentVersionQuestions) {
+                QuestionVersion questionVersion = QuestionVersion.builder()
+                        .questionId(currentVersionQuestion.getQuestionId())
+                        .build();
+                if (currentVersionQuestion.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
 
-            for (Question question : questions) {
-                if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
-                    List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question,false);
-                    choicesByQuestion.put(question.getQuestionId(), choices);
+                    List<UUID> choiceVersionIds = new ArrayList<>();
+                    if (currentVersionQuestion.getParent() == null) {
+                        List<Choice> currentVersionChoices = choiceRepository.getVersionChoiceByQuestionId(
+                                currentVersionQuestion.getQuestionId());
+                        currentVersionChoices.stream()
+                                .map(Choice::getChoiceId)
+                                .forEach(choiceVersionIds::add);
+
+                        if (currentVersionChoices.isEmpty()) {
+                            throw new AppException(
+                                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                    HttpStatus.NOT_FOUND.value()
+                            );
+                        }
+                        currentVersionChoicesByQuestion.put(currentVersionQuestion, currentVersionChoices);
+                    } else {
+                        List<Choice> originVersionChoices = choiceRepository.getVersionChoiceByParentQuestionId(
+                                currentVersionQuestion.getParent().getQuestionId());
+                        List<Choice> choices = new ArrayList<>();
+
+                        for (Choice choice : originVersionChoices) {
+                            if (!choice.getIsCurrent()) {
+                                Choice current = choiceRepository.getCurrentVersionChoiceByChoiceId(choice.getChoiceId());
+                                choices.add(current);
+
+                            } else {
+                                choices.add(choice);
+                            }
+                        }
+                        choices.stream()
+                                .map(Choice::getChoiceId)
+                                .forEach(choiceVersionIds::add);
+                        currentVersionChoicesByQuestion.put(currentVersionQuestion, choices);
+                    }
+                    questionVersion.setChoiceMapping(choiceVersionIds);
                 }
-                dragItemRepository.findByQuestion(question).ifPresent(di -> {
-                    dragItemsByGroup.computeIfAbsent(group.getGroupId(), k -> new ArrayList<>()).add(di);
-                });
+
+                else {
+                    List<Choice> choices = new ArrayList<>();
+                    currentVersionChoicesByQuestion.put(currentVersionQuestion, choices);
+                }
             }
+
+
+            currentVersionChoicesByGroup.put(group, currentVersionChoicesByQuestion);
         }
 
-        String userId = getUserIdFromToken(request);
-        if (userId == null) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.UNAUTHORIZED,
-                    Constants.ErrorCode.UNAUTHORIZED,
-                    HttpStatus.UNAUTHORIZED.value()
-            );
-        }
-        UserProfileResponse userProfile = getUserProfileById(userId);
+        AttemptVersion version = AttemptVersion.builder()
+                .readingPassageId(passage.getPassageId())
+                .build();
+        Map<UUID, List<QuestionVersion>> questionVersions = new HashMap<>();
+
+
+
+        currentVersionChoicesByGroup.forEach((group, questionChoices) -> {
+            List<QuestionVersion> versions = new ArrayList<>();
+            for (Map.Entry<Question, List<Choice>> entry : questionChoices.entrySet()) {
+                Question question = entry.getKey();
+                List<Choice> choices = entry.getValue();
+
+                QuestionVersion questionVersion = QuestionVersion.builder()
+                        .questionId(question.getQuestionId())
+                        .choiceMapping(choices.stream().map(Choice::getChoiceId).collect(Collectors.toList()))
+                        .build();
+                versions.add(questionVersion);
+                questionVersions.put(group.getGroupId(), versions);
+            }
+        });
+        version.setGroupMappingQuestion(questionVersions);
 
         Attempt attempt = Attempt.builder()
-                .createdBy(userId)
-                .readingPassage(passage)
+                .readingPassage(currentVersion)
+                .createdBy(getUserIdFromToken(request))
                 .status(Status.DRAFT)
-                .createdAt(LocalDateTime.now())
-                .createdBy(userId)
+                .version(objectMapper.writeValueAsString(version))
+                .duration(0L)
                 .build();
         attempt = attemptRepository.save(attempt);
+        List<AttemptResponse.QuestionGroupAttemptResponse> questionGroupResponses =
+                currentVersionChoicesByGroup.entrySet().stream()
+                        .map(groupEntry -> {
+                            QuestionGroup group = groupEntry.getKey();
+                            Map<Question, List<Choice>> questionChoices = groupEntry.getValue();
 
-        List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse> groupResponses =
-                questionGroups.stream().map(group -> {
-                    UUID groupId = group.getGroupId();
+                            List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionResponses =
+                                    questionChoices.entrySet().stream()
+                                            .map(questionEntry -> {
+                                                Question question = questionEntry.getKey();
+                                                List<Choice> choices = questionEntry.getValue();
 
-                    List<Question> questions = questionsByGroup.get(groupId);
-                    List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse> questionResponses =
-                            questions.stream().map(question -> {
-                                List<UpdatedQuestionResponse.ChoiceResponse> choiceResponses =
-                                        choicesByQuestion.getOrDefault(question.getQuestionId(), Collections.emptyList())
-                                                .stream()
-                                                .map(choice -> UpdatedQuestionResponse.ChoiceResponse.builder()
-                                                        .choiceId(choice.getChoiceId().toString())
-                                                        .label(choice.getLabel())
-                                                        .choiceOrder(choice.getChoiceOrder())
-                                                        .content(choice.getContent())
-                                                        .build())
-                                                .toList();
+                                                List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse> choiceResponses =
+                                                        choices.stream()
+                                                                .map(choice -> new AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse(
+                                                                        choice.getChoiceId(),
+                                                                        choice.getLabel(),
+                                                                        choice.getContent(),
+                                                                        choice.getChoiceOrder()
+                                                                ))
+                                                                .collect(Collectors.toList());
 
-                                return PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
-                                        .questionId(question.getQuestionId().toString())
-                                        .questionOrder(question.getQuestionOrder())
-                                        .questionType(question.getQuestionType().ordinal())
-                                        .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
-                                        .instructionForChoice(question.getInstructionForChoice())
-                                        .choices(choiceResponses)
-                                        .blankIndex(question.getBlankIndex())
-                                        .correctAnswer(question.getCorrectAnswer())
-                                        .instructionForMatching(question.getInstructionForMatching())
-                                        .correctAnswerForMatching(question.getCorrectAnswerForMatching())
-                                        .zoneIndex(question.getZoneIndex())
-                                        .build();
-                            }).toList();
+//
+                                                return AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse
+                                                        .builder()
+                                                        .questionId(question.getQuestionId())
+                                                        .questionOrder(question.getQuestionOrder())
+                                                        .questionType(question.getQuestionType().ordinal())
+                                                        .instructionForChoice(question.getInstructionForChoice())
+                                                        .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                                        .instructionForMatching(question.getInstructionForMatching())
+                                                        .choices(choiceResponses)
+                                                        .build();
+                                            })
+                                            .collect(Collectors.toList());
 
-                    List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses =
-                            dragItemsByGroup.getOrDefault(groupId, Collections.emptyList())
-                                    .stream()
-                                    .map(di -> UpdatedQuestionResponse.DragItemResponse.builder()
-                                            .dragItemId(di.getDragItemId().toString())
-                                            .content(di.getContent())
-                                            .build())
-                                    .toList();
+                            return new AttemptResponse.QuestionGroupAttemptResponse(
+                                    group.getGroupId(),
+                                    group.getSectionOrder(),
+                                    group.getSectionLabel(),
+                                    group.getInstruction(),
+                                    group.getSentenceWithBlanks(),
+                                    questionResponses,
+                                    currentVersionDragItemsByGroup.getOrDefault(group, Collections.emptyList()).stream()
+                                            .filter(DragItem::getIsCurrent)
+                                            .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
+                                                    .dragItemId(d.getParent() == null
+                                                            ? d.getDragItemId().toString()
+                                                            : d.getParent().getDragItemId().toString())
+                                                    .content(d.getContent())
+                                                    .build())
+                                            .toList()
+                            );
+                        })
+                        .sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse::sectionOrder)).collect(Collectors.toList());
 
-                    return PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
-                            .groupId(groupId.toString())
-                            .sectionLabel(group.getSectionLabel())
-                            .sectionOrder(group.getSectionOrder())
-                            .instruction(group.getInstruction())
-                            .dragItems(dragItemResponses)
-                            .questions(questionResponses)
-                            .build();
-                }).toList();
-
-        PassageAttemptResponse.ReadingPassageResponse readingPassageResp =
-                PassageAttemptResponse.ReadingPassageResponse.builder()
-                        .passageId(passageId)
-                        .instruction(passage.getInstruction())
-                        .title(passage.getTitle())
-                        .content(passage.getContent())
-                        .partNumber(passage.getPartNumber().ordinal())
-                        .questionGroups(groupResponses)
-                        .build();
-
-        return PassageAttemptResponse.builder()
-                .attemptId(attempt.getAttemptId().toString())
-                .createdBy(UserInformationResponse.builder()
-                        .userId(userId)
-                        .firstName(userProfile.firstName())
-                        .lastName(userProfile.lastName())
-                        .build())
-                .createdAt(attempt.getCreatedAt().toString())
-                .readingPassage(readingPassageResp)
-                .build();
+        return new AttemptResponse(
+                attempt.getAttemptId(),
+                currentVersion.getPassageId(),
+                currentVersion.getIeltsType().ordinal(),
+                currentVersion.getPartNumber().ordinal(),
+                currentVersion.getInstruction(),
+                currentVersion.getContent(),
+                questionGroupResponses
+        );
     }
 
     @Override
@@ -266,6 +306,7 @@ public class AttemptServiceImpl implements AttemptService {
 
             AnswerAttempt attemptAnswer = Optional.ofNullable(answerAttemptRepository.findAnswerAttemptById(key))
                     .orElseGet(() -> AnswerAttempt.builder()
+                            .id(key)
                             .attempt(attempt)
                             .question(question)
                             .build()
@@ -293,11 +334,12 @@ public class AttemptServiceImpl implements AttemptService {
             }
 
             answerAttemptRepository.save(attemptAnswer);
+            attemptRepository.save(attempt);
         }
     }
 
     @Override
-    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) {
+    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) throws JsonProcessingException {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
@@ -321,6 +363,76 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
+
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
+
+        // Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        // Bước 2: map node sang AttemptVersion
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        ReadingPassage readingPassage = readingPassageRepository.findById(questionVersion.getReadingPassageId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        Map<UUID, List<QuestionVersion>> groupMappingQuestion = questionVersion.getGroupMappingQuestion();
+
+        List<QuestionGroup> questionGroups = new ArrayList<>();
+
+        groupMappingQuestion.forEach((key, value) -> {
+            QuestionGroup questionGroup = questionGroupRepository.findById(key)
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+
+            Map<Question, List<Choice>> questionChoices = new HashMap<>();
+            List<Question> questions = questionRepository.findQuestionsByIds(
+                    value.stream()
+                            .map(QuestionVersion::getQuestionId)
+                            .collect(Collectors.toList())
+            );
+
+           for(QuestionVersion qv : value) {
+               Question question = questions.stream()
+                       .filter(q -> q.getQuestionId().equals(qv.getQuestionId()))
+                       .findFirst()
+                       .orElseThrow(() -> new AppException(
+                               Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                               Constants.ErrorCode.QUESTION_NOT_FOUND,
+                               HttpStatus.NOT_FOUND.value()
+                       ));
+               if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                   List<Choice> choices = choiceRepository.getChoicesByIds(qv.getChoiceMapping())
+                           .stream()
+                           .map(choiceId -> choiceRepository.findById(UUID.fromString(choiceId))
+                                   .orElseThrow(() -> new AppException(
+                                           Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                           Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                           HttpStatus.NOT_FOUND.value()
+                                   )))
+                           .toList();
+                   questionChoices.put(question, choices);
+               }
+               if(question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                     questionChoices.put(question, Collections.emptyList());
+               }
+                if(question.getQuestionType() == QuestionType.MATCHING) {
+                     questionChoices.put(question, Collections.emptyList());
+                }
+                if(question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                    questionChoices.put(question, Collections.emptyList());
+
+                }
+           }
+
+        });
+
         List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
 
         List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
@@ -343,19 +455,14 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     @Override
-    public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) {
-
-
+    @Transactional
+    public SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) throws JsonProcessingException {
         Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.ATTEMPT_NOT_FOUND,
                         Constants.ErrorCode.ATTEMPT_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
-
-        List<Question> questions = questionRepository.findAllByReadingPassage(attempt.getReadingPassage());
-
-        Map<UUID, QuestionAttempt> correctAnswers = getCorrectAnswer(questions);
         String userId = getUserIdFromToken(request);
         if (!attempt.getCreatedBy().equals(userId)) {
             throw new AppException(
@@ -364,18 +471,159 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.FORBIDDEN.value()
             );
         }
-        if (attempt.getStatus() != Status.DRAFT) {
+        if(attempt.getStatus().equals(Status.FINISHED)) {
             throw new AppException(
-                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
-                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCodeMessage.ATTEMPT_ALREADY_SUBMITTED,
+                    Constants.ErrorCode.ATTEMPT_ALREADY_SUBMITTED,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        attempt.setStatus(Status.FINISHED);
-        attempt.setDuration(answers.duration());
+
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
+
+        // Bước 1: chuyển từ chuỗi JSON lồng sang object JSON (giải mã lần đầu)
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        // Bước 2: map node sang AttemptVersion
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        // Lấy list question của bài đọc
+        List<Question> questions = new ArrayList<>();
+        questionVersion.getGroupMappingQuestion().forEach((groupId, questionVersions) -> {
+            List<Question> currentQuestions = questionRepository.findQuestionsByIds(
+                    questionVersions.stream()
+                            .map(QuestionVersion::getQuestionId)
+                            .collect(Collectors.toList()));
+            questions.addAll(currentQuestions);
+        });
+
+        // Tạo hashMap answers để compare
+        Map<UUID, SavedAnswersRequest> savedAnswers = new HashMap<>();
+        for(SavedAnswersRequest savedAnswer : answers.answers()) {
+            savedAnswers.put(savedAnswer.questionId(), savedAnswer);
+        }
+        List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
+
+        for(Question question : questions) {
+            SavedAnswersRequest answer = savedAnswers.get(question.getQuestionId());
+            if(Objects.isNull(answer)) {
+                continue;
+            }
+            AnswerAttemptId answerAttemptId = AnswerAttemptId.builder()
+                    .questionId(question.getQuestionId())
+                    .attemptId(attempt.getAttemptId())
+                    .build();
+
+            AnswerAttempt answerAttempt = answerAttemptRepository.findAnswerAttemptByAttemptId(answerAttemptId)
+                    .orElse(AnswerAttempt.builder()
+                            .attempt(attempt)
+                            .id(answerAttemptId)
+                            .question(question)
+                            .build());
+
+            if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                SubmittedAttemptResponse.ResultSet result = scoreMultipleChoiceQuestion(answer, question);
+                resultSets.add(result);
+                answerAttempt.setChoices(answer.choices());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            if(question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswer().equalsIgnoreCase(answer.dataFilled())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDataFilled(answer.dataFilled());
+                answerAttempt.setIsCorrect(result.isCorrect());
+
+            }
+            if(question.getQuestionType() == QuestionType.MATCHING) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDataMatched(answer.dataMatched());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            if(question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
+                        .userAnswer(List.of(answer.dataFilled()))
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getDragItem().getContent()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getDragItem().getDragItemId().equals(answer.dragItemId())) {
+                    result.setCorrect(true);
+                }
+                resultSets.add(result);
+                answerAttempt.setDragItemId(answer.dragItemId());
+                answerAttempt.setIsCorrect(result.isCorrect());
+            }
+            answerAttemptRepository.save(answerAttempt);
+        }
 
         attempt.setFinishedAt(LocalDateTime.now());
-        return null;
+        attempt.setStatus(Status.FINISHED);
+        attempt.setDuration(answers.duration());
+        attemptRepository.save(attempt);
+
+
+        return SubmittedAttemptResponse.builder()
+                .duration(answers.duration())
+                .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedAttemptResponse.ResultSet::getQuestionIndex)).collect(Collectors.toList()))
+                .build();
+    }
+
+    private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
+        List<Choice> correctAnswers = new ArrayList<>();
+        List<String> userAnswers= choiceRepository.getChoicesByIds(answer.choices());
+        SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
+                .questionIndex(question.getQuestionOrder())
+                .userAnswer(userAnswers)
+
+                .explanation(question.getExplanation())
+                .build();
+        if(question.getIsOriginal()) {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+        } else {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+        }
+
+        List<UUID> userChoice = answer.choices();
+        List<String> correctLabel = new ArrayList<>();
+        for(Choice correctAnswer : correctAnswers) {
+
+            if( userChoice.contains(correctAnswer.getChoiceId())) {
+                correctLabel.add(correctAnswer.getLabel());
+            }
+        }
+        resultSet.setCorrectAnswer(correctLabel);
+        boolean isCorrect =false;
+        int numberOfCorrect = 0;
+        for(String userAnswer : userAnswers) {
+            if(correctLabel.contains(userAnswer)) {
+                numberOfCorrect++;
+            }
+        }
+        isCorrect = numberOfCorrect == correctAnswers.size();
+        resultSet.setCorrect(isCorrect);
+        return resultSet;
     }
 
     private Map<UUID, QuestionAttempt> getCorrectAnswer(List<Question> questions) {

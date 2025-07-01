@@ -25,6 +25,8 @@ public class Constants {
         public static final String ATTEMPT_NOT_FOUND = "ATTEMPT_NOT_FOUND";
         public static final String FORBIDDEN = "FORBIDDEN";
         public static final String ATTEMPT_NOT_DRAFT = "ATTEMPT_NOT_DRAFT";
+        public static final String ATTEMPT_ALREADY_SUBMITTED = "ATTEMPT_ALREADY_SUBMITTED";
+        public static final String EXAM_ATTEMPT_NOT_FOUND = "EXAM_ATTEMPT_NOT_FOUND";
     }
 
     public final class RedisKey {
@@ -60,6 +62,9 @@ public class Constants {
         public static final String READING_EXAM_NOT_FOUND="100024";
         public static final String INVALID_INPUT = "100025";
         public static final String INTERNAL_SERVER_ERROR = "100999";
+
+        public static final String ATTEMPT_ALREADY_SUBMITTED = "100026";
+        public static final String EXAM_ATTEMPT_NOT_FOUND = "100027";
 
     }
 }

@@ -36,13 +36,12 @@ public class QuestionGroup {
     @Column(name = "section_label", length = 255)
     private String sectionLabel;
 
-    @Column(name = "instruction", length = 5000)
+    @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
 
-    @Lob
-    @Basic(fetch = FetchType.EAGER)
     @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
     private String sentenceWithBlanks;
+
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
@@ -95,4 +94,6 @@ public class QuestionGroup {
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionGroup> children = new ArrayList<>();
+
+
 }

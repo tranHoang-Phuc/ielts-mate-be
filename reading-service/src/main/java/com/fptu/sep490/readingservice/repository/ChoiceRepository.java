@@ -4,6 +4,7 @@ import com.fptu.sep490.readingservice.model.Choice;
 import com.fptu.sep490.readingservice.model.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,4 +23,44 @@ public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
         WHERE c.choiceId = :choiceId OR c.parent.choiceId = :choiceId
     """)
     List<Choice> findAllVersion(UUID choiceId);
+
+    @Query("""
+        SELECT  c FROM Choice c WHERE c.question.questionId = :questionId AND c.isCurrent = true
+        """)
+    List<Choice> getVersionChoiceByQuestionId(UUID questionId);
+
+
+    @Query("""
+        SELECT  c FROM Choice c WHERE c.question.questionId = :questionId
+        """)
+    List<Choice> getVersionChoiceByParentQuestionId(UUID questionId);
+
+    @Query("""
+            SELECT c FROM Choice c where c.parent.choiceId = :choiceId AND c.isCurrent = true
+        """)
+    Choice getCurrentVersionChoiceByChoiceId(UUID choiceId);
+
+
+    @Query("""
+    SELECT c
+      FROM Choice c
+     WHERE c.isOriginal = TRUE
+       AND c.question.questionId = :questionId
+""")
+    List<Choice> getOriginalChoiceByOriginalQuestion(@Param("questionId") UUID questionId);
+
+    @Query("""
+    SELECT c
+      FROM Choice c
+     WHERE c.isCorrect = TRUE
+       AND (c IN :originalChoices OR c.parent IN :originalChoices)
+""")
+    List<Choice> getCurrentCorrectChoice(
+            @Param("originalChoices") List<Choice> originalChoices
+    );
+
+    @Query("""
+        select c.label from Choice c where c.choiceId IN :choices
+    """)
+    List<String> getChoicesByIds(List<UUID> choices);
 }

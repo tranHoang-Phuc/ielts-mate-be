@@ -27,6 +27,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,53 +46,60 @@ public class DragItemServiceImpl implements DragItemService {
     RedisService redisService;
 
     @Override
-    public DragItemResponse createDragItem(UUID groupId, CreateDragItemRequest request, HttpServletRequest httpServletRequest) throws AppException {
+    public List<DragItemResponse> createDragItem(UUID groupId, CreateDragItemRequest request, HttpServletRequest httpServletRequest) throws AppException {
         // 1. Kiểm tra group tồn tại
 
         QuestionGroup group = questionGroupRepository.findById(groupId)
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        List<DragItem> dragItemList = new ArrayList<>();
 
-        // 2. QuestionId null thì truyền question null, không thì lấy Question bằng id
-        Question question = request.getQuestionId()==null ? null : questionRepository.findById(UUID.fromString(request.getQuestionId()))
-                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+            if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
 
-        if (question.getDragItem() != null) {
-            throw new AppException(Constants.ErrorCodeMessage.QUESTION_ALREADY_HAS_DRAG_ITEM,
-                    Constants.ErrorCode.QUESTION_ALREADY_HAS_DRAG_ITEM, HttpStatus.BAD_REQUEST.value());
-        }
+            DragItem entity = DragItem.builder()
+                    .questionGroup(group)
+                    .content(request.getContent().trim())
+                    .isCurrent(true)
+                    .version(1)
+                    .isOriginal(true)
+                    .isDeleted(false)
+                    .build();
+            dragItemList.add(entity);
 
-        // 3. Tạo mới DragItem (mapping sang entity)
 
-        DragItem entity = DragItem.builder()
-                .questionGroup(group)
-                .content(request.getContent().trim())
-                .question(question)
-                .build();
-
-        DragItem saved = dragItemRepository.save(entity);
+        List<DragItem> data =  dragItemRepository.saveAll(dragItemList);
 
         // 4. update user cho Group Question
         String userId = helper.getUserIdFromToken(httpServletRequest);
         group.setUpdatedBy(userId);
         questionGroupRepository.save(group);
 
-        return DragItemResponse.builder()
-                .group_id(groupId.toString())
-                .item_id(saved.getDragItemId().toString())
-                .content(saved.getContent())
-                .build();
+
+        return data.stream().map(
+                item -> DragItemResponse.builder()
+                        .group_id(groupId.toString())
+                        .item_id(item.getDragItemId().toString())
+                        .content(item.getContent())
+                        .build()
+        ).toList();
     }
 
     @Override
+    @Transactional
     public DragItemResponse updateDragItem(
             UUID groupId,
             UUID itemId,
             UpdateDragItemRequest request,
             HttpServletRequest httpServletRequest
     ) throws AppException {
-// 1. Kiểm tra QuestionGroup tồn tại
+        // 1. Kiểm tra QuestionGroup tồn tại
+        int currentVersion = 0;
         QuestionGroup group = questionGroupRepository.findById(groupId)
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
@@ -100,12 +109,23 @@ public class DragItemServiceImpl implements DragItemService {
 
         // 2. Tìm DragItem theo groupId và itemId
         DragItem existing = dragItemRepository
-                .findByDragItemIdAndQuestionGroup_GroupId(itemId, groupId)
+                .findByDragItemIdAndQuestionGroup_GroupIdAndIsDeleted(itemId, groupId, false)
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
                         Constants.ErrorCode.DRAG_ITEM_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+        // Update current of previous items
+        List<DragItem> previousItems = dragItemRepository.findPreviousDragItems( itemId);
+
+        for( DragItem previousItem : previousItems) {
+            previousItem.setIsCurrent(false);
+            if( previousItem.getVersion() > currentVersion) {
+                currentVersion = previousItem.getVersion();
+            }
+        }
+
+        dragItemRepository.saveAll(previousItems);
 
         if (!existing.getQuestionGroup().getGroupId().equals(groupId)) {
             throw new AppException(
@@ -115,7 +135,7 @@ public class DragItemServiceImpl implements DragItemService {
             );
         }
 
-        // 3. Cập nhật content (đảm bảo không rỗng)
+        // Tạo dragItem mới với nội dung cập nhật
         String newContent = request.getContent().trim();
         if (newContent.isEmpty()) {
             throw new AppException(
@@ -124,10 +144,20 @@ public class DragItemServiceImpl implements DragItemService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        existing.setContent(newContent);
+
+        DragItem updatedItem = DragItem.builder()
+                .content(newContent)
+                .questionGroup(group)
+                .isCurrent(true)
+                .version(currentVersion + 1)
+                .parent(existing)
+                .isOriginal(false)
+                .isDeleted(false)
+                .build();
+
 
         // 4. Lưu DragItem
-        DragItem updated = dragItemRepository.save(existing);
+        DragItem updated = dragItemRepository.save(updatedItem);
 
         // 5. Cập nhật updatedBy, updatedAt cho QuestionGroup
         String userId = helper.getUserIdFromToken(httpServletRequest);
@@ -137,7 +167,7 @@ public class DragItemServiceImpl implements DragItemService {
         // 6. Trả về response
         return DragItemResponse.builder()
                 .group_id(groupId.toString())
-                .item_id(updated.getDragItemId().toString())
+                .item_id(itemId.toString())
                 .content(updated.getContent())
                 .build();
     }
@@ -156,7 +186,7 @@ public class DragItemServiceImpl implements DragItemService {
 
         // 2. Tìm DragItem theo dragItemId & questionGroup.groupId
         DragItem existing = dragItemRepository
-                .findByDragItemIdAndQuestionGroup_GroupId(itemId, groupId)
+                .findByDragItemIdAndQuestionGroup_GroupIdAndIsDeleted(itemId, groupId, false)
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
                         Constants.ErrorCode.DRAG_ITEM_NOT_FOUND,
@@ -171,8 +201,16 @@ public class DragItemServiceImpl implements DragItemService {
             );
         }
 
+        List<DragItem> previousItems = dragItemRepository.findPreviousDragItems( itemId);
+
+        for( DragItem previousItem : previousItems) {
+            previousItem.setIsDeleted(true);
+            previousItem.setIsCurrent(false);
+        }
+
+
         // 3. Xóa DragItem
-        dragItemRepository.deleteById(itemId);
+        dragItemRepository.saveAll(previousItems);
 
         // 4. (Tuỳ chọn) Cập nhật updatedBy, updatedAt cho QuestionGroup
         // Nếu bạn muốn ghi lại ai xóa, có thể uncomment:
@@ -188,7 +226,7 @@ public class DragItemServiceImpl implements DragItemService {
 
         // 2. Tìm DragItem theo dragItemId và questionGroup.groupId
         DragItem existing = dragItemRepository
-                .findByDragItemIdAndQuestionGroup_GroupId(itemId, groupId)
+                .findByDragItemIdAndQuestionGroup_GroupIdAndIsDeleted(itemId, groupId, false)
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
                         Constants.ErrorCode.DRAG_ITEM_NOT_FOUND,

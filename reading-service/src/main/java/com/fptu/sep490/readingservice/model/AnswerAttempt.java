@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AnswerAttempt {
+public class    AnswerAttempt {
     @EmbeddedId
     private AnswerAttemptId id;
 
