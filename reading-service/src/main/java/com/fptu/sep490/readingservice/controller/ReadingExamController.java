@@ -35,7 +35,7 @@ public class ReadingExamController {
     ReadingExamService readingExamService;
 
     @PostMapping("/")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Create a new reading exam",
             description = "Allows a teacher to create a new reading exam."
@@ -65,7 +65,7 @@ public class ReadingExamController {
     }
 
     @PutMapping("/{readingExamId}")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Update a reading exam",
             description = "Allows a teacher to update an existing reading exam."
@@ -96,7 +96,7 @@ public class ReadingExamController {
     }
 
     @GetMapping("/{readingExamId}")
-    @PreAuthorize("TEACHER")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get a reading exam",
             description = "Retrieve a reading exam by its ID."
@@ -146,7 +146,7 @@ public class ReadingExamController {
     }
 
     @GetMapping("/my-exams")
-    @PreAuthorize("CREATOR")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get all reading exams for creator",
             description = "Retrieve all reading exams created by the current user."
@@ -169,7 +169,7 @@ public class ReadingExamController {
     }
 
     @GetMapping("/")
-    @PreAuthorize("CREATOR")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get all reading exams",
             description = "Retrieve all reading exams (for creator)."
