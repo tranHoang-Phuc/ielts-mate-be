@@ -24,7 +24,7 @@ notification:
 
 springdoc:
   paths-to-match: /**
-  packages-to-scan: com.fptu.sep490.identityservice.controller
+  packages-to-scan: com.fptu.sep490.notificationservice.controller
   swagger-ui:
     path: /swagger-ui
     oauth:
