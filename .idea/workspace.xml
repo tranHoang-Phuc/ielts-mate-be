@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="fix: missing idea">
-      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/config/OpenApiConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/controller/SseController.java" afterDir="false" />
+    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="feature: config swagger">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/java/com/fptu/sep490/apigateway/config/SwaggerConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/java/com/fptu/sep490/apigateway/config/SwaggerConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/controller/EmailController.java" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/controller/EmailController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notification-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +24,7 @@
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="fix/missing-idea" />
+        <entry key="$PROJECT_DIR$" value="local" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -40,66 +35,22 @@
     &quot;assignee&quot;: &quot;tranHoang-Phuc&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/tranHoang-Phuc/ielts-mate-be.git&quot;,
-    &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/tranHoang-Phuc/ielts-mate-be.git",
+    "accountId": "5ea8103d-a79c-4e58-8ae3-2d325d43e98d"
   },
-  &quot;recentNewPullRequestHead&quot;: {
-    &quot;server&quot;: {
-      &quot;useHttp&quot;: false,
-      &quot;host&quot;: &quot;github.com&quot;,
-      &quot;port&quot;: null,
-      &quot;suffix&quot;: null
+  "recentNewPullRequestHead": {
+    "server": {
+      "useHttp": false,
+      "host": "github.com",
+      "port": null,
+      "suffix": null
     },
-    &quot;owner&quot;: &quot;tranHoang-Phuc&quot;,
-    &quot;repository&quot;: &quot;ielts-mate-be&quot;
+    "owner": "tranHoang-Phuc",
+    "repository": "ielts-mate-be"
   }
-}&lt;/component&gt;
-  &lt;component name=&quot;KubernetesApiPersistence&quot;&gt;{}&lt;/component&gt;
-  &lt;component name=&quot;KubernetesApiProvider&quot;&gt;{
-  &amp;quot;isMigrated&amp;quot;: true
-}&lt;/component&gt;
-  &lt;component name=&quot;ProjectColorInfo&quot;&gt;{
-  &amp;quot;customColor&amp;quot;: &amp;quot;&amp;quot;,
-  &amp;quot;associatedIndex&amp;quot;: 0
-}&lt;/component&gt;
-  &lt;component name=&quot;ProjectId&quot; id=&quot;2zEH7s7NOalY5HLqPqKf6epxzmZ&quot; /&gt;
-  &lt;component name=&quot;ProjectLevelVcsManager&quot;&gt;
-    &lt;ConfirmationsSetting value=&quot;2&quot; id=&quot;Add&quot; /&gt;
-  &lt;/component&gt;
-  &lt;component name=&quot;ProjectViewState&quot;&gt;
-    &lt;option name=&quot;hideEmptyMiddlePackages&quot; value=&quot;true&quot; /&gt;
-    &lt;option name=&quot;showLibraryContents&quot; value=&quot;true&quot; /&gt;
-  &lt;/component&gt;
-  &lt;component name=&quot;PropertiesComponent&quot;&gt;&lt;![CDATA[{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.DiscoveryServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.FileServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.IdentityServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.ListeningServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.NotificationServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.ReadingServiceApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
-  }
-}</component>
+}]]></component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
@@ -115,14 +66,14 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
+    "Spring Boot.ApiGatewayApplication.executor": "Debug",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
     "Spring Boot.FileServiceApplication.executor": "Run",
     "Spring Boot.IdentityServiceApplication.executor": "Run",
     "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
     "Spring Boot.ReadingServiceApplication.executor": "Run",
-    "git-widget-placeholder": "local",
+    "git-widget-placeholder": "#84 on feature/notification",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -133,6 +84,9 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.fptu.sep490.notificationservice.config" />
@@ -146,6 +100,19 @@
         <option value="QuarkusRunConfigurationType" />
         <option value="SpringBootApplicationConfigurationType" />
       </set>
+    </option>
+    <option name="hiddenConfigurations">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <set>
+              <option value="ListeningServiceApplication" />
+              <option value="NotificationServiceApplication" />
+              <option value="ReadingServiceApplication" />
+            </set>
+          </value>
+        </entry>
+      </map>
     </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ListeningServiceApplication">
@@ -268,7 +235,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751290601094</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feature: config swagger">
+      <option name="closed" value="true" />
+      <created>1751404380054</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1751404380054</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -277,7 +252,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix: missing idea" />
     <MESSAGE value="feature: create listening task" />
-    <option name="LAST_COMMIT_MESSAGE" value="feature: create listening task" />
+    <MESSAGE value="feature: config swagger" />
+    <option name="LAST_COMMIT_MESSAGE" value="feature: config swagger" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -301,6 +277,21 @@
           <url>file://$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/service/impl/SseServiceImpl.java</url>
           <line>41</line>
           <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
+          <line>45</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
+          <line>40</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
+          <line>41</line>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
