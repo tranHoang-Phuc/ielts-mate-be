@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @RestController
@@ -49,10 +51,16 @@ public class FileController {
             } else {
                 mediaType = MediaType.APPLICATION_OCTET_STREAM;
             }
+            String filename = id.toString() + "." + format;
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(mediaType);
-
+            headers.setContentDisposition(
+                    ContentDisposition
+                            .attachment()
+                            .filename(filename, StandardCharsets.UTF_8)
+                            .build()
+            );
             return new ResponseEntity<>(data, headers, HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -82,6 +90,15 @@ public class FileController {
             byte[] data = fileService.download(metadata.getFileId());
             MediaType mediaType = resolveMediaType(metadata);
             HttpHeaders headers = new HttpHeaders(); headers.setContentType(mediaType);
+            String format = metadata.getFormat();
+            String filename = metadata.getFileId().toString() + "." + format;
+            headers.setContentDisposition(
+                    ContentDisposition
+                            .attachment()
+                            .filename(filename, StandardCharsets.UTF_8)
+                            .build()
+            );
+
             return new ResponseEntity<>(data, headers, HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
