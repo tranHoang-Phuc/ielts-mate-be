@@ -1,6 +1,25 @@
 spring:
   application:
     name: listening-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        max.request.size: 10485760
+    consumer:
+      group-id: listening-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+          spring.json.trusted.packages: "*"
+
   security:
     oauth2:
       resourceserver:
@@ -26,6 +45,10 @@ spring:
 
 server:
   port: 8071
+  servlet:
+    context-path: /listening
+
+
 logging:
   level:
     org.hibernate.type.descriptor.sql: trace
@@ -54,3 +77,13 @@ springdoc:
     authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
     token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
 
+topic:
+  upload-audio: upload-audio-topic
+  update-listening-audio: update-listening-audio-topic
+  send-notification: send-notification-topic
+
+
+cloudinary:
+  cloud-name: dbrm5eowo
+  api-key: 566182576423582
+  api-secret: mYJD0DbR4oXl4oD8g22RtvJx9kU

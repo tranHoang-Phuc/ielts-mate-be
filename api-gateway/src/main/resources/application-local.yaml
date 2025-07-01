@@ -35,7 +35,12 @@ spring:
             - Path=/api/v1/resource/**
           filters:
             - StripPrefix=2
-
+        - id: listening-service
+          uri: http://localhost:8071
+          predicates:
+            - Path=/api/v1/listening/**
+          filters:
+            - StripPrefix=2
       globalcors:
         cors-configurations:
           '[/**]':
@@ -66,6 +71,8 @@ springdoc:
         url: http://localhost:9191/api/v1/reading/v3/api-docs
       - name: file-service
         url: http://localhost:9191/api/v1/resource/v3/api-docs
+      - name: listening-service
+        url: http://localhost:9191/api/v1/listening/v3/api-docs
 
 eureka:
   client:

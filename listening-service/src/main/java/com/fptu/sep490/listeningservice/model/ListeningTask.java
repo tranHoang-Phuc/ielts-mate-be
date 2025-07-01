@@ -41,10 +41,10 @@ public class ListeningTask {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "audio_file_id",nullable = false)
+    @Column(name = "audio_file_id")
     private UUID audioFileId;
 
-    @Column(name = "transcription")
+    @Column(name = "transcription", columnDefinition = "TEXT")
     private String transcription;
 
     @Column(name = "created_by", length = 100)

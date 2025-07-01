@@ -38,6 +38,9 @@ public class QuestionGroup {
     @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
 
+    @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
+    private String sentenceWithBlanks;
+
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
@@ -86,8 +89,5 @@ public class QuestionGroup {
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionGroup> children = new ArrayList<>();
 
-    @Lob
-    @Basic(fetch = FetchType.EAGER)
-    @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
-    private String sentenceWithBlanks;
+
 }
