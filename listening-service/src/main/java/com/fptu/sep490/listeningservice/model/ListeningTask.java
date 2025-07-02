@@ -2,6 +2,7 @@ package com.fptu.sep490.listeningservice.model;
 
 import com.fptu.sep490.listeningservice.model.enumeration.IeltsType;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
+import com.fptu.sep490.listeningservice.model.enumeration.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,6 +35,10 @@ public class ListeningTask {
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "part_number", nullable = false)
     private PartNumber partNumber;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "status")
+    private Status status;
 
     @Column(name = "instruction", nullable = false, columnDefinition = "TEXT")
     private String instruction;
