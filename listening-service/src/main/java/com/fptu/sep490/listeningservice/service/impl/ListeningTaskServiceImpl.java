@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -79,7 +80,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
         ListeningTask saved = listeningTaskRepository.save(listeningTask);
 
-        fileService.uploadAsync("listening-tasks", audio, saved.getTaskId());
+        fileService.uploadAsync("listening-tasks", audio, saved.getTaskId(), UUID.fromString(userId));
 
         return ListeningTaskCreationResponse.builder()
                 .taskId(saved.getTaskId())
