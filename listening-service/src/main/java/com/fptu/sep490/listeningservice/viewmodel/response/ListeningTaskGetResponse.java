@@ -6,20 +6,24 @@ import lombok.Builder;
 import java.util.UUID;
 
 @Builder
-public record ListeningTaskCreationResponse(
+public record ListeningTaskGetResponse(
         @JsonProperty("task_id")
         UUID taskId,
         @JsonProperty("ielts_type")
         Integer ieltsType,
         @JsonProperty("part_number")
         Integer partNumber,
-        @JsonProperty("instruction")
-        String instruction,
+        @JsonProperty("status")
+        Integer status,
         @JsonProperty("title")
         String title,
-        @JsonProperty("audio_file_id")
-        UUID audioFileId,
-        @JsonProperty("transcription")
-        String transcription
+        @JsonProperty("created_by")
+        UserInformationResponse createdBy,
+        @JsonProperty("updated_by")
+        UserInformationResponse updatedBy,
+        @JsonProperty("created_at")
+        String createdAt,
+        @JsonProperty("updated_at")
+        String updatedAt
 ) {
 }

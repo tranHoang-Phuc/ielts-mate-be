@@ -1,11 +1,14 @@
-package com.fptu.sep490.listeningservice.viewmodel.request;
+package com.fptu.sep490.listeningservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @Builder
-public record ListeningTaskCreationRequest(
+public record ListeningTaskResponse(
+        @JsonProperty("task_id")
+        UUID taskId,
         @JsonProperty("ielts_type")
         Integer ieltsType,
         @JsonProperty("part_number")
@@ -14,12 +17,8 @@ public record ListeningTaskCreationRequest(
         String instruction,
         @JsonProperty("title")
         String title,
-        @JsonProperty("status")
-        Integer status,
-        @JsonProperty("audio_file")
-        MultipartFile audioFile,
-        @JsonProperty("is_automatic_transcription")
-        boolean isAutomaticTranscription,
+        @JsonProperty("audio_file_id")
+        UUID audioFileId,
         @JsonProperty("transcription")
         String transcription
 ) {
