@@ -43,7 +43,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam readingExam = new ReadingExam();
         readingExam.setExamName(readingExamCreationRequest.readingExamName());
         readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        readingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        readingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
         readingExam.setCreatedBy(userId);
         readingExam.setIsOriginal(true);
 
@@ -133,7 +133,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam newReadingExam = new ReadingExam();
         newReadingExam.setExamName(readingExamCreationRequest.readingExamName());
         newReadingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setUpdatedAt(LocalDateTime.now());
         newReadingExam.setParent(readingExam);

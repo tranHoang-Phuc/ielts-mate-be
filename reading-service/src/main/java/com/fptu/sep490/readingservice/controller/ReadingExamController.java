@@ -1,22 +1,22 @@
 package com.fptu.sep490.readingservice.controller;
 
-
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.ReadingExamService;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,28 +40,29 @@ public class ReadingExamController {
             summary = "Create a new reading exam",
             description = "Allows a teacher to create a new reading exam."
     )
-    @RequestBody(
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Reading exam creation request",
             required = true,
-            description = "Reading exam creation request"
+            content = @Content(schema = @Schema(implementation = ReadingExamCreationRequest.class))
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Exam created successfully"),
+            @ApiResponse(responseCode = "201", description = "Exam created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request data"),
             @ApiResponse(responseCode = "403", description = "Access denied"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<BaseResponse<ReadingExamResponse>> createReadingExam(
-            @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ReadingExamCreationRequest readingExamCreationRequest,
             HttpServletRequest httpServletRequest
-    )
-    throws Exception{
+    ) throws Exception {
         ReadingExamResponse response = readingExamService.createReadingExam(readingExamCreationRequest, httpServletRequest);
-        return ResponseEntity.ok(
-                BaseResponse.<ReadingExamResponse>builder()
-                        .message("Add Group Question")
-                        .data(response)
-                        .build()
-        );
+        BaseResponse<ReadingExamResponse> body = BaseResponse.<ReadingExamResponse>builder()
+                .message("Add Group Question")
+                .data(response)
+                .build();
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(body);
     }
 
     @PutMapping("/{readingExamId}")
@@ -70,9 +71,10 @@ public class ReadingExamController {
             summary = "Update a reading exam",
             description = "Allows a teacher to update an existing reading exam."
     )
-    @RequestBody(
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Reading exam update request",
             required = true,
-            description = "Reading exam update request"
+            content = @Content(schema = @Schema(implementation = ReadingExamCreationRequest.class))
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Exam updated successfully"),
@@ -82,11 +84,10 @@ public class ReadingExamController {
     })
     public ResponseEntity<BaseResponse<ReadingExamResponse>> updateReadingExam(
             @PathVariable("readingExamId") String readingExamId,
-            @RequestBody ReadingExamCreationRequest readingExamCreationRequest,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ReadingExamCreationRequest readingExamCreationRequest,
             HttpServletRequest httpServletRequest
-    )
-        throws Exception{
-        ReadingExamResponse response = readingExamService.updateReadingExam(readingExamId,readingExamCreationRequest, httpServletRequest);
+    ) throws Exception {
+        ReadingExamResponse response = readingExamService.updateReadingExam(readingExamId, readingExamCreationRequest, httpServletRequest);
         return ResponseEntity.ok(
                 BaseResponse.<ReadingExamResponse>builder()
                         .message("Update Group Question")
@@ -110,18 +111,18 @@ public class ReadingExamController {
     public ResponseEntity<BaseResponse<ReadingExamResponse>> getReadingExam(
             @PathVariable("readingExamId") String readingExamId,
             HttpServletRequest httpServletRequest
-    ) throws Exception{
-        ReadingExamResponse response= readingExamService.getReadingExam(readingExamId, httpServletRequest);
+    ) throws Exception {
+        ReadingExamResponse response = readingExamService.getReadingExam(readingExamId, httpServletRequest);
         return ResponseEntity.ok(
                 BaseResponse.<ReadingExamResponse>builder()
-                        .message("Update Group Question")
+                        .message("Get Reading Exam")
                         .data(response)
                         .build()
         );
     }
 
     @DeleteMapping("/{readingExamId}")
-    @PreAuthorize("hasAnyRole('TEACHER', 'STUDENT')")
+    @PreAuthorize("hasAnyRole('CREATOR', 'TEACHER')")
     @Operation(
             summary = "Delete a reading exam",
             description = "Delete a reading exam by its ID."
