@@ -138,7 +138,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         newReadingExam.setUpdatedAt(LocalDateTime.now());
         newReadingExam.setParent(readingExam);
 
-        if (!readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart1() != null && !readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
             if (readingPassagePart1.isEmpty()) {
                 throw new AppException(
@@ -149,7 +149,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
             }
             newReadingExam.setPart1(readingPassagePart1.get());
         }
-        if (!readingExamCreationRequest.readingPassageIdPart2().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart2() != null && !readingExamCreationRequest.readingPassageIdPart2().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart2 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart2()));
 
             if (readingPassagePart2.isEmpty()) {
@@ -160,7 +160,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                 );            }
             newReadingExam.setPart2(readingPassagePart2.get());
         }
-        if (!readingExamCreationRequest.readingPassageIdPart3().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart3() != null && !readingExamCreationRequest.readingPassageIdPart3().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart3 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart3()));
 
             if (readingPassagePart3.isEmpty()) {
