@@ -1,7 +1,9 @@
 package com.fptu.sep490.readingservice.controller;
 
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.readingservice.service.ReadingExamService;
+import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.fptu.sep490.readingservice.model.ReadingExam;
 
 import java.util.List;
 
@@ -158,17 +164,35 @@ public class ReadingExamController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<BaseResponse<List<ReadingExamResponse>>> getAllReadingExamsForCreator(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             HttpServletRequest httpServletRequest
     ) throws Exception {
-        List<ReadingExamResponse> response = readingExamService.getAllReadingExamsForCreator(httpServletRequest);
-        return ResponseEntity.ok(
-                BaseResponse.<List<ReadingExamResponse>>builder()
-                        .message("Get All Reading Exams")
-                        .data(response)
-                        .build()
+        Page<ReadingExamResponse> examPage = readingExamService.getAllReadingExamsForCreator(
+                httpServletRequest, page, size, sortBy, sortDirection
         );
-    }
 
+        Pagination pagination = Pagination.builder()
+                .currentPage(examPage.getNumber() + 1)
+                .totalPages(examPage.getTotalPages())
+                .pageSize(examPage.getSize())
+                .totalItems((int)examPage.getTotalElements())
+                .hasNextPage(examPage.hasNext())
+                .hasPreviousPage(examPage.hasPrevious())
+                .build();
+
+        BaseResponse<List<ReadingExamResponse>> body = BaseResponse.<List<ReadingExamResponse>>builder()
+                .message("Get All Reading Exams")
+                .data(examPage.getContent())
+                .pagination(pagination)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(body);
+    }
     @GetMapping("")
     @PreAuthorize("hasRole('CREATOR')")
     @Operation(
