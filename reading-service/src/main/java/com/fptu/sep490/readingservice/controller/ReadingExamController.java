@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/reading-exams")
+@RequestMapping("/reading-exams")
 public class ReadingExamController {
 
     ReadingExamService readingExamService;
