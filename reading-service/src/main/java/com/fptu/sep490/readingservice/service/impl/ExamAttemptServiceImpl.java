@@ -5,13 +5,10 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
-import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
-import com.fptu.sep490.readingservice.model.enumeration.Status;
-import com.fptu.sep490.readingservice.model.json.QuestionVersion;
-import com.fptu.sep490.readingservice.repository.AttemptRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
+import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,12 +16,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -63,7 +63,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         //create examAttempt
         ExamAttempt examAttempt = ExamAttempt.builder()
-                .duration(60)
+                .duration(null) // Initialize duration to null, will be updated later
+                .totalPoint(null) // Initialize totalPoint to null, will be updated later
                 .readingExam(currentExam)
                 .createdBy(userId)
                 .updatedBy(userId)
@@ -90,6 +91,54 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .createdAt(examAttempt.getCreatedAt().toString())
                 .readingExam(readingExamResponse)
                 .build();
+
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserGetHistoryExamAttemptResponse> getListExamHistory(
+            int page,
+            int size,
+            String readingExamName,
+            String sortBy,
+            String sortDirection,
+            HttpServletRequest request
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = ExamAttemptSpecifications.byConditions(
+                readingExamName,
+                sortBy,
+                sortDirection,
+                helper.getUserIdFromToken(request)
+        );
+
+        Page<ExamAttempt> examAttemptsResult = examAttemptRepo.findAll(spec, pageable);
+
+        List<ExamAttempt> examAttempts = examAttemptsResult.getContent();
+
+        List<UserGetHistoryExamAttemptResponse> list = examAttempts.stream().map(examAttempt -> {
+            UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptReadingExamResponse readingExamResponse =
+                    UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptReadingExamResponse.builder()
+                            .readingExamId(examAttempt.getReadingExam().getReadingExamId())
+                            .readingExamName(examAttempt.getReadingExam().getExamName())
+                            .readingExamDescription(examAttempt.getReadingExam().getExamDescription())
+                            .urlSlug(examAttempt.getReadingExam().getUrlSlug())
+                            .build();
+
+            return UserGetHistoryExamAttemptResponse.builder()
+                    .examAttemptId(examAttempt.getExamAttemptId())
+                    .readingExam(readingExamResponse)
+                    .duration(examAttempt.getDuration())
+                    .totalQuestion(examAttempt.getTotalPoint())
+                    .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                    .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                    .createdAt(examAttempt.getCreatedAt().toString())
+                    .updatedAt(examAttempt.getUpdatedAt().toString())
+                    .build();
+        }).toList();
+
+        return new PageImpl<>(list, pageable, examAttemptsResult.getTotalElements());
 
     }
 

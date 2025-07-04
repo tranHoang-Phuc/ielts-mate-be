@@ -112,13 +112,24 @@ public class Helper {
         );
     }
 
-    public UserInformationResponse getUserInformationResponse(String userId) throws JsonProcessingException {
-        UserProfileResponse user = getUserProfileById(userId);
-        return UserInformationResponse.builder()
-                .userId(user.id())
-                .email(user.email())
-                .firstName(user.firstName())
-                .lastName(user.lastName())
-                .build();
+    public UserInformationResponse getUserInformationResponse(String userId) {
+        try {
+            UserProfileResponse user = getUserProfileById(userId);
+            return UserInformationResponse.builder()
+                    .userId(user.id())
+                    .email(user.email())
+                    .firstName(user.firstName())
+                    .lastName(user.lastName())
+                    .build();
+        } catch (JsonProcessingException e) {
+            // Bọc thành AppException (runtime) để không phải throws
+            throw new AppException(
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    "Lỗi khi parse JSON user profile",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e
+            );
+        }
     }
+
 }

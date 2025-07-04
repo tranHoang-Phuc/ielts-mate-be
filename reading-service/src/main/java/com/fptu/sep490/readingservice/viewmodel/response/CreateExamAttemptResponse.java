@@ -21,7 +21,7 @@ public record CreateExamAttemptResponse(
 //        Long duration,
 //        @JsonProperty("history")
 //        String history,
-//        @JsonProperty("total_question")
+        @JsonProperty("total_question")
         Integer totalQuestion,
         @JsonProperty("created_by")
         UserInformationResponse createdBy,
