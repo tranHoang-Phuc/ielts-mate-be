@@ -34,7 +34,7 @@ public class ReadingExamController {
 
     ReadingExamService readingExamService;
 
-    @PostMapping("/")
+    @PostMapping("")
     @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Create a new reading exam",
@@ -168,7 +168,7 @@ public class ReadingExamController {
         );
     }
 
-    @GetMapping("/")
+    @GetMapping("")
     @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get all reading exams",
