@@ -93,4 +93,45 @@ public class ListeningTask {
     )
     private List<QuestionGroup> questionGroups = new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "listeningTask",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<Attempt> attempts = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part1",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ListeningExam> listeningExamsPart1 = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part2",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ListeningExam> listeningExamsPart2 = new ArrayList<>();
+
+
+    @OneToMany(
+            mappedBy = "part3",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ListeningExam> listeningExamsPart3 = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "part4",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<ListeningExam> listeningExamsPart4 = new ArrayList<>();
+
 }
