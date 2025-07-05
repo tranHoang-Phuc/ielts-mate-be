@@ -28,4 +28,13 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
             (lt.parent.taskId IN :taskIds AND lt.isCurrent = true)
     """)
     List<ListeningTask> findCurrentVersionsByIds(List<UUID> taskIds);
+
+    @Query("""
+        SELECT lt FROM ListeningTask lt
+        WHERE 
+            (lt.taskId = :taskId AND lt.isOriginal = true AND lt.isCurrent = true)
+            OR 
+            (lt.parent.taskId = :taskId AND lt.isCurrent = true )
+    """)
+    ListeningTask findLastestVersion(UUID taskId);
 }
