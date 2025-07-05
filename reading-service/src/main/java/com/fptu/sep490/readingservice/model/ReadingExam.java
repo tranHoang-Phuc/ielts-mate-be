@@ -31,7 +31,8 @@ public class ReadingExam {
     @Column(name = "exam_description", columnDefinition = "TEXT")
     private String examDescription;
 
-    @Column(name = "url_slug", nullable = false, length = 255, unique = true)
+    // t update lai la false vi minh update la duplicate dong
+    @Column(name = "url_slug", nullable = false, length = 255, unique = false)
     private String urlSlug;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

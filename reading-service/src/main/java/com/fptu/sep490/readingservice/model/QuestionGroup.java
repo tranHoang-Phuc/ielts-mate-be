@@ -1,5 +1,6 @@
 package com.fptu.sep490.readingservice.model;
 
+import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,13 +36,12 @@ public class QuestionGroup {
     @Column(name = "section_label", length = 255)
     private String sectionLabel;
 
-    @Column(name = "instruction", length = 5000)
+    @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;
 
-    @Lob
-    @Basic(fetch = FetchType.EAGER)
     @Column(name = "sentence_with_blanks", columnDefinition = "TEXT")
     private String sentenceWithBlanks;
+
 
     @Column(name = "created_by", length = 100)
     private String createdBy;
@@ -74,13 +74,19 @@ public class QuestionGroup {
     @Column(name = "is_current")
     private Boolean isCurrent = true;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
     @Column(name = "display_version")
     private Integer version = 1;
 
     @Column(name = "is_original")
     private Boolean isOriginal = true;
-    @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "group_type")
+    private QuestionType groupType = QuestionType.MULTIPLE_CHOICE;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_question_parent"))
@@ -88,4 +94,6 @@ public class QuestionGroup {
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<QuestionGroup> children = new ArrayList<>();
+
+
 }

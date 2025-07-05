@@ -125,7 +125,7 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<PassageGetResponse> getPassages(
             int page,
             int size,
@@ -275,6 +275,7 @@ public class PassageServiceImpl implements PassageService {
         entity.setIsCurrent(false);
         entity.setUpdatedAt(LocalDateTime.now());
         entity.setUpdatedBy(userId);
+        entity.setPassageStatus(request.passageStatus() == null ? entity.getPassageStatus() : safeEnumFromOrdinal(Status.values(), request.passageStatus()));
         ReadingPassage updated = readingPassageRepository.save(entity);
         ReadingPassage saved = readingPassageRepository.save(updatedVersion);
         UserProfileResponse createdProfile;
@@ -473,9 +474,13 @@ public class PassageServiceImpl implements PassageService {
                                                                 .instructionForMatching(q.getInstructionForMatching())
                                                                 .correctAnswerForMatching(q.getCorrectAnswerForMatching())
                                                                 .zoneIndex(q.getZoneIndex())
-                                                                .dragItemId(q.getDragItem() == null
-                                                                        ? null
-                                                                        : q.getDragItem().getDragItemId().toString())
+                                                                .dragItemId(
+                                                                        q.getQuestionType() == QuestionType.DRAG_AND_DROP ?
+                                                                        q.getIsOriginal()?
+                                                                                (dragItemRepository.findByQuestionId(q.getQuestionId()).getDragItemId().toString())
+                                                                                :
+                                                                                (dragItemRepository.findByQuestionId(q.getParent().getQuestionId()).getDragItemId().toString())
+                                                                                        : null)
                                                                 .build())
                                                         .sorted(Comparator.comparing(PassageAttemptResponse.
                                                                 ReadingPassageResponse.QuestionGroupResponse.
@@ -507,7 +512,8 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+
+    @Transactional
     public Page<PassageGetResponse> getActivePassages(int page,
                                                       int size,
                                                       List<Integer> ieltsType,

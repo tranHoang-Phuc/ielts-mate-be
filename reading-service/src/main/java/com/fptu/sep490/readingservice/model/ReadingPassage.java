@@ -43,14 +43,16 @@ public class ReadingPassage {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "content", nullable = false)
+
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "passage_status", nullable = false)
     private Status passageStatus;
 
-    @Column(name = "content_with_highlight_keyword")
+
+    @Column(name = "content_with_highlight_keyword", nullable = false, columnDefinition = "TEXT")
     private String contentWithHighlightKeyword;
 
     @Column(name = "created_by", length = 100)

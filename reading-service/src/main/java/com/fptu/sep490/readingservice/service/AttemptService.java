@@ -14,7 +14,8 @@ public interface AttemptService {
 
     void saveAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers);
 
-    UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request);
+    UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) throws JsonProcessingException;
 
-    SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers);
+    SubmittedAttemptResponse submitAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers)
+            throws JsonProcessingException;
 }

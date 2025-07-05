@@ -322,24 +322,24 @@ public class QuestionServiceImpl implements QuestionService {
                         .point(question.point())
                         .questionOrder(question.questionOrder())
                         .zoneIndex(question.zoneIndex())
-                        .dragItem(dragItem)
                         .categories(Set.copyOf(categories))
                         .explanation(question.explanation())
                         .numberOfCorrectAnswers(question.numberOfCorrectAnswers())
                         .isOriginal(true)
                         .isCurrent(true)
+                        .questionGroup(questionGroup)
+                        .dragItem(dragItem)
                         .isDeleted(false)
                         .version(1)
                         .zoneIndex(question.zoneIndex())
-                        .questionGroup(questionGroup)
                         .build();
                 dragItem.setQuestion(savedQuestion);
                 String userId = getUserIdFromToken(request);
                 savedQuestion.setCreatedBy(userId);
                 savedQuestion.setUpdatedBy(userId);
+
                 Question saved = questionRepository.save(savedQuestion);
                 dragItemRepository.save(dragItem);
-
                 saved.setCreatedBy(userId);
                 saved.setUpdatedBy(userId);
                 UserProfileResponse userProfile = getUserProfileById(userId);

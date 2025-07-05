@@ -41,7 +41,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
         String refreshToken = CookieUtils.getCookieValue(request, CookieConstants.REFRESH_TOKEN);
-        if(accessToken == null || refreshToken == null) {
+        if (accessToken == null || refreshToken == null) {
             return true;
         }
         boolean isValid = validateAccessToken(accessToken);

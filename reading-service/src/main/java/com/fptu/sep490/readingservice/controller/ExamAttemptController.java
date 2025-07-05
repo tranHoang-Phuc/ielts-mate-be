@@ -2,40 +2,64 @@ package com.fptu.sep490.readingservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
+import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
-import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
+import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
+@RequestMapping("/exam/attempts")
+@RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
-@RequestMapping("/exam-attempts")
 public class ExamAttemptController {
 
     ExamAttemptService examAttemptService;
 
-    // lam bai thi
+    @PutMapping("/save/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitExamAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            ExamAttemptAnswersRequest answers,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        SubmittedAttemptResponse response = examAttemptService.submittedExam(attemptId, answers, request);
+        BaseResponse<SubmittedAttemptResponse> baseResponse = BaseResponse.<SubmittedAttemptResponse>builder()
+                .data(response)
+                .message("Exam attempt submitted successfully")
+                .build();
+        return ResponseEntity.ok(baseResponse);
+    }
+
     @PostMapping("/{url-slug}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<CreateExamAttemptResponse>> createReadingExam(
-            @PathVariable ("url-slug") String urlSlug,
+            @PathVariable("url-slug") String urlSlug,
             HttpServletRequest httpServletRequest
     ) throws JsonProcessingException {
 
@@ -95,5 +119,4 @@ public class ExamAttemptController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
     }
-
 }

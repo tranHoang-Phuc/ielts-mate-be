@@ -64,7 +64,7 @@ public class AttemptController {
     public ResponseEntity<BaseResponse<UserDataAttempt>> loadAttempt(
             @PathVariable("attempt-id") String attemptId,
             HttpServletRequest request
-    ) {
+    ) throws JsonProcessingException {
         UserDataAttempt data = attemptService.loadAttempt(attemptId, request);
         return ResponseEntity.ok(BaseResponse.<UserDataAttempt>builder()
                 .data(data)
@@ -78,7 +78,7 @@ public class AttemptController {
             @PathVariable("attempt-id") String attemptId,
             HttpServletRequest request,
             @RequestBody SavedAnswersRequestList answers
-    ) {
+    ) throws JsonProcessingException {
         SubmittedAttemptResponse data = attemptService.submitAttempt(attemptId, request, answers);
         return ResponseEntity.ok(BaseResponse.<SubmittedAttemptResponse>builder()
                 .data(data)

@@ -1,0 +1,55 @@
+package com.fptu.sep490.listeningservice.model;
+
+import com.fptu.sep490.listeningservice.model.enumeration.Status;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name ="attempts")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Attempt {
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "attempt_id", updatable = false, nullable = false)
+    private UUID attemptId;
+
+    @Column(name = "duration" )
+    private Long duration;
+
+    @Column(name="total_points")
+    private Integer totalPoints;
+
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
+
+    @Column(name = "status", length = 50)
+    @Enumerated(EnumType.ORDINAL)
+    private Status status;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name ="finished_at")
+    private LocalDateTime finishedAt;
+
+    @Column(name= "version", columnDefinition = "TEXT")
+    private String version;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "listening_task_id", nullable = false)
+    private ListeningTask listeningTask;
+
+
+}

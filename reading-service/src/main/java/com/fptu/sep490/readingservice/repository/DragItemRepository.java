@@ -24,6 +24,11 @@ public interface DragItemRepository extends JpaRepository<DragItem, UUID> {
     Optional<DragItem> findByQuestion(Question question);
 
     @Query("""
+        SELECT di FROM DragItem di
+        WHERE di.question.questionId = :questionId
+    """)
+    DragItem findByQuestionId(UUID questionId);
+    @Query("""
         SELECT di FROM DragItem di 
         WHERE (di.dragItemId = :originalDragItemId AND di.isCurrent = true)
            OR (di.parent.dragItemId = :originalDragItemId AND di.isCurrent = true)

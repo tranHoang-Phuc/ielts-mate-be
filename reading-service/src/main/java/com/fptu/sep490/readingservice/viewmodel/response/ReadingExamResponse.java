@@ -10,8 +10,8 @@ public record ReadingExamResponse(
         String readingExamName,
         @JsonProperty("reading_exam_description")
         String readingExamDescription,
-        @JsonProperty("url_slung")
-        String urlSlung,
+        @JsonProperty("url_slug")
+        String urlSlug,
         @JsonProperty("reading_passage_id_part1")
         ReadingPassageResponse readingPassageIdPart1,
         @JsonProperty("reading_passage_id_part2")

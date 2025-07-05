@@ -44,7 +44,7 @@ public class Question {
     @Enumerated(EnumType.STRING)
     private Set<QuestionCategory> categories = new HashSet<>();
 
-    @Column(name = "explanation")
+    @Column(name = "explanation", columnDefinition = "TEXT")
     private String explanation;
 
     @Column(name = "number_of_correct_answers")

@@ -5,6 +5,9 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
 import com.fptu.sep490.readingservice.service.ReadingExamService;
@@ -15,9 +18,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -41,7 +47,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam readingExam = new ReadingExam();
         readingExam.setExamName(readingExamCreationRequest.readingExamName());
         readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        readingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        readingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
         readingExam.setCreatedBy(userId);
         readingExam.setIsOriginal(true);
 
@@ -131,12 +137,12 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam newReadingExam = new ReadingExam();
         newReadingExam.setExamName(readingExamCreationRequest.readingExamName());
         newReadingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlung());
+        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setUpdatedAt(LocalDateTime.now());
         newReadingExam.setParent(readingExam);
 
-        if (!readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart1() != null && !readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
             if (readingPassagePart1.isEmpty()) {
                 throw new AppException(
@@ -147,7 +153,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
             }
             newReadingExam.setPart1(readingPassagePart1.get());
         }
-        if (!readingExamCreationRequest.readingPassageIdPart2().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart2() != null && !readingExamCreationRequest.readingPassageIdPart2().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart2 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart2()));
 
             if (readingPassagePart2.isEmpty()) {
@@ -158,7 +164,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                 );            }
             newReadingExam.setPart2(readingPassagePart2.get());
         }
-        if (!readingExamCreationRequest.readingPassageIdPart3().isEmpty()) {
+        if (readingExamCreationRequest.readingPassageIdPart3() != null && !readingExamCreationRequest.readingPassageIdPart3().isEmpty()) {
             Optional<ReadingPassage> readingPassagePart3 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart3()));
 
             if (readingPassagePart3.isEmpty()) {
@@ -291,6 +297,140 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
                 )
         );
         return response;
+    }
+
+    @Override
+    public Page<ReadingExamResponse> getAllReadingExamsForCreator(
+            HttpServletRequest httpServletRequest,
+            int page,
+            int size,
+            String sortBy,
+            String sortDirection
+    ) throws Exception {
+        if (httpServletRequest == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null || userId.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+        Page<ReadingExam> readingExamPage = readingExamRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
+
+        List<ReadingExamResponse> readingExamResponses = readingExamPage.getContent().stream()
+                .filter(exam -> exam.getPart1() != null && exam.getPart2() != null && exam.getPart3() != null)
+                .map(readingExam -> new ReadingExamResponse(
+                        readingExam.getReadingExamId().toString(),
+                        readingExam.getExamName(),
+                        readingExam.getExamDescription(),
+                        readingExam.getUrlSlug(),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart1().getPassageId().toString(),
+                                readingExam.getPart1().getTitle(),
+                                readingExam.getPart1().getContent()
+                        ),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
+                                readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
+                                readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                        ),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
+                                readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
+                                readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                        )
+                ))
+                .toList();
+
+        return new PageImpl<>(readingExamResponses, pageable, readingExamPage.getTotalElements());
+    }
+
+    @Override
+    public List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception {
+        if (httpServletRequest == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String userId;
+
+        userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null || userId.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        List<ReadingExam> readingExams;
+        try {
+            readingExams = readingExamRepository.findAll();
+        } catch (Exception e) {
+            log.error("Database error when fetching exams for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+
+        // 3. Filter out deleted exams (soft delete)
+        List<ReadingExamResponse> readingExamResponses = new ArrayList<>();
+        for (ReadingExam readingExam : readingExams) {
+            if (Boolean.TRUE.equals(readingExam.getIsDeleted())) {
+                continue;
+            }
+            // 4. Validate required fields
+            if (readingExam.getPart1() == null) {
+                log.warn("ReadingExam {} missing part1, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart2() == null) {
+                log.warn("ReadingExam {} missing part2, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            if (readingExam.getPart3() == null) {
+                log.warn("ReadingExam {} missing part3, skipping", readingExam.getReadingExamId());
+                continue;
+            }
+            ReadingExamResponse response = new ReadingExamResponse(
+                    readingExam.getReadingExamId().toString(),
+                    readingExam.getExamName(),
+                    readingExam.getExamDescription(),
+                    readingExam.getUrlSlug(),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart1().getPassageId().toString(),
+                            readingExam.getPart1().getTitle(),
+                            readingExam.getPart1().getContent()
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
+                            readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                    ),
+                    new ReadingExamResponse.ReadingPassageResponse(
+                            readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
+                            readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                    )
+            );
+            readingExamResponses.add(response);
+        }
+        return readingExamResponses;
     }
 
 
