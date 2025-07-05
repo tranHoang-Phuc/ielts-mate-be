@@ -18,6 +18,8 @@ public record AttemptResponse(
         int ieltsType,
         @JsonProperty("part_number")
         int partNumber,
+        @JsonProperty("title")
+        String title,
         @JsonProperty("instruction")
         String instruction,
         @JsonProperty("content")
