@@ -97,7 +97,7 @@ public record ListeningTaskGetAllResponse(
                     @JsonProperty("content")
                     String content,
                     @JsonProperty("is_correct")
-                    boolean isCorrect
+                    Boolean isCorrect
             ){}
         }
 

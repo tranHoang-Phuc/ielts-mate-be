@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
@@ -8,6 +9,7 @@ import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.embedded.AnswerAttemptId;
+import com.fptu.sep490.listeningservice.model.enumeration.QuestionType;
 import com.fptu.sep490.listeningservice.model.enumeration.Status;
 import com.fptu.sep490.listeningservice.model.json.AttemptVersion;
 import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
@@ -18,6 +20,8 @@ import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.UserDataAttempt;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -291,6 +295,142 @@ public class AttemptServiceImpl implements AttemptService {
             answerAttemptRepository.save(attemptAnswer);
             attemptRepository.save(attempt);
         }
+    }
+
+    @Override
+    public UserDataAttempt loadAttempt(String attemptId, HttpServletRequest request) throws JsonProcessingException {
+        Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        String userId = helper.getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        if (attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
+
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        ListeningTask listeningTask = listeningTaskRepository.findById(questionVersion.getTaskId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        Map<UUID, List<QuestionVersion>> groupMappingQuestion = questionVersion.getGroupMappingQuestion();
+        Map<UUID, List<UUID>> groupMappingDragItem = questionVersion.getGroupMappingDragItem();
+
+        Map<QuestionGroup, List<Question>> groupQuestions = new HashMap<>();
+        Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
+        Map<UUID, List<Choice>> questionChoice = new HashMap<>();
+        groupMappingQuestion.forEach((key, value) ->{
+            var group = questionGroupRepository.findById(key).get();
+            List<Question> questions = new ArrayList<>();
+            value.forEach(q -> {
+                var question = questionRepository.findById(q.getQuestionId()).get();
+                if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                    List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
+                    questionChoice.put(question.getQuestionId(), choices);
+                }
+                questions.add(question);
+            });
+            groupQuestions.put(group, questions);
+
+            List<DragItem> dragItems = dragItemRepository.findAllById(groupMappingDragItem.get(group.getGroupId()));
+            groupDragItems.put(key, dragItems);
+        });
+
+        List<ListeningTaskGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
+        groupQuestions.forEach((key, value) ->{
+
+            ListeningTaskGetAllResponse.QuestionGroupResponse groupResponse = ListeningTaskGetAllResponse
+                    .QuestionGroupResponse.builder()
+                    .groupId(key.getGroupId())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .instruction(key.getInstruction())
+                    .questions(value.stream().map(q ->
+                                    ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                            .questionId(q.getQuestionId())
+                                            .questionOrder(q.getQuestionOrder())
+                                            .questionType(q.getQuestionType().ordinal())
+                                            .point(q.getPoint())
+                                            .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                            .instructionForMatching(q.getInstructionForMatching())
+                                            .zoneIndex(q.getZoneIndex())
+                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
+                                                    questionChoice.get(q.getQuestionId()).stream()
+                                                            .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse
+                                                                    .QuestionResponse.ChoiceResponse.builder()
+                                                                    .choiceId(c.getChoiceId())
+                                                                    .label(c.getLabel())
+                                                                    .choiceOrder(c.getChoiceOrder())
+                                                                    .content(c.getContent())
+                                                                    .build()).sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder)).toList() : null)
+                                            .build()
+                            )
+                            .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
+                                    ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
+                                            .dragItemId(i.getDragItemId())
+                                            .content(i.getContent())
+                                            .build()
+                            ).toList())
+                    .build();
+            questionGroups.add(groupResponse);
+        });
+
+        ListeningTaskGetAllResponse attemptResponse = ListeningTaskGetAllResponse.builder()
+                .taskId(listeningTask.getTaskId())
+                .ieltsType(listeningTask.getIeltsType().ordinal())
+                .partNumber(listeningTask.getPartNumber().ordinal())
+                .instruction(listeningTask.getInstruction())
+                .title(listeningTask.getTitle())
+                .audioFileId(listeningTask.getAudioFileId())
+                .questionGroups(questionGroups.stream().sorted(
+                        Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)
+                ).toList())
+                .build();
+
+        List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
+        List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
+        for (AnswerAttempt answerAttempt : answerAttempts) {
+            UserDataAttempt.AnswerChoice answerChoice = UserDataAttempt.AnswerChoice.builder()
+                    .questionId(answerAttempt.getQuestion() != null ? answerAttempt.getQuestion().getQuestionId() : null)
+                    .dragItemId(answerAttempt.getDragItemId() != null ? answerAttempt.getDragItemId() : null)
+                    .filledTextAnswer(answerAttempt.getDataFilled() != null ? answerAttempt.getDataFilled() : null)
+                    .matchedTextAnswer(answerAttempt.getDataMatched() != null ? answerAttempt.getDataMatched() : null)
+                    .choiceIds(answerAttempt.getChoices() != null ? answerAttempt.getChoices() : Collections.emptyList())
+                    .build();
+            answerChoices.add(answerChoice);
+
+
+        }
+        return UserDataAttempt.builder()
+                .attemptId(attempt.getAttemptId())
+                .answers(answerChoices)
+                .duration(attempt.getDuration())
+                .attemptResponse(attemptResponse)
+                .build();
     }
 
 }
