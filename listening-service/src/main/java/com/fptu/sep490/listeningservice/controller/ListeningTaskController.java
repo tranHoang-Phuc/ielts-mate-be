@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.listeningservice.service.ListeningTaskService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
+import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
 import lombok.AccessLevel;
@@ -59,6 +60,17 @@ public class ListeningTaskController {
                 .message("Listening task created successfully")
                 .build();
         return new ResponseEntity<>(baseResponse, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{task-Id}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<ListeningTaskGetAllResponse>> getTaskById(@PathVariable("task-Id") UUID taskId) {
+        ListeningTaskGetAllResponse data = listeningTaskService.getTaskById(taskId);
+        BaseResponse<ListeningTaskGetAllResponse> response = BaseResponse.<ListeningTaskGetAllResponse>builder()
+                .message("Retrieve data successfully")
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping(value = "/{task-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
