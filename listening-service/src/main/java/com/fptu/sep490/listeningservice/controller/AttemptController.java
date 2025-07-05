@@ -1,19 +1,17 @@
 package com.fptu.sep490.listeningservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -25,15 +23,20 @@ public class AttemptController {
 
     AttemptService attemptService;
 
-    @PostMapping("/{listening-task-id}")
+    @PostMapping("/{listeningTaskId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AttemptResponse> createAttempt(@PathVariable("listening-task-id") UUID listeningTaskId,
-                                                         HttpServletRequest request) {
-        AttemptResponse response = attemptService.createAttempt(listeningTaskId, request);
+    public ResponseEntity<BaseResponse<AttemptResponse>> createAttempt(
+            @PathVariable UUID listeningTaskId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        AttemptResponse attemptResponse = attemptService.createAttempt(listeningTaskId, request);
         BaseResponse<AttemptResponse> baseResponse = BaseResponse.<AttemptResponse>builder()
                 .message("Attempt created successfully")
-                .data(response)
+                .data(attemptResponse)
                 .build();
-        return new ResponseEntity<>(baseResponse, HttpStatus.CREATED);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(baseResponse);
     }
 }

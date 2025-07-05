@@ -14,22 +14,22 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
     @Query("""
         SELECT qg FROM QuestionGroup qg LEFT JOIN ListeningTask lt ON qg.listeningTask.taskId = lt.taskId
             WHERE 
-                (qg.groupId IN (select g.groupId FROM QuestionGroup g WHERE g.listeningTask.taskId = :taskId) AND qg.isOriginal = true AND qg.isCurrent = true)
+                (qg.groupId IN (select g.groupId FROM QuestionGroup g WHERE g.listeningTask.taskId = :taskId) AND qg.isOriginal = true AND qg.isCurrent = true and qg.isDeleted = false )
                 OR 
-                (qg.parent.groupId IN (select g.groupId FROM QuestionGroup g WHERE g.listeningTask.taskId = :taskId) AND qg.isCurrent = true)
+                (qg.parent.groupId IN (select g.groupId FROM QuestionGroup g WHERE g.listeningTask.taskId = :taskId) AND qg.isCurrent = true and qg.isDeleted = false)
     """)
     List<QuestionGroup> findAllLatestVersionByTaskId(@Param("taskId") UUID taskId);
 
     @Query("""
         SELECT qg FROM QuestionGroup qg JOIN ListeningTask lt ON qg.listeningTask.taskId = lt.taskId
-            WHERE lt.taskId = :originalTaskId AND qg.isOriginal = true
+            WHERE lt.taskId = :originalTaskId AND qg.isOriginal = true and qg.isDeleted = false
     """)
     List<QuestionGroup> findOriginalVersionByTaskId(@Param("originalTaskId") UUID originalTaskId);
 
     @Query("""
         SELECT qg From QuestionGroup qg 
-            WHERE (qg.groupId = :groupId AND qg.isOriginal = true AND qg.isCurrent = true)
-            OR (qg.parent.groupId = :groupId and qg.isCurrent = true)
+            WHERE (qg.groupId = :groupId AND qg.isOriginal = true AND qg.isCurrent = true and qg.isDeleted = false )
+            OR (qg.parent.groupId = :groupId and qg.isCurrent = true and qg.isDeleted = false)
     """)
     QuestionGroup findLatestVersionByOriginalId(@Param("groupId") UUID groupId);
 }

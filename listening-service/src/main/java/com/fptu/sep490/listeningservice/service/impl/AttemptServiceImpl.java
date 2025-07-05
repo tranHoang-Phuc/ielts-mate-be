@@ -1,5 +1,6 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
@@ -7,6 +8,8 @@ import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.enumeration.Status;
+import com.fptu.sep490.listeningservice.model.json.AttemptVersion;
+import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
@@ -23,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,6 +39,7 @@ public class AttemptServiceImpl implements AttemptService {
     DragItemRepository dragItemRepository;
     QuestionRepository questionRepository;
     ChoiceRepository choiceRepository;
+    AttemptRepository attemptRepository;
 
     ObjectMapper objectMapper;
     KeyCloakTokenClient keyCloakTokenClient;
@@ -59,7 +60,7 @@ public class AttemptServiceImpl implements AttemptService {
     String clientSecret;
     @Override
     @Transactional
-    public AttemptResponse createAttempt(UUID listeningTaskId, HttpServletRequest request) {
+    public AttemptResponse createAttempt(UUID listeningTaskId, HttpServletRequest request) throws JsonProcessingException {
         String userId = helper.getUserIdFromToken(request);
         ListeningTask originalTask = listeningTaskRepository.findById(listeningTaskId)
                 .orElseThrow(
@@ -79,39 +80,139 @@ public class AttemptServiceImpl implements AttemptService {
             );
         }
 
+        AttemptVersion attemptVersion = AttemptVersion.builder()
+                .taskId(currentVersion.getTaskId())
+                .build();
+        Map<UUID, List<QuestionVersion>> questionVersions = new HashMap<>();
+        Map<UUID, List<UUID>> groupMapDragItem = new HashMap<>();
+
+
         List<QuestionGroup> originalVersionGroupQuestion = questionGroupRepository
                 .findOriginalVersionByTaskId(originalTask.getTaskId());
 
-        List<QuestionGroup> currentVersionGroupQuestion = questionGroupRepository
-                .findAllLatestVersionByTaskId(originalTask.getTaskId());
-
         Map<QuestionGroup, List<DragItem>> currentGroupMapCurrentDragItem = new HashMap<>();
-        Map<UUID,List<Question>>  currentGroupIdQuestionId = new HashMap<>();
+        Map<UUID,List<Question>>  currentGroupIdQuestions = new HashMap<>();
+        Map<UUID, Map<UUID, List<Choice>>> currentGroupIdMapQuestionIdMapCurrentChoice = new HashMap<>();
         originalVersionGroupQuestion.forEach(g -> {
             // Get All Current DragItem
             List<DragItem> currentVersionDragItem = dragItemRepository.findCurrentVersionByGroupId(g.getGroupId());
             QuestionGroup latestVersion = questionGroupRepository.findLatestVersionByOriginalId(g.getGroupId());
             currentGroupMapCurrentDragItem.put(latestVersion, currentVersionDragItem);
 
+            // mapping group with dragItem for version
+            groupMapDragItem.put(g.getGroupId(), currentVersionDragItem.stream().map(DragItem::getDragItemId).toList());
+
             // Get All Original Question
             List<UUID> originalQuestionId = questionRepository.findOriginalVersionByGroupId(g.getGroupId());
             List<Question> currentQuestion = questionRepository.findAllCurrentVersion(originalQuestionId);
-            currentGroupIdQuestionId.put(g.getGroupId(), currentQuestion);
+            currentGroupIdQuestions.put(g.getGroupId(), currentQuestion);
 
             Map<UUID, List<Choice>> questionIdMapCurrentChoice = new HashMap<>();
+            List<QuestionVersion> questionVersionList = new ArrayList<>();
             currentQuestion.forEach(q -> {
                 if(q.getIsOriginal()) {
                     List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getQuestionId());
                     questionIdMapCurrentChoice.put(q.getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
                 } else {
                     List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getParent().getQuestionId());
                     questionIdMapCurrentChoice.put(q.getParent().getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
                 }
             });
+            questionVersions.put(g.getGroupId(), questionVersionList);
+            currentGroupIdMapQuestionIdMapCurrentChoice.put(g.getGroupId(), questionIdMapCurrentChoice);
         });
 
+        attemptVersion.setGroupMappingDragItem(groupMapDragItem);
+        attemptVersion.setGroupMappingQuestion(questionVersions);
+        Attempt attempt = Attempt.builder()
+                .createdBy(userId)
+                .status(Status.DRAFT)
+                .duration(0L)
+                .listeningTask(originalTask)
+                .version(objectMapper.writeValueAsString(attemptVersion))
+                .build();
+        attempt = attemptRepository.save(attempt);
+
+        List<AttemptResponse.QuestionGroupAttemptResponse> groups = new ArrayList<>();
+        currentGroupMapCurrentDragItem.forEach((key, value) ->{
+
+            List<AttemptResponse.QuestionGroupAttemptResponse.DragItemResponse> dragItems =
+                    value.stream()
+                            .map(item -> AttemptResponse.QuestionGroupAttemptResponse.DragItemResponse
+                                    .builder()
+                                    .dragItemId(item.getDragItemId().toString())
+                                    .content(item.getContent())
+                                    .build()
+                            )
+                            .toList();
+
+            List<Question> questions = currentGroupIdQuestions.get(key.getGroupId());
+            Map<UUID, List<Choice>> questionMapChoices = currentGroupIdMapQuestionIdMapCurrentChoice.get(key.getGroupId());
+
+            List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionListResponse = new ArrayList<>();
+
+            questions.forEach(question -> {
+                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+                AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionResponse = AttemptResponse.
+                        QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
+                        .questionId(question.getQuestionId())
+                        .questionOrder(question.getQuestionOrder())
+                        .questionType(question.getQuestionType().ordinal())
+                        .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                        .blankIndex(question.getBlankIndex())
+                        .instructionForChoice(question.getInstructionForChoice())
+                        .instructionForMatching(question.getInstructionForMatching())
+                        .zoneIndex(question.getZoneIndex())
+                        .choices(
+                                choices.stream().map(c ->
+                                                AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
+                                                        .choiceId(c.getChoiceId())
+                                                        .label(c.getLabel())
+                                                        .content(c.getContent())
+                                                        .choiceOrder(question.getQuestionOrder())
+                                                        .build()
+                                        ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.
+                                        QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList()
+                        )
+                        .build();
+                questionListResponse.add(questionResponse);
+            });
+
+            AttemptResponse.QuestionGroupAttemptResponse group = AttemptResponse.QuestionGroupAttemptResponse.builder()
+                    .questionGroupId(key.getGroupId())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .instruction(key.getInstruction())
+                    .dragItems(dragItems)
+                    .questions(questionListResponse.stream().sorted(Comparator.comparing(AttemptResponse.
+                            QuestionGroupAttemptResponse.QuestionAttemptResponse::questionOrder)).toList())
+                    .build();
+
+            groups.add(group);
+        });
+
+        return AttemptResponse.builder()
+                .taskId(currentVersion.getTaskId())
+                .attemptId(attempt.getAttemptId())
+                .title(currentVersion.getTitle())
+                .instruction(currentVersion.getInstruction())
+                .ieltsType(currentVersion.getIeltsType().ordinal())
+                .partNumber(currentVersion.getPartNumber().ordinal())
+                .audioFileId(currentVersion.getAudioFileId())
+                .questionGroups(groups.stream().sorted(Comparator.comparing(AttemptResponse
+                        .QuestionGroupAttemptResponse::sectionOrder)).toList())
+                .build();
 
 
-        return null;
     }
 }

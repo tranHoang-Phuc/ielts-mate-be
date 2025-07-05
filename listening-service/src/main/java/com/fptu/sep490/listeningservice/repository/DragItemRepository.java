@@ -12,9 +12,9 @@ public interface DragItemRepository extends JpaRepository<DragItem, UUID> {
     @Query("""
        SELECT di FROM DragItem di
            WHERE 
-               (di.dragItemId in (SELECT i.dragItemId FROM DragItem i WHERE i.questionGroup.groupId = :groupId) AND di.isOriginal = true AND di.isCurrent = true)
+               (di.dragItemId in (SELECT i.dragItemId FROM DragItem i WHERE i.questionGroup.groupId = :groupId) AND di.isOriginal = true AND di.isCurrent = true and di.isDeleted =false)
                OR 
-               (di.parent.dragItemId in (SELECT i.dragItemId FROM DragItem i WHERE i.questionGroup.groupId = :groupId) AND di.isCurrent = true)        
+               (di.parent.dragItemId in (SELECT i.dragItemId FROM DragItem i WHERE i.questionGroup.groupId = :groupId) AND di.isCurrent = true and di.isDeleted =false)        
     """)
     List<DragItem> findCurrentVersionByGroupId(UUID groupId);
 }

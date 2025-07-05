@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UUID> {
     @Query("""
-        SELECT lt FROM ListeningTask lt WHERE lt.parent.taskId = :taskId
+        SELECT lt FROM ListeningTask lt WHERE lt.parent.taskId = :taskId and lt.isDeleted = false 
     """)
     List<ListeningTask> findAllByParentId(@Param("taskId") UUID taskId);
 
@@ -23,18 +23,18 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
     @Query("""
         SELECT lt FROM ListeningTask lt
         WHERE 
-            (lt.taskId IN :taskIds AND lt.isOriginal = true AND lt.isCurrent = true)
+            (lt.taskId IN :taskIds AND lt.isOriginal = true AND lt.isCurrent = true and lt.isDeleted = false)
             OR 
-            (lt.parent.taskId IN :taskIds AND lt.isCurrent = true)
+            (lt.parent.taskId IN :taskIds AND lt.isCurrent = true and lt.isDeleted = false)
     """)
     List<ListeningTask> findCurrentVersionsByIds(List<UUID> taskIds);
 
     @Query("""
         SELECT lt FROM ListeningTask lt
         WHERE 
-            (lt.taskId = :taskId AND lt.isOriginal = true AND lt.isCurrent = true)
+            (lt.taskId = :taskId AND lt.isOriginal = true AND lt.isCurrent = true and lt.isDeleted = false)
             OR 
-            (lt.parent.taskId = :taskId AND lt.isCurrent = true )
+            (lt.parent.taskId = :taskId AND lt.isCurrent = true and lt.isDeleted = false)
     """)
     ListeningTask findLastestVersion(UUID taskId);
 }
