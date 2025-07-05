@@ -15,6 +15,7 @@ import com.fptu.sep490.readingservice.model.json.UserAnswer;
 import com.fptu.sep490.readingservice.repository.ChoiceRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.QuestionRepository;
+import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
@@ -42,7 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @Slf4j
 public class ExamAttemptServiceImpl implements ExamAttemptService {
     QuestionRepository questionRepository;
@@ -51,6 +52,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ChoiceRepository choiceRepository;
     Helper helper;
     PassageServiceImpl passageServiceImpl;
+    private final ReadingExamRepository readingExamRepository;
+
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
 
@@ -197,7 +200,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     public CreateExamAttemptResponse createExamAttempt(String urlSlug, HttpServletRequest request) throws JsonProcessingException {
         //find reading exam by urlSlug and isOriginal=true and isDeleted = false, else throw error
         // 1. Tìm original exam
-        ReadingExam originalExam = readingExamRepo
+        ReadingExam originalExam = readingExamRepository
                 .findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(urlSlug)
                 .orElseThrow(() -> new AppException(
                                 Constants.ErrorCode.READING_EXAM_NOT_FOUND,
@@ -208,7 +211,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         //get reading exam has parent.readingExamId = readingExamId and isCurrent=true
         // 2. Lấy bản current, nếu ko có current bắn lỗi
-        ReadingExam currentExam = readingExamRepo.findCurrentChildByParentId(originalExam.getReadingExamId())
+        ReadingExam currentExam = readingExamRepository.findCurrentChildByParentId(originalExam.getReadingExamId())
                 .orElse(originalExam);
 
         String userId = helper.getUserIdFromToken(request);
@@ -223,7 +226,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .updatedBy(userId)
                 .build();
         //save examAttempt
-        examAttempt = examAttemptRepo.saveAndFlush(examAttempt);
+        examAttempt = examAttemptRepository.saveAndFlush(examAttempt);
 
         //create CreateExamAttemptResponse
 
@@ -266,7 +269,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 helper.getUserIdFromToken(request)
         );
 
-        Page<ExamAttempt> examAttemptsResult = examAttemptRepo.findAll(spec, pageable);
+        Page<ExamAttempt> examAttemptsResult = examAttemptRepository.findAll(spec, pageable);
 
         List<ExamAttempt> examAttempts = examAttemptsResult.getContent();
 
