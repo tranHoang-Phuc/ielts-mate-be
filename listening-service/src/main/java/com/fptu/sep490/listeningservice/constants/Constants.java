@@ -6,6 +6,7 @@ public class Constants {
         public static final String INVALID_REQUEST = "INVALID_REQUEST";
         public static final String NOT_FOUND = "NOT_FOUND";
         public static final String ERROR_WHEN_UPLOAD = "ERROR_WHEN_UPLOAD";
+        public static final String LISTENING_TASK_NOT_ACTIVATED = "LISTENING_TASK_NOT_ACTIVATED";
     }
 
     public final class RedisKey {
@@ -21,6 +22,7 @@ public class Constants {
         public static final String INVALID_REQUEST = "400002";
         public static final String NOT_FOUND = "400003";
         public static final String ERROR_WHEN_UPLOAD="400004";
+        public static final String LISTENING_TASK_NOT_ACTIVATED = "400005";
 
     }
 }
