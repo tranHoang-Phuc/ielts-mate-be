@@ -5,17 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="feature: create attempt">
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/json/AttemptVersion.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/json/QuestionVersion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/AttemptController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/AttemptController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ChoiceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ChoiceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/DragItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/DragItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/AttemptService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/AttemptService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,7 +24,7 @@
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="local" />
+        <entry key="$PROJECT_DIR$" value="feat/exam-attempt" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -86,14 +76,14 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Debug",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.ApiGatewayApplication.executor": "Run",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
     "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Debug",
-    "Spring Boot.ListeningServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
     "Spring Boot.ReadingServiceApplication.executor": "Run",
-    "git-widget-placeholder": "feature/create-listening-attempt",
+    "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
@@ -129,19 +119,6 @@
         <option value="QuarkusRunConfigurationType" />
         <option value="SpringBootApplicationConfigurationType" />
       </set>
-    </option>
-    <option name="hiddenConfigurations">
-      <map>
-        <entry key="SpringBootApplicationConfigurationType">
-          <value>
-            <set>
-              <option value="FileServiceApplication" />
-              <option value="NotificationServiceApplication" />
-              <option value="ReadingServiceApplication" />
-            </set>
-          </value>
-        </entry>
-      </map>
     </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ListeningServiceApplication">
@@ -334,40 +311,25 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
-          <line>47</line>
+          <line>45</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
-          <line>42</line>
+          <line>40</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
-          <line>43</line>
+          <line>41</line>
           <option name="timeStamp" value="11" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
-          <line>576</line>
-          <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/AttemptResponse.java</url>
           <line>47</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/AttemptResponse.java</url>
-          <line>49</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="SpringBootApplicationConfigurationType">
-        <watch expression="currentGroupIdMapQuestionIdMapCurrentChoice" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>
