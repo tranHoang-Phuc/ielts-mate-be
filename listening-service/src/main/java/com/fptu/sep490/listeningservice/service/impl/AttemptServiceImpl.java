@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
+import com.fptu.sep490.listeningservice.model.embedded.AnswerAttemptId;
 import com.fptu.sep490.listeningservice.model.enumeration.Status;
 import com.fptu.sep490.listeningservice.model.json.AttemptVersion;
 import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
@@ -14,6 +15,8 @@ import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.listeningservice.service.AttemptService;
+import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequest;
+import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,7 @@ public class AttemptServiceImpl implements AttemptService {
     QuestionRepository questionRepository;
     ChoiceRepository choiceRepository;
     AttemptRepository attemptRepository;
+    AnswerAttemptRepository answerAttemptRepository;
 
     ObjectMapper objectMapper;
     KeyCloakTokenClient keyCloakTokenClient;
@@ -215,4 +219,78 @@ public class AttemptServiceImpl implements AttemptService {
 
 
     }
+
+    @Override
+    public void saveAttempt(String attemptId, HttpServletRequest request, SavedAnswersRequestList answers) {
+        Attempt attempt = attemptRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        String userId = helper.getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if (attempt.getStatus() != Status.DRAFT) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_DRAFT,
+                    Constants.ErrorCode.ATTEMPT_NOT_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        attempt.setDuration(attempt.getDuration());
+
+        for (SavedAnswersRequest ans : answers.answers()) {
+            Question question = questionRepository.findById(ans.questionId())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+
+            AnswerAttemptId key = AnswerAttemptId.builder()
+                    .attemptId(UUID.fromString(attemptId))
+                    .questionId(question.getQuestionId())
+                    .build();
+
+            AnswerAttempt attemptAnswer = Optional.ofNullable(answerAttemptRepository.findAnswerAttemptById(key))
+                    .orElseGet(() -> AnswerAttempt.builder()
+                            .id(key)
+                            .attempt(attempt)
+                            .question(question)
+                            .build()
+                    );
+
+            switch (question.getQuestionType()) {
+                case MULTIPLE_CHOICE:
+                    attemptAnswer.setChoices(ans.choices());
+                    break;
+                case FILL_IN_THE_BLANKS:
+                    attemptAnswer.setDataFilled(ans.dataFilled());
+                    break;
+                case MATCHING:
+                    attemptAnswer.setDataMatched(ans.dataMatched());
+                    break;
+                case DRAG_AND_DROP:
+                    attemptAnswer.setDragItemId(ans.dragItemId());
+                    break;
+                default:
+                    throw new AppException(
+                            Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
+                            Constants.ErrorCode.INVALID_QUESTION_TYPE,
+                            HttpStatus.BAD_REQUEST.value()
+                    );
+            }
+
+            answerAttemptRepository.save(attemptAnswer);
+            attemptRepository.save(attempt);
+        }
+    }
+
 }
