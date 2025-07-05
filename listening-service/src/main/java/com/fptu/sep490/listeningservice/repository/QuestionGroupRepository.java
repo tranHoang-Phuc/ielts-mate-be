@@ -32,4 +32,6 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
             OR (qg.parent.groupId = :groupId and qg.isCurrent = true and qg.isDeleted = false)
     """)
     QuestionGroup findLatestVersionByOriginalId(@Param("groupId") UUID groupId);
+
+
 }

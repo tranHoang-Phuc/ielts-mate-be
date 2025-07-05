@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.UserDataAttempt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,10 @@ public class AttemptController {
 
     AttemptService attemptService;
 
-    @PostMapping("/{listeningTaskId}")
+    @PostMapping("/{listening-task-id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<AttemptResponse>> createAttempt(
-            @PathVariable UUID listeningTaskId,
+            @PathVariable("listening-task-id") UUID listeningTaskId,
             HttpServletRequest request
     ) throws JsonProcessingException {
         AttemptResponse attemptResponse = attemptService.createAttempt(listeningTaskId, request);
@@ -51,6 +52,19 @@ public class AttemptController {
         attemptService.saveAttempt(attemptId, request, answers);
         return ResponseEntity.ok(BaseResponse.<Void>builder().data(null)
                 .message("Save attempt successfully")
+                .build());
+    }
+
+    @GetMapping("/load/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserDataAttempt>> loadAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        UserDataAttempt data = attemptService.loadAttempt(attemptId, request);
+        return ResponseEntity.ok(BaseResponse.<UserDataAttempt>builder()
+                .data(data)
+                .message(null)
                 .build());
     }
 }
