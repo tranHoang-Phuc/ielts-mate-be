@@ -12,6 +12,7 @@ public class Constants {
         public static final String QUESTION_NOT_FOUND = "QUESTION_NOT_FOUND";
         public static final String INVALID_QUESTION_TYPE = "INVALID_QUESTION_TYPE";
         public static final String ATTEMPT_ALREADY_SUBMITTED = "ATTEMPT_ALREADY_SUBMITTED";
+        public static final String ATTEMPT_NOT_FINISHED = "ATTEMPT_NOT_FINISHED";
     }
 
     public final class RedisKey {
@@ -34,6 +35,7 @@ public class Constants {
         public static final String QUESTION_NOT_FOUND = "400008";
         public static final String INVALID_QUESTION_TYPE = "400009";
         public static final String ATTEMPT_ALREADY_SUBMITTED = "400010";
+        public static final String ATTEMPT_NOT_FINISHED = "400011";
 
 
     }

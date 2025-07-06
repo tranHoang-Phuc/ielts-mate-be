@@ -22,6 +22,9 @@ public class SubmittedAttemptResponse {
     @JsonProperty("result_sets")
     List<ResultSet> resultSets;
 
+    @JsonProperty("total_points")
+    Integer totalPoints;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Builder
     @Getter
