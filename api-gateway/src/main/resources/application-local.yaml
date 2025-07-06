@@ -17,6 +17,17 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: notification-sse
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/notification/sse/stream/**
+          filters:
+            - StripPrefix=2
+            - SetResponseHeader=Cache-Control,no-cache
+            - SetResponseHeader=Content-Type,text/event-stream;charset=UTF-8
+            - AddResponseHeader=Connection,keep-alive
+            - AddResponseHeader=X-Accel-Buffering,no
+
         - id: identity-service
           uri: http://localhost:8090
           predicates:
@@ -45,6 +56,7 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/v1/notification/**
+            - ExceptPath=/api/v1/notification/sse/stream/**
           filters:
             - StripPrefix=2
       globalcors:
@@ -63,6 +75,11 @@ spring:
               - "*"
             allowCredentials: true
             maxAge: 3600
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 3600s
+        pool:
+          max-idle-time: 3600s
 
 springdoc:
   api-docs:
