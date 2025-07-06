@@ -53,4 +53,23 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         WHERE q.questionId IN :collect
     """)
     List<Question> findQuestionsByIds(List<UUID> collect);
+
+    @Query("""
+        select q.questionId from Question q WHERE q.questionGroup.groupId = :groupId AND q.isOriginal = true and q.isDeleted = false
+    """)
+    List<UUID> findOriginalVersionByGroupId(UUID groupId);
+
+    @Query("""
+    select q
+      from Question q
+      left join fetch q.dragItem di
+     where (q.questionId in :originalQuestionId
+            and q.isOriginal = true
+            and q.isCurrent = true
+            and q.isDeleted = false)
+        or (q.parent.questionId in :originalQuestionId
+            and q.isCurrent = true
+            and q.isDeleted = false)
+    """)
+    List<Question> findAllCurrentVersion(List<UUID> originalQuestionId);
 }

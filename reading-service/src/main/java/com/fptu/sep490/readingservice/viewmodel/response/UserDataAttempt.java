@@ -7,15 +7,21 @@ import lombok.Builder;
 import java.util.List;
 import java.util.UUID;
 
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record UserDataAttempt(
         @JsonProperty("attempt_id")
         UUID attemptId,
-        @JsonProperty("answers")
-        List<AnswerChoice> answers,
+
         @JsonProperty("duration")
-        Long duration
+        Long duration,
+
+        @JsonProperty("task_data")
+        ReadingPassageGetAllResponse attemptResponse,
+
+        @JsonProperty("answers")
+        List<AnswerChoice> answers
+
 ) {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     @Builder
