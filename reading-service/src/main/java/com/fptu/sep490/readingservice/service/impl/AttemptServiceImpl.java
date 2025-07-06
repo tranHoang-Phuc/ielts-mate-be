@@ -572,22 +572,28 @@ public class AttemptServiceImpl implements AttemptService {
     }
 
     private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
-        List<Choice> correctAnswers = new ArrayList<>();
+        List<Choice> correctAnswers;
         List<String> userAnswers = choiceRepository.getChoicesByIds(answer.choices());
+
+        if (question.getIsOriginal()) {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
+        } else {
+            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
+        }
         SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
                 .questionIndex(question.getQuestionOrder())
                 .userAnswer(userAnswers)
-
+                .correctAnswer(correctAnswers.stream().map(
+                        Choice::getLabel
+                ).toList())
                 .explanation(question.getExplanation())
                 .build();
-        if (question.getIsOriginal()) {
-            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
-        } else {
-            List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
-        }
-
         List<UUID> userChoice = answer.choices();
         List<String> correctLabel = new ArrayList<>();
         for (Choice correctAnswer : correctAnswers) {
@@ -596,7 +602,6 @@ public class AttemptServiceImpl implements AttemptService {
                 correctLabel.add(correctAnswer.getLabel());
             }
         }
-        resultSet.setCorrectAnswer(correctLabel);
         boolean isCorrect = false;
         int numberOfCorrect = 0;
         for (String userAnswer : userAnswers) {
