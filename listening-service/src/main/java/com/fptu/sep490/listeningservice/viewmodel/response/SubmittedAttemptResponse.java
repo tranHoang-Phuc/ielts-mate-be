@@ -1,4 +1,4 @@
-package com.fptu.sep490.readingservice.viewmodel.response;
+package com.fptu.sep490.listeningservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
-
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
@@ -18,7 +17,7 @@ import java.util.List;
 public class SubmittedAttemptResponse {
 
     @JsonProperty("duration")
-     Long duration;
+    Long duration;
 
     @JsonProperty("result_sets")
     List<ResultSet> resultSets;
@@ -33,19 +32,19 @@ public class SubmittedAttemptResponse {
     public static class ResultSet {
 
         @JsonProperty("question_index")
-         int questionIndex;
+        int questionIndex;
 
         @JsonProperty("correct_answer")
-         List<String>correctAnswer;
+        List<String>correctAnswer;
 
         @JsonProperty("user_answer")
-         List<String> userAnswer;
+        List<String> userAnswer;
 
         @JsonProperty("is_correct")
-         boolean isCorrect;
+        boolean isCorrect;
 
         @JsonProperty("explanation")
-         String explanation;
+        String explanation;
 
 
     }

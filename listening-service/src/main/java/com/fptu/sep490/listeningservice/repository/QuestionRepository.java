@@ -29,4 +29,9 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
     List<Question> findAllCurrentVersion(
             @Param("originalQuestionId") List<UUID> originalQuestionId
     );
+    @Query("""
+        SELECT q FROM Question q
+        WHERE q.questionId IN :collect
+    """)
+    List<Question> findQuestionsByIds(List<UUID> collect);
 }

@@ -14,4 +14,8 @@ public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, An
     AnswerAttempt findAnswerAttemptById(AnswerAttemptId id);
 
     List<AnswerAttempt> findByAttempt(Attempt attempt);
+    @Query("""
+        select at from AnswerAttempt at where at.id = :id
+    """)
+    Optional<AnswerAttempt> findAnswerAttemptByAttemptId(AnswerAttemptId id);
 }
