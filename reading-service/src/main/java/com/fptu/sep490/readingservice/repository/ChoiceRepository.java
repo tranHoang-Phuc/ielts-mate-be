@@ -63,4 +63,13 @@ public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
         select c.label from Choice c where c.choiceId IN :choices
     """)
     List<String> getChoicesByIds(List<UUID> choices);
+
+    @Query("""
+        select c from Choice c
+            where 
+                (c.choiceId IN (select ch.choiceId from Choice ch where ch.question.questionId = :questionId) and c.isOriginal = true and c.isCurrent = true and c.isDeleted =false)
+                   or 
+                (c.parent.choiceId in (select ch.choiceId from Choice ch where ch.question.questionId = :questionId) and c.isCurrent = true and c.isDeleted = false )
+    """)
+    List<Choice> findCurrentVersionByQuestionId(UUID questionId);
 }
