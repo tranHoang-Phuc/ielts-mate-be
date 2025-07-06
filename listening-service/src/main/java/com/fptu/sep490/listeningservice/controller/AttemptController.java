@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequestList;
 import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserDataAttempt;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -65,6 +66,20 @@ public class AttemptController {
         return ResponseEntity.ok(BaseResponse.<UserDataAttempt>builder()
                 .data(data)
                 .message(null)
+                .build());
+    }
+
+    @PutMapping("/submite/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            HttpServletRequest request,
+            @RequestBody SavedAnswersRequestList answers
+    ) throws JsonProcessingException {
+        SubmittedAttemptResponse data = attemptService.submitAttempt(attemptId, request, answers);
+        return ResponseEntity.ok(BaseResponse.<SubmittedAttemptResponse>builder()
+                .data(data)
+                .message("Submit attempt successfully")
                 .build());
     }
 }
