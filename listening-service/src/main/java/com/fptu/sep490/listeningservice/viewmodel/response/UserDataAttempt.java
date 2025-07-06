@@ -16,6 +16,9 @@ public record UserDataAttempt(
         @JsonProperty("duration")
         Long duration,
 
+        @JsonProperty("total_points")
+        Integer totalPoints,
+
         @JsonProperty("task_data")
         ListeningTaskGetAllResponse attemptResponse,
 

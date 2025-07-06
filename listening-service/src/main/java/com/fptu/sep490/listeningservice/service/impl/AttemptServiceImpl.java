@@ -16,19 +16,21 @@ import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.listeningservice.model.specification.AttemptSpecification;
 import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequestList;
-import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.UserDataAttempt;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -431,6 +433,7 @@ public class AttemptServiceImpl implements AttemptService {
         return UserDataAttempt.builder()
                 .attemptId(attempt.getAttemptId())
                 .answers(answerChoices)
+                .totalPoints(attempt.getTotalPoints())
                 .duration(attempt.getDuration())
                 .attemptResponse(attemptResponse)
                 .build();
@@ -486,6 +489,7 @@ public class AttemptServiceImpl implements AttemptService {
         }
         List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
 
+        int totalPoints = 0;
         for (Question question : questions) {
             SavedAnswersRequest answer = savedAnswers.get(question.getQuestionId());
             if (Objects.isNull(answer)) {
@@ -508,6 +512,9 @@ public class AttemptServiceImpl implements AttemptService {
                 resultSets.add(result);
                 answerAttempt.setChoices(answer.choices());
                 answerAttempt.setIsCorrect(result.isCorrect());
+                if(result.isCorrect()) {
+                    totalPoints += question.getPoint();
+                }
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
@@ -523,6 +530,9 @@ public class AttemptServiceImpl implements AttemptService {
                 resultSets.add(result);
                 answerAttempt.setDataFilled(answer.dataFilled());
                 answerAttempt.setIsCorrect(result.isCorrect());
+                if(result.isCorrect()) {
+                    totalPoints += question.getPoint();
+                }
 
             }
             if (question.getQuestionType() == QuestionType.MATCHING) {
@@ -539,6 +549,9 @@ public class AttemptServiceImpl implements AttemptService {
                 resultSets.add(result);
                 answerAttempt.setDataMatched(answer.dataMatched());
                 answerAttempt.setIsCorrect(result.isCorrect());
+                if(result.isCorrect()) {
+                    totalPoints += question.getPoint();
+                }
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
@@ -554,21 +567,202 @@ public class AttemptServiceImpl implements AttemptService {
                 resultSets.add(result);
                 answerAttempt.setDragItemId(answer.dragItemId());
                 answerAttempt.setIsCorrect(result.isCorrect());
+                if(result.isCorrect()) {
+                    totalPoints += question.getPoint();
+                }
             }
             answerAttemptRepository.save(answerAttempt);
         }
 
         attempt.setFinishedAt(LocalDateTime.now());
         attempt.setStatus(Status.FINISHED);
+        attempt.setTotalPoints(totalPoints);
         attempt.setDuration(answers.duration());
         attemptRepository.save(attempt);
 
 
         return SubmittedAttemptResponse.builder()
                 .duration(answers.duration())
+                .totalPoints(totalPoints)
                 .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedAttemptResponse.ResultSet::getQuestionIndex)).collect(Collectors.toList()))
                 .build();
     }
+
+    @Override
+    public Page<UserAttemptResponse> getAttemptByUser(int page, int size,
+                                                      List<Integer> ieltsTypeList,
+                                                      List<Integer> statusList,
+                                                      List<Integer> partNumberList,
+                                                      String sortBy,
+                                                      String sortDirection,
+                                                      String title,
+                                                      UUID listeningTaskId,
+                                                      HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = AttemptSpecification.byConditions(
+                ieltsTypeList, statusList, partNumberList, sortBy, sortDirection, title, listeningTaskId, userId
+        );
+
+        Page<Attempt> pageResult = attemptRepository.findAll(spec, pageable);
+        List<Attempt> attempts = pageResult.getContent();
+
+        List<UserAttemptResponse> responses = attempts.stream().map(
+                a -> UserAttemptResponse.builder()
+                        .attemptId(a.getAttemptId())
+                        .duration(a.getDuration())
+                        .totalPoints(a.getTotalPoints())
+                        .status(a.getStatus().ordinal())
+                        .startAt(a.getCreatedAt())
+                        .finishedAt(a.getFinishedAt())
+                        .listeningTaskId(a.getListeningTask().getTaskId())
+                        .title(a.getListeningTask().getTitle())
+                        .build()
+        ).toList();
+
+        return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+    }
+
+    @Override
+    public UserDataAttempt viewResult(UUID attemptId, HttpServletRequest request) throws JsonProcessingException {
+        Attempt attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        String userId = helper.getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        if (attempt.getStatus() != Status.FINISHED) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_FINISHED,
+                    Constants.ErrorCode.ATTEMPT_NOT_FINISHED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
+
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        ListeningTask listeningTask = listeningTaskRepository.findById(questionVersion.getTaskId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        Map<UUID, List<QuestionVersion>> groupMappingQuestion = questionVersion.getGroupMappingQuestion();
+        Map<UUID, List<UUID>> groupMappingDragItem = questionVersion.getGroupMappingDragItem();
+
+        Map<QuestionGroup, List<Question>> groupQuestions = new HashMap<>();
+        Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
+        Map<UUID, List<Choice>> questionChoice = new HashMap<>();
+        groupMappingQuestion.forEach((key, value) ->{
+            var group = questionGroupRepository.findById(key).get();
+            List<Question> questions = new ArrayList<>();
+            value.forEach(q -> {
+                var question = questionRepository.findById(q.getQuestionId()).get();
+                if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                    List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
+                    questionChoice.put(question.getQuestionId(), choices);
+                }
+                questions.add(question);
+            });
+            groupQuestions.put(group, questions);
+
+            List<DragItem> dragItems = dragItemRepository.findAllById(groupMappingDragItem.get(group.getGroupId()));
+            groupDragItems.put(key, dragItems);
+        });
+
+        List<ListeningTaskGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
+        groupQuestions.forEach((key, value) ->{
+
+            ListeningTaskGetAllResponse.QuestionGroupResponse groupResponse = ListeningTaskGetAllResponse
+                    .QuestionGroupResponse.builder()
+                    .groupId(key.getGroupId())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .instruction(key.getInstruction())
+                    .questions(value.stream().map(q ->
+                                    ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                            .questionId(q.getQuestionId())
+                                            .questionOrder(q.getQuestionOrder())
+                                            .questionType(q.getQuestionType().ordinal())
+                                            .point(q.getPoint())
+                                            .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                            .instructionForMatching(q.getInstructionForMatching())
+                                            .zoneIndex(q.getZoneIndex())
+                                            .correctAnswer(q.getCorrectAnswer() == null ? null : q.getCorrectAnswer())
+                                            .correctAnswerForMatching(q.getCorrectAnswerForMatching() == null ? null : q.getCorrectAnswerForMatching())
+                                            .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId())
+                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
+                                                    questionChoice.get(q.getQuestionId()).stream()
+                                                            .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse
+                                                                    .QuestionResponse.ChoiceResponse.builder()
+                                                                    .choiceId(c.getChoiceId())
+                                                                    .label(c.getLabel())
+                                                                    .choiceOrder(c.getChoiceOrder())
+                                                                    .content(c.getContent())
+                                                                    .isCorrect(c.isCorrect())
+                                                                    .build()).sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder)).toList() : null)
+                                            .build()
+                            )
+                            .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
+                            ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
+                                    .dragItemId(i.getDragItemId())
+                                    .content(i.getContent())
+                                    .build()
+                    ).toList())
+                    .build();
+            questionGroups.add(groupResponse);
+        });
+
+        ListeningTaskGetAllResponse attemptResponse = ListeningTaskGetAllResponse.builder()
+                .taskId(listeningTask.getTaskId())
+                .ieltsType(listeningTask.getIeltsType().ordinal())
+                .partNumber(listeningTask.getPartNumber().ordinal())
+                .instruction(listeningTask.getInstruction())
+                .title(listeningTask.getTitle())
+                .audioFileId(listeningTask.getAudioFileId())
+                .questionGroups(questionGroups.stream().sorted(
+                        Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)
+                ).toList())
+                .build();
+
+        List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
+        List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
+        for (AnswerAttempt answerAttempt : answerAttempts) {
+            UserDataAttempt.AnswerChoice answerChoice = UserDataAttempt.AnswerChoice.builder()
+                    .questionId(answerAttempt.getQuestion() != null ? answerAttempt.getQuestion().getQuestionId() : null)
+                    .dragItemId(answerAttempt.getDragItemId() != null ? answerAttempt.getDragItemId() : null)
+                    .filledTextAnswer(answerAttempt.getDataFilled() != null ? answerAttempt.getDataFilled() : null)
+                    .matchedTextAnswer(answerAttempt.getDataMatched() != null ? answerAttempt.getDataMatched() : null)
+                    .choiceIds(answerAttempt.getChoices() != null ? answerAttempt.getChoices() : Collections.emptyList())
+                    .build();
+            answerChoices.add(answerChoice);
+        }
+        return UserDataAttempt.builder()
+                .attemptId(attempt.getAttemptId())
+                .answers(answerChoices)
+                .totalPoints(attempt.getTotalPoints())
+                .duration(attempt.getDuration())
+                .attemptResponse(attemptResponse)
+                .build();
+    }
+
     private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
         List<Choice> correctAnswers;
         List<String> userAnswers = choiceRepository.getChoicesByIds(answer.choices());
