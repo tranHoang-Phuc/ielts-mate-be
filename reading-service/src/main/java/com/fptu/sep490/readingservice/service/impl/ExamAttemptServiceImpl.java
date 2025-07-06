@@ -169,10 +169,14 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .build();
         if(question.getIsOriginal()) {
             List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
         } else {
             List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
         }
 
         List<UUID> userChoice = answerChoice;
@@ -183,7 +187,6 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 correctLabel.add(correctAnswer.getLabel());
             }
         }
-        resultSet.setCorrectAnswer(correctLabel);
         int numberOfCorrect = 0;
         for(String userAnswer : userAnswers) {
             if(correctLabel.contains(userAnswer)) {

@@ -53,10 +53,10 @@ public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
     SELECT c
       FROM Choice c
      WHERE c.isCorrect = TRUE
-       AND (c IN :originalChoices OR c.parent IN :originalChoices)
+       AND (c.choiceId IN :originalChoices OR c.parent.choiceId IN :originalChoices)
 """)
     List<Choice> getCurrentCorrectChoice(
-            @Param("originalChoices") List<Choice> originalChoices
+            @Param("originalChoices") List<UUID> originalChoices
     );
 
     @Query("""
