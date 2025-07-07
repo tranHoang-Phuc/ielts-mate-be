@@ -114,6 +114,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .isCurrent(true)
                 .parent(null)
                 .createdBy(userId)
+                .updatedBy(userId)
                 .isDeleted(false)
                 .build();
 

@@ -56,7 +56,6 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/v1/notification/**
-            - ExceptPath=/api/v1/notification/sse/stream/**
           filters:
             - StripPrefix=2
       globalcors:
@@ -103,5 +102,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+    register-with-eureka: false
+    fetch-registry: true
 server:
   port: 9191
