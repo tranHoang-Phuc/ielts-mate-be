@@ -13,6 +13,13 @@ public class Constants {
         public static final String INVALID_QUESTION_TYPE = "INVALID_QUESTION_TYPE";
         public static final String ATTEMPT_ALREADY_SUBMITTED = "ATTEMPT_ALREADY_SUBMITTED";
         public static final String ATTEMPT_NOT_FINISHED = "ATTEMPT_NOT_FINISHED";
+        public static final String QUESTION_LIST_EMPTY = "QUESTION_LIST_EMPTY";
+        public static final String QUESTION_GROUP_NOT_FOUND = "QUESTION_GROUP_NOT_FOUND";
+        public static final String CHOICES_LIST_EMPTY = "CHOICES_LIST_EMPTY";
+        public static final String INVALID_NUMBER_OF_CORRECT_ANSWERS = "INVALID_NUMBER_OF_CORRECT_ANSWERS";
+        public static final String INVALID_BLANK_INDEX = "INVALID_BLANK_INDEX";
+
+        public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
 
     public final class RedisKey {
@@ -37,6 +44,13 @@ public class Constants {
         public static final String ATTEMPT_ALREADY_SUBMITTED = "400010";
         public static final String ATTEMPT_NOT_FINISHED = "400011";
 
+        public static final String QUESTION_LIST_EMPTY = "400012";
+        public static final String QUESTION_GROUP_NOT_FOUND = "400013";
+        public static final String CHOICES_LIST_EMPTY = "400014";
+        public static final String INVALID_NUMBER_OF_CORRECT_ANSWERS = "400015";
+        public static final String INVALID_BLANK_INDEX = "400016";
+
+        public static final String INTERNAL_SERVER_ERROR = "400999";
 
     }
 }

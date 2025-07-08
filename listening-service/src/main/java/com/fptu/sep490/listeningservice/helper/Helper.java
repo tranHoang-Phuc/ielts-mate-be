@@ -10,6 +10,7 @@ import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.model.QuestionGroup;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.listeningservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.NonFinal;
@@ -76,6 +77,26 @@ public class Helper {
         } catch (Exception e) {
             throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
                     HttpStatus.UNAUTHORIZED.value());
+        }
+    }
+
+    public UserInformationResponse getUserInformationResponse(String userId) {
+        try {
+            UserProfileResponse user = getUserProfileById(userId);
+            return UserInformationResponse.builder()
+                    .userId(user.id())
+                    .email(user.email())
+                    .firstName(user.firstName())
+                    .lastName(user.lastName())
+                    .build();
+        } catch (JsonProcessingException e) {
+            // Bọc thành AppException (runtime) để không phải throws
+            throw new AppException(
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    "Lỗi khi parse JSON user profile",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e
+            );
         }
     }
 
