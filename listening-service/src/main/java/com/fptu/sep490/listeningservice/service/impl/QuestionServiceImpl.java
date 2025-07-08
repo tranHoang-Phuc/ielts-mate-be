@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -57,11 +58,11 @@ public class QuestionServiceImpl implements QuestionService {
                     Constants.ErrorCode.QUESTION_LIST_EMPTY, HttpStatus.BAD_REQUEST.value());
         }
 
-        int correctAnswersCount = 0;
         String userId = helper.getUserIdFromToken(request);
 
 
         for(QuestionCreationRequest question : questionCreationRequest){
+            int correctAnswersCount = 0;
             if (question.questionType() < 0 || question.questionType() >= QuestionType.values().length) {
                 throw new AppException(Constants.ErrorCodeMessage.INVALID_QUESTION_TYPE,
                         Constants.ErrorCode.INVALID_QUESTION_TYPE, HttpStatus.BAD_REQUEST.value());
@@ -128,7 +129,7 @@ public class QuestionServiceImpl implements QuestionService {
                 savedQuestion.setQuestionType(QuestionType.MULTIPLE_CHOICE);
 
 
-                Question saved = questionRepository.save(savedQuestion);
+                Question saved = questionRepository.saveAndFlush(savedQuestion);
 
                 questionCreationResponseList.add(
                         QuestionCreationResponse.builder()
@@ -172,7 +173,7 @@ public class QuestionServiceImpl implements QuestionService {
                 savedQuestion.setQuestionType(QuestionType.FILL_IN_THE_BLANKS);
                 savedQuestion.setCorrectAnswer(question.correctAnswer());
                 savedQuestion.setBlankIndex(question.blankIndex());
-                Question saved = questionRepository.save(savedQuestion);
+                Question saved = questionRepository.saveAndFlush(savedQuestion);
 
                 questionCreationResponseList.add(
                         QuestionCreationResponse.builder()
@@ -212,7 +213,7 @@ public class QuestionServiceImpl implements QuestionService {
                 savedQuestion.setQuestionType(QuestionType.MATCHING);
                 savedQuestion.setInstructionForMatching(question.instructionForMatching());
                 savedQuestion.setCorrectAnswerForMatching(question.correctAnswerForMatching());
-                Question saved = questionRepository.save(savedQuestion);
+                Question saved = questionRepository.saveAndFlush(savedQuestion);
 
                 questionCreationResponseList.add(
                         QuestionCreationResponse.builder()
@@ -245,7 +246,7 @@ public class QuestionServiceImpl implements QuestionService {
 
                 dragItem.setQuestion(savedQuestion);
 
-                Question saved = questionRepository.save(savedQuestion);
+                Question saved = questionRepository.saveAndFlush(savedQuestion);
 
                 dragItemRepository.save(dragItem);
                 saved.setCreatedBy(userId);
@@ -598,106 +599,178 @@ public class QuestionServiceImpl implements QuestionService {
     public UpdatedQuestionResponse updateInformation(String questionId, String groupId,
                                                      InformationUpdatedQuestionRequest informationRequest,
                                                      HttpServletRequest request) throws JsonProcessingException {
+        int lastVersion = 0;
         String userId = helper.getUserIdFromToken(request);
-        UserProfileResponse userInformation = helper.getUserProfileById(userId);
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+
+        List<Question> getPreviousVersions = questionRepository.findAllPreviousVersion(question.getQuestionId());
+
+        if (!getPreviousVersions.isEmpty()) {
+            for(Question previousVersion : getPreviousVersions) {
+                previousVersion.setIsCurrent(false);
+                if( previousVersion.getVersion() > lastVersion) {
+                    lastVersion = previousVersion.getVersion();
+                }
+            }
+
+            questionRepository.saveAll(getPreviousVersions);
+        }
+
         if (informationRequest == null) {
             throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
         }
-        if(informationRequest.explanation() != null || !informationRequest.explanation().isEmpty()) {
-            question.setExplanation(informationRequest.explanation());
-        }
-        if(informationRequest.point() != null && informationRequest.point() > 0) {
-            question.setPoint(informationRequest.point());
-        }
-        if(informationRequest.questionCategories() != null && !informationRequest.questionCategories().isEmpty()) {
-            List<QuestionCategory> categories = informationRequest.questionCategories().stream()
-                    .map(QuestionCategory::valueOf)
-                    .toList();
-            question.setCategories(Set.copyOf(categories));
-        }
-        if(informationRequest.numberOfCorrectAnswers() != null && informationRequest.numberOfCorrectAnswers() > 0) {
-            question.setNumberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers());
+        Question newVersion;
+
+        if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+            newVersion = Question.builder()
+                    .questionOrder(question.getQuestionOrder())
+                    .point(informationRequest.point())
+                    .questionType(QuestionType.MULTIPLE_CHOICE)
+                    .explanation(informationRequest.explanation())
+                    .categories(informationRequest.questionCategories() == null ? Set.of() : informationRequest.questionCategories().stream()
+                            .map(QuestionCategory::valueOf)
+                            .collect(Collectors.toSet()))
+                    .instructionForChoice(informationRequest.instructionForChoice())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
+                    .parent(question)
+                    .questionGroup(question.getQuestionGroup())
+                    .version(lastVersion + 1)
+                    .isOriginal(false)
+                    .isCurrent(true)
+                    .isDeleted(false)
+                    .createdBy(userId)
+                    .updatedBy(userId)
+                    .build();
+            question.setUpdatedAt(LocalDateTime.now());
+            question.setIsCurrent(false);
+            question.setUpdatedBy(userId);
+            questionRepository.save(question);
+            questionRepository.save(newVersion);
+
+        } else if(question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+            newVersion = Question.builder()
+                    .questionOrder(question.getQuestionOrder())
+                    .point(informationRequest.point())
+                    .questionType(QuestionType.FILL_IN_THE_BLANKS)
+                    .categories(informationRequest.questionCategories() == null ? Set.of() : informationRequest.questionCategories().stream()
+                            .map(QuestionCategory::valueOf)
+                            .collect(Collectors.toSet()))
+                    .explanation(informationRequest.explanation())
+                    .blankIndex(informationRequest.blankIndex())
+                    .correctAnswer(informationRequest.correctAnswer())
+                    .parent(question)
+                    .questionGroup(question.getQuestionGroup())
+                    .version(lastVersion + 1)
+                    .isOriginal(false)
+                    .isCurrent(true)
+                    .isDeleted(false)
+                    .createdBy(userId)
+                    .updatedBy(userId)
+                    .build();
+            question.setUpdatedAt(LocalDateTime.now());
+            question.setIsCurrent(false);
+            question.setUpdatedBy(userId);
+            questionRepository.save(question);
+            questionRepository.save(newVersion);
+        } else if(question.getQuestionType() == QuestionType.MATCHING) {
+            newVersion = Question.builder()
+                    .questionOrder(question.getQuestionOrder())
+                    .point(informationRequest.point())
+                    .questionType(QuestionType.MATCHING)
+                    .categories(informationRequest.questionCategories() == null ? Set.of() : informationRequest.questionCategories().stream()
+                            .map(QuestionCategory::valueOf)
+                            .collect(Collectors.toSet()))
+                    .explanation(informationRequest.explanation())
+                    .instructionForMatching(informationRequest.instructionForMatching())
+                    .correctAnswerForMatching(informationRequest.correctAnswerForMatching())
+                    .parent(question)
+                    .questionGroup(question.getQuestionGroup())
+                    .version(lastVersion + 1)
+                    .isOriginal(false)
+                    .isCurrent(true)
+                    .isDeleted(false)
+                    .createdBy(userId)
+                    .updatedBy(userId)
+                    .build();
+            question.setUpdatedAt(LocalDateTime.now());
+            question.setIsCurrent(false);
+            question.setUpdatedBy(userId);
+            questionRepository.save(question);
+            questionRepository.save(newVersion);
+        } else {
+            var dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(informationRequest.dragItemId()))
+                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                            Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value()));
+            newVersion = Question.builder()
+                    .questionOrder(question.getQuestionOrder())
+                    .point(informationRequest.point())
+                    .questionType(QuestionType.DRAG_AND_DROP)
+                    .explanation(informationRequest.explanation())
+                    .categories(informationRequest.questionCategories() == null ? Set.of() : informationRequest.questionCategories().stream()
+                            .map(QuestionCategory::valueOf)
+                            .collect(Collectors.toSet()))
+                    .questionGroup(question.getQuestionGroup())
+                    .zoneIndex(informationRequest.zoneIndex())
+                    .dragItem(dragItem)
+                    .categories(question.getCategories() != null ?
+                            Set.copyOf(question.getCategories()) :
+                            Set.of())
+                    .numberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers() != null ? informationRequest.numberOfCorrectAnswers() : 0)
+                    .zoneIndex(informationRequest.zoneIndex())
+                    .parent(question)
+                    .version(lastVersion + 1)
+                    .isOriginal(false)
+                    .isCurrent(true)
+                    .isDeleted(false)
+                    .createdBy(userId)
+                    .updatedBy(userId)
+                    .build();
+            question.setUpdatedAt(LocalDateTime.now());
+            question.setIsCurrent(false);
+            question.setUpdatedBy(userId);
+            questionRepository.save(question);
+            questionRepository.save(newVersion);
         }
 
-        if(informationRequest.instructionForChoice() != null && !informationRequest.instructionForChoice().isEmpty()) {
-            question.setInstructionForChoice(informationRequest.instructionForChoice());
-        }
-        if(informationRequest.blankIndex() != null && informationRequest.blankIndex() >= 0) {
-            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            question.setBlankIndex(informationRequest.blankIndex());
-        }
-        if(informationRequest.correctAnswer() != null && !informationRequest.correctAnswer().isEmpty()) {
-            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            question.setCorrectAnswer(informationRequest.correctAnswer());
-        }
-        if(informationRequest.instructionForMatching() != null && !informationRequest.instructionForMatching().isEmpty()) {
-            if (question.getQuestionType() != QuestionType.MATCHING) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            question.setInstructionForMatching(informationRequest.instructionForMatching());
-        }
-        if(informationRequest.correctAnswerForMatching() != null && !informationRequest.correctAnswerForMatching().isEmpty()) {
-            if (question.getQuestionType() != QuestionType.MATCHING) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            question.setCorrectAnswerForMatching(informationRequest.correctAnswerForMatching());
-        }
-        if(informationRequest.zoneIndex() != null && informationRequest.zoneIndex() >= 0) {
-            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            question.setZoneIndex(informationRequest.zoneIndex());
-        }
-        if(informationRequest.dragItemId() != null && !informationRequest.dragItemId().isEmpty()) {
-            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
-                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
-                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
-            }
-            DragItem dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(informationRequest.dragItemId()))
-                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
-                            Constants.ErrorCode.DRAG_ITEM_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-            question.setDragItem(dragItem);
-        }
 
-        question.setUpdatedBy(userInformation.id());
-        Question savedQuestion = questionRepository.save(question);
-        UserInformationResponse createdUser = helper.getUserInformationResponse(savedQuestion.getCreatedBy().toString());
-        UserInformationResponse updatedUser = helper.getUserInformationResponse(userInformation.id());
+        UserInformationResponse createdUser = helper.getUserInformationResponse(question.getCreatedBy().toString());
+        UserInformationResponse updatedUser = helper.getUserInformationResponse(question.getUpdatedBy());
         return UpdatedQuestionResponse.builder()
-                .questionId(savedQuestion.getQuestionId().toString())
-                .questionOrder(savedQuestion.getQuestionOrder())
-                .point(savedQuestion.getPoint())
-                .questionType(savedQuestion.getQuestionType().ordinal())
-                .questionCategories(savedQuestion.getCategories().stream()
+                .questionId(question.getQuestionId().toString())
+                .questionOrder(newVersion.getQuestionOrder())
+                .point(newVersion.getPoint())
+                .questionType(newVersion.getQuestionType().ordinal())
+                .questionCategories(newVersion.getCategories() == null ? List.of() : newVersion.getCategories().stream()
                         .map(QuestionCategory::name)
                         .toList())
-                .explanation(savedQuestion.getExplanation())
-                .questionGroupId(savedQuestion.getQuestionGroup().getGroupId().toString())
-                .numberOfCorrectAnswers(savedQuestion.getNumberOfCorrectAnswers())
-                .instructionForChoice(savedQuestion.getInstructionForChoice())
+                .explanation(newVersion.getExplanation())
+                .questionGroupId(newVersion.getQuestionGroup().getGroupId().toString())
+                .numberOfCorrectAnswers(newVersion.getNumberOfCorrectAnswers())
+                .instructionForChoice(newVersion.getInstructionForChoice())
+                .blankIndex(newVersion.getBlankIndex() == null ? null : newVersion.getBlankIndex())
+                .correctAnswer(newVersion.getCorrectAnswer() == null ? null : newVersion.getCorrectAnswer())
+                .instructionForMatching(newVersion.getInstructionForMatching() == null ? null : newVersion.getInstructionForMatching())
+                .correctAnswerForMatching(newVersion.getCorrectAnswerForMatching() == null ? null : newVersion.getCorrectAnswerForMatching())
+                .zoneIndex(newVersion.getZoneIndex() == null ? null : newVersion.getZoneIndex())
+                .dragItems(newVersion.getDragItem() == null ? List.of() : List.of(
+                        UpdatedQuestionResponse.DragItemResponse.builder()
+                                .dragItemId(newVersion.getDragItem().getDragItemId().toString())
+                                .content(newVersion.getDragItem().getContent())
+                                .build()
+                ))
+
                 .createdBy(createdUser)
                 .updatedBy(updatedUser)
-                .createdAt(savedQuestion.getCreatedAt().toString())
-                .updatedAt(savedQuestion.getUpdatedAt().toString())
+                .createdAt(question.getCreatedAt().toString())
+                .updatedAt(question.getUpdatedAt().toString())
                 .build();
     }
-
 
     @Transactional
     @Override
@@ -713,9 +786,13 @@ public class QuestionServiceImpl implements QuestionService {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
                     Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
         }
-        questionRepository.delete(question);
-        question.setUpdatedBy(userId);
+
+        question.setQuestionGroup(null);
+        question.setIsDeleted(false);
+        question.setIsCurrent(false);
         questionRepository.save(question);
+        questionGroup.setUpdatedBy(userId);
+        questionGroupRepository.save(questionGroup);
     }
 
 }

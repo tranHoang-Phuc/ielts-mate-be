@@ -13,6 +13,9 @@ import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,8 @@ import org.springframework.util.MultiValueMap;
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Helper {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
