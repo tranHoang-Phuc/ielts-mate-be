@@ -186,7 +186,7 @@ public class DragItemServiceImpl implements DragItemService {
             return DragItemResponse.builder()
                     .dragItemId(dragItem.getDragItemId().toString())
                     .content(dragItem.getContent())
-                    .questionGroup(mapToQuestionGroupResponse(group))
+                    .questionGroup(groupResponse)
                     .build();
         }
 
@@ -196,7 +196,7 @@ public class DragItemServiceImpl implements DragItemService {
             return DragItemResponse.builder()
                     .dragItemId(found.getDragItemId().toString())
                     .content(found.getContent())
-                    .questionGroup(groupResponse))
+                    .questionGroup(groupResponse)
                     .build();
         }
 
