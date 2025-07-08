@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.Choice;
+import com.fptu.sep490.listeningservice.model.DragItem;
 import com.fptu.sep490.listeningservice.model.Question;
 import com.fptu.sep490.listeningservice.model.QuestionGroup;
 import com.fptu.sep490.listeningservice.model.enumeration.QuestionCategory;
@@ -13,6 +14,8 @@ import com.fptu.sep490.listeningservice.repository.DragItemRepository;
 import com.fptu.sep490.listeningservice.repository.QuestionGroupRepository;
 import com.fptu.sep490.listeningservice.repository.QuestionRepository;
 import com.fptu.sep490.listeningservice.service.QuestionService;
+import com.fptu.sep490.listeningservice.viewmodel.request.InformationUpdatedQuestionRequest;
+import com.fptu.sep490.listeningservice.viewmodel.request.OrderUpdatedQuestionRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.UpdatedQuestionRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.QuestionCreationResponse;
@@ -488,6 +491,231 @@ public class QuestionServiceImpl implements QuestionService {
                     .build();
         }
 
+    }
+
+    @Transactional
+    @Override
+    public UpdatedQuestionResponse updateOrder(
+            String questionId,
+            String groupId,
+            OrderUpdatedQuestionRequest questionCreationRequest,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        String userId = helper.getUserIdFromToken(request);
+        UserProfileResponse userInformation = helper.getUserProfileById(userId);
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        List<Question> questions = questionRepository
+                .findAllByQuestionGroupOrderByQuestionOrderAsc(questionGroup);
+        if (questions.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
+                    Constants.ErrorCode.QUESTION_LIST_EMPTY,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        UUID targetQuestionUuid;
+        try {
+            targetQuestionUuid = UUID.fromString(questionId);
+        } catch (IllegalArgumentException ex) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        Question targetQuestion = null;
+        for (Question q : questions) {
+            if (q.getQuestionId().equals(targetQuestionUuid)) {
+                targetQuestion = q;
+                break;
+            }
+        }
+        if (targetQuestion == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        int newOrder = questionCreationRequest.order();
+        if (newOrder < 1) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        questions.remove(targetQuestion);
+        int insertIndex = newOrder - 1;
+        if (insertIndex > questions.size()) {
+            insertIndex = questions.size();
+        }
+
+        questions.add(insertIndex, targetQuestion);
+        List<Question> toSave = new ArrayList<>();
+        for (int i = 0; i < questions.size(); i++) {
+            Question q = questions.get(i);
+            int recalculatedOrder = i + 1;
+            if (q.getQuestionOrder() != recalculatedOrder) {
+                q.setQuestionOrder(recalculatedOrder);
+                q.setUpdatedBy(userInformation.id());
+                toSave.add(q);
+            }
+        }
+
+
+        if (!toSave.isEmpty()) {
+            questionRepository.saveAll(toSave);
+        }
+        UserInformationResponse createdUser = helper.getUserInformationResponse(toSave.getFirst().getCreatedBy().toString());
+        UserInformationResponse updatedUser = helper.getUserInformationResponse(userInformation.id());
+        return UpdatedQuestionResponse.builder()
+                .questionId(targetQuestion.getQuestionId().toString())
+                .questionOrder(targetQuestion.getQuestionOrder())
+                .point(targetQuestion.getPoint())
+                .questionType(targetQuestion.getQuestionType().ordinal())
+                .questionCategories(targetQuestion.getCategories().stream()
+                        .map(QuestionCategory::name)
+                        .toList())
+                .explanation(targetQuestion.getExplanation())
+                .questionGroupId(targetQuestion.getQuestionGroup().getGroupId().toString())
+                .numberOfCorrectAnswers(targetQuestion.getNumberOfCorrectAnswers())
+                .instructionForChoice(targetQuestion.getInstructionForChoice())
+                .createdBy(createdUser)
+                .updatedBy(updatedUser)
+                .createdAt(targetQuestion.getCreatedAt().toString())
+                .updatedAt(targetQuestion.getUpdatedAt().toString())
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public UpdatedQuestionResponse updateInformation(String questionId, String groupId,
+                                                     InformationUpdatedQuestionRequest informationRequest,
+                                                     HttpServletRequest request) throws JsonProcessingException {
+        String userId = helper.getUserIdFromToken(request);
+        UserProfileResponse userInformation = helper.getUserProfileById(userId);
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (informationRequest == null) {
+            throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+        }
+        if(informationRequest.explanation() != null || !informationRequest.explanation().isEmpty()) {
+            question.setExplanation(informationRequest.explanation());
+        }
+        if(informationRequest.point() != null && informationRequest.point() > 0) {
+            question.setPoint(informationRequest.point());
+        }
+        if(informationRequest.questionCategories() != null && !informationRequest.questionCategories().isEmpty()) {
+            List<QuestionCategory> categories = informationRequest.questionCategories().stream()
+                    .map(QuestionCategory::valueOf)
+                    .toList();
+            question.setCategories(Set.copyOf(categories));
+        }
+        if(informationRequest.numberOfCorrectAnswers() != null && informationRequest.numberOfCorrectAnswers() > 0) {
+            question.setNumberOfCorrectAnswers(informationRequest.numberOfCorrectAnswers());
+        }
+
+        if(informationRequest.instructionForChoice() != null && !informationRequest.instructionForChoice().isEmpty()) {
+            question.setInstructionForChoice(informationRequest.instructionForChoice());
+        }
+        if(informationRequest.blankIndex() != null && informationRequest.blankIndex() >= 0) {
+            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setBlankIndex(informationRequest.blankIndex());
+        }
+        if(informationRequest.correctAnswer() != null && !informationRequest.correctAnswer().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.FILL_IN_THE_BLANKS) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setCorrectAnswer(informationRequest.correctAnswer());
+        }
+        if(informationRequest.instructionForMatching() != null && !informationRequest.instructionForMatching().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.MATCHING) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setInstructionForMatching(informationRequest.instructionForMatching());
+        }
+        if(informationRequest.correctAnswerForMatching() != null && !informationRequest.correctAnswerForMatching().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.MATCHING) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setCorrectAnswerForMatching(informationRequest.correctAnswerForMatching());
+        }
+        if(informationRequest.zoneIndex() != null && informationRequest.zoneIndex() >= 0) {
+            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            question.setZoneIndex(informationRequest.zoneIndex());
+        }
+        if(informationRequest.dragItemId() != null && !informationRequest.dragItemId().isEmpty()) {
+            if (question.getQuestionType() != QuestionType.DRAG_AND_DROP) {
+                throw new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
+                        Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value());
+            }
+            DragItem dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(informationRequest.dragItemId()))
+                    .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
+                            Constants.ErrorCode.DRAG_ITEM_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+            question.setDragItem(dragItem);
+        }
+
+        question.setUpdatedBy(userInformation.id());
+        Question savedQuestion = questionRepository.save(question);
+        UserInformationResponse createdUser = helper.getUserInformationResponse(savedQuestion.getCreatedBy().toString());
+        UserInformationResponse updatedUser = helper.getUserInformationResponse(userInformation.id());
+        return UpdatedQuestionResponse.builder()
+                .questionId(savedQuestion.getQuestionId().toString())
+                .questionOrder(savedQuestion.getQuestionOrder())
+                .point(savedQuestion.getPoint())
+                .questionType(savedQuestion.getQuestionType().ordinal())
+                .questionCategories(savedQuestion.getCategories().stream()
+                        .map(QuestionCategory::name)
+                        .toList())
+                .explanation(savedQuestion.getExplanation())
+                .questionGroupId(savedQuestion.getQuestionGroup().getGroupId().toString())
+                .numberOfCorrectAnswers(savedQuestion.getNumberOfCorrectAnswers())
+                .instructionForChoice(savedQuestion.getInstructionForChoice())
+                .createdBy(createdUser)
+                .updatedBy(updatedUser)
+                .createdAt(savedQuestion.getCreatedAt().toString())
+                .updatedAt(savedQuestion.getUpdatedAt().toString())
+                .build();
+    }
+
+
+    @Transactional
+    @Override
+    public void deleteQuestion(String questionId, String groupId, HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+        if (!question.getQuestionGroup().equals(questionGroup)) {
+            throw new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_BELONG_TO_GROUP,
+                    Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
+        }
+        questionRepository.delete(question);
+        question.setUpdatedBy(userId);
+        questionRepository.save(question);
     }
 
 }
