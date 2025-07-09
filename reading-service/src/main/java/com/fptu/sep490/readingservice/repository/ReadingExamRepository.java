@@ -27,4 +27,16 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
 
     Page<ReadingExam> findByCreatedByAndIsDeletedFalse(String createdBy, Pageable pageable);
 
+
+    @Query("""
+        SELECT r FROM ReadingExam r
+        WHERE r.readingExamId = :readingExamId
+        AND r.isCurrent = true
+    """)
+    Optional<ReadingExam> findCurrentByReadingExamId(@Param("urlSlug") String urlSlug);
+
+    Optional<ReadingExam> findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(String urlSlug);
+//    Optional<ReadingExam> findByParentReadingExamReadingExamIdAndIsCurrentTrue(UUID parentId);
+
+//    Optional<ReadingPassage> findByParentPassageIdAndIsCurrentTrue(UUID parentId);
 }

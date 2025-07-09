@@ -4,20 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="refactor: change role controller">
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/specification/ListeningTaskSpecification.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskGetResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/UserInformationResponse.java" afterDir="false" />
+    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="fix: sse gateway config">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/ListeningServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/ListeningServiceApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ListeningTask.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ListeningTask.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ListeningTaskService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ListeningTaskService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/request/ListeningTaskCreationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/request/ListeningTaskCreationRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskCreationResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +16,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
+        <option value="Record" />
         <option value="Class" />
       </list>
     </option>
@@ -35,7 +26,7 @@
     <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="feature/notification" />
+        <entry key="$PROJECT_DIR$" value="local" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -85,23 +76,32 @@
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
-    "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Run",
-    "Spring Boot.ListeningServiceApplication.executor": "Run",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.FileServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Debug",
+    "Spring Boot.ListeningServiceApplication.executor": "Debug",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
-    "Spring Boot.ReadingServiceApplication.executor": "Run",
-    "git-widget-placeholder": "local",
+    "Spring Boot.ReadingServiceApplication.executor": "Debug",
+    "git-widget-placeholder": "fix/sse-gateway-config",
     "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.configurations.included.in.services": "true",
+    "settings.editor.selected.configurable": "com.github.copilot.settings.ApplicationConfigurable",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql",
+      "dynamo"
+    ]
   }
 }]]></component>
   <component name="ReactorSettings">
@@ -109,6 +109,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.fptu.sep490.listeningservice.model.json" />
       <recent name="com.fptu.sep490.notificationservice.config" />
     </key>
   </component>
@@ -126,6 +127,7 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
+              <option value="NotificationServiceApplication" />
               <option value="ReadingServiceApplication" />
             </set>
           </value>
@@ -134,15 +136,6 @@
     </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ListeningServiceApplication">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2" />
-    </configuration>
     <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="api-gateway" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
@@ -211,6 +204,7 @@
       </set>
     </attachedChunks>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="" />
@@ -222,6 +216,12 @@
       <workItem from="1751289913840" duration="784000" />
       <workItem from="1751418146718" duration="54000" />
       <workItem from="1751465206530" duration="987000" />
+      <workItem from="1751678316678" duration="16768000" />
+      <workItem from="1751711786368" duration="1582000" />
+      <workItem from="1751720900922" duration="843000" />
+      <workItem from="1751761616418" duration="14323000" />
+      <workItem from="1751797713144" duration="594000" />
+      <workItem from="1751893287699" duration="619000" />
     </task>
     <task id="LOCAL-00001" summary="fix: missing idea">
       <option name="closed" value="true" />
@@ -271,7 +271,79 @@
       <option name="project" value="LOCAL" />
       <updated>1751406106588</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feature: crud listening task">
+      <option name="closed" value="true" />
+      <created>1751474299286</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1751474299286</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feature: crud listening task">
+      <option name="closed" value="true" />
+      <created>1751474352361</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1751474352361</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feature: create attempt">
+      <option name="closed" value="true" />
+      <created>1751699801022</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1751699801022</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fix: missing repo">
+      <option name="closed" value="true" />
+      <created>1751708077244</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1751708077244</updated>
+    </task>
+    <task id="LOCAL-00011" summary="feature: get listening task by id">
+      <option name="closed" value="true" />
+      <created>1751713371736</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1751713371736</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix: load reading attempt">
+      <option name="closed" value="true" />
+      <created>1751763455756</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1751763455756</updated>
+    </task>
+    <task id="LOCAL-00013" summary="fix: submit exam attempt">
+      <option name="closed" value="true" />
+      <created>1751765357292</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1751765357292</updated>
+    </task>
+    <task id="LOCAL-00014" summary="feature: submit listening attempt">
+      <option name="closed" value="true" />
+      <created>1751768338569</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1751768338569</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fix: sse gateway config">
+      <option name="closed" value="true" />
+      <created>1751788669812</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1751788669812</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -282,14 +354,22 @@
     <MESSAGE value="feature: create listening task" />
     <MESSAGE value="feature: config swagger" />
     <MESSAGE value="refactor: change role controller" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor: change role controller" />
+    <MESSAGE value="feature: crud listening task" />
+    <MESSAGE value="feature: create attempt" />
+    <MESSAGE value="fix: missing repo" />
+    <MESSAGE value="feature: get listening task by id" />
+    <MESSAGE value="fix: load reading attempt" />
+    <MESSAGE value="fix: submit exam attempt" />
+    <MESSAGE value="feature: submit listening attempt" />
+    <MESSAGE value="fix: sse gateway config" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: sse gateway config" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java</url>
-          <line>60</line>
+          <line>61</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
@@ -318,9 +398,24 @@
           <option name="timeStamp" value="11" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
-          <line>576</line>
-          <option name="timeStamp" value="12" />
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/AttemptResponse.java</url>
+          <line>47</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
+          <line>271</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
+          <line>292</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
+          <line>430</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

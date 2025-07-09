@@ -4,22 +4,33 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.Choice;
 import com.fptu.sep490.readingservice.model.ExamAttempt;
 import com.fptu.sep490.readingservice.model.Question;
+import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.model.json.UserAnswer;
 import com.fptu.sep490.readingservice.repository.ChoiceRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.QuestionRepository;
+import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
+import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -28,16 +39,21 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 @Slf4j
 public class ExamAttemptServiceImpl implements ExamAttemptService {
     QuestionRepository questionRepository;
     ExamAttemptRepository examAttemptRepository;
     ObjectMapper objectMapper;
     ChoiceRepository choiceRepository;
+    Helper helper;
+    PassageServiceImpl passageServiceImpl;
+    private final ReadingExamRepository readingExamRepository;
+
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
 
@@ -153,10 +169,14 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .build();
         if(question.getIsOriginal()) {
             List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
         } else {
             List<Choice> originalChoice = choiceRepository.getOriginalChoiceByOriginalQuestion(question.getParent().getQuestionId());
-            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice);
+            correctAnswers = choiceRepository.getCurrentCorrectChoice(originalChoice.stream().map(
+                    Choice::getChoiceId
+            ).toList());
         }
 
         List<UUID> userChoice = answerChoice;
@@ -167,7 +187,6 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 correctLabel.add(correctAnswer.getLabel());
             }
         }
-        resultSet.setCorrectAnswer(correctLabel);
         int numberOfCorrect = 0;
         for(String userAnswer : userAnswers) {
             if(correctLabel.contains(userAnswer)) {
@@ -177,5 +196,108 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         boolean isCorrect = numberOfCorrect == correctAnswers.size();
         resultSet.setCorrect(isCorrect);
         return resultSet;
+    }
+
+    @Transactional
+    @Override
+    public CreateExamAttemptResponse createExamAttempt(String urlSlug, HttpServletRequest request) throws JsonProcessingException {
+        //find reading exam by urlSlug and isOriginal=true and isDeleted = false, else throw error
+        // 1. Tìm original exam
+        ReadingExam originalExam = readingExamRepository
+                .findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(urlSlug)
+                .orElseThrow(() -> new AppException(
+                                Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                                Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                                HttpStatus.NOT_FOUND.value()
+                        )
+                );
+
+        //get reading exam has parent.readingExamId = readingExamId and isCurrent=true
+        // 2. Lấy bản current, nếu ko có current bắn lỗi
+        ReadingExam currentExam = readingExamRepository.findCurrentChildByParentId(originalExam.getReadingExamId())
+                .orElse(originalExam);
+
+        String userId = helper.getUserIdFromToken(request);
+        UserInformationResponse user = helper.getUserInformationResponse(userId);
+
+        //create examAttempt
+        ExamAttempt examAttempt = ExamAttempt.builder()
+                .duration(null) // Initialize duration to null, will be updated later
+                .totalPoint(null) // Initialize totalPoint to null, will be updated later
+                .readingExam(currentExam)
+                .createdBy(userId)
+                .updatedBy(userId)
+                .build();
+        //save examAttempt
+        examAttempt = examAttemptRepository.saveAndFlush(examAttempt);
+
+        //create CreateExamAttemptResponse
+
+        CreateExamAttemptResponse.ReadingExamResponse readingExamResponse = CreateExamAttemptResponse.ReadingExamResponse.builder()
+                .readingExamId(currentExam.getReadingExamId())
+                .readingExamName(currentExam.getExamName())
+                .readingExamDescription(currentExam.getExamDescription())
+                .urlSlug(currentExam.getUrlSlug())
+                .readingPassageIdPart1(passageServiceImpl.fromReadingPassage(currentExam.getPart1().getPassageId().toString()))
+                .readingPassageIdPart2(passageServiceImpl.fromReadingPassage(currentExam.getPart2().getPassageId().toString()))
+                .readingPassageIdPart3(passageServiceImpl.fromReadingPassage(currentExam.getPart3().getPassageId().toString()))
+                .build();
+
+        return CreateExamAttemptResponse.builder()
+                .examAttemptId(examAttempt.getExamAttemptId())
+                .urlSlug(currentExam.getUrlSlug())
+                .createdBy(user)
+                .createdAt(examAttempt.getCreatedAt().toString())
+                .readingExam(readingExamResponse)
+                .build();
+
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserGetHistoryExamAttemptResponse> getListExamHistory(
+            int page,
+            int size,
+            String readingExamName,
+            String sortBy,
+            String sortDirection,
+            HttpServletRequest request
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = ExamAttemptSpecifications.byConditions(
+                readingExamName,
+                sortBy,
+                sortDirection,
+                helper.getUserIdFromToken(request)
+        );
+
+        Page<ExamAttempt> examAttemptsResult = examAttemptRepository.findAll(spec, pageable);
+
+        List<ExamAttempt> examAttempts = examAttemptsResult.getContent();
+
+        List<UserGetHistoryExamAttemptResponse> list = examAttempts.stream().map(examAttempt -> {
+            UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptReadingExamResponse readingExamResponse =
+                    UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptReadingExamResponse.builder()
+                            .readingExamId(examAttempt.getReadingExam().getReadingExamId())
+                            .readingExamName(examAttempt.getReadingExam().getExamName())
+                            .readingExamDescription(examAttempt.getReadingExam().getExamDescription())
+                            .urlSlug(examAttempt.getReadingExam().getUrlSlug())
+                            .build();
+
+            return UserGetHistoryExamAttemptResponse.builder()
+                    .examAttemptId(examAttempt.getExamAttemptId())
+                    .readingExam(readingExamResponse)
+                    .duration(examAttempt.getDuration())
+                    .totalQuestion(examAttempt.getTotalPoint())
+                    .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                    .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                    .createdAt(examAttempt.getCreatedAt().toString())
+                    .updatedAt(examAttempt.getUpdatedAt().toString())
+                    .build();
+        }).toList();
+
+        return new PageImpl<>(list, pageable, examAttemptsResult.getTotalElements());
+
     }
 }

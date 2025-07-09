@@ -10,7 +10,7 @@
         <module name="api-gateway" />
         <module name="discovery-service" />
       </profile>
-      <profile name="Annotation profile for listening-service" enabled="true">
+      <profile name="Annotation profile for ielts-mate-be" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />

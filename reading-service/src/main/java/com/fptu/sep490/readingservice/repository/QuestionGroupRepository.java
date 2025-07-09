@@ -26,5 +26,18 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
               (qg.readingPassage.parent.passageId = :passageId AND qg.isCurrent = true)      
     """)
     List<QuestionGroup> findAllCurrentVersionGroupsByPassageId(UUID passageId);
+
+    @Query("""
+        SELECT qg FROM QuestionGroup qg JOIN ReadingPassage lt ON qg.readingPassage.passageId = lt.passageId
+            WHERE lt.passageId = :passageId AND qg.isOriginal = true and qg.isDeleted = false
+    """)
+    List<QuestionGroup> findOriginalVersionByTaskId(UUID passageId);
+
+    @Query("""
+        SELECT qg From QuestionGroup qg 
+            WHERE (qg.groupId = :groupId AND qg.isOriginal = true AND qg.isCurrent = true and qg.isDeleted = false )
+            OR (qg.parent.groupId = :groupId and qg.isCurrent = true and qg.isDeleted = false)
+    """)
+    QuestionGroup findLatestVersionByOriginalId(UUID groupId);
 }
 

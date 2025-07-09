@@ -9,10 +9,14 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
 import com.fptu.sep490.readingservice.viewmodel.request.AddGroupQuestionRequest;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,8 @@ import org.springframework.util.MultiValueMap;
 import java.time.Duration;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class Helper {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
@@ -44,8 +50,24 @@ public class Helper {
 
     public UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
-        return keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
+        UserProfileResponse cachedProfile = getFromCache(userId);
+        if (cachedProfile != null) {
+            return cachedProfile;
+        }
+        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
 
+        if (profileResponse == null) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
+        return profileResponse;
+    }
+
+    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
+        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
+        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
+        return cachedProfile;
     }
     public String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
@@ -89,4 +111,25 @@ public class Helper {
                 request.dragItems()
         );
     }
+
+    public UserInformationResponse getUserInformationResponse(String userId) {
+        try {
+            UserProfileResponse user = getUserProfileById(userId);
+            return UserInformationResponse.builder()
+                    .userId(user.id())
+                    .email(user.email())
+                    .firstName(user.firstName())
+                    .lastName(user.lastName())
+                    .build();
+        } catch (JsonProcessingException e) {
+            // Bọc thành AppException (runtime) để không phải throws
+            throw new AppException(
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    "Lỗi khi parse JSON user profile",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    e
+            );
+        }
+    }
+
 }

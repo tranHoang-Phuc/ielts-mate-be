@@ -6,21 +6,19 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
-import com.fptu.sep490.listeningservice.model.ListeningTask;
+import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.enumeration.IeltsType;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
 import com.fptu.sep490.listeningservice.model.enumeration.Status;
+import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
 import com.fptu.sep490.listeningservice.model.specification.ListeningTaskSpecification;
-import com.fptu.sep490.listeningservice.repository.ListeningTaskRepository;
+import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
 import com.fptu.sep490.listeningservice.service.FileService;
 import com.fptu.sep490.listeningservice.service.ListeningTaskService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.UserInformationResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.UserProfileResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -51,6 +49,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ListeningTaskServiceImpl implements ListeningTaskService {
     ListeningTaskRepository listeningTaskRepository;
+    QuestionGroupRepository questionGroupRepository;
+    DragItemRepository dragItemRepository;
+    QuestionRepository questionRepository;
+    ChoiceRepository choiceRepository;
+
     FileService fileService;
     Helper helper;
     RedisService redisService;
@@ -111,6 +114,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .isCurrent(true)
                 .parent(null)
                 .createdBy(userId)
+                .updatedBy(userId)
                 .isDeleted(false)
                 .build();
 
@@ -229,6 +233,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ListeningTaskGetResponse> getActivatedTask(int page, int size, List<Integer> ieltsType,
                                                            List<Integer> partNumber, String questionCategory,
                                                            String sortBy, String sortDirection, String title,
@@ -290,6 +295,134 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .map(this :: toListeningTaskGetResponse)
                 .toList();
         return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ListeningTaskGetAllResponse getTaskById(UUID taskId) {
+        ListeningTask originalTask = listeningTaskRepository.findById(taskId)
+                .orElseThrow(
+                        () -> new AppException(
+                                Constants.ErrorCodeMessage.NOT_FOUND,
+                                Constants.ErrorCode.NOT_FOUND,
+                                HttpStatus.NOT_FOUND.value()
+                        )
+                );
+
+        ListeningTask currentVersion = listeningTaskRepository.findLastestVersion(taskId);
+        List<QuestionGroup> originalVersionGroupQuestion = questionGroupRepository
+                .findOriginalVersionByTaskId(originalTask.getTaskId());
+
+        Map<QuestionGroup, List<DragItem>> currentGroupMapCurrentDragItem = new HashMap<>();
+        Map<UUID,List<Question>>  currentGroupIdQuestions = new HashMap<>();
+        Map<UUID, Map<UUID, List<Choice>>> currentGroupIdMapQuestionIdMapCurrentChoice = new HashMap<>();
+        originalVersionGroupQuestion.forEach(g -> {
+            // Get All Current DragItem
+            List<DragItem> currentVersionDragItem = dragItemRepository.findCurrentVersionByGroupId(g.getGroupId());
+            QuestionGroup latestVersion = questionGroupRepository.findLatestVersionByOriginalId(g.getGroupId());
+            currentGroupMapCurrentDragItem.put(latestVersion, currentVersionDragItem);
+
+            // Get All Original Question
+            List<UUID> originalQuestionId = questionRepository.findOriginalVersionByGroupId(g.getGroupId());
+            List<Question> currentQuestion = questionRepository.findAllCurrentVersion(originalQuestionId);
+            currentGroupIdQuestions.put(g.getGroupId(), currentQuestion);
+
+            Map<UUID, List<Choice>> questionIdMapCurrentChoice = new HashMap<>();
+            List<QuestionVersion> questionVersionList = new ArrayList<>();
+            currentQuestion.forEach(q -> {
+                if(q.getIsOriginal()) {
+                    List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getQuestionId());
+                    questionIdMapCurrentChoice.put(q.getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
+                } else {
+                    List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getParent().getQuestionId());
+                    questionIdMapCurrentChoice.put(q.getParent().getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
+                }
+            });
+            currentGroupIdMapQuestionIdMapCurrentChoice.put(g.getGroupId(), questionIdMapCurrentChoice);
+        });
+
+        List<ListeningTaskGetAllResponse.QuestionGroupResponse> groups = new ArrayList<>();
+        currentGroupMapCurrentDragItem.forEach((key, value) -> {
+            List<ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse> dragItemResponses =
+                    value.stream()
+                            .map(item -> ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse
+                                    .builder()
+                                    .dragItemId(item.getParent() == null ? item.getDragItemId() : item.getParent().getDragItemId() )
+                                    .content(item.getContent())
+                                    .build())
+                            .toList();
+            List<Question> questions = currentGroupIdQuestions.get(key.getGroupId());
+            Map<UUID, List<Choice>> questionMapChoices = currentGroupIdMapQuestionIdMapCurrentChoice.get(key.getGroupId());
+
+            List<ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
+
+            questions.forEach(question -> {
+                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+
+                ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse questionResponse =
+                        ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                .questionId(question.getParent() == null ? question.getQuestionId() : question.getParent().getQuestionId())
+                                .questionOrder(question.getQuestionOrder())
+                                .questionType(question.getQuestionType().ordinal())
+                                .point(question.getPoint())
+                                .explanation(question.getExplanation())
+                                .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                .instructionForChoice(question.getInstructionForChoice())
+                                .blankIndex(question.getBlankIndex())
+                                .correctAnswer(question.getCorrectAnswer())
+                                .instructionForMatching(question.getInstructionForMatching())
+                                .correctAnswerForMatching(question.getCorrectAnswerForMatching())
+                                .zoneIndex(question.getZoneIndex())
+                                .dragItemId(question.getDragItem() != null ? question.getDragItem().getDragItemId() : null)
+                                .choices(choices.stream()
+                                        .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse
+                                                .ChoiceResponse.builder()
+                                                .choiceId(c.getParent() == null ? c.getChoiceId() : c.getParent().getChoiceId())
+                                                .label(c.getLabel())
+                                                .choiceOrder(c.getChoiceOrder())
+                                                .content(c.getContent())
+                                                .isCorrect(c.isCorrect())
+                                                .build())
+                                        .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder))
+                                        .toList())
+                                .build();
+                questionListResponse.add(questionResponse);
+            });
+            ListeningTaskGetAllResponse.QuestionGroupResponse group = ListeningTaskGetAllResponse.QuestionGroupResponse.builder()
+                    .groupId(key.getParent() == null ? key.getGroupId() : key.getParent().getGroupId())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .instruction(key.getInstruction())
+                    .dragItems(dragItemResponses)
+                    .questions(questionListResponse.stream()
+                            .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .build();
+            groups.add(group);
+        });
+
+
+
+        return ListeningTaskGetAllResponse.builder()
+                .taskId(taskId)
+                .title(currentVersion.getTitle())
+                .instruction(currentVersion.getInstruction())
+                .ieltsType(currentVersion.getIeltsType().ordinal())
+                .partNumber(currentVersion.getPartNumber().ordinal())
+                .audioFileId(currentVersion.getAudioFileId())
+                .transcription(currentVersion.getTranscription())
+                .status(currentVersion.getStatus().ordinal())
+                .questionGroups(groups.stream().sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)).toList())
+                .build();
     }
 
     private ListeningTaskGetResponse toListeningTaskGetResponse(ListeningTask listeningTask) {

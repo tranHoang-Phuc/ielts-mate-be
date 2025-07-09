@@ -23,9 +23,6 @@ public class SubmittedAttemptResponse {
     @JsonProperty("result_sets")
     List<ResultSet> resultSets;
 
-    // Jackson sẽ dùng builder này để deserialize
-
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Builder
     @Getter
