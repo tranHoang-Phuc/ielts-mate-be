@@ -282,6 +282,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         readingExam.setIsDeleted(true);
         readingExam.setUpdatedBy(userId);
         readingExam.setUpdatedAt(LocalDateTime.now());
+        readingExamRepository.save(readingExam);
         ReadingExamResponse response = new ReadingExamResponse(
                 readingExam.getReadingExamId().toString(),
                 readingExam.getExamName(),
@@ -333,6 +334,7 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
+        // Only get exams with isDeleted = false
         Page<ReadingExam> readingExamPage = readingExamRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
 
         List<ReadingExamResponse> readingExamResponses = readingExamPage.getContent().stream()
