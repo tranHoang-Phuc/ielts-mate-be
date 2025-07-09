@@ -217,6 +217,13 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         }
         ReadingExam finalReadingExam ;
         ReadingExam readingExam = readingExamOptional.get();
+        if(readingExam.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
+                    Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
         if(readingExam.getIsCurrent()) {
             finalReadingExam = readingExam;
 
