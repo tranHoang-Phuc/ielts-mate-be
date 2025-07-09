@@ -528,13 +528,13 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.MATCHING) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(List.of(answer.dataMatched()))
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .correctAnswer(List.of(question.getCorrectAnswerForMatching()))
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
+                if (question.getCorrectAnswerForMatching().equalsIgnoreCase(answer.dataMatched())) {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
@@ -543,7 +543,7 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(List.of(dragItemRepository.findById(answer.dragItemId()).get().getContent()))
                         .explanation(question.getExplanation())
                         .correctAnswer(List.of(question.getDragItem().getContent()))
                         .isCorrect(false)
