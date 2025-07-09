@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.repository;
 
 import com.fptu.sep490.listeningservice.model.Question;
+import com.fptu.sep490.listeningservice.model.QuestionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,4 +35,18 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         WHERE q.questionId IN :collect
     """)
     List<Question> findQuestionsByIds(List<UUID> collect);
+
+    List<Question> findAllByQuestionGroupOrderByQuestionOrderAsc(QuestionGroup questionGroup);
+
+    @Query("""
+        SELECT q FROM Question q
+        WHERE q.questionId = :questionId OR q.parent.questionId = :questionId
+    """)
+    List<Question> findAllVersionByQuestionId(Question question);
+
+    @Query("""
+        SELECT q FROM Question q
+            WHERE q.questionId = :questionId OR q.parent.questionId = :questionId
+    """)
+    List<Question> findAllPreviousVersion(UUID questionId);
 }
