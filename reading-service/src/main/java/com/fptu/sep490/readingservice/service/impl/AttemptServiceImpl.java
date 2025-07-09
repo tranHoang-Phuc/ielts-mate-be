@@ -505,12 +505,14 @@ public class AttemptServiceImpl implements AttemptService {
                             .build());
 
             if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                if (answer.choices() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = scoreMultipleChoiceQuestion(answer, question);
                 resultSets.add(result);
                 answerAttempt.setChoices(answer.choices());
                 answerAttempt.setIsCorrect(result.isCorrect());
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                if (answer.dataFilled() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(List.of(answer.dataFilled()))
                         .explanation(question.getExplanation())
@@ -527,6 +529,7 @@ public class AttemptServiceImpl implements AttemptService {
 
             }
             if (question.getQuestionType() == QuestionType.MATCHING) {
+                if (answer.dataMatched() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(List.of(answer.dataMatched()))
                         .explanation(question.getExplanation())
@@ -542,6 +545,7 @@ public class AttemptServiceImpl implements AttemptService {
                 answerAttempt.setIsCorrect(result.isCorrect());
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                if (answer.dragItemId() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(List.of(dragItemRepository.findById(answer.dragItemId()).get().getContent()))
                         .explanation(question.getExplanation())
