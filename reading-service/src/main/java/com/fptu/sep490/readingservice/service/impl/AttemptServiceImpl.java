@@ -582,7 +582,7 @@ public class AttemptServiceImpl implements AttemptService {
 
         Pageable pageable = PageRequest.of(page, size);
         var spec = AttemptSpecification.byConditions(
-                ieltsTypeList, statusList, partNumberList, sortBy, sortDirection, title, listeningTaskId, userId
+                ieltsTypeList, statusList, partNumberList, sortBy, sortDirection, title, passageId, userId
         );
         Page<Attempt> pageResult = attemptRepository.findAll(spec, pageable);
         List<Attempt> attempts = pageResult.getContent();
