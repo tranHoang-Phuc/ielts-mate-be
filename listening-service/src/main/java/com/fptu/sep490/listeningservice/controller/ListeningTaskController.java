@@ -40,7 +40,7 @@ public class ListeningTaskController {
             @RequestParam("part_number") Integer partNumber,
             @RequestParam("instruction") String instruction,
             @RequestParam("title") String title,
-            @RequestPart("status") Integer status,
+            @RequestParam("status") Integer status,
             @RequestPart("audio_file") MultipartFile audioFile,
             @RequestParam("is_automatic_transcription") boolean isAutomaticTranscription,
             @RequestParam(value = "transcription", required = false) String transcription,
@@ -77,13 +77,13 @@ public class ListeningTaskController {
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ListeningTaskResponse>> updateListeningTask(
             @PathVariable("task-id") UUID taskId,
-            @RequestParam("ielts_type") Integer ieltsType,
-            @RequestParam("part_number") Integer partNumber,
-            @RequestParam("instruction") String instruction,
-            @RequestParam("status") Integer status,
-            @RequestParam("title") String title,
-            @RequestPart("audio_file") MultipartFile audioFile,
-            @RequestParam("transcription") String transcription,
+            @RequestParam(value = "ielts_type", required = false) Integer ieltsType,
+            @RequestParam(value = "part_number", required = false) Integer partNumber,
+            @RequestParam(value = "instruction", required = false) String instruction,
+            @RequestParam(value = "status", required = false) Integer status,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestPart(value = "audio_file", required = false) MultipartFile audioFile,
+            @RequestParam(value = "transcription", required = false) String transcription,
             HttpServletRequest httpServletRequest) throws IOException {
         ListeningTaskResponse response = listeningTaskService.updateTask(taskId,status, ieltsType, partNumber, instruction,
                 title, audioFile, transcription, httpServletRequest);

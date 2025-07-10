@@ -4,9 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="fix: sse gateway config">
+    <list default="true" id="7d1c4795-e2dd-40f7-b6e4-4eea98333578" name="Changes" comment="fix: missing data matching">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,9 +80,9 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
-    "Spring Boot.FileServiceApplication.executor": "Debug",
-    "Spring Boot.IdentityServiceApplication.executor": "Debug",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
+    "Spring Boot.FileServiceApplication.executor": "Run",
+    "Spring Boot.IdentityServiceApplication.executor": "Run",
     "Spring Boot.ListeningServiceApplication.executor": "Debug",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
     "Spring Boot.ReadingServiceApplication.executor": "Debug",
@@ -221,7 +222,9 @@
       <workItem from="1751720900922" duration="843000" />
       <workItem from="1751761616418" duration="14323000" />
       <workItem from="1751797713144" duration="594000" />
-      <workItem from="1751893287699" duration="619000" />
+      <workItem from="1751893287699" duration="2703000" />
+      <workItem from="1752038334206" duration="2156000" />
+      <workItem from="1752146617676" duration="1120000" />
     </task>
     <task id="LOCAL-00001" summary="fix: missing idea">
       <option name="closed" value="true" />
@@ -343,7 +346,23 @@
       <option name="project" value="LOCAL" />
       <updated>1751788669812</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="fix: sse path">
+      <option name="closed" value="true" />
+      <created>1751894076614</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1751894076614</updated>
+    </task>
+    <task id="LOCAL-00017" summary="fix: missing data matching">
+      <option name="closed" value="true" />
+      <created>1752039164804</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1752039164804</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -362,7 +381,9 @@
     <MESSAGE value="fix: submit exam attempt" />
     <MESSAGE value="feature: submit listening attempt" />
     <MESSAGE value="fix: sse gateway config" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: sse gateway config" />
+    <MESSAGE value="fix: sse path" />
+    <MESSAGE value="fix: missing data matching" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: missing data matching" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -404,18 +425,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>271</line>
+          <line>281</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>292</line>
+          <line>302</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>430</line>
-          <option name="timeStamp" value="16" />
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java</url>
+          <line>528</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java</url>
+          <line>47</line>
+          <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
