@@ -71,12 +71,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         List<Question> questions = questionRepository.findQuestionsByIds(questionIds);
 
         // Save version of exam attempt
-        ExamAttemptHistory examAttemptHistory = ExamAttemptHistory.builder()
-                .passageId(answers.passageId())
-                .questionGroupIds(answers.questionGroupIds())
-                .questionIds(questionIds)
-                .build();
-        examAttempt.setHistory(objectMapper.writeValueAsString(examAttemptHistory));
+
 
         // Convert user answers for mapping questions and answers
         Map<UUID, List<String>> userAnswers = answers.answers().stream()
@@ -84,6 +79,13 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         ExamAttemptAnswersRequest.ExamAnswerRequest::questionId,
                         ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers
                 ));
+        ExamAttemptHistory examAttemptHistory = ExamAttemptHistory.builder()
+                .passageId(answers.passageId())
+                .questionGroupIds(answers.questionGroupIds())
+                .userAnswers(userAnswers)
+                .questionIds(questionIds)
+                .build();
+        examAttempt.setHistory(objectMapper.writeValueAsString(examAttemptHistory));
 
         int points = 0;
         List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
@@ -117,11 +119,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(userSelectedAnswers)
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .correctAnswer(List.of(question.getCorrectAnswerForMatching()))
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if(question.getCorrectAnswer().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
+                if(question.getCorrectAnswerForMatching().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
                     result.setCorrect(true);
                     points += question.getPoint();
                 }
@@ -164,7 +166,6 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
                 .questionIndex(question.getQuestionOrder())
                 .userAnswer(userAnswers)
-
                 .explanation(question.getExplanation())
                 .build();
         if(question.getIsOriginal()) {
@@ -183,7 +184,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         List<String> correctLabel = new ArrayList<>();
         for(Choice correctAnswer : correctAnswers) {
 
-            if( userChoice.contains(correctAnswer.getChoiceId())) {
+            if(userChoice.contains(correctAnswer.getChoiceId())) {
                 correctLabel.add(correctAnswer.getLabel());
             }
         }

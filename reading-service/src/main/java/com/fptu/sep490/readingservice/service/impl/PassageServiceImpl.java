@@ -189,6 +189,18 @@ public class PassageServiceImpl implements PassageService {
         }
         readingPassageRepository.saveAll(allVersions);
 
+        ReadingPassage currentVersionPassage = readingPassageRepository.findCurrentVersionById(passageId).get();
+
+        if(currentVersionPassage.getPassageStatus() == Status.TEST) {
+            if(request.passageStatus() != Status.TEST.ordinal()) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.CANT_UPDATE_TEST_TO_ANOTHER,
+                        Constants.ErrorCode.CANT_UPDATE_TEST_TO_ANOTHER,
+                        HttpStatus.CONFLICT.value()
+                );
+            }
+        }
+
         if (request.title()== null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
@@ -197,7 +209,7 @@ public class PassageServiceImpl implements PassageService {
             );
         }
 
-        if (request.ieltsType() == null) {
+        if (request.ieltsType() != null) {
             int ordinal = request.ieltsType();
             if (ordinal < 0 || ordinal >= IeltsType.values().length) {
                 throw new AppException(
@@ -208,7 +220,7 @@ public class PassageServiceImpl implements PassageService {
             }
         }
 
-        if (request.partNumber() == null) {
+        if (request.partNumber() != null) {
             int ordinal = request.partNumber();
             if (ordinal < 0 || ordinal >= PartNumber.values().length) {
                 throw new AppException(
@@ -219,7 +231,7 @@ public class PassageServiceImpl implements PassageService {
             }
         }
 
-        if (request.content() == null) {
+        if (request.content() != null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST,
@@ -235,14 +247,14 @@ public class PassageServiceImpl implements PassageService {
             );
         }
 
-        if (request.instruction() == null) {
+        if (request.instruction() != null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST,
                     HttpStatus.BAD_REQUEST.value()
             );        }
 
-        if (request.passageStatus() == null) {
+        if (request.passageStatus() != null) {
             int ordinal = request.passageStatus();
             if (ordinal < 0 || ordinal >= Status.values().length) {
                 throw new AppException(
@@ -574,14 +586,14 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.NOT_FOUND.value()
                 ));
 
-
-        if (currentVersion.getPassageStatus() == null || currentVersion.getPassageStatus() != Status.PUBLISHED) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.PASSAGE_NOT_ACTIVE,
-                    Constants.ErrorCode.PASSAGE_NOT_ACTIVE,
-                    HttpStatus.BAD_REQUEST.value()
-            );
-        }
+//        if (currentVersion.getPassageStatus() == null || currentVersion.getPassageStatus() != Status.PUBLISHED) {
+//            throw new AppException(
+//                    Constants.ErrorCodeMessage.PASSAGE_NOT_ACTIVE,
+//                    Constants.ErrorCode.PASSAGE_NOT_ACTIVE,
+//                    HttpStatus.BAD_REQUEST.value()
+//            );
+//        }
+//
 
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(passage.getPassageId());
         if (questionGroups.isEmpty()) {
