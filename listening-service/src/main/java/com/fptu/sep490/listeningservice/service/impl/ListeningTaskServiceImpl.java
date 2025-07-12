@@ -114,7 +114,9 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .isCurrent(true)
                 .parent(null)
                 .createdBy(userId)
+                .updatedBy(userId)
                 .isDeleted(false)
+                .version(1)
                 .build();
 
         ListeningTask saved = listeningTaskRepository.save(listeningTask);
@@ -186,7 +188,15 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
             newVersion.setTranscription(task.getTranscription());
         }
 
-        newVersion = listeningTaskRepository.save(newVersion);
+
+
+        newVersion.setIsCurrent(true);
+        newVersion.setCreatedBy(userId);
+        newVersion.setUpdatedBy(userId);
+        newVersion.setIsDeleted(false);
+        newVersion.setVersion(listeningTaskRepository.findLastestVersion(task.getTaskId()).getVersion() + 1);
+        newVersion.setParent(task);
+        newVersion.setIsOriginal(false);
 
         if(!Objects.isNull(audioFile)) {
             fileService.uploadAsync("listening-tasks", audioFile, newVersion.getTaskId(), UUID.fromString(userId));
@@ -203,7 +213,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .partNumber(newVersion.getPartNumber().ordinal())
                 .instruction(newVersion.getInstruction())
                 .title(newVersion.getTitle())
-                .audioFileId(null)
+                .audioFileId(newVersion.getAudioFileId())
                 .transcription(newVersion.getTranscription())
                 .build();
     }

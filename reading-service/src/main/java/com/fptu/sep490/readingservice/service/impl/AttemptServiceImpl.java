@@ -18,6 +18,7 @@ import com.fptu.sep490.readingservice.model.json.QuestionVersion;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.readingservice.repository.specification.AttemptSpecification;
 import com.fptu.sep490.readingservice.service.AttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.DragItemResponse;
 import com.fptu.sep490.readingservice.viewmodel.request.SavedAnswersRequest;
@@ -30,6 +31,10 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -505,12 +510,14 @@ public class AttemptServiceImpl implements AttemptService {
                             .build());
 
             if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                if (answer.choices() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = scoreMultipleChoiceQuestion(answer, question);
                 resultSets.add(result);
                 answerAttempt.setChoices(answer.choices());
                 answerAttempt.setIsCorrect(result.isCorrect());
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                if (answer.dataFilled() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(List.of(answer.dataFilled()))
                         .explanation(question.getExplanation())
@@ -527,14 +534,15 @@ public class AttemptServiceImpl implements AttemptService {
 
             }
             if (question.getQuestionType() == QuestionType.MATCHING) {
+                if (answer.dataMatched() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(List.of(answer.dataMatched()))
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .correctAnswer(List.of(question.getCorrectAnswerForMatching()))
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
+                if (question.getCorrectAnswerForMatching().equalsIgnoreCase(answer.dataMatched())) {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
@@ -542,8 +550,9 @@ public class AttemptServiceImpl implements AttemptService {
                 answerAttempt.setIsCorrect(result.isCorrect());
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                if (answer.dragItemId() == null) continue;
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(List.of(dragItemRepository.findById(answer.dragItemId()).get().getContent()))
                         .explanation(question.getExplanation())
                         .correctAnswer(List.of(question.getDragItem().getContent()))
                         .isCorrect(false)
@@ -569,6 +578,35 @@ public class AttemptServiceImpl implements AttemptService {
                 .duration(answers.duration())
                 .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedAttemptResponse.ResultSet::getQuestionIndex)).collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    public Page<UserAttemptResponse> getAttemptByUser(int page, int size, List<Integer> ieltsTypeList, List<Integer> statusList, List<Integer> partNumberList, String sortBy, String sortDirection, String title, UUID passageId, HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = AttemptSpecification.byConditions(
+                ieltsTypeList, statusList, partNumberList, sortBy, sortDirection, title, passageId, userId
+        );
+        Page<Attempt> pageResult = attemptRepository.findAll(spec, pageable);
+        List<Attempt> attempts = pageResult.getContent();
+
+        List<UserAttemptResponse> responses = attempts.stream().map(
+                a -> UserAttemptResponse.builder()
+                        .attemptId(a.getAttemptId())
+                        .duration(a.getDuration())
+                        .totalPoints(a.getTotalPoints())
+                        .status(a.getStatus().ordinal())
+                        .startAt(a.getCreatedAt())
+                        .finishedAt(a.getFinishedAt())
+                        .readingPassageId(a.getReadingPassage().getPassageId())
+                        .title(a.getReadingPassage().getTitle())
+                        .build()
+        ).toList();
+
+        return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+
+
     }
 
     private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {

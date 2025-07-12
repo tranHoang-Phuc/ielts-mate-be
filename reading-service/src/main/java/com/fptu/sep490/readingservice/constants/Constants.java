@@ -28,7 +28,6 @@ public class Constants {
         public static final String ATTEMPT_ALREADY_SUBMITTED = "ATTEMPT_ALREADY_SUBMITTED";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "EXAM_ATTEMPT_NOT_FOUND";
     }
-
     public final class RedisKey {
 
         public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
@@ -36,7 +35,6 @@ public class Constants {
     }
 
     public final class ErrorCode {
-
         public static final String UNAUTHORIZED = "100001";
         public static final String INVALID_REQUEST = "100002";
         public static final String PASSAGE_NOT_FOUND = "100003";
@@ -53,8 +51,6 @@ public class Constants {
         public static final String ATTEMPT_NOT_FOUND = "100014";
         public static final String FORBIDDEN = "100015";
         public static final String ATTEMPT_NOT_DRAFT = "100016";
-
-
 
         public static final String QUESTION_NOT_FOUND = "100021";
         public static final String QUESTION_ALREADY_HAS_DRAG_ITEM = "100022";

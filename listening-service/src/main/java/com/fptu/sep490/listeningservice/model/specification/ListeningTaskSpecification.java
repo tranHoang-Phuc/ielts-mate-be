@@ -40,7 +40,7 @@ public class ListeningTaskSpecification {
                 List<Status> statusEnums = status.stream()
                         .map(i -> Status.values()[i])
                         .toList();
-                predicates.add(root.get("passageStatus").in(statusEnums));
+                predicates.add(root.get("status").in(statusEnums));
             }
 
             if (partNumber != null && !partNumber.isEmpty()) {
