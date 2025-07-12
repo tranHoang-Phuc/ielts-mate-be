@@ -32,9 +32,6 @@ public class Module {
     @ManyToMany(mappedBy = "modules")
     private Set<FlashCard> flashCards = new HashSet<>();
 
-    // Lưu json những id có thể access, nếu null thì ai cx có thể access
-    @Column(name="accessors", columnDefinition = "TEXT")
-    private String accessors;
 
     @Column(name = "createdBy")
     private String createdBy;
