@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.UUID;
 
 public record ExamAttemptAnswersRequest(
-        @JsonProperty(value ="passsage_id", required = true)
-        UUID passageId,
-        @JsonProperty( value= "question_group_ids", required = true)
+        @JsonProperty(value ="passage_id")
+        List<UUID> passageId,
+        @JsonProperty( value= "question_group_ids")
         List<UUID> questionGroupIds,
         @JsonProperty("answers")
         List<ExamAnswerRequest> answers,
@@ -19,7 +19,7 @@ public record ExamAttemptAnswersRequest(
             @JsonProperty("question_id")
             UUID questionId,
             @JsonProperty("selected_answers")
-        List<String> selectedAnswers
+            List<String> selectedAnswers
     ) {
     }
 }

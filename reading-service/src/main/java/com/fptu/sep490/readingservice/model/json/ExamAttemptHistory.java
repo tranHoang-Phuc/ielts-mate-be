@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +14,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExamAttemptHistory {
-    private UUID passageId;
+    private List<UUID> passageId;
     private List<UUID> questionGroupIds;
     private List<UUID> questionIds;
+    Map<UUID, List<String>> userAnswers;
 }
