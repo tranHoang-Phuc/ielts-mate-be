@@ -23,9 +23,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Interface" />
-        <option value="Record" />
         <option value="Class" />
-        <option value="Enum" />
+        <option value="Record" />
       </list>
     </option>
   </component>
@@ -34,6 +33,7 @@
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="feature/init-personal-feature-db" />
+        <entry key="$PROJECT_DIR$" value="feature/submit-listening-attempt" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -47,7 +47,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/tranHoang-Phuc/ielts-mate-be.git&quot;,
-    &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
+    &quot;accountId&quot;: &quot;462cd5c5-0d45-4ef0-a06c-10e37159c618&quot;
   },
   &quot;recentNewPullRequestHead&quot;: {
     &quot;server&quot;: {
@@ -106,23 +106,18 @@
     "settings.editor.selected.configurable": "com.github.copilot.settings.ApplicationConfigurable",
     "vue.rearranger.settings.migration": "true"
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql",
-      "dynamo"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;,
+      &quot;dynamo&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\personal-service\src\main\java\com\fptu\sep490\personalservice\repository" />
-      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\personal-service\src\main\java\com\fptu\sep490\personalservice" />
-    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="com.fptu.sep490.personalservice.viewmodel.response" />
       <recent name="com.fptu.sep490.listeningservice.model.json" />
       <recent name="com.fptu.sep490.notificationservice.config" />
     </key>
@@ -150,7 +145,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ListeningServiceApplication">
+  <component name="RunManager">
     <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="api-gateway" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
@@ -194,13 +189,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PersonalServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="personal-service" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.personalservice.PersonalServiceApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="ReadingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="reading-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.readingservice.ReadingServiceApplication" />
@@ -208,24 +196,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <list>
-      <item itemvalue="Spring Boot.PersonalServiceApplication" />
-      <item itemvalue="Spring Boot.ApiGatewayApplication" />
-      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
-      <item itemvalue="Spring Boot.FileServiceApplication" />
-      <item itemvalue="Spring Boot.IdentityServiceApplication" />
-      <item itemvalue="Spring Boot.ListeningServiceApplication" />
-      <item itemvalue="Spring Boot.NotificationServiceApplication" />
-      <item itemvalue="Spring Boot.ReadingServiceApplication" />
-    </list>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -365,39 +335,7 @@
       <option name="project" value="LOCAL" />
       <updated>1751768338569</updated>
     </task>
-    <task id="LOCAL-00015" summary="fix: sse gateway config">
-      <option name="closed" value="true" />
-      <created>1751788669812</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1751788669812</updated>
-    </task>
-    <task id="LOCAL-00016" summary="fix: sse path">
-      <option name="closed" value="true" />
-      <created>1751894076614</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1751894076614</updated>
-    </task>
-    <task id="LOCAL-00017" summary="fix: missing data matching">
-      <option name="closed" value="true" />
-      <created>1752039164804</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1752039164804</updated>
-    </task>
-    <task id="LOCAL-00018" summary="fix: update listening task">
-      <option name="closed" value="true" />
-      <created>1752147778798</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1752147778798</updated>
-    </task>
-    <option name="localTasksCounter" value="19" />
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -415,11 +353,7 @@
     <MESSAGE value="fix: load reading attempt" />
     <MESSAGE value="fix: submit exam attempt" />
     <MESSAGE value="feature: submit listening attempt" />
-    <MESSAGE value="fix: sse gateway config" />
-    <MESSAGE value="fix: sse path" />
-    <MESSAGE value="fix: missing data matching" />
-    <MESSAGE value="fix: update listening task" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: update listening task" />
+    <option name="LAST_COMMIT_MESSAGE" value="feature: submit listening attempt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -433,6 +367,11 @@
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/FileServiceImpl.java</url>
           <line>47</line>
           <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/service/impl/SseServiceImpl.java</url>
+          <line>41</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/file-service/src/main/java/com/fptu/sep490/fileservice/controller/FileController.java</url>
@@ -454,31 +393,7 @@
           <line>47</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>281</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>302</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java</url>
-          <line>533</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java</url>
-          <line>47</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
-  </component>
-  <component name="XSLT-Support.FileAssociations.UIState">
-    <expand />
-    <select />
   </component>
 </project>
