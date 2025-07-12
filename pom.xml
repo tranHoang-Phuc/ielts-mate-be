@@ -24,6 +24,8 @@
         <module>discovery-service</module>
         <module>file-service</module>
         <module>reading-service</module>
+        <module>listening-service</module>
+        <module>personal-service</module>
     </modules>
 
     <properties>
