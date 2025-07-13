@@ -10,6 +10,8 @@ public record ExamAttemptAnswersRequest(
         List<UUID> passageId,
         @JsonProperty( value= "question_group_ids")
         List<UUID> questionGroupIds,
+        @JsonProperty( value= "item_ids")
+        List<UUID> itemsIds,
         @JsonProperty("answers")
         List<ExamAnswerRequest> answers,
         @JsonProperty("duration")
@@ -19,7 +21,9 @@ public record ExamAttemptAnswersRequest(
             @JsonProperty("question_id")
             UUID questionId,
             @JsonProperty("selected_answers")
-            List<String> selectedAnswers
+            List<String> selectedAnswers,
+            @JsonProperty("choice_ids")
+            List<UUID>  choiceIds
     ) {
     }
 }

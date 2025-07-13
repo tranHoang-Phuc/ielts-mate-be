@@ -51,8 +51,6 @@ public class Choice {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_choice_parent"))
     private Choice parent;

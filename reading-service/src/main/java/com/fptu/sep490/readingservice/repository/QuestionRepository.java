@@ -72,4 +72,9 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
             and q.isDeleted = false)
     """)
     List<Question> findAllCurrentVersion(List<UUID> originalQuestionId);
+
+    @Query("""
+        select q.questionId from Question q where q.questionGroup.groupId =: groupId and q.isOriginal = true
+    """)
+    List<UUID> findQuestionsByGroupId(@Param("groupId") UUID groupId);
 }
