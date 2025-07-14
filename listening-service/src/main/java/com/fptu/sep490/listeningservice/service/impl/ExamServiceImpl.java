@@ -19,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 
 @Service
 @Slf4j
@@ -179,5 +182,109 @@ public class ExamServiceImpl implements ExamService {
         );
         return response;
     }
+
+    @Override
+    public ExamResponse getExamById(String examId, HttpServletRequest httpServletRequest) throws Exception {
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        ListeningExam listeningExam = listeningExamRepository.findById(UUID.fromString(examId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        ListeningExam currentExam = findCurrentOrChildCurrentExam(listeningExam);
+
+        ExamResponse response = new ExamResponse(
+                currentExam.getListeningExamId(),
+                currentExam.getExamName(),
+                currentExam.getExamDescription(),
+                currentExam.getUrlSlug(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(currentExam.getPart1().getTaskId())
+                        .ieltsType(currentExam.getPart1().getIeltsType().ordinal())
+                        .partNumber(currentExam.getPart1().getPartNumber().ordinal())
+                        .instruction(currentExam.getPart1().getInstruction())
+                        .title(currentExam.getPart1().getTitle())
+                        .audioFileId(currentExam.getPart1().getAudioFileId())
+                        .transcription(currentExam.getPart1().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(currentExam.getPart2().getTaskId())
+                        .ieltsType(currentExam.getPart2().getIeltsType().ordinal())
+                        .partNumber(currentExam.getPart2().getPartNumber().ordinal())
+                        .instruction(currentExam.getPart2().getInstruction())
+                        .title(currentExam.getPart2().getTitle())
+                        .audioFileId(currentExam.getPart2().getAudioFileId())
+                        .transcription(currentExam.getPart2().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(currentExam.getPart3().getTaskId())
+                        .ieltsType(currentExam.getPart3().getIeltsType().ordinal())
+                        .partNumber(currentExam.getPart3().getPartNumber().ordinal())
+                        .instruction(currentExam.getPart3().getInstruction())
+                        .title(currentExam.getPart3().getTitle())
+                        .audioFileId(currentExam.getPart3().getAudioFileId())
+                        .transcription(currentExam.getPart3().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(currentExam.getPart4().getTaskId())
+                        .ieltsType(currentExam.getPart4().getIeltsType().ordinal())
+                        .partNumber(currentExam.getPart4().getPartNumber().ordinal())
+                        .instruction(currentExam.getPart4().getInstruction())
+                        .title(currentExam.getPart4().getTitle())
+                        .audioFileId(currentExam.getPart4().getAudioFileId())
+                        .transcription(currentExam.getPart4().getTranscription())
+                        .build(),
+
+                currentExam.getCreatedBy(),
+                currentExam.getCreatedAt(),
+                currentExam.getUpdatedBy(),
+                currentExam.getUpdatedAt(),
+                currentExam.getIsCurrent(),
+                currentExam.getVersion(),
+                currentExam.getIsOriginal(),
+                currentExam.getIsDeleted()
+        );
+        return response;
+    }
+
+    @Override
+    public void deleteExam(String examId, HttpServletRequest httpServletRequest) throws Exception {
+        ListeningExam exam = listeningExamRepository.findById(UUID.fromString(examId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        List<ListeningExam> list = listeningExamRepository.findAllCurrentByParentId(UUID.fromString(examId));
+        for (ListeningExam item:list){
+            item.setIsDeleted(true);
+            listeningExamRepository.save(item);
+        }
+
+    }
+
+    private ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
+        if (listeningExam.getIsCurrent() && !listeningExam.getIsDeleted()) {
+            return listeningExam;
+        }
+        for(ListeningExam child : listeningExam.getChildren()) {
+            if(child.getIsCurrent() && !child.getIsDeleted()) {
+                return child;
+            }
+        }
+        return null;
+        }
 
 }

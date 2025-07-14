@@ -22,10 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -64,6 +61,57 @@ public class ExamController {
                 .message("Question group created successfully")
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    @GetMapping("/{examId}")
+    @PreAuthorize("hasRole('CREATOR') or hasRole('STUDENT')")
+    @Operation(
+            summary = "Get a listening exam by ID",
+            description = "This endpoint allows users to retrieve a specific listening exam by its ID."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listening exam retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Listening exam not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<ExamResponse>> getExamById(
+            @PathVariable String examId,
+            HttpServletRequest httpServletRequest) throws Exception {
+        ExamResponse response = examService.getExamById(examId, httpServletRequest);
+        BaseResponse<ExamResponse> baseResponse = BaseResponse.<ExamResponse>builder()
+                .data(response)
+                .message("Listening exam retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    @DeleteMapping("/{examId}")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Delete a listening exam by ID",
+            description = "This endpoint allows creators to delete a specific listening exam by its ID."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Listening exam deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Listening exam not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<Void>> deleteExam(
+            @PathVariable String examId,
+            HttpServletRequest httpServletRequest) throws Exception {
+        examService.deleteExam(examId, httpServletRequest);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Listening exam deleted successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }

@@ -113,4 +113,21 @@ public class DragItemController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
+
+    @PutMapping("/{group-id}/items/{item-id}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<DragItemResponse>> updateDragItem(
+            @PathVariable("group-id") String groupId,
+            @PathVariable("item-id") String itemId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody DragItemCreationRequest request,
+            HttpServletRequest httpServletRequest) throws Exception {
+        DragItemResponse response = dragItemService.updateDragItem(groupId, itemId, request, httpServletRequest);
+        BaseResponse<DragItemResponse> baseResponse = BaseResponse.<DragItemResponse>builder()
+                .data(response)
+                .message("Drag item updated successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
 }
