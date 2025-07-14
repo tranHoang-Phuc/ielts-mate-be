@@ -3,7 +3,9 @@ package com.fptu.sep490.listeningservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +41,16 @@ public class DragItem {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
+    @Column(name="updated_by", length = 100)
+    private String updatedBy;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "created_by", length = 100)
+    private String createdBy;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_dragItem_parent"))
     private DragItem parent;
@@ -49,7 +61,8 @@ public class DragItem {
     @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(
             name = "question_id",
-            unique = true         // đảm bảo mỗi question_id chỉ dùng cho đúng 1 DragItem
+            unique = false
+                                    // vì update là dup row data nên t hêm unique = false
     )
     private Question question;
 }

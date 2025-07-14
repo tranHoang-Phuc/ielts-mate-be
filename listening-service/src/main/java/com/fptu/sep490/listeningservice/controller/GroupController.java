@@ -62,7 +62,7 @@ public class GroupController {
     public ResponseEntity<BaseResponse<QuestionGroupResponse>> deleteGroup(
             @PathVariable("listening-task-id") UUID listeningTaskId,
             @PathVariable("group-id") UUID groupId,
-            HttpServletRequest httpServletRequest) {
+            HttpServletRequest httpServletRequest) throws Exception {
         groupService.deleteGroup(listeningTaskId, groupId, httpServletRequest);
         BaseResponse<QuestionGroupResponse> baseResponse = BaseResponse.<QuestionGroupResponse>builder()
                 .message("Question group deleted successfully")
