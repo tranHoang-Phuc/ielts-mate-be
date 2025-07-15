@@ -5,12 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
-import com.fptu.sep490.readingservice.model.Choice;
-import com.fptu.sep490.readingservice.model.ExamAttempt;
-import com.fptu.sep490.readingservice.model.Question;
-import com.fptu.sep490.readingservice.model.ReadingExam;
+import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
+import com.fptu.sep490.readingservice.model.json.UserAnswer;
+import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.ChoiceRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.QuestionRepository;
@@ -29,13 +28,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -46,9 +44,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ExamAttemptRepository examAttemptRepository;
     ObjectMapper objectMapper;
     ChoiceRepository choiceRepository;
+    DragItemRepository  dragItemRepository;
     Helper helper;
     PassageServiceImpl passageServiceImpl;
     private final ReadingExamRepository readingExamRepository;
+    private final QuestionGroupRepository questionGroupRepository;
 
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
@@ -65,8 +65,22 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .map(ExamAttemptAnswersRequest.ExamAnswerRequest::questionId)
                 .toList();
         List<Question> questions = questionRepository.findQuestionsByIds(questionIds);
+        Map<UUID, List<UUID>> groupMapDragItem = new HashMap<>();
+        if(!CollectionUtils.isEmpty(answers.itemsIds())) {
+            List<DragItem> items = dragItemRepository.findAllById(answers.itemsIds());
+            List<UUID> groupIds = items.stream()
+                    .map(i -> i.getQuestionGroup().getGroupId()).toList();
+            Set<UUID> group = new HashSet<>(groupIds);
+            group.forEach(groupId -> {
+                        List<UUID> ids = items.stream()
+                                .filter(dragItem -> groupId.equals(dragItem.getQuestionGroup().getGroupId()))
+                                .map(DragItem::getDragItemId)
+                                .toList();
 
-        // Save version of exam attempt
+                        groupMapDragItem.put(groupId, ids);
+            });
+        }
+
 
 
         // Convert user answers for mapping questions and answers
@@ -75,10 +89,18 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         ExamAttemptAnswersRequest.ExamAnswerRequest::questionId,
                         ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers
                 ));
+        Map<UUID, List<UUID>> questionMapChoice = new HashMap<>();
+        for (ExamAttemptAnswersRequest.ExamAnswerRequest answer : answers.answers()) {
+            if(!CollectionUtils.isEmpty(answer.choiceIds())) {
+                questionMapChoice.put(answer.questionId(), answer.choiceIds());
+            }
+        }
         ExamAttemptHistory examAttemptHistory = ExamAttemptHistory.builder()
                 .passageId(answers.passageId())
                 .questionGroupIds(answers.questionGroupIds())
                 .userAnswers(userAnswers)
+                .groupMapItems(groupMapDragItem)
+                .questionMapChoices(questionMapChoice)
                 .questionIds(questionIds)
                 .build();
         examAttempt.setHistory(objectMapper.writeValueAsString(examAttemptHistory));
@@ -86,6 +108,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         int points = 0;
         List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
         for(Question question : questions) {
+
             List<String> userSelectedAnswers = userAnswers.get(question.getQuestionId());
             if(userSelectedAnswers == null) {
                 continue;

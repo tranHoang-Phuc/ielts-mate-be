@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name ="vocabularies")
+@Table(name ="modules")
 @Getter
 @Setter
 @NoArgsConstructor

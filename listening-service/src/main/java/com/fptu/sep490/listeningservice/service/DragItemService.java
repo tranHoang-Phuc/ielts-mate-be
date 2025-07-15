@@ -16,4 +16,6 @@ public interface DragItemService {
     DragItemResponse getDragItemByGroupIdAndItemId(String groupId, String itemId, HttpServletRequest httpServletRequest) throws Exception;
 
     Page<DragItemResponse> getDragItemsByGroupId(String groupId, int i, int size, HttpServletRequest httpServletRequest);
+
+    DragItemResponse updateDragItem(String groupId, String itemId, DragItemCreationRequest request, HttpServletRequest httpServletRequest) throws Exception;
 }

@@ -74,6 +74,11 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
     List<Question> findAllCurrentVersion(List<UUID> originalQuestionId);
 
     @Query("""
+        select q.questionId from Question q where q.questionGroup.groupId =: groupId and q.isOriginal = true
+    """)
+    List<UUID> findQuestionsByGroupId(@Param("groupId") UUID groupId);
+
+    @Query("""
         SELECT q FROM Question q
         WHERE q.questionId IN :ids
         ORDER BY q.questionOrder ASC
