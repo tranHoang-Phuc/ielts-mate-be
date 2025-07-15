@@ -71,6 +71,20 @@ public class ExamAttemptController {
 
     //xem lai bai thi: get("/{examAttemptId}")
 
+    @GetMapping("/{examAttemptId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> getExamAttemptById(
+            @PathVariable("examAttemptId") String examAttemptId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        SubmittedAttemptResponse response = examAttemptService.getExamAttemptById(examAttemptId, request);
+        BaseResponse<SubmittedAttemptResponse> baseResponse = BaseResponse.<SubmittedAttemptResponse>builder()
+                .data(response)
+                .message(null)
+                .build();
+        return ResponseEntity.ok(baseResponse);
+    }
+
     //xem tat ca lich su lam bai: get("/history")
     @GetMapping("/history")
     @PreAuthorize("isAuthenticated()")

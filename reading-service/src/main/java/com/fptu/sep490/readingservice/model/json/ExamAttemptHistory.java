@@ -1,6 +1,8 @@
 package com.fptu.sep490.readingservice.model.json;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
 import lombok.*;
 
 import java.util.List;

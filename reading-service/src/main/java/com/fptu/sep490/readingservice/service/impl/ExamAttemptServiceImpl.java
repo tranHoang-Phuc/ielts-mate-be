@@ -11,7 +11,6 @@ import com.fptu.sep490.readingservice.model.Question;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
-import com.fptu.sep490.readingservice.model.json.UserAnswer;
 import com.fptu.sep490.readingservice.repository.ChoiceRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.QuestionRepository;
@@ -19,10 +18,7 @@ import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -300,5 +296,70 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         return new PageImpl<>(list, pageable, examAttemptsResult.getTotalElements());
 
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ExamAttemptGetDetail getExamAttemptById(String examAttemptId, HttpServletRequest request) throws JsonProcessingException {
+        UUID attemptId = UUID.fromString(examAttemptId);
+        ExamAttempt examAttempt = examAttemptRepository.findById(attemptId).orElseThrow(
+                () -> new AppException(
+                        Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                )
+        );
+
+        String userId = helper.getUserIdFromToken(request);
+        if (!examAttempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                    Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
+
+        List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
+        for (UUID questionId : history.getQuestionIds()) {
+            Question question = questionRepository.findById(questionId).orElseThrow(
+                    () -> new AppException(
+                            Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                            Constants.ErrorCode.QUESTION_NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    )
+            );
+            List<String> userAnswers = history.getUserAnswers().get(questionId);
+            if (userAnswers == null) {
+                continue;
+            }
+            SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
+                    .questionIndex(question.getQuestionOrder())
+                    .userAnswer(userAnswers)
+                    .explanation(question.getExplanation())
+                    .correctAnswer(List.of(question.getCorrectAnswer()))
+                    .isCorrect(false)
+                    .build();
+
+            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                resultSet.setCorrect(checkMultipleChoiceQuestion(question, userAnswers).isCorrect());
+            } else if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                if (question.getCorrectAnswer().equalsIgnoreCase(userAnswers.getFirst())) {
+                    resultSet.setCorrect(true);
+                }
+            } else if (question.getQuestionType() == QuestionType.MATCHING) {
+                if (question.getCorrectAnswerForMatching().equalsIgnoreCase(userAnswers.getFirst())) {
+                    resultSet.setCorrect(true);
+                }
+            } else if (question.getQuestionType()
+                    == QuestionType.DRAG_AND_DROP) {
+                if (question.getDragItem().getDragItemId().equals(UUID.fromString(userAnswers.getFirst()))) {
+                    resultSet.setCorrect(true);
+                }
+            }
+            resultSets.add(resultSet);
+        }
+        return null;
     }
 }

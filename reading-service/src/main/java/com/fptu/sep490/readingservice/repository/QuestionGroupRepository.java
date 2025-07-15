@@ -39,5 +39,12 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
             OR (qg.parent.groupId = :groupId and qg.isCurrent = true and qg.isDeleted = false)
     """)
     QuestionGroup findLatestVersionByOriginalId(UUID groupId);
+
+    @Query("""
+        SELECT qg FROM QuestionGroup qg
+        WHERE qg.groupId IN :ids
+        ORDER BY qg.sectionOrder ASC
+    """)
+    List<QuestionGroup> findAllByIdOrderBySectionOrder(@Param("ids") List<UUID> ids);
 }
 

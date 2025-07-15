@@ -12,6 +12,7 @@ import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.model.json.QuestionVersion;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
@@ -731,6 +732,60 @@ public class PassageServiceImpl implements PassageService {
                 .build();
     }
 
+    @Override
+    public ExamAttemptGetDetail.ReadingExamResponse fromExamAttemptHistory(ExamAttemptHistory history) {
+        List<ReadingPassage> passages = readingPassageRepository.findAllByIdSortedByPartNumber(history.getPassageId());
+        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByIdOrderBySectionOrder(history.getQuestionGroupIds());
+        List<Question> questions = questionRepository.findAllByIdOrderByQuestionOrder(history.getQuestionIds());
+        for (ReadingPassage passage: passages) {
+            ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse readingPassageResponse = ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.builder()
+                    .passageId(passage.getPassageId())
+                    .title(passage.getTitle())
+                    .instruction(passage.getInstruction())
+                    .content(passage.getContent())
+                    .contentWithHighlightKeyword(passage.getContentWithHighlightKeyword())
+                    .partNumber(passage.getPartNumber().ordinal())
+                    .questionGroups(new ArrayList<>())
+                    .build();
+
+
+
+            Map<QuestionGroup, Map<Question, List<Choice>>> currentVersionChoicesByGroup = new HashMap<>();
+            Map<QuestionGroup, List<DragItem>> currentVersionDragItemsByGroup = new HashMap<>();
+            for (QuestionGroup group : questionGroups) {
+                List<Question> currentVersionQuestions = questionRepository.findCurrentVersionByGroup(group.getGroupId());
+                List<DragItem> currentVersionDragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId());
+                currentVersionDragItemsByGroup.put(group, currentVersionDragItems);
+                Map<Question, List<Choice>> currentVersionChoicesByQuestion = new HashMap<>();
+                for (Question currentVersionQuestion : currentVersionQuestions) {
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(currentVersionQuestion.getQuestionId())
+                            .build();
+                    if (currentVersionQuestion.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+
+                        List<UUID> choiceVersionIds = new ArrayList<>();
+                        if (currentVersionQuestion.getParent() == null) {
+                            List<Choice> currentVersionChoices = choiceRepository.getVersionChoiceByQuestionId(
+                                    currentVersionQuestion.getQuestionId());
+                            currentVersionChoices.stream()
+                                    .map(Choice::getChoiceId)
+                                    .forEach(choiceVersionIds::add);
+
+                            if (currentVersionChoices.isEmpty()) {
+                                throw new AppException(
+                                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                        Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                        HttpStatus
+                                                .NOT_FOUND.value()
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;
         UserProfileResponse updatedByProfile;

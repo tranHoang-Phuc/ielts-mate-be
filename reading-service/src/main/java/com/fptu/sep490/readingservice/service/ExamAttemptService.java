@@ -2,6 +2,7 @@ package com.fptu.sep490.readingservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
 import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
@@ -23,4 +24,6 @@ public interface ExamAttemptService {
             String sortDirection,
             HttpServletRequest request
     );
+
+    ExamAttemptGetDetail getExamAttemptById(String examAttemptId, HttpServletRequest request) throws JsonProcessingException;
 }
