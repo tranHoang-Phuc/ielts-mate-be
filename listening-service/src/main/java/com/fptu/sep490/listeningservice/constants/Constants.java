@@ -21,6 +21,8 @@ public class Constants {
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "QUESTION_NOT_BELONG_TO_GROUP";
         public static final String DRAG_ITEM_NOT_FOUND = "DRAG_ITEM_NOT_FOUND";
         public static final String WRONG_PART = "WRONG_PART";
+        public static final String EXAM_DELETED = "EXAM_DELETED";
+
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
@@ -55,6 +57,7 @@ public class Constants {
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "400017";
         public static final String DRAG_ITEM_NOT_FOUND = "400018";
         public static final String WRONG_PART = "400019";
+        public static final String EXAM_DELETED = "400020";
 
         public static final String INTERNAL_SERVER_ERROR = "400999";
 

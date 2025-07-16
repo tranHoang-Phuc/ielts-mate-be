@@ -11,4 +11,6 @@ public interface ExamService {
     ExamResponse getExamById(String examId, HttpServletRequest httpServletRequest) throws Exception;
 
     void deleteExam(String examId, HttpServletRequest httpServletRequest) throws Exception;
+
+    ExamResponse updateExam(String examId, ExamRequest request, HttpServletRequest httpServletRequest) throws Exception;
 }

@@ -116,4 +116,37 @@ public class ExamController {
                 .body(baseResponse);
     }
 
+    @PutMapping("/{examId}")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Update a listening exam by ID",
+            description = "This endpoint allows creators to update a specific listening exam by its ID."
+    )
+    @RequestBody(
+            description = "Request body to update a listening exam",
+            required = true,
+            content = @Content(schema = @Schema(implementation = ExamRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listening exam updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404", description = "Listening exam not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<ExamResponse>> updateExam(
+            @PathVariable String examId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ExamRequest request,
+            HttpServletRequest httpServletRequest) throws Exception {
+        ExamResponse response = examService.updateExam(examId, request, httpServletRequest);
+        BaseResponse<ExamResponse> baseResponse = BaseResponse.<ExamResponse>builder()
+                .data(response)
+                .message("Listening exam updated successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
 }

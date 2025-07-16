@@ -276,6 +276,213 @@ public class ExamServiceImpl implements ExamService {
 
     }
 
+    @Override
+    public ExamResponse updateExam(String examId, ExamRequest request, HttpServletRequest httpServletRequest) throws Exception {
+        String User_Id = helper.getUserIdFromToken(httpServletRequest);
+        if (User_Id == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        ListeningExam listeningExam = listeningExamRepository.findById(UUID.fromString(examId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if(listeningExam.getIsDeleted()){
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_DELETED,
+                    Constants.ErrorCode.EXAM_DELETED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        ListeningExam currentExam = findCurrentOrChildCurrentExam(listeningExam);
+        if (currentExam == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCode.NOT_FOUND,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        currentExam.setIsCurrent(false);
+
+        ListeningExam newExam = new ListeningExam();
+        newExam.setExamName(request.examName() != null ? request.examName() : currentExam.getExamName());
+        newExam.setExamDescription(request.examDescription() != null ? request.examDescription(): currentExam.getExamDescription());
+        newExam.setUrlSlug(request.urlSlug() != null ? request.urlSlug(): currentExam.getUrlSlug());
+        if(request.part2Id()!= null){
+            ListeningTask part1 = listeningTaskRepository.findById(request.part1Id())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.NOT_FOUND,
+                            Constants.ErrorCode.NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+            if (part1.getPartNumber() != PartNumber.PART_1) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.WRONG_PART,
+                        Constants.ErrorCode.WRONG_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            if (part1.getIsDeleted()){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            newExam.setPart1(part1);
+        }else{
+            newExam.setPart1(currentExam.getPart1());
+        }
+        if(request.part2Id()!= null) {
+            ListeningTask part2 = listeningTaskRepository.findById(request.part2Id())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.NOT_FOUND,
+                            Constants.ErrorCode.NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+            if (part2.getPartNumber() != PartNumber.PART_2) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.WRONG_PART,
+                        Constants.ErrorCode.WRONG_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            if (part2.getIsDeleted()){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            newExam.setPart2(part2);
+        }else {
+            newExam.setPart2(currentExam.getPart2());
+        }
+        if(request.part3Id()!= null) {
+            ListeningTask part3 = listeningTaskRepository.findById(request.part3Id())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.NOT_FOUND,
+                            Constants.ErrorCode.NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+            if (part3.getPartNumber() != PartNumber.PART_3) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.WRONG_PART,
+                        Constants.ErrorCode.WRONG_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            if (part3.getIsDeleted()){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            newExam.setPart3(part3);
+        }else{
+            newExam.setPart3(currentExam.getPart3());
+        }
+        if(request.part4Id()!= null) {
+            ListeningTask part4 = listeningTaskRepository.findById(request.part4Id())
+                    .orElseThrow(() -> new AppException(
+                            Constants.ErrorCodeMessage.NOT_FOUND,
+                            Constants.ErrorCode.NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    ));
+            if (part4.getPartNumber() != PartNumber.PART_4) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.WRONG_PART,
+                        Constants.ErrorCode.WRONG_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            if (part4.getIsDeleted()){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            newExam.setPart4(part4);
+        }else{
+            newExam.setPart4(currentExam.getPart4());
+        }
+
+
+        newExam.setCreatedBy(User_Id);
+        newExam.setUpdatedBy(User_Id);
+        newExam.setIsCurrent(true);
+        newExam.setVersion(currentExam.getVersion()+1);
+        newExam.setParent(listeningExam);
+
+        listeningExamRepository.save(listeningExam);
+        listeningExamRepository.save(currentExam);
+        listeningExamRepository.save(newExam);
+
+        return new ExamResponse(
+                newExam.getListeningExamId(),
+                newExam.getExamName(),
+                newExam.getExamDescription(),
+                newExam.getUrlSlug(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(newExam.getPart1().getTaskId())
+                        .ieltsType(newExam.getPart1().getIeltsType().ordinal())
+                        .partNumber(newExam.getPart1().getPartNumber().ordinal())
+                        .instruction(newExam.getPart1().getInstruction())
+                        .title(newExam.getPart1().getTitle())
+                        .audioFileId(newExam.getPart1().getAudioFileId())
+                        .transcription(newExam.getPart1().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(newExam.getPart2().getTaskId())
+                        .ieltsType(newExam.getPart2().getIeltsType().ordinal())
+                        .partNumber(newExam.getPart2().getPartNumber().ordinal())
+                        .instruction(newExam.getPart2().getInstruction())
+                        .title(newExam.getPart2().getTitle())
+                        .audioFileId(newExam.getPart2().getAudioFileId())
+                        .transcription(newExam.getPart2().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(newExam.getPart3().getTaskId())
+                        .ieltsType(newExam.getPart3().getIeltsType().ordinal())
+                        .partNumber(newExam.getPart3().getPartNumber().ordinal())
+                        .instruction(newExam.getPart3().getInstruction())
+                        .title(newExam.getPart3().getTitle())
+                        .audioFileId(newExam.getPart3().getAudioFileId())
+                        .transcription(newExam.getPart3().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(newExam.getPart4().getTaskId())
+                        .ieltsType(newExam.getPart4().getIeltsType().ordinal())
+                        .partNumber(newExam.getPart4().getPartNumber().ordinal())
+                        .instruction(newExam.getPart4().getInstruction())
+                        .title(newExam.getPart4().getTitle())
+                        .audioFileId(newExam.getPart4().getAudioFileId())
+                        .transcription(newExam.getPart4().getTranscription())
+                        .build(),
+
+                newExam.getCreatedBy(),
+                newExam.getCreatedAt(),
+                newExam.getUpdatedBy(),
+                newExam.getUpdatedAt(),
+                newExam.getIsCurrent(),
+                newExam.getVersion(),
+                newExam.getIsOriginal(),
+                newExam.getIsDeleted()
+        );
+
+    }
+
     private ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
         if (listeningExam.getIsCurrent() && !listeningExam.getIsDeleted()) {
             return listeningExam;
