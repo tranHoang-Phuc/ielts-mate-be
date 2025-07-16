@@ -1,6 +1,8 @@
 package com.fptu.sep490.listeningservice.repository;
 
 import com.fptu.sep490.listeningservice.model.ListeningExam;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,4 +16,42 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
     SELECT le FROM ListeningExam le
     WHERE le.parent.listeningExamId = :examId
 """)
-    List<ListeningExam> findAllCurrentByParentId(@Param("examId") UUID examId);}
+    List<ListeningExam> findAllCurrentByParentId(@Param("examId") UUID examId);
+
+
+    @Query("""
+    SELECT le FROM ListeningExam le
+    WHERE le.createdBy = :userId
+    AND le.isDeleted = false
+    AND le.isCurrent = true
+    AND (
+        :keyword IS NULL OR :keyword = '' OR
+        LOWER(le.examName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(le.examDescription) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(le.urlSlug) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    )
+""")
+    Page<ListeningExam> searchCurrentExamsByCreator(
+            @Param("userId") String userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query("""
+    SELECT le FROM ListeningExam le
+    WHERE le.createdBy = :userId
+    AND le.isDeleted = false
+    AND le.isCurrent = true
+    AND le.status = 0
+    AND (
+        :keyword IS NULL OR :keyword = '' OR
+        LOWER(le.examName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(le.examDescription) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(le.urlSlug) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    )
+""")
+    Page<ListeningExam> searchCurrentExamsActivated(
+            @Param("userId") String userId,
+            @Param("keyword") String keyword,
+            Pageable pageable);
+}
