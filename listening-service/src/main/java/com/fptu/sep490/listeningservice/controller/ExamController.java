@@ -2,6 +2,7 @@ package com.fptu.sep490.listeningservice.controller;
 
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.listeningservice.service.ExamService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.QuestionGroupCreationRequest;
@@ -18,11 +19,14 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -148,5 +152,87 @@ public class ExamController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
+
+    @GetMapping("/creator")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Get all listening exams created by the user",
+            description = "This endpoint allows creators to retrieve all listening exams they have created."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Listening exams retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<List<ExamResponse>>> getAllExamsForCreator(
+            HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword
+    ) throws Exception {
+        Page<ExamResponse> response = examService.getAllExamsForCreator(httpServletRequest, page, size, sortBy, sortDirection, keyword);
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(response.getNumber() + 1)
+                .totalPages(response.getTotalPages())
+                .pageSize(response.getSize())
+                .totalItems((int) response.getTotalElements())
+                .hasNextPage(response.hasNext())
+                .hasPreviousPage(response.hasPrevious())
+                .build();
+
+        BaseResponse<List<ExamResponse>> baseResponse = BaseResponse.<List<ExamResponse>>builder()
+                .data(response.getContent())
+                .pagination(pagination)
+                .message("Listening exams retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    @GetMapping("/activate")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Get all active listening exams",
+            description = "This endpoint allows users to retrieve all active listening exams."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Active listening exams retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<List<ExamResponse>>> getActiveExams(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection,
+            @RequestParam(required = false) String keyword,
+            HttpServletRequest httpServletRequest) throws Exception {
+        Page<ExamResponse> response = examService.getActiveExams(page, size, sortBy, sortDirection, httpServletRequest, keyword);
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(response.getNumber() + 1)
+                .totalPages(response.getTotalPages())
+                .pageSize(response.getSize())
+                .totalItems((int) response.getTotalElements())
+                .hasNextPage(response.hasNext())
+                .hasPreviousPage(response.hasPrevious())
+                .build();
+
+        BaseResponse<List<ExamResponse>> baseResponse = BaseResponse.<List<ExamResponse>>builder()
+                .data(response.getContent())
+                .pagination(pagination)
+                .message("Active listening exams retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
 
 }

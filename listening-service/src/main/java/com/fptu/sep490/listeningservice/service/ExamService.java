@@ -4,6 +4,7 @@ import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 
 public interface ExamService {
     ExamResponse createExam(@Valid ExamRequest request, HttpServletRequest httpServletRequest) throws Exception;
@@ -13,4 +14,8 @@ public interface ExamService {
     void deleteExam(String examId, HttpServletRequest httpServletRequest) throws Exception;
 
     ExamResponse updateExam(String examId, ExamRequest request, HttpServletRequest httpServletRequest) throws Exception;
+
+    Page<ExamResponse> getAllExamsForCreator(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception;
+
+    Page<ExamResponse> getActiveExams(int page, int size, String sortBy, String sortDirection, HttpServletRequest httpServletRequest, String keyword) throws Exception;
 }

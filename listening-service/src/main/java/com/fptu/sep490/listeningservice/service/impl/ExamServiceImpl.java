@@ -5,6 +5,7 @@ import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ListeningExam;
 import com.fptu.sep490.listeningservice.model.ListeningTask;
+import com.fptu.sep490.listeningservice.model.enumeration.ExamStatus;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.service.ExamService;
@@ -16,6 +17,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -115,6 +120,7 @@ public class ExamServiceImpl implements ExamService {
                 .isCurrent(true)
                 .isDeleted(false)
                 .isOriginal(true)
+                .status(ExamStatus.ACTIVE)
                 .version(1)
                 .part1(part1)
                 .part2(part2)
@@ -483,6 +489,60 @@ public class ExamServiceImpl implements ExamService {
 
     }
 
+    @Override
+    public Page<ExamResponse> getAllExamsForCreator(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception {
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        // Validate sort field fallback
+        if (sortBy == null || sortBy.isBlank()) sortBy = "createdAt";
+
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<ListeningExam> exams = listeningExamRepository.searchCurrentExamsByCreator(userId, keyword, pageable);
+
+        return exams.map(this::mapToExamResponse);
+    }
+
+    @Override
+    public Page<ExamResponse> getActiveExams(int page, int size, String sortBy, String sortDirection, HttpServletRequest httpServletRequest, String keyword) throws Exception {
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        // Validate sort field fallback
+        if (sortBy == null || sortBy.isBlank()) sortBy = "createdAt";
+
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<ListeningExam> exams = listeningExamRepository.searchCurrentExamsActivated(userId, keyword, pageable);
+
+        return exams.map(this::mapToExamResponse);
+
+    }
+
+
     private ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
         if (listeningExam.getIsCurrent() && !listeningExam.getIsDeleted()) {
             return listeningExam;
@@ -493,6 +553,63 @@ public class ExamServiceImpl implements ExamService {
             }
         }
         return null;
-        }
+    }
+    private ExamResponse mapToExamResponse(ListeningExam exam) {
+        return new ExamResponse(
+                exam.getListeningExamId(),
+                exam.getExamName(),
+                exam.getExamDescription(),
+                exam.getUrlSlug(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart1().getTaskId())
+                        .ieltsType(exam.getPart1().getIeltsType().ordinal())
+                        .partNumber(exam.getPart1().getPartNumber().ordinal())
+                        .instruction(exam.getPart1().getInstruction())
+                        .title(exam.getPart1().getTitle())
+                        .audioFileId(exam.getPart1().getAudioFileId())
+                        .transcription(exam.getPart1().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart2().getTaskId())
+                        .ieltsType(exam.getPart2().getIeltsType().ordinal())
+                        .partNumber(exam.getPart2().getPartNumber().ordinal())
+                        .instruction(exam.getPart2().getInstruction())
+                        .title(exam.getPart2().getTitle())
+                        .audioFileId(exam.getPart2().getAudioFileId())
+                        .transcription(exam.getPart2().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart3().getTaskId())
+                        .ieltsType(exam.getPart3().getIeltsType().ordinal())
+                        .partNumber(exam.getPart3().getPartNumber().ordinal())
+                        .instruction(exam.getPart3().getInstruction())
+                        .title(exam.getPart3().getTitle())
+                        .audioFileId(exam.getPart3().getAudioFileId())
+                        .transcription(exam.getPart3().getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart4().getTaskId())
+                        .ieltsType(exam.getPart4().getIeltsType().ordinal())
+                        .partNumber(exam.getPart4().getPartNumber().ordinal())
+                        .instruction(exam.getPart4().getInstruction())
+                        .title(exam.getPart4().getTitle())
+                        .audioFileId(exam.getPart4().getAudioFileId())
+                        .transcription(exam.getPart4().getTranscription())
+                        .build(),
+
+                exam.getCreatedBy(),
+                exam.getCreatedAt(),
+                exam.getUpdatedBy(),
+                exam.getUpdatedAt(),
+                exam.getIsCurrent(),
+                exam.getVersion(),
+                exam.getIsOriginal(),
+                exam.getIsDeleted()
+        );
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.model;
 
 
+import com.fptu.sep490.listeningservice.model.enumeration.ExamStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,6 +36,10 @@ public class ListeningExam {
 
     @Column(name = "url_slug", nullable = false, length = 255, unique = true)
     private String urlSlug;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name ="status", nullable = false)
+    private ExamStatus status = ExamStatus.ACTIVE;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "part1_id", nullable = false)
