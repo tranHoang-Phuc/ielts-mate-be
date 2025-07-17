@@ -38,7 +38,7 @@ public class ListeningExam {
     private String urlSlug;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name ="status", nullable = false)
+    @Column(name ="status")
     private ExamStatus status = ExamStatus.ACTIVE;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
