@@ -23,6 +23,7 @@ public record ListeningTaskGetAllResponse(
         @JsonProperty("title")
         String title,
         @JsonProperty("audio_file_id")
+        @JsonInclude(JsonInclude.Include.ALWAYS)
         UUID audioFileId,
         @JsonProperty("transcript")
         String transcription,
