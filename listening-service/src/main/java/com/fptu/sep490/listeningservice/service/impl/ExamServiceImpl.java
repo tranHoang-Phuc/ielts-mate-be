@@ -528,8 +528,13 @@ public class ExamServiceImpl implements ExamService {
         }
 
         // Validate sort field fallback
-        if (sortBy == null || sortBy.isBlank()) sortBy = "createdAt";
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
 
+        if (sortDirection == null || sortDirection.isBlank()) {
+            sortDirection = "asc";
+        }
         Sort sort = sortDirection.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
                 : Sort.by(sortBy).ascending();
