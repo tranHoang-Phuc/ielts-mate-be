@@ -26,6 +26,7 @@ public class SecurityConfig {
             "/swagger-resources/**",
             "/webjars/**",
             "/api/v1/email/**",
+            "/sse/**"
 
     };
     @Bean

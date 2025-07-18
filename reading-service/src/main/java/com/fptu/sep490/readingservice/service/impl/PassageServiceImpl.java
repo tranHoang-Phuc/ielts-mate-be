@@ -459,7 +459,7 @@ public class PassageServiceImpl implements PassageService {
                                                                 .point(q.getPoint())
                                                                 .instructionForChoice(q.getInstructionForChoice())
                                                                 .choices((q.getParent() == null && Boolean.TRUE.equals(g.getIsCurrent())) ?
-                                                                        q.getChoices().stream()
+                                                                         q.getChoices().stream()
                                                                                 .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
                                                                                 .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
                                                                                         .choiceId(c.getChoiceId().toString())
@@ -490,9 +490,9 @@ public class PassageServiceImpl implements PassageService {
                                                                 .dragItemId(
                                                                         q.getQuestionType() == QuestionType.DRAG_AND_DROP ?
                                                                         q.getIsOriginal()?
-                                                                                (dragItemRepository.findByQuestionId(q.getQuestionId()).getDragItemId().toString())
+                                                                                (dragItemRepository.findByQuestionId(q.getQuestionId()) != null ?dragItemRepository.findByQuestionId(q.getQuestionId()).getDragItemId().toString() : null)
                                                                                 :
-                                                                                (dragItemRepository.findByQuestionId(q.getParent().getQuestionId()).getDragItemId().toString())
+                                                                                (dragItemRepository.findByQuestionId(q.getParent().getQuestionId()) != null?dragItemRepository.findByQuestionId(q.getParent().getQuestionId()) .getDragItemId().toString() : null)
                                                                                         : null)
                                                                 .build())
                                                         .sorted(Comparator.comparing(PassageAttemptResponse.

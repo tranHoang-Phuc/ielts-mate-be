@@ -147,9 +147,15 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                         HttpStatus.NOT_FOUND.value()
                 )
         );
-
+        int version = 0;
         task.setIsCurrent(false);
-
+        List<ListeningTask> allVersion = listeningTaskRepository.findAllVersion(task.getTaskId());
+        for(var v : allVersion) {
+            if(v.getVersion() > version) {
+                version = v.getVersion();
+            }
+            v.setIsCurrent(false);
+        }
         ListeningTask newVersion = ListeningTask.builder().build();
 
         if (!Objects.isNull(status)) {
@@ -194,7 +200,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         newVersion.setCreatedBy(userId);
         newVersion.setUpdatedBy(userId);
         newVersion.setIsDeleted(false);
-        newVersion.setVersion(listeningTaskRepository.findLastestVersion(task.getTaskId()).getVersion() + 1);
+        newVersion.setVersion(version + 1);
         newVersion.setParent(task);
         newVersion.setIsOriginal(false);
 
@@ -203,7 +209,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         } else {
             newVersion.setAudioFileId(task.getAudioFileId());
         }
-
+        listeningTaskRepository.saveAll(allVersion);
         listeningTaskRepository.save(newVersion);
         listeningTaskRepository.save(task);
 
