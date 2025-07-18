@@ -54,6 +54,10 @@ public class DragItemServiceImpl implements DragItemService {
         // Create DragItem
         DragItem dragItem = DragItem.builder()
                 .content(request.content())
+                .isCurrent(true)
+                .isDeleted(false)
+                .isOriginal(true)
+                .version(1)
                 .createdBy(userId)
                 .questionGroup(group)
                 .build();
