@@ -61,7 +61,7 @@ public class DragItem {
     @OneToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(
             name = "question_id",
-            unique = false
+            unique = true
                                     // vì update là dup row data nên t hêm unique = false
     )
     private Question question;

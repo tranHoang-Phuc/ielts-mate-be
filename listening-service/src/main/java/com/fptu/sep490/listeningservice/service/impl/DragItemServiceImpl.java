@@ -231,6 +231,14 @@ public class DragItemServiceImpl implements DragItemService {
         Page<DragItem> dragItemsPage = dragItemRepository.findCurrentVersionByGroupIdPaging(UUID.fromString(groupId), pageable);
 
         return dragItemsPage.map(dragItem -> {
+            DragItem currentOrChild = findCurrentOrChildCurrent(dragItem);
+            if (currentOrChild == null) {
+                throw new AppException(
+                        "No current drag item found in item or its children",
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );
+            }
             QuestionGroupResponse groupResponse = QuestionGroupResponse.builder()
                     .groupId(UUID.fromString(group.getGroupId().toString()))
                     .listeningTaskId(group.getListeningTask().getTaskId())
@@ -251,7 +259,7 @@ public class DragItemServiceImpl implements DragItemService {
                     .build();
             return DragItemResponse.builder()
                     .dragItemId(dragItem.getDragItemId().toString())
-                    .content(dragItem.getContent())
+                    .content(currentOrChild.getContent())
                     .questionGroup(groupResponse)
                     .build();
         });
