@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
+import com.fptu.sep490.event.StreakEvent;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
@@ -36,6 +37,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,7 @@ import org.springframework.util.MultiValueMap;
 
 import javax.xml.transform.Result;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +67,7 @@ public class AttemptServiceImpl implements AttemptService {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
     RedisService redisService;
+    KafkaTemplate<String, Object> kafkaTemplate;
     Helper helper;
 
     @Value("${keycloak.realm}")
@@ -77,6 +81,10 @@ public class AttemptServiceImpl implements AttemptService {
     @Value("${keycloak.client-secret}")
     @NonFinal
     String clientSecret;
+
+    @Value("${kafka.topic.streak}")
+    @NonFinal
+    String streakTopic;
 
     @Override
     @Transactional
@@ -573,6 +581,12 @@ public class AttemptServiceImpl implements AttemptService {
         attempt.setDuration(answers.duration());
         attemptRepository.save(attempt);
 
+        StreakEvent streakEvent = StreakEvent.builder()
+                .accountId(UUID.fromString(userId))
+                .currentDate(LocalDate.now())
+                .build();
+
+        kafkaTemplate.send(streakTopic, streakEvent);
 
         return SubmittedAttemptResponse.builder()
                 .duration(answers.duration())

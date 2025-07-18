@@ -6,6 +6,16 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://identity.sep.local/realms/SEP490
+
+  kafka:
+    consumer:
+      group-id: personal-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
   jpa:
     properties:
       hibernate:
@@ -58,3 +68,6 @@ springdoc:
     authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
     token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
 
+kafka:
+  topic:
+    streak: streak-topic

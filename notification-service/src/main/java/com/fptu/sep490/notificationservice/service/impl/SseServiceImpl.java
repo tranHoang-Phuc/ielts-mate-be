@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.notificationservice.service.SseService;
 import com.fptu.sep490.notificationservice.viewmodel.event.BaseMessageResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -14,10 +15,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
+
 public class SseServiceImpl implements SseService {
 
     private final Map<UUID, SseEmitter> clientEmitters = new ConcurrentHashMap<>();
-    ObjectMapper objectMapper;
+
+
+    private final ObjectMapper objectMapper;
+
+    public SseServiceImpl(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public SseEmitter subscribe(UUID clientId) {

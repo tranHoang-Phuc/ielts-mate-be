@@ -6,6 +6,13 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://identity.sep.local/realms/SEP490
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
   jpa:
     properties:
       hibernate:
@@ -63,3 +70,6 @@ springdoc:
     token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
 
 
+kafka:
+  topic:
+    streak: streak-topic

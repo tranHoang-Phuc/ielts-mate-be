@@ -4,6 +4,7 @@ public class Constants {
     public final class ErrorCodeMessage {
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
 
+        public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
 
     public final class RedisKey {
@@ -12,6 +13,8 @@ public class Constants {
 
     public final class ErrorCode {
         public static final String UNAUTHORIZED = "500001";
+        public static final String INTERNAL_SERVER_ERROR = "999999";
+
     }
 
     public final class Config {
