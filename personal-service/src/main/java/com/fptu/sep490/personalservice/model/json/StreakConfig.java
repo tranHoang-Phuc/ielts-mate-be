@@ -17,4 +17,6 @@ public class StreakConfig {
     LocalDate startDate;
     @JsonProperty("last_updated")
     LocalDate lastUpdated;
+    @JsonProperty("streak")
+    int currentStreak;
 }

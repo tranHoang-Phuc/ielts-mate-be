@@ -54,6 +54,10 @@ public class DragItemServiceImpl implements DragItemService {
         // Create DragItem
         DragItem dragItem = DragItem.builder()
                 .content(request.content())
+                .isCurrent(true)
+                .isDeleted(false)
+                .isOriginal(true)
+                .version(1)
                 .createdBy(userId)
                 .questionGroup(group)
                 .build();
@@ -320,7 +324,7 @@ public class DragItemServiceImpl implements DragItemService {
             newDragItem.setIsOriginal(false);
             newDragItem.setUpdatedBy(UserId);
             newDragItem.setUpdatedAt(LocalDateTime.now());
-            newDragItem.setQuestion(currentOrChild.getQuestion());
+//            newDragItem.setQuestion(currentOrChild.getQuestion());
 
             currentOrChild.setIsCurrent(false);
             dragItemRepository.save(newDragItem);

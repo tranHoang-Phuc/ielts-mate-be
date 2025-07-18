@@ -1,0 +1,11 @@
+package com.fptu.sep490.personalservice.service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.event.StreakEvent;
+import com.fptu.sep490.personalservice.model.json.StreakConfig;
+
+import java.util.UUID;
+
+public interface ConfigService {
+    StreakConfig getOrAddStreakConfig( StreakEvent streakEvent) throws JsonProcessingException;
+}
