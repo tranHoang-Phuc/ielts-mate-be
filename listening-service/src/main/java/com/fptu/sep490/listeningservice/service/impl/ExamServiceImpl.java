@@ -131,6 +131,12 @@ public class ExamServiceImpl implements ExamService {
 
         listeningExamRepository.save(listeningExam);
 
+
+        ListeningTask part1Current = findCurrentOrChildCurrentTask(part1);
+
+        ListeningTask part2Current = findCurrentOrChildCurrentTask(part2);
+        ListeningTask part3Current = findCurrentOrChildCurrentTask(part3);
+        ListeningTask part4Current = findCurrentOrChildCurrentTask(part4);
         ExamResponse response = new ExamResponse(
                 listeningExam.getListeningExamId(),
                 listeningExam.getExamName(),
@@ -139,42 +145,42 @@ public class ExamServiceImpl implements ExamService {
 
                 ListeningTaskResponse.builder()
                         .taskId(part1.getTaskId())
-                        .ieltsType(part1.getIeltsType().ordinal())
-                        .partNumber(part1.getPartNumber().ordinal())
-                        .instruction(part1.getInstruction())
-                        .title(part1.getTitle())
-                        .audioFileId(part1.getAudioFileId())
-                        .transcription(part1.getTranscription())
+                        .ieltsType(part1Current.getIeltsType().ordinal())
+                        .partNumber(part1Current.getPartNumber().ordinal())
+                        .instruction(part1Current.getInstruction())
+                        .title(part1Current.getTitle())
+                        .audioFileId(part1Current.getAudioFileId())
+                        .transcription(part1Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(part2.getTaskId())
-                        .ieltsType(part2.getIeltsType().ordinal())
-                        .partNumber(part2.getPartNumber().ordinal())
-                        .instruction(part2.getInstruction())
-                        .title(part2.getTitle())
-                        .audioFileId(part2.getAudioFileId())
-                        .transcription(part2.getTranscription())
+                        .ieltsType(part2Current.getIeltsType().ordinal())
+                        .partNumber(part2Current.getPartNumber().ordinal())
+                        .instruction(part2Current.getInstruction())
+                        .title(part2Current.getTitle())
+                        .audioFileId(part2Current.getAudioFileId())
+                        .transcription(part2Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(part3.getTaskId())
-                        .ieltsType(part3.getIeltsType().ordinal())
-                        .partNumber(part3.getPartNumber().ordinal())
-                        .instruction(part3.getInstruction())
-                        .title(part3.getTitle())
-                        .audioFileId(part3.getAudioFileId())
-                        .transcription(part3.getTranscription())
+                        .ieltsType(part3Current.getIeltsType().ordinal())
+                        .partNumber(part3Current.getPartNumber().ordinal())
+                        .instruction(part3Current.getInstruction())
+                        .title(part3Current.getTitle())
+                        .audioFileId(part3Current.getAudioFileId())
+                        .transcription(part3Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(part4.getTaskId())
-                        .ieltsType(part4.getIeltsType().ordinal())
-                        .partNumber(part4.getPartNumber().ordinal())
-                        .instruction(part4.getInstruction())
-                        .title(part4.getTitle())
-                        .audioFileId(part4.getAudioFileId())
-                        .transcription(part4.getTranscription())
+                        .ieltsType(part4Current.getIeltsType().ordinal())
+                        .partNumber(part4Current.getPartNumber().ordinal())
+                        .instruction(part4Current.getInstruction())
+                        .title(part4Current.getTitle())
+                        .audioFileId(part4Current.getAudioFileId())
+                        .transcription(part4Current.getTranscription())
                         .build(),
 
                 listeningExam.getCreatedBy(),
@@ -207,6 +213,11 @@ public class ExamServiceImpl implements ExamService {
                 ));
         ListeningExam currentExam = findCurrentOrChildCurrentExam(listeningExam);
 
+        ListeningTask part1Current = findCurrentOrChildCurrentTask(currentExam.getPart1());
+        ListeningTask part2Current = findCurrentOrChildCurrentTask(currentExam.getPart2());
+        ListeningTask part3Current = findCurrentOrChildCurrentTask(currentExam.getPart3());
+        ListeningTask part4Current = findCurrentOrChildCurrentTask(currentExam.getPart4());
+
         ExamResponse response = new ExamResponse(
                 currentExam.getListeningExamId(),
                 currentExam.getExamName(),
@@ -215,42 +226,42 @@ public class ExamServiceImpl implements ExamService {
 
                 ListeningTaskResponse.builder()
                         .taskId(currentExam.getPart1().getTaskId())
-                        .ieltsType(currentExam.getPart1().getIeltsType().ordinal())
-                        .partNumber(currentExam.getPart1().getPartNumber().ordinal())
-                        .instruction(currentExam.getPart1().getInstruction())
-                        .title(currentExam.getPart1().getTitle())
-                        .audioFileId(currentExam.getPart1().getAudioFileId())
-                        .transcription(currentExam.getPart1().getTranscription())
+                        .ieltsType(part1Current.getIeltsType().ordinal())
+                        .partNumber(part1Current.getPartNumber().ordinal())
+                        .instruction(part1Current.getInstruction())
+                        .title(part1Current.getTitle())
+                        .audioFileId(part1Current.getAudioFileId())
+                        .transcription(part1Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(currentExam.getPart2().getTaskId())
-                        .ieltsType(currentExam.getPart2().getIeltsType().ordinal())
-                        .partNumber(currentExam.getPart2().getPartNumber().ordinal())
-                        .instruction(currentExam.getPart2().getInstruction())
-                        .title(currentExam.getPart2().getTitle())
-                        .audioFileId(currentExam.getPart2().getAudioFileId())
-                        .transcription(currentExam.getPart2().getTranscription())
+                        .ieltsType(part2Current.getIeltsType().ordinal())
+                        .partNumber(part2Current.getPartNumber().ordinal())
+                        .instruction(part2Current.getInstruction())
+                        .title(part2Current.getTitle())
+                        .audioFileId(part2Current.getAudioFileId())
+                        .transcription(part2Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(currentExam.getPart3().getTaskId())
-                        .ieltsType(currentExam.getPart3().getIeltsType().ordinal())
-                        .partNumber(currentExam.getPart3().getPartNumber().ordinal())
-                        .instruction(currentExam.getPart3().getInstruction())
-                        .title(currentExam.getPart3().getTitle())
-                        .audioFileId(currentExam.getPart3().getAudioFileId())
-                        .transcription(currentExam.getPart3().getTranscription())
+                        .ieltsType(part3Current.getIeltsType().ordinal())
+                        .partNumber(part3Current.getPartNumber().ordinal())
+                        .instruction(part3Current.getInstruction())
+                        .title(part3Current.getTitle())
+                        .audioFileId(part3Current.getAudioFileId())
+                        .transcription(part3Current.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(currentExam.getPart4().getTaskId())
-                        .ieltsType(currentExam.getPart4().getIeltsType().ordinal())
-                        .partNumber(currentExam.getPart4().getPartNumber().ordinal())
-                        .instruction(currentExam.getPart4().getInstruction())
-                        .title(currentExam.getPart4().getTitle())
-                        .audioFileId(currentExam.getPart4().getAudioFileId())
-                        .transcription(currentExam.getPart4().getTranscription())
+                        .ieltsType(part4Current.getIeltsType().ordinal())
+                        .partNumber(part4Current.getPartNumber().ordinal())
+                        .instruction(part4Current.getInstruction())
+                        .title(part4Current.getTitle())
+                        .audioFileId(part4Current.getAudioFileId())
+                        .transcription(part4Current.getTranscription())
                         .build(),
 
                 currentExam.getCreatedBy(),
@@ -547,6 +558,18 @@ public class ExamServiceImpl implements ExamService {
 
     }
 
+    private ListeningTask findCurrentOrChildCurrentTask(ListeningTask listeningTask) {
+        if (listeningTask.getIsCurrent() && !listeningTask.getIsDeleted()) {
+            return listeningTask;
+        }
+        for (ListeningTask child : listeningTask.getChildren()) {
+            if (child.getIsCurrent() && !child.getIsDeleted()) {
+                return child;
+            }
+        }
+        return listeningTask;
+    }
+
 
     private ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
         if (listeningExam.getIsCurrent() && !listeningExam.getIsDeleted()) {
@@ -560,6 +583,11 @@ public class ExamServiceImpl implements ExamService {
         return null;
     }
     private ExamResponse mapToExamResponse(ListeningExam exam) {
+
+        ListeningTask currentPart1 = findCurrentOrChildCurrentTask(exam.getPart1());
+        ListeningTask currentPart2 = findCurrentOrChildCurrentTask(exam.getPart2());
+        ListeningTask currentPart3 = findCurrentOrChildCurrentTask(exam.getPart3());
+        ListeningTask currentPart4 = findCurrentOrChildCurrentTask(exam.getPart4());
         return new ExamResponse(
                 exam.getListeningExamId(),
                 exam.getExamName(),
@@ -568,42 +596,42 @@ public class ExamServiceImpl implements ExamService {
 
                 ListeningTaskResponse.builder()
                         .taskId(exam.getPart1().getTaskId())
-                        .ieltsType(exam.getPart1().getIeltsType().ordinal())
-                        .partNumber(exam.getPart1().getPartNumber().ordinal())
-                        .instruction(exam.getPart1().getInstruction())
-                        .title(exam.getPart1().getTitle())
-                        .audioFileId(exam.getPart1().getAudioFileId())
-                        .transcription(exam.getPart1().getTranscription())
+                        .ieltsType(currentPart1.getIeltsType().ordinal())
+                        .partNumber(currentPart1.getPartNumber().ordinal())
+                        .instruction(currentPart1.getInstruction())
+                        .title(currentPart1.getTitle())
+                        .audioFileId(currentPart1.getAudioFileId())
+                        .transcription(currentPart1.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(exam.getPart2().getTaskId())
-                        .ieltsType(exam.getPart2().getIeltsType().ordinal())
-                        .partNumber(exam.getPart2().getPartNumber().ordinal())
-                        .instruction(exam.getPart2().getInstruction())
-                        .title(exam.getPart2().getTitle())
-                        .audioFileId(exam.getPart2().getAudioFileId())
-                        .transcription(exam.getPart2().getTranscription())
+                        .ieltsType(currentPart2.getIeltsType().ordinal())
+                        .partNumber(currentPart2.getPartNumber().ordinal())
+                        .instruction(currentPart2.getInstruction())
+                        .title(currentPart2.getTitle())
+                        .audioFileId(currentPart2.getAudioFileId())
+                        .transcription(currentPart2.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(exam.getPart3().getTaskId())
-                        .ieltsType(exam.getPart3().getIeltsType().ordinal())
-                        .partNumber(exam.getPart3().getPartNumber().ordinal())
-                        .instruction(exam.getPart3().getInstruction())
-                        .title(exam.getPart3().getTitle())
-                        .audioFileId(exam.getPart3().getAudioFileId())
-                        .transcription(exam.getPart3().getTranscription())
+                        .ieltsType(currentPart3.getIeltsType().ordinal())
+                        .partNumber(currentPart3.getPartNumber().ordinal())
+                        .instruction(currentPart3.getInstruction())
+                        .title(currentPart3.getTitle())
+                        .audioFileId(currentPart3.getAudioFileId())
+                        .transcription(currentPart3.getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
                         .taskId(exam.getPart4().getTaskId())
-                        .ieltsType(exam.getPart4().getIeltsType().ordinal())
-                        .partNumber(exam.getPart4().getPartNumber().ordinal())
-                        .instruction(exam.getPart4().getInstruction())
-                        .title(exam.getPart4().getTitle())
-                        .audioFileId(exam.getPart4().getAudioFileId())
-                        .transcription(exam.getPart4().getTranscription())
+                        .ieltsType(currentPart4.getIeltsType().ordinal())
+                        .partNumber(currentPart4.getPartNumber().ordinal())
+                        .instruction(currentPart4.getInstruction())
+                        .title(currentPart4.getTitle())
+                        .audioFileId(currentPart4.getAudioFileId())
+                        .transcription(currentPart4.getTranscription())
                         .build(),
 
                 exam.getCreatedBy(),
