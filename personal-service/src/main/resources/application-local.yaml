@@ -8,6 +8,9 @@ spring:
           issuer-uri: http://identity.sep.local/realms/SEP490
 
   kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
       group-id: personal-group
       auto-offset-reset: earliest
@@ -71,3 +74,4 @@ springdoc:
 kafka:
   topic:
     streak: streak-topic
+    send-notification: send-notification-topic

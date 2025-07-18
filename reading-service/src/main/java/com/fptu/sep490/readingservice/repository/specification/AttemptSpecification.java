@@ -22,7 +22,7 @@ public  class AttemptSpecification {
             String createdBy
     ) {
         return ((root, query, criteriaBuilder) -> {
-            Join<Attempt, ReadingPassage> task = root.join("listeningTask", JoinType.INNER);
+            Join<Attempt, ReadingPassage> task = root.join("readingPassage", JoinType.INNER);
             List<Predicate> predicates = new ArrayList<>();
             if(passageId != null) {
                 predicates.add(criteriaBuilder.equal(task.get("passageId"), passageId));

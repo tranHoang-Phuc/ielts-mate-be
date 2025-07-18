@@ -9,6 +9,8 @@ public class Constants {
 
     public final class RedisKey {
 
+        public static final String USER_PROFILE = "user-profile";
+        public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
     }
 
     public final class ErrorCode {
