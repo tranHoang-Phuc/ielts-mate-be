@@ -816,6 +816,8 @@ public class QuestionServiceImpl implements QuestionService {
             var dragItem = dragItemRepository.findDragItemByDragItemId(UUID.fromString(informationRequest.dragItemId()))
                     .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
                             Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value()));
+            boolean isBelongToItem = question.getDragItem().getDragItemId().equals(UUID.fromString(informationRequest.dragItemId()))
+                    || question.getDragItem().getParent().getDragItemId().equals(UUID.fromString(informationRequest.dragItemId()));
             newVersion = Question.builder()
                     .questionOrder(question.getQuestionOrder())
                     .point(informationRequest.point())
@@ -826,7 +828,7 @@ public class QuestionServiceImpl implements QuestionService {
                             .collect(Collectors.toSet()))
                     .questionGroup(question.getQuestionGroup())
                     .zoneIndex(informationRequest.zoneIndex())
-                    .dragItem(dragItem)
+//                    .dragItem(dragItem)
                     .categories(question.getCategories() != null ?
                               Set.copyOf(question.getCategories()) :
                               Set.of())
@@ -843,6 +845,9 @@ public class QuestionServiceImpl implements QuestionService {
             question.setUpdatedAt(LocalDateTime.now());
             question.setIsCurrent(false);
             question.setUpdatedBy(userId);
+            if(!isBelongToItem) {
+                question.setDragItem(dragItem);
+            }
             questionRepository.save(question);
             questionRepository.save(newVersion);
         }
