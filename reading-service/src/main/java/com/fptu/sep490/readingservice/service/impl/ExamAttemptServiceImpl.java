@@ -8,7 +8,6 @@ import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
-import com.fptu.sep490.readingservice.model.json.UserAnswer;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.ChoiceRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
@@ -16,6 +15,7 @@ import com.fptu.sep490.readingservice.repository.QuestionRepository;
 import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
+import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
@@ -46,9 +46,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ChoiceRepository choiceRepository;
     DragItemRepository  dragItemRepository;
     Helper helper;
-    PassageServiceImpl passageServiceImpl;
-    private final ReadingExamRepository readingExamRepository;
-    private final QuestionGroupRepository questionGroupRepository;
+    PassageService passageService;
+    ReadingExamRepository readingExamRepository;
 
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
@@ -258,9 +257,9 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .readingExamName(currentExam.getExamName())
                 .readingExamDescription(currentExam.getExamDescription())
                 .urlSlug(currentExam.getUrlSlug())
-                .readingPassageIdPart1(passageServiceImpl.fromReadingPassage(currentExam.getPart1().getPassageId().toString()))
-                .readingPassageIdPart2(passageServiceImpl.fromReadingPassage(currentExam.getPart2().getPassageId().toString()))
-                .readingPassageIdPart3(passageServiceImpl.fromReadingPassage(currentExam.getPart3().getPassageId().toString()))
+                .readingPassageIdPart1(passageService.fromReadingPassage(currentExam.getPart1().getPassageId().toString()))
+                .readingPassageIdPart2(passageService.fromReadingPassage(currentExam.getPart2().getPassageId().toString()))
+                .readingPassageIdPart3(passageService.fromReadingPassage(currentExam.getPart3().getPassageId().toString()))
                 .build();
 
         return CreateExamAttemptResponse.builder()
@@ -344,45 +343,29 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
 
-        List<SubmittedAttemptResponse.ResultSet> resultSets = new ArrayList<>();
-        for (UUID questionId : history.getQuestionIds()) {
-            Question question = questionRepository.findById(questionId).orElseThrow(
-                    () -> new AppException(
-                            Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                            Constants.ErrorCode.QUESTION_NOT_FOUND,
-                            HttpStatus.NOT_FOUND.value()
-                    )
-            );
-            List<String> userAnswers = history.getUserAnswers().get(questionId);
-            if (userAnswers == null) {
-                continue;
-            }
-            SubmittedAttemptResponse.ResultSet resultSet = SubmittedAttemptResponse.ResultSet.builder()
-                    .questionIndex(question.getQuestionOrder())
-                    .userAnswer(userAnswers)
-                    .explanation(question.getExplanation())
-                    .correctAnswer(List.of(question.getCorrectAnswer()))
-                    .isCorrect(false)
-                    .build();
-
-            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
-                resultSet.setCorrect(checkMultipleChoiceQuestion(question, userAnswers).isCorrect());
-            } else if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
-                if (question.getCorrectAnswer().equalsIgnoreCase(userAnswers.getFirst())) {
-                    resultSet.setCorrect(true);
-                }
-            } else if (question.getQuestionType() == QuestionType.MATCHING) {
-                if (question.getCorrectAnswerForMatching().equalsIgnoreCase(userAnswers.getFirst())) {
-                    resultSet.setCorrect(true);
-                }
-            } else if (question.getQuestionType()
-                    == QuestionType.DRAG_AND_DROP) {
-                if (question.getDragItem().getDragItemId().equals(UUID.fromString(userAnswers.getFirst()))) {
-                    resultSet.setCorrect(true);
-                }
-            }
-            resultSets.add(resultSet);
-        }
-        return null;
+        List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> passageResponses = passageService.fromExamAttemptHistory(history);
+        passageResponses = passageResponses.stream()
+                .sorted(Comparator.comparing(ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse::partNumber))
+                .toList();
+        ExamAttemptGetDetail.ReadingExamResponse readingExamResponse = ExamAttemptGetDetail.ReadingExamResponse.builder()
+                .readingExamId(examAttempt.getReadingExam().getReadingExamId())
+                .readingExamName(examAttempt.getReadingExam().getExamName())
+                .readingExamDescription(examAttempt.getReadingExam().getExamDescription())
+                .urlSlug(examAttempt.getReadingExam().getUrlSlug())
+                .readingPassageIdPart1(passageResponses.get(0))
+                .readingPassageIdPart2(passageResponses.get(1))
+                .readingPassageIdPart3(passageResponses.get(2))
+                .build();
+        return ExamAttemptGetDetail.builder()
+                .examAttemptId(examAttempt.getExamAttemptId())
+                .readingExam(readingExamResponse)
+                .duration(examAttempt.getDuration().longValue())
+                .totalQuestion(examAttempt.getTotalPoint())
+                .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                .createdAt(examAttempt.getCreatedAt().toString())
+                .updatedAt(examAttempt.getUpdatedAt().toString())
+                .answers(history.getUserAnswers())
+                .build();
     }
 }

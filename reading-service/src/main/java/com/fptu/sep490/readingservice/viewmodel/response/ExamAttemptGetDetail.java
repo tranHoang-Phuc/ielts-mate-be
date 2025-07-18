@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Builder
@@ -27,25 +28,8 @@ public record ExamAttemptGetDetail(
         @JsonProperty("updated_at")
         String updatedAt,
         @JsonProperty("answers")
-        List<AnswerChoice> answers
+        Map<UUID, List<String>> answers
 ) {
-
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @Builder
-    public record AnswerChoice(
-            @JsonProperty("question_id")
-            UUID questionId,
-            @JsonProperty("choice_ids")
-            List<UUID> choiceIds,
-            @JsonProperty("filled_text_answer")
-            String filledTextAnswer,
-            @JsonProperty("matched_text_answer")
-            String matchedTextAnswer,
-            @JsonProperty("drag_item_id")
-            UUID dragItemId
-    ) {
-    }
-
     @Builder
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public record ReadingExamResponse(
