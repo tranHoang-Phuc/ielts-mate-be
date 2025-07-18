@@ -324,7 +324,7 @@ public class DragItemServiceImpl implements DragItemService {
             newDragItem.setIsOriginal(false);
             newDragItem.setUpdatedBy(UserId);
             newDragItem.setUpdatedAt(LocalDateTime.now());
-            newDragItem.setQuestion(currentOrChild.getQuestion());
+//            newDragItem.setQuestion(currentOrChild.getQuestion());
 
             currentOrChild.setIsCurrent(false);
             dragItemRepository.save(newDragItem);
