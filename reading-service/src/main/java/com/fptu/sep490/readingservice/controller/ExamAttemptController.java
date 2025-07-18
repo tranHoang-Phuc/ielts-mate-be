@@ -8,6 +8,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
+import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
 import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
@@ -70,6 +71,20 @@ public class ExamAttemptController {
     }
 
     //xem lai bai thi: get("/{examAttemptId}")
+
+    @GetMapping("/{examAttemptId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<ExamAttemptGetDetail>> getExamAttemptById(
+            @PathVariable("examAttemptId") String examAttemptId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        ExamAttemptGetDetail response = examAttemptService.getExamAttemptById(examAttemptId, request);
+        BaseResponse<ExamAttemptGetDetail> baseResponse = BaseResponse.<ExamAttemptGetDetail>builder()
+                .data(response)
+                .message(null)
+                .build();
+        return ResponseEntity.ok(baseResponse);
+    }
 
     //xem tat ca lich su lam bai: get("/history")
     @GetMapping("/history")

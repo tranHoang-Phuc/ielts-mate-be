@@ -11,6 +11,7 @@ import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
@@ -68,4 +69,6 @@ public interface PassageService {
                                                String createdBy);
 
     CreateExamAttemptResponse.ReadingExamResponse.ReadingPassageResponse fromReadingPassage(String passageId);
+
+    List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> fromExamAttemptHistory(ExamAttemptHistory history);
 }

@@ -45,4 +45,7 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
     WHERE p.passageId = :id OR p.parent.passageId = :id
 """)
     List<ReadingPassage> findAllVersion(@Param("id") UUID passageId);
+
+    @Query("SELECT rp FROM ReadingPassage rp WHERE rp.passageId IN :ids ORDER BY rp.partNumber ASC")
+    List<ReadingPassage> findAllByIdSortedByPartNumber(List<UUID> ids);
 }

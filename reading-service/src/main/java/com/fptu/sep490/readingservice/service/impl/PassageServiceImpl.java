@@ -12,6 +12,7 @@ import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.enumeration.Status;
+import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.model.json.QuestionVersion;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
@@ -730,6 +731,110 @@ public class PassageServiceImpl implements PassageService {
                 .questionGroups(questionGroupResponses)
                 .build();
     }
+
+    @Override
+    public List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> fromExamAttemptHistory(ExamAttemptHistory history) {
+        List<ReadingPassage> passages = readingPassageRepository.findAllByIdSortedByPartNumber(history.getPassageId());
+        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByIdOrderBySectionOrder(history.getQuestionGroupIds());
+        List<Question> questions = questionRepository.findAllByIdOrderByQuestionOrder(history.getQuestionIds());
+
+        List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> passageResponses = new ArrayList<>();
+        for (ReadingPassage passage: passages) {
+            int partNumber = passage.getPartNumber().ordinal();
+
+            List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse> questionGroupsList = new ArrayList<>();
+            for (QuestionGroup group : questionGroups) {
+
+                if (group.getReadingPassage().getPartNumber().ordinal()==partNumber) {
+                    List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses = new ArrayList<>();
+                    if (group.getGroupType()==QuestionType.DRAG_AND_DROP) {
+                        List<UUID> dragItemIds = history.getGroupMapItems().getOrDefault(group.getGroupId(), Collections.emptyList());
+                        List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
+                        for (DragItem dragItem : dragItems) {
+                            UpdatedQuestionResponse.DragItemResponse dragItemResponse =
+                                    UpdatedQuestionResponse.DragItemResponse.builder()
+                                            .dragItemId(dragItem.getDragItemId().toString())
+                                            .content(dragItem.getContent())
+                                            .build();
+                            dragItemResponses.add(dragItemResponse);
+                        }
+                    }
+
+                    List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionAttemptResponses = new ArrayList<>();
+                    for (Question question : questions) {
+                        if (question.getQuestionGroup() != null && question.getQuestionGroup().getGroupId().equals(group.getGroupId())) {
+
+                            List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse> choiceAttemptResponses = new ArrayList<>();
+
+                            if (question.getQuestionType()== QuestionType.MULTIPLE_CHOICE) {
+                                for (UUID choiceId : history.getQuestionMapChoices().getOrDefault(question.getQuestionId(), Collections.emptyList())) {
+                                    Choice choice = choiceRepository.findById(choiceId)
+                                            .orElseThrow(() -> new AppException(
+                                                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                                    HttpStatus.NOT_FOUND.value()
+                                            ));
+                                    ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse choiceAttemptResponse =
+                                            ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
+                                                    .choiceId(choice.getChoiceId())
+                                                    .label(choice.getLabel())
+                                                    .content(choice.getContent())
+                                                    .choiceOrder(choice.getChoiceOrder())
+                                                    .isCorrect(choice.isCorrect())
+                                                    .build();
+                                    choiceAttemptResponses.add(choiceAttemptResponse);
+                                }
+                            }
+                            ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionAttemptResponse =
+                                    ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
+                                            .questionId(question.getQuestionId())
+                                            .questionOrder(question.getQuestionOrder())
+                                            .questionType(question.getQuestionType().ordinal())
+                                            .blankIndex(question.getBlankIndex())
+                                            .instructionForChoice(question.getInstructionForChoice())
+                                            .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                            .instructionForMatching(question.getInstructionForMatching())
+                                            .zoneIndex( question.getZoneIndex())
+                                            .choices(choiceAttemptResponses)
+                                            .correctAnswer(question.getCorrectAnswer())
+                                            .correctAnswerForMatching( question.getCorrectAnswerForMatching())
+                                            .explanation( question.getExplanation())
+                                            .point( question.getPoint())
+                                            .build();
+
+                            questionAttemptResponses.add(questionAttemptResponse);
+                        }
+                    }
+
+                    ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse currentGroup = ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.QuestionGroupAttemptResponse.builder()
+                            .questionGroupId(group.getGroupId())
+                            .sectionOrder(group.getSectionOrder())
+                            .sectionLabel(group.getSectionLabel())
+                            .instruction(group.getInstruction())
+                            .sentenceWithBlanks(group.getSentenceWithBlanks())
+                            .questions(questionAttemptResponses)
+                            .dragItems(dragItemResponses)
+                            .build();
+
+                    questionGroupsList.add(currentGroup);
+                }
+            }
+            ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse readingPassageResponse = ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse.builder()
+                    .passageId(passage.getPassageId())
+                    .title(passage.getTitle())
+                    .instruction(passage.getInstruction())
+                    .content(passage.getContent())
+                    .contentWithHighlightKeyword(passage.getContentWithHighlightKeyword())
+                    .partNumber(passage.getPartNumber().ordinal())
+                    .questionGroups(questionGroupsList)
+                    .build();
+
+            passageResponses.add(readingPassageResponse);
+        }
+
+        return passageResponses;
+    }
+
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;

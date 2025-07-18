@@ -8,15 +8,16 @@ import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
-import com.fptu.sep490.readingservice.model.json.UserAnswer;
 import com.fptu.sep490.readingservice.repository.*;
+import com.fptu.sep490.readingservice.repository.ChoiceRepository;
+import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
+import com.fptu.sep490.readingservice.repository.QuestionRepository;
+import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.specification.ExamAttemptSpecifications;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
+import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,9 +46,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ChoiceRepository choiceRepository;
     DragItemRepository  dragItemRepository;
     Helper helper;
-    PassageServiceImpl passageServiceImpl;
-    private final ReadingExamRepository readingExamRepository;
-    private final QuestionGroupRepository questionGroupRepository;
+    PassageService passageService;
+    ReadingExamRepository readingExamRepository;
 
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
@@ -257,9 +257,9 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .readingExamName(currentExam.getExamName())
                 .readingExamDescription(currentExam.getExamDescription())
                 .urlSlug(currentExam.getUrlSlug())
-                .readingPassageIdPart1(passageServiceImpl.fromReadingPassage(currentExam.getPart1().getPassageId().toString()))
-                .readingPassageIdPart2(passageServiceImpl.fromReadingPassage(currentExam.getPart2().getPassageId().toString()))
-                .readingPassageIdPart3(passageServiceImpl.fromReadingPassage(currentExam.getPart3().getPassageId().toString()))
+                .readingPassageIdPart1(passageService.fromReadingPassage(currentExam.getPart1().getPassageId().toString()))
+                .readingPassageIdPart2(passageService.fromReadingPassage(currentExam.getPart2().getPassageId().toString()))
+                .readingPassageIdPart3(passageService.fromReadingPassage(currentExam.getPart3().getPassageId().toString()))
                 .build();
 
         return CreateExamAttemptResponse.builder()
@@ -318,5 +318,54 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         return new PageImpl<>(list, pageable, examAttemptsResult.getTotalElements());
 
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ExamAttemptGetDetail getExamAttemptById(String examAttemptId, HttpServletRequest request) throws JsonProcessingException {
+        UUID attemptId = UUID.fromString(examAttemptId);
+        ExamAttempt examAttempt = examAttemptRepository.findById(attemptId).orElseThrow(
+                () -> new AppException(
+                        Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                )
+        );
+
+        String userId = helper.getUserIdFromToken(request);
+        if (!examAttempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                    Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
+
+        List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> passageResponses = passageService.fromExamAttemptHistory(history);
+        passageResponses = passageResponses.stream()
+                .sorted(Comparator.comparing(ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse::partNumber))
+                .toList();
+        ExamAttemptGetDetail.ReadingExamResponse readingExamResponse = ExamAttemptGetDetail.ReadingExamResponse.builder()
+                .readingExamId(examAttempt.getReadingExam().getReadingExamId())
+                .readingExamName(examAttempt.getReadingExam().getExamName())
+                .readingExamDescription(examAttempt.getReadingExam().getExamDescription())
+                .urlSlug(examAttempt.getReadingExam().getUrlSlug())
+                .readingPassageIdPart1(passageResponses.get(0))
+                .readingPassageIdPart2(passageResponses.get(1))
+                .readingPassageIdPart3(passageResponses.get(2))
+                .build();
+        return ExamAttemptGetDetail.builder()
+                .examAttemptId(examAttempt.getExamAttemptId())
+                .readingExam(readingExamResponse)
+                .duration(examAttempt.getDuration().longValue())
+                .totalQuestion(examAttempt.getTotalPoint())
+                .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                .createdAt(examAttempt.getCreatedAt().toString())
+                .updatedAt(examAttempt.getUpdatedAt().toString())
+                .answers(history.getUserAnswers())
+                .build();
     }
 }
