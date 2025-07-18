@@ -52,6 +52,10 @@ public class GroupServiceImpl implements GroupService {
                 .sectionOrder(request.sectionOrder())
                 .sectionLabel(request.sectionLabel())
                 .instruction(request.instruction())
+                .isCurrent(true)
+                .isOriginal(true)
+                .isDeleted(false)
+                .version(1)
                 .createdBy(userId)
                 .updatedBy(userId)
                 .build();
