@@ -32,6 +32,11 @@ public class Vocabulary {
     @Column(name = "meaning", columnDefinition = "TEXT")
     private String meaning;
 
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+    @Column(name = "is_public")
+    private Boolean isPublic = false;
 
     @Column(name = "createdBy")
     private String createdBy;

@@ -1,0 +1,125 @@
+package com.fptu.sep490.personalservice.controller;
+
+
+import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.personalservice.service.VocabularyService;
+import com.fptu.sep490.personalservice.viewmodel.request.VocabularyRequest;
+import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+@RequestMapping("/vocabulary")
+@Slf4j
+public class VocabularyController {
+    VocabularyService vocabularyService;
+
+
+    @PostMapping("/")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Create a new vocabulary",
+            description = "Create a new vocabulary with the provided details. Requires CREATOR role."
+    )
+    @RequestBody(
+            description = "Request body to create a vocabulary",
+            required = true,
+            content = @Content(schema = @Schema(implementation = VocabularyRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Vocabulary exam created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<VocabularyResponse>> createVocabulary(
+            @Valid @org.springframework.web.bind.annotation.RequestBody VocabularyRequest vocabularyRequest,
+            HttpServletRequest request
+
+    ) throws Exception{
+        VocabularyResponse response = vocabularyService.createVocabulary(vocabularyRequest, request);
+        BaseResponse<VocabularyResponse> baseResponse = BaseResponse.<VocabularyResponse>builder()
+                .data(response)
+                .message("Vocabulary created successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+
+    }
+
+    @GetMapping("/{vocabularyId}")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Get vocabulary by ID",
+            description = "Retrieve a vocabulary by its ID. Requires CREATOR role."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vocabulary retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Vocabulary not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<VocabularyResponse>> getVocabularyById(
+            @org.springframework.web.bind.annotation.RequestParam("vocabularyId") String vocabularyId,
+            HttpServletRequest request
+    )throws Exception {
+        VocabularyResponse response = vocabularyService.getVocabularyById(vocabularyId, request);
+        BaseResponse<VocabularyResponse> baseResponse = BaseResponse.<VocabularyResponse>builder()
+                .data(response)
+                .message("Vocabulary get successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    @DeleteMapping("/{vocabularyId}")
+    @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+            summary = "Delete vocabulary by ID",
+            description = "Delete a vocabulary by its ID. Requires CREATOR role."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Vocabulary deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Vocabulary not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<Void>> deleteVocabularyById(
+            @PathVariable("vocabularyId") String vocabularyId,
+            HttpServletRequest request
+    ) throws Exception {
+        vocabularyService.deleteVocabularyById(vocabularyId, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Listening exam deleted successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);    }
+
+
+
+
+}
