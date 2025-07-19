@@ -3,6 +3,7 @@ package com.fptu.sep490.personalservice.constants;
 public class Constants {
     public final class ErrorCodeMessage {
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
+        public static final String NOT_FOUND = "NOT_FOUND";
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
@@ -15,6 +16,7 @@ public class Constants {
 
     public final class ErrorCode {
         public static final String UNAUTHORIZED = "500001";
+        public static final String NOT_FOUND = "500002";
         public static final String INTERNAL_SERVER_ERROR = "999999";
 
     }
