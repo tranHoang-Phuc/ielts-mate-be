@@ -8,10 +8,14 @@ import com.fptu.sep490.event.SseEvent;
 import com.fptu.sep490.event.StreakEvent;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
+import com.fptu.sep490.personalservice.model.ReminderConfig;
 import com.fptu.sep490.personalservice.model.UserConfig;
 import com.fptu.sep490.personalservice.model.json.StreakConfig;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
+import com.fptu.sep490.personalservice.repository.ReminderConfigRepository;
 import com.fptu.sep490.personalservice.service.ConfigService;
+import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigCreationRequest;
+import com.fptu.sep490.personalservice.viewmodel.response.ReminderConfigResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.StreakConfigResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +41,8 @@ public class ConfigServiceImpl implements ConfigService {
     ConfigRepository configRepository;
     ObjectMapper objectMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
+    ReminderConfigRepository reminderConfigRepository;
+
     Helper helper;
     @Value("${kafka.topic.send-notification}")
     @NonFinal
@@ -142,6 +148,29 @@ public class ConfigServiceImpl implements ConfigService {
                 .lastUpdated(config.getLastUpdated())
                 .startDate(config.getStartDate())
                 .build();
+    }
+
+    @Override
+    public ReminderConfigResponse getReminder(HttpServletRequest request) {
+        UUID userId = UUID.fromString(helper.getUserIdFromToken(request));
+        ReminderConfig reminderConfig = (ReminderConfig) reminderConfigRepository.findByAccountId(userId);
+        if(reminderConfig == null) return null;
+        return ReminderConfigResponse.builder()
+                .configId(reminderConfig.getConfigId())
+                .email(reminderConfig.getEmail())
+                .reminderDate(reminderConfig.getReminderDate())
+                .reminderTime(reminderConfig.getReminderTime())
+                .enabled(reminderConfig.isEnabled())
+                .daysOfWeek(reminderConfig.getDaysOfWeek())
+                .recurrence(reminderConfig.getRecurrence().ordinal())
+                .message(reminderConfig.getMessage())
+                .build();
+
+    }
+
+    @Override
+    public ReminderConfigResponse registerReminder(ReminderConfigCreationRequest reminderConfigCreationRequest, HttpServletRequest request) {
+        return null;
     }
 
     public String buildMessage(int streak) {

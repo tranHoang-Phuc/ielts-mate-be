@@ -4,16 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/event/SseEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/ConfigController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/helper/Helper.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/json/RecurrenceType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/StreakConfigResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local">
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/ReminderController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/repository/ReminderConfigRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/request/ReminderConfigCreationRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/ReminderConfigResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/UserInformationResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/constants/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/json/ReminderConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/json/ReminderConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/ConfigController.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/ConfigController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/helper/Helper.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/helper/Helper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/json/RecurrenceType.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/enumeration/RecurrenceType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/json/ReminderConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/ReminderConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/ConfigService.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/ConfigService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/ConfigServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/ConfigServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" afterDir="false" />
@@ -26,10 +27,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Enum" />
+        <option value="Record" />
         <option value="Interface" />
         <option value="Class" />
-        <option value="Record" />
-        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -63,6 +64,9 @@
     &quot;repository&quot;: &quot;ielts-mate-be&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="jar://C:/Program Files/Java/jdk-21/lib/src.zip!/java.base/java/time/ZoneId.java" root0="SKIP_INSPECTION" />
+  </component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -81,10 +85,32 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "git-widget-placeholder": "local",
-    "node.js.selected.package.tslint": "(autodetect)"
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.PersonalServiceApplication.executor": "Debug",
+    "Spring Boot.discovery.executor": "Run",
+    "Spring Boot.gateway.executor": "Run",
+    "Spring Boot.identity.executor": "Run",
+    "Spring Boot.reading.executor": "Debug",
+    "git-widget-placeholder": "temp",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.31724137",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.fptu.sep490.personalservice.helper" />
@@ -105,7 +131,8 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
-              <option value="PersonalServiceApplication" />
+              <option value="file" />
+              <option value="listening" />
               <option value="notify" />
               <option value="reading" />
             </set>
@@ -201,9 +228,17 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="17f6cb1e-5694-4910-99fe-f8bcc8dcdab2" name="Changes" comment="" />
+      <changelist id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
       <created>1752391597437</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -214,6 +249,8 @@
       <workItem from="1752643193407" duration="879000" />
       <workItem from="1752681770952" duration="9000" />
       <workItem from="1752730107922" duration="1728000" />
+      <workItem from="1752859943494" duration="1810000" />
+      <workItem from="1752887205549" duration="7194000" />
     </task>
     <task id="LOCAL-00001" summary="fix: version exam attempt">
       <option name="closed" value="true" />
@@ -263,7 +300,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752850797933</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local">
+      <option name="closed" value="true" />
+      <created>1752860353521</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1752860353521</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -275,7 +320,8 @@
     <MESSAGE value="fix: add versioning for group" />
     <MESSAGE value="fix: add versioning for drag drop item" />
     <MESSAGE value="fix: streak" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: streak" />
+    <MESSAGE value="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

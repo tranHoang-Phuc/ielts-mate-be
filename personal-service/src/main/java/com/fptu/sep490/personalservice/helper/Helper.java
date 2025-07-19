@@ -9,6 +9,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.personalservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.personalservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
