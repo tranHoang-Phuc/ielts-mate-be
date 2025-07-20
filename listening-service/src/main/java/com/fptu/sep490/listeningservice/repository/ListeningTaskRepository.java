@@ -58,4 +58,7 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
         WHERE (l.taskId = :passageId OR l.parent.taskId = :taskId )AND l.isCurrent = true
     """)
     Optional<ListeningTask> findCurrentVersionById(UUID taskId);
+
+    @Query("SELECT rp FROM ListeningTask rp WHERE rp.taskId IN :ids ORDER BY rp.partNumber ASC")
+    List<ListeningTask> findAllByIdSortedByPartNumber(List<UUID> ids);
 }

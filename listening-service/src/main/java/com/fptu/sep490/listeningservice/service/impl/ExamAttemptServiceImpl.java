@@ -1,15 +1,18 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ExamAttempt;
 import com.fptu.sep490.listeningservice.model.ListeningExam;
+import com.fptu.sep490.listeningservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.service.ExamAttemptService;
 import com.fptu.sep490.listeningservice.service.ListeningTaskService;
 import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserInformationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -19,6 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -66,16 +73,65 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .listeningExamName(currentExam.getExamName())
                 .listeningExamDescription(currentExam.getExamDescription())
                 .urlSlug(currentExam.getUrlSlug())
-                .readingPassageIdPart1(listeningTaskService.fromListeningTask(currentExam.getPart1().getTaskId().toString()))
-                .readingPassageIdPart2(listeningTaskService.fromListeningTask(currentExam.getPart2().getTaskId().toString()))
-                .readingPassageIdPart3(listeningTaskService.fromListeningTask(currentExam.getPart3().getTaskId().toString()))
+                .listeningTaskIdPart1(listeningTaskService.fromListeningTask(currentExam.getPart1().getTaskId().toString()))
+                .listeningTaskIdPart2(listeningTaskService.fromListeningTask(currentExam.getPart2().getTaskId().toString()))
+                .listeningTaskIdPart3(listeningTaskService.fromListeningTask(currentExam.getPart3().getTaskId().toString()))
                 .build();
         return CreateExamAttemptResponse.builder()
                 .examAttemptId(examAttempt.getExamAttemptId())
                 .urlSlug(currentExam.getUrlSlug())
                 .createdBy(user)
                 .createdAt(examAttempt.getCreatedAt().toString())
-                .readingExam(listeningExamResponse)
+                .listeningExam(listeningExamResponse)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ExamAttemptGetDetail getExamAttemptById(String examAttemptId, HttpServletRequest request) throws JsonProcessingException {
+        UUID attemptId = UUID.fromString(examAttemptId);
+        ExamAttempt examAttempt = examAttemptRepository.findById(attemptId).orElseThrow(
+                () -> new AppException(
+                        Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                )
+        );
+
+        String userId = helper.getUserIdFromToken(request);
+        if (!examAttempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                    Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
+
+        List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> taskResponses = listeningTaskService.fromExamAttemptHistory(history);
+        taskResponses = taskResponses.stream()
+                .sorted(Comparator.comparing(ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse::partNumber))
+                .toList();
+        ExamAttemptGetDetail.ListeningExamResponse readingExamResponse = ExamAttemptGetDetail.ListeningExamResponse.builder()
+                .listeningExamId(examAttempt.getListeningExam().getListeningExamId())
+                .listeningExamName(examAttempt.getListeningExam().getExamName())
+                .listeningExamDescription(examAttempt.getListeningExam().getExamDescription())
+                .urlSlug(examAttempt.getListeningExam().getUrlSlug())
+                .listeningTaskIdPart1(taskResponses.get(0))
+                .listeningTaskIdPart2(taskResponses.get(1))
+                .listeningTaskIdPart3(taskResponses.get(2))
+                .build();
+        return ExamAttemptGetDetail.builder()
+                .examAttemptId(examAttempt.getExamAttemptId())
+                .readingExam(readingExamResponse)
+                .duration(examAttempt.getDuration().longValue())
+                .totalQuestion(examAttempt.getTotalPoint())
+                .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                .createdAt(examAttempt.getCreatedAt().toString())
+                .updatedAt(examAttempt.getUpdatedAt().toString())
+                .answers(history.getUserAnswers())
                 .build();
     }
 }

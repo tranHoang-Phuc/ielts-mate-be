@@ -1,10 +1,8 @@
 package com.fptu.sep490.listeningservice.service;
 
+import com.fptu.sep490.listeningservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,4 +33,6 @@ public interface ListeningTaskService {
     ListeningTaskGetAllResponse getTaskById(UUID taskId);
 
     CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId);
+
+    List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> fromExamAttemptHistory(ExamAttemptHistory history);
 }

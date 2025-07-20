@@ -14,7 +14,7 @@ public record CreateExamAttemptResponse(
         @JsonProperty("exam_attempt_id")
         UUID examAttemptId,
         @JsonProperty("listening_exam")
-        ListeningExamResponse readingExam,
+        ListeningExamResponse listeningExam,
         @JsonProperty("url_slug")
         String urlSlug,
         @JsonProperty("total_question")
@@ -35,12 +35,12 @@ public record CreateExamAttemptResponse(
             String listeningExamDescription,
             @JsonProperty("url_slug")
             String urlSlug,
-            @JsonProperty("listening_passage_id_part1")
-            ListeningTaskResponse readingPassageIdPart1,
-            @JsonProperty("listening_passage_id_part2")
-            ListeningTaskResponse readingPassageIdPart2,
-            @JsonProperty("listening_passage_id_part3")
-            ListeningTaskResponse readingPassageIdPart3
+            @JsonProperty("listening_task_id_part1")
+            ListeningTaskResponse listeningTaskIdPart1,
+            @JsonProperty("listening_task_id_part2")
+            ListeningTaskResponse listeningTaskIdPart2,
+            @JsonProperty("listening_task_id_part3")
+            ListeningTaskResponse listeningTaskIdPart3
     ) {
         @Builder
         @JsonInclude(JsonInclude.Include.NON_EMPTY)

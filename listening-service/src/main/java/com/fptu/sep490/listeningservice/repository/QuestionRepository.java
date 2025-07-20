@@ -56,4 +56,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
     """)
     List<Question> findCurrentVersionByGroup(UUID groupId);
 
+    @Query("""
+        SELECT q FROM Question q
+        WHERE q.questionId IN :ids
+        ORDER BY q.questionOrder ASC
+    """)
+    List<Question> findAllByIdOrderByQuestionOrder(@Param("ids") List<UUID> ids);
 }
