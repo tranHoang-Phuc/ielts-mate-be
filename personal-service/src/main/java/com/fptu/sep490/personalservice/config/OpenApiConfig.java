@@ -7,9 +7,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "Listening Service API", version = "v1"),
+        info = @Info(title = "Personal Service API", version = "v1"),
         servers = {
-                @Server(url = "/api/v1/listening", description = "Listening Service")
+                @Server(url = "/api/v1/personal", description = "Personal Service")
         }
 )
 public class OpenApiConfig {

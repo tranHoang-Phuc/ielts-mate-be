@@ -8,6 +8,7 @@ spring:
           issuer-uri: http://identity.sep.local/realms/SEP490
 
   kafka:
+    bootstrap-servers: localhost:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -37,11 +38,15 @@ spring:
       data-source-properties:
         prepareThreshold: 0
 
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    date-format: HH:mm
 server:
   port: 8072
   servlet:
     context-path: /personal
-
 logging:
   level:
     org.hibernate.type.descriptor.sql: trace
@@ -75,3 +80,7 @@ kafka:
   topic:
     streak: streak-topic
     send-notification: send-notification-topic
+    reminder: reminder-topic
+
+reminder:
+  cron: 0 * * * * *

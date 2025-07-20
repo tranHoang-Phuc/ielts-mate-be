@@ -2,6 +2,7 @@ package com.fptu.sep490.notificationservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.BrevoException;
+import com.fptu.sep490.event.ReminderEvent;
 import com.fptu.sep490.notificationservice.constants.Constants;
 import com.fptu.sep490.notificationservice.repository.client.EmailClient;
 import com.fptu.sep490.notificationservice.service.EmailService;
@@ -74,6 +75,32 @@ public class EmailServiceImpl implements EmailService {
                 .build();
         try {
             return emailClient.sendEmail(apiKey, emailRequest);
+        } catch (FeignException e) {
+            throw new BrevoException(Constants.ErrorCode.ERROR_WHEN_SENDING_EMAIL,
+                    ErrorCodeMessage.ERROR_WHEN_SENDING_EMAIL);
+        }
+    }
+
+    @Override
+    public EmailResponse sendReminder(ReminderEvent reminderRequest) {
+        EmailRequest emailResponse = EmailRequest.builder()
+                .sender(Sender.builder()
+                        .name("noreply")
+                        .email("phucth115.dev@gmail.com")
+                        .build()
+                )
+                .subject(reminderRequest.subject())
+                .htmlContent(reminderRequest.htmlContent())
+                .to(reminderRequest.email().stream().map(
+                        e -> Recipient.builder()
+                                .email(e)
+                                .name("noreply")
+                                .build()
+                ).toList())
+
+                .build();
+        try {
+            return emailClient.sendEmail(apiKey, emailResponse);
         } catch (FeignException e) {
             throw new BrevoException(Constants.ErrorCode.ERROR_WHEN_SENDING_EMAIL,
                     ErrorCodeMessage.ERROR_WHEN_SENDING_EMAIL);

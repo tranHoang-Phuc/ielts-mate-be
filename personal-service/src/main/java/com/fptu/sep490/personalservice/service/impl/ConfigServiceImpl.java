@@ -8,10 +8,17 @@ import com.fptu.sep490.event.SseEvent;
 import com.fptu.sep490.event.StreakEvent;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
+import com.fptu.sep490.personalservice.helper.UtcConverter;
+import com.fptu.sep490.personalservice.model.ReminderConfig;
 import com.fptu.sep490.personalservice.model.UserConfig;
+import com.fptu.sep490.personalservice.model.enumeration.RecurrenceType;
 import com.fptu.sep490.personalservice.model.json.StreakConfig;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
+import com.fptu.sep490.personalservice.repository.ReminderConfigRepository;
 import com.fptu.sep490.personalservice.service.ConfigService;
+import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigCreationRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigUpdateRequest;
+import com.fptu.sep490.personalservice.viewmodel.response.ReminderConfigResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.StreakConfigResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +32,13 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.time.LocalDate;
+import java.time.*;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static com.fptu.sep490.personalservice.helper.UtcConverter.convertToUtc;
+
 
 @Service
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
@@ -37,27 +48,14 @@ public class ConfigServiceImpl implements ConfigService {
     ConfigRepository configRepository;
     ObjectMapper objectMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
+    ReminderConfigRepository reminderConfigRepository;
+
     Helper helper;
     @Value("${kafka.topic.send-notification}")
     @NonFinal
     String notificationTopic;
 
-    private static final String[] TPL_3  = {
-            "Nice! You've hit a %d-day streak—3-day milestone unlocked!",
-            "Keep it rolling: %d days straight! First 3-day mark achieved."
-    };
-    private static final String[] TPL_10 = {
-            "Awesome! %d days in a row—10-day milestone!",
-            "Double digits! Congrats on your 10-day streak (%d days)."
-    };
-    private static final String[] TPL_30 = {
-            "Impressive: %d days of continuous learning—30-day milestone!",
-            "1 month strong! %d-day streak reached."
-    };
-    private static final String[] TPL_90 = {
-            "Phenomenal! %d days—90-day milestone. You’re unstoppable!",
-            "Quarter‑year streak! %d days straight of learning. Bravo!"
-    };
+
     @Override
     public StreakConfig getOrAddStreakConfig(StreakEvent streakEvent) throws JsonProcessingException {
         LocalDate today = LocalDate.now();
@@ -106,7 +104,10 @@ public class ConfigServiceImpl implements ConfigService {
         UserConfig userConfig = configRepository.findByConfigNameAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId());
         userConfig.setValue(objectMapper.writeValueAsString(config));
         configRepository.save(userConfig);
-        if(config.getCurrentStreak() == 3 || config.getCurrentStreak() == 10 || config.getCurrentStreak() == 30 || config.getCurrentStreak() == 90) {
+        if(config.getCurrentStreak() == Constants.Streak.TPL_3 ||
+                config.getCurrentStreak() == Constants.Streak.TPL_10 ||
+                config.getCurrentStreak() == Constants.Streak.TPL_30 ||
+                config.getCurrentStreak() == Constants.Streak.TPL_90) {
             SseEvent sseEvent = SseEvent.builder()
                     .clientId(streakEvent.accountId())
                     .status("streak")
@@ -144,12 +145,96 @@ public class ConfigServiceImpl implements ConfigService {
                 .build();
     }
 
-    public String buildMessage(int streak) {
+    @Override
+    public ReminderConfigResponse getReminder(HttpServletRequest request) {
+        UUID userId = UUID.fromString(helper.getUserIdFromToken(request));
+        ReminderConfig reminderConfig = (ReminderConfig) reminderConfigRepository.findByAccountId(userId);
+        if(reminderConfig == null) return null;
+        return ReminderConfigResponse.builder()
+                .configId(reminderConfig.getConfigId())
+                .email(reminderConfig.getEmail())
+                .reminderDate(reminderConfig.getReminderDate())
+                .reminderTime(reminderConfig.getReminderTime())
+                .enabled(reminderConfig.isEnabled())
+                .recurrence(reminderConfig.getRecurrence().ordinal())
+                .zone(reminderConfig.getTimeZone())
+                .message(reminderConfig.getMessage())
+                .build();
+
+    }
+
+    @Override
+    public ReminderConfigResponse registerReminder(ReminderConfigCreationRequest reminderConfigCreationRequest, HttpServletRequest request) {
+        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
+        UtcConverter.UtcResult result = convertToUtc(reminderConfigCreationRequest.timeZone(),
+                reminderConfigCreationRequest.reminderDate(), reminderConfigCreationRequest.reminderTime());
+
+        if(reminderConfigRepository.existsByAccountId(accountId)) {
+            throw new AppException(Constants.ErrorCodeMessage.REMINDER_CONFIGURED,
+                    Constants.ErrorCode.REMINDER_CONFIGURED,HttpStatus.CONFLICT.value());
+        }
+
+        ReminderConfig config =ReminderConfig.builder()
+                .email(reminderConfigCreationRequest.email())
+                .accountId(accountId)
+                .message(reminderConfigCreationRequest.message())
+                .reminderDate(result.getUtcDates())
+                .reminderTime(result.getUtcTime())
+                .recurrence(safeEnumFromOrdinal(RecurrenceType.values(),reminderConfigCreationRequest.recurrence()))
+                .timeZone(reminderConfigCreationRequest.timeZone())
+                .enabled(reminderConfigCreationRequest.enable())
+                .build();
+        config = reminderConfigRepository.save(config);
+        return ReminderConfigResponse.builder()
+                .configId(config.getConfigId())
+                .email(config.getEmail())
+                .reminderDate(config.getReminderDate())
+                .reminderTime(config.getReminderTime())
+                .enabled(config.isEnabled())
+                .zone(config.getTimeZone())
+                .recurrence(config.getRecurrence().ordinal())
+                .message(config.getMessage())
+                .build();
+
+    }
+
+    @Override
+    public ReminderConfigResponse updateReminder(ReminderConfigUpdateRequest reminderConfig, HttpServletRequest request) {
+        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
+        if(!reminderConfigRepository.existsByAccountId(accountId)) {
+            throw new AppException(Constants.ErrorCodeMessage.REMINDER_NOT_FOUND,
+                    Constants.ErrorCode.REMINDER_NOT_FOUND,HttpStatus.CONFLICT.value());
+        }
+        UtcConverter.UtcResult result = convertToUtc(reminderConfig.timeZone(),
+                reminderConfig.reminderDate(), reminderConfig.reminderTime());
+        ReminderConfig config = (ReminderConfig) reminderConfigRepository.findByAccountId(accountId);
+        config.setEmail(reminderConfig.email());
+        config.setMessage(reminderConfig.message());
+        config.setReminderDate(result.getUtcDates());
+        config.setReminderTime(result.getUtcTime());
+        config.setRecurrence(safeEnumFromOrdinal(RecurrenceType.values(),reminderConfig.recurrence()));
+        config.setTimeZone(reminderConfig.timeZone());
+        config.setEnabled(reminderConfig.enable());
+
+        config = reminderConfigRepository.save(config);
+        return ReminderConfigResponse.builder()
+                .configId(config.getConfigId())
+                .email(config.getEmail())
+                .reminderDate(config.getReminderDate())
+                .reminderTime(config.getReminderTime())
+                .enabled(config.isEnabled())
+                .recurrence(config.getRecurrence().ordinal())
+                .zone(config.getTimeZone())
+                .message(config.getMessage())
+                .build();
+    }
+
+    private String buildMessage(int streak) {
         int milestone = 0;
-        if (streak % 90 == 0)  milestone = 90;
-        else if (streak % 30 == 0) milestone = 30;
-        else if (streak % 10 == 0) milestone = 10;
-        else if (streak % 3 == 0)  milestone = 3;
+        if (streak % Constants.Streak.TPL_90 == 0)  milestone = Constants.Streak.TPL_90;
+        else if (streak % Constants.Streak.TPL_30 == 0) milestone = Constants.Streak.TPL_30;
+        else if (streak % Constants.Streak.TPL_10 == 0) milestone = Constants.Streak.TPL_10;
+        else if (streak % Constants.Streak.TPL_3 == 0)  milestone = Constants.Streak.TPL_3;
 
         if (milestone == 0) {
             return null;
@@ -157,13 +242,25 @@ public class ConfigServiceImpl implements ConfigService {
 
         String[] tpl;
         switch (milestone) {
-            case 90: tpl = TPL_90; break;
-            case 30: tpl = TPL_30; break;
-            case 10: tpl = TPL_10; break;
-            default:  tpl = TPL_3;  break;
+            case Constants.Streak.TPL_90: tpl = Constants.StreakMessage.TPL_90 ; break;
+            case Constants.Streak.TPL_30: tpl = Constants.StreakMessage.TPL_30; break;
+            case Constants.Streak.TPL_10: tpl = Constants.StreakMessage.TPL_10; break;
+            default:  tpl = Constants.StreakMessage.TPL_3;  break;
         }
 
         int idx = ThreadLocalRandom.current().nextInt(tpl.length);
         return String.format(tpl[idx], streak);
     }
+    private <T extends Enum<T>> T safeEnumFromOrdinal(T[] values, int ordinal) {
+        if (ordinal < 0 || ordinal >= values.length) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        return values[ordinal];
+    }
+
+
 }
