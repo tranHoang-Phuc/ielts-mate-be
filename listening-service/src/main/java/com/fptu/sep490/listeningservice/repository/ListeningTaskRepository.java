@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UUID> {
@@ -51,4 +52,13 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
        
     """)
     List<ListeningTask> findAllVersion(UUID taskId);
+
+    @Query("""
+        SELECT l FROM ListeningTask l
+        WHERE (l.taskId = :passageId OR l.parent.taskId = :taskId )AND l.isCurrent = true
+    """)
+    Optional<ListeningTask> findCurrentVersionById(UUID taskId);
+
+    @Query("SELECT rp FROM ListeningTask rp WHERE rp.taskId IN :ids ORDER BY rp.partNumber ASC")
+    List<ListeningTask> findAllByIdSortedByPartNumber(List<UUID> ids);
 }

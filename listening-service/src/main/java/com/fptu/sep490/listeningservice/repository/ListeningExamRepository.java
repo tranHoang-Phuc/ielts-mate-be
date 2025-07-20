@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ListeningExamRepository extends JpaRepository<ListeningExam, UUID> {
@@ -54,4 +55,13 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
             @Param("userId") String userId,
             @Param("keyword") String keyword,
             Pageable pageable);
+
+    Optional<ListeningExam> findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(String urlSlug);
+
+    @Query("""
+        SELECT l FROM ListeningExam l
+        WHERE l.parent.listeningExamId = :parentId
+        AND l.isCurrent = true
+    """)
+    Optional<ListeningExam> findCurrentChildByParentId(@Param("parentId") UUID parentId);
 }

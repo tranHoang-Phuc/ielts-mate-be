@@ -580,12 +580,12 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.NOT_FOUND.value()
                 ));
         //Không cần find current nua vi exam da luu phien ban tai thoi diem tao cua passage r
-        ReadingPassage currentVersion = readingPassageRepository.findCurrentVersionById(passage.getPassageId())
-                .orElseThrow(() -> new AppException(
-                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
-                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
-                        HttpStatus.NOT_FOUND.value()
-                ));
+//        ReadingPassage currentVersion = readingPassageRepository.findCurrentVersionById(passage.getPassageId())
+//                .orElseThrow(() -> new AppException(
+//                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+//                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+//                        HttpStatus.NOT_FOUND.value()
+//                ));
 
 //        if (currentVersion.getPassageStatus() == null || currentVersion.getPassageStatus() != Status.PUBLISHED) {
 //            throw new AppException(
@@ -724,10 +724,10 @@ public class PassageServiceImpl implements PassageService {
 
         return CreateExamAttemptResponse.ReadingExamResponse.ReadingPassageResponse.builder()
                 .passageId(passage.getPassageId())
-                .instruction(currentVersion.getInstruction())
-                .title(currentVersion.getTitle())
-                .content(currentVersion.getContent())
-                .partNumber(currentVersion.getPartNumber().ordinal())
+                .instruction(passage.getInstruction())
+                .title(passage.getTitle())
+                .content(passage.getContent())
+                .partNumber(passage.getPartNumber().ordinal())
                 .questionGroups(questionGroupResponses)
                 .build();
     }
