@@ -225,7 +225,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         ReadingExam originalExam = readingExamRepository
                 .findByUrlSlugAndIsOriginalTrueAndIsDeletedFalse(urlSlug)
                 .orElseThrow(() -> new AppException(
-                                Constants.ErrorCode.READING_EXAM_NOT_FOUND,
+                                Constants.ErrorCodeMessage.READING_EXAM_NOT_FOUND,
                                 Constants.ErrorCode.READING_EXAM_NOT_FOUND,
                                 HttpStatus.NOT_FOUND.value()
                         )

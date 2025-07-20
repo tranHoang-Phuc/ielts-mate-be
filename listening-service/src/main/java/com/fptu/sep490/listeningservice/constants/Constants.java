@@ -22,7 +22,9 @@ public class Constants {
         public static final String DRAG_ITEM_NOT_FOUND = "DRAG_ITEM_NOT_FOUND";
         public static final String WRONG_PART = "WRONG_PART";
         public static final String EXAM_DELETED = "EXAM_DELETED";
-
+        public static final String LISTENING_EXAM_NOT_FOUND = "LISTENING_EXAM_NOT_FOUND";
+        public static final String LISTENING_TASK_NOT_FOUND = "LISTENING_TASK_NOT_FOUND";
+        public static final String CHOICE_NOT_FOUND = "CHOICE_NOT_FOUND";
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
@@ -58,6 +60,10 @@ public class Constants {
         public static final String DRAG_ITEM_NOT_FOUND = "400018";
         public static final String WRONG_PART = "400019";
         public static final String EXAM_DELETED = "400020";
+
+        public static final String LISTENING_EXAM_NOT_FOUND = "400021";
+        public static final String LISTENING_TASK_NOT_FOUND = "400022";
+        public static final String CHOICE_NOT_FOUND = "400023";
 
         public static final String INTERNAL_SERVER_ERROR = "400999";
 

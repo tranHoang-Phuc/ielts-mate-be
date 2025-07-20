@@ -64,7 +64,7 @@ public class ExamAttemptController {
         );
         return ResponseEntity.ok(
                 BaseResponse.<CreateExamAttemptResponse>builder()
-                        .message("Your IELTS Reading test is about to begin.")
+                        .message("Your IELTS Reading exam is about to begin.")
                         .data(createExamAttemptResponse)
                         .build()
         );

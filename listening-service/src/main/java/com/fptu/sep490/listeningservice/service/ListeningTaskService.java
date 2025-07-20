@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.service;
 
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
+import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
@@ -32,4 +33,6 @@ public interface ListeningTaskService {
                                                     String title, String createdBy);
 
     ListeningTaskGetAllResponse getTaskById(UUID taskId);
+
+    CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId);
 }
