@@ -13,6 +13,7 @@ import com.fptu.sep490.personalservice.model.ReminderConfig;
 import com.fptu.sep490.personalservice.model.UserConfig;
 import com.fptu.sep490.personalservice.model.enumeration.RecurrenceType;
 import com.fptu.sep490.personalservice.model.json.StreakConfig;
+import com.fptu.sep490.personalservice.model.json.TargetConfig;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
 import com.fptu.sep490.personalservice.repository.ReminderConfigRepository;
 import com.fptu.sep490.personalservice.service.ConfigService;
@@ -227,6 +228,39 @@ public class ConfigServiceImpl implements ConfigService {
                 .zone(config.getTimeZone())
                 .message(config.getMessage())
                 .build();
+    }
+
+    @Override
+    public TargetConfig getTarget(HttpServletRequest request) {
+        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
+        String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)
+                .orElseGet(()->null);
+        if(targetValue == null) return null;
+        return objectMapper.convertValue(targetValue, TargetConfig.class);
+    }
+
+    @Override
+    public TargetConfig addOrUpdate(HttpServletRequest request, TargetConfig targetConfig) throws JsonProcessingException {
+        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
+        String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)
+                .orElseGet(()->null);
+        String value = objectMapper.writeValueAsString(targetConfig);
+        if(targetValue == null) {
+
+            UserConfig config = UserConfig.builder()
+                    .accountId(accountId)
+                    .configName(Constants.Config.TARGET_CONFIG)
+                    .value(value)
+                    .description("Target config")
+                    .build();
+            configRepository.save(config);
+            return targetConfig;
+        } else {
+            UserConfig config = configRepository.findByAccountIdAndConfigName(accountId,Constants.Config.TARGET_CONFIG);
+            config.setValue(value);
+            configRepository.save(config);
+            return targetConfig;
+        }
     }
 
     private String buildMessage(int streak) {

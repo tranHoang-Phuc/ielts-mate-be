@@ -3,6 +3,7 @@ package com.fptu.sep490.personalservice.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.event.StreakEvent;
 import com.fptu.sep490.personalservice.model.json.StreakConfig;
+import com.fptu.sep490.personalservice.model.json.TargetConfig;
 import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigCreationRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigUpdateRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.ReminderConfigResponse;
@@ -20,4 +21,8 @@ public interface ConfigService {
     ReminderConfigResponse registerReminder(ReminderConfigCreationRequest reminderConfigCreationRequest, HttpServletRequest request);
 
     ReminderConfigResponse updateReminder(ReminderConfigUpdateRequest reminderConfig, HttpServletRequest request);
+
+    TargetConfig getTarget(HttpServletRequest request);
+
+    TargetConfig addOrUpdate(HttpServletRequest request, TargetConfig targetConfig) throws JsonProcessingException;
 }

@@ -13,8 +13,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TargetConfig {
-    @JsonProperty("target")
-    float target;
-    @JsonProperty("target_date")
-    LocalDate targetDate;
+    @JsonProperty("listening_target")
+    float listeningTarget;
+    @JsonProperty("listening_target_date")
+    LocalDate listeningTargetDate;
+
+    @JsonProperty("reading_target")
+    float readingTarget;
+    @JsonProperty("reading_target_date")
+    LocalDate readingTargetDate;
 }
