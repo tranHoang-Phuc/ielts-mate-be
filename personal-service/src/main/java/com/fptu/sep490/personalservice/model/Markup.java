@@ -5,7 +5,9 @@ import com.fptu.sep490.personalservice.model.enumeration.PracticeType;
 import com.fptu.sep490.personalservice.model.enumeration.TaskType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -35,4 +37,11 @@ public class Markup {
 
     @Column(name = "task_id")
     private UUID taskId;
+
+    @Column(name = "account_id")
+    private UUID accountId;
+
+    @Column(name="created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }

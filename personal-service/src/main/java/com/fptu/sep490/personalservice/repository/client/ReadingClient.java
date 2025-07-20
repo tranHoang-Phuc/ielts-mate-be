@@ -1,0 +1,24 @@
+package com.fptu.sep490.personalservice.repository.client;
+
+import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+import java.util.UUID;
+
+@FeignClient(name = "reading-client", url = "${service.reading-service}")
+public interface ReadingClient {
+    @GetMapping(value = "/passages/internal/task", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<List<TaskTitle>>> getReadingTitle(@RequestParam("ids") List<UUID> ids,
+                                                                  @RequestHeader("Authorization") String token);
+
+    @GetMapping(value = "/reading-exams/internal/exam", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<List<TaskTitle>>> getExamTitle(@RequestParam("ids") List<UUID> ids,
+                                                               @RequestHeader("Authorization") String token);
+}

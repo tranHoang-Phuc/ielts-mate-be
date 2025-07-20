@@ -2,10 +2,12 @@ package com.fptu.sep490.readingservice.service;
 
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ReadingExamService {
     public ReadingExamResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception;
@@ -19,4 +21,6 @@ public interface ReadingExamService {
     Page<ReadingExamResponse> getAllReadingExamsForCreator(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection) throws Exception;
 
     List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception;
+
+    List<TaskTitle> getTaskTitle(List<UUID> ids);
 }

@@ -835,6 +835,17 @@ public class PassageServiceImpl implements PassageService {
         return passageResponses;
     }
 
+    @Override
+    public List<TaskTitle> getTaskTitle(List<UUID> ids) {
+        List<ReadingPassage> tasks = readingPassageRepository.findAllById(ids);
+        return tasks.stream().map(
+                t-> TaskTitle.builder()
+                        .taskId(t.getPassageId())
+                        .title(t.getTitle())
+                        .build()
+        ).toList();
+    }
+
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
         UserProfileResponse createdByProfile;

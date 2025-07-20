@@ -440,6 +440,15 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .build();
     }
 
+    @Override
+    public List<TaskTitle> getTaskTitle(List<UUID> taskIds) {
+        List<ListeningTask> tasks = listeningTaskRepository.findAllById(taskIds);
+        return tasks.stream().map(t -> TaskTitle.builder()
+                .title(t.getTitle())
+                .taskId(t.getTaskId())
+                .build()).toList();
+    }
+
     private ListeningTaskGetResponse toListeningTaskGetResponse(ListeningTask listeningTask) {
         UserProfileResponse createdByProfile;
         UserProfileResponse updatedByProfile;

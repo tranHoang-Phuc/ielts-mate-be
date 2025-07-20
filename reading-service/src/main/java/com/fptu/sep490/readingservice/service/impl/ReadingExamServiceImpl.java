@@ -5,6 +5,7 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
+import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.fptu.sep490.readingservice.model.ReadingExam;
@@ -440,6 +441,17 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
             readingExamResponses.add(response);
         }
         return readingExamResponses;
+    }
+
+    @Override
+    public List<TaskTitle> getTaskTitle(List<UUID> ids) {
+        List<ReadingExam> readingExams = readingExamRepository.findAllById(ids);
+        return readingExams.stream().map(
+                e -> TaskTitle.builder()
+                        .taskId(e.getReadingExamId())
+                        .title(e.getExamName())
+                        .build()
+        ).toList();
     }
 
 

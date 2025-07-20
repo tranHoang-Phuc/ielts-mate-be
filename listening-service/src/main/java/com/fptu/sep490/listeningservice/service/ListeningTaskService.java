@@ -4,6 +4,7 @@ import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationR
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,4 +33,6 @@ public interface ListeningTaskService {
                                                     String title, String createdBy);
 
     ListeningTaskGetAllResponse getTaskById(UUID taskId);
+
+    List<TaskTitle> getTaskTitle(List<UUID> taskIds);
 }

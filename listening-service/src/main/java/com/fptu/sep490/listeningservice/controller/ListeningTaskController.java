@@ -8,6 +8,7 @@ import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationR
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -176,6 +177,18 @@ public class ListeningTaskController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(body);
+    }
+
+    @GetMapping("/internal/task")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(
+            @RequestParam("task-ids") List<UUID> taskIds
+    ) {
+        List<TaskTitle> data = listeningTaskService.getTaskTitle(taskIds);
+        BaseResponse<List<TaskTitle>> response = BaseResponse.<List<TaskTitle>>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     private List<Integer> parseCommaSeparatedIntegers(String input) {

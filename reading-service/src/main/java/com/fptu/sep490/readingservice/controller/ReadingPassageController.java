@@ -10,10 +10,7 @@ import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.service.GroupQuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.UpdatedPassageRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.PassageCreationResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.PassageDetailResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.PassageGetResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -475,6 +472,16 @@ public class ReadingPassageController {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    @GetMapping("/internal/task")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(@RequestParam("ids") List<UUID> ids) {
+        List<TaskTitle> data = passageService.getTaskTitle(ids);
+        BaseResponse<List<TaskTitle>> response = BaseResponse.<List<TaskTitle>>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     private Integer parseFirstInteger(String input) {
