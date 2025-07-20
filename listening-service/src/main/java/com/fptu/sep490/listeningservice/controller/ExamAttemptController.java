@@ -5,8 +5,10 @@ import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.listeningservice.service.ExamAttemptService;
+import com.fptu.sep490.listeningservice.viewmodel.request.ExamAttemptAnswersRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
+import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -99,5 +101,20 @@ public class ExamAttemptController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
+    }
+
+    @PutMapping("/save/{attempt-id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<SubmittedExamAttemptResponse>> submitExamAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            @RequestBody ExamAttemptAnswersRequest answers,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        SubmittedExamAttemptResponse response = examAttemptService.submittedExam(attemptId, answers, request);
+        BaseResponse<SubmittedExamAttemptResponse> baseResponse = BaseResponse.<SubmittedExamAttemptResponse>builder()
+                .data(response)
+                .message("Exam attempt submitted successfully")
+                .build();
+        return ResponseEntity.ok(baseResponse);
     }
 }
