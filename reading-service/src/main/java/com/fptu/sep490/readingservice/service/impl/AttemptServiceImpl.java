@@ -121,7 +121,7 @@ public class AttemptServiceImpl implements AttemptService {
                 .findOriginalVersionByTaskId(passage.getPassageId());
 
         Map<QuestionGroup, List<DragItem>> currentGroupMapCurrentDragItem = new HashMap<>();
-        Map<UUID,List<Question>>  currentGroupIdQuestions = new HashMap<>();
+        Map<UUID, List<Question>> currentGroupIdQuestions = new HashMap<>();
         Map<UUID, Map<UUID, List<Choice>>> currentGroupIdMapQuestionIdMapCurrentChoice = new HashMap<>();
         originalVersionGroupQuestion.forEach(g -> {
             // Get All Current DragItem
@@ -140,7 +140,7 @@ public class AttemptServiceImpl implements AttemptService {
             Map<UUID, List<Choice>> questionIdMapCurrentChoice = new HashMap<>();
             List<QuestionVersion> questionVersionList = new ArrayList<>();
             currentQuestion.forEach(q -> {
-                if(q.getIsOriginal()) {
+                if (q.getIsOriginal()) {
                     List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getQuestionId());
                     questionIdMapCurrentChoice.put(q.getQuestionId(), currentChoice);
                     QuestionVersion questionVersion = QuestionVersion.builder()
@@ -173,7 +173,7 @@ public class AttemptServiceImpl implements AttemptService {
         attempt = attemptRepository.save(attempt);
 
         List<AttemptResponse.QuestionGroupAttemptResponse> groups = new ArrayList<>();
-        currentGroupMapCurrentDragItem.forEach((key, value)-> {
+        currentGroupMapCurrentDragItem.forEach((key, value) -> {
             List<UpdatedQuestionResponse.DragItemResponse> dragItems =
                     value.stream()
                             .map(item -> UpdatedQuestionResponse.DragItemResponse
@@ -191,25 +191,25 @@ public class AttemptServiceImpl implements AttemptService {
                 List<Choice> choices = questionMapChoices.get(question.getQuestionId());
                 AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionResponse =
                         AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
-                        .questionId(question.getQuestionId())
-                        .questionOrder(question.getQuestionOrder())
-                        .questionType(question.getQuestionType().ordinal())
-                        .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
-                        .blankIndex(question.getBlankIndex())
-                        .instructionForChoice(question.getInstructionForChoice())
-                        .instructionForMatching(question.getInstructionForMatching())
-                        .zoneIndex(question.getZoneIndex())
-                        .choices(
-                                choices.stream().map(c ->
-                                        AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
-                                                .choiceId(c.getChoiceId())
-                                                .label(c.getLabel())
-                                                .content(c.getContent())
-                                                .choiceOrder(question.getQuestionOrder())
-                                                .build()
-                                ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList()
-                        )
-                        .build();
+                                .questionId(question.getQuestionId())
+                                .questionOrder(question.getQuestionOrder())
+                                .questionType(question.getQuestionType().ordinal())
+                                .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                .blankIndex(question.getBlankIndex())
+                                .instructionForChoice(question.getInstructionForChoice())
+                                .instructionForMatching(question.getInstructionForMatching())
+                                .zoneIndex(question.getZoneIndex())
+                                .choices(
+                                        choices.stream().map(c ->
+                                                AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
+                                                        .choiceId(c.getChoiceId())
+                                                        .label(c.getLabel())
+                                                        .content(c.getContent())
+                                                        .choiceOrder(question.getQuestionOrder())
+                                                        .build()
+                                        ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList()
+                                )
+                                .build();
                 questionListResponse.add(questionResponse);
             });
 
@@ -359,12 +359,12 @@ public class AttemptServiceImpl implements AttemptService {
         Map<QuestionGroup, List<Question>> groupQuestions = new HashMap<>();
         Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
         Map<UUID, List<Choice>> questionChoice = new HashMap<>();
-        groupMappingQuestion.forEach((key, value) ->{
+        groupMappingQuestion.forEach((key, value) -> {
             var group = questionGroupRepository.findById(key).get();
             List<Question> questions = new ArrayList<>();
             value.forEach(q -> {
                 var question = questionRepository.findById(q.getQuestionId()).get();
-                if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
                     List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
                     questionChoice.put(question.getQuestionId(), choices);
                 }
@@ -377,7 +377,7 @@ public class AttemptServiceImpl implements AttemptService {
         });
 
         List<ReadingPassageGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
-        groupQuestions.forEach((key, value) ->{
+        groupQuestions.forEach((key, value) -> {
 
             ReadingPassageGetAllResponse.QuestionGroupResponse groupResponse = ReadingPassageGetAllResponse
                     .QuestionGroupResponse.builder()
