@@ -33,5 +33,14 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
     """)
     QuestionGroup findLatestVersionByOriginalId(@Param("groupId") UUID groupId);
 
+    @Query("SELECT qg FROM QuestionGroup qg JOIN qg.listeningTask rp WHERE rp.taskId = :taskId")
+    List<QuestionGroup> findAllByListeningTaskByTaskId(@Param("taskId") UUID taskId);
+
+    @Query("""
+        SELECT qg FROM QuestionGroup qg
+        WHERE qg.groupId IN :ids
+        ORDER BY qg.sectionOrder ASC
+    """)
+    List<QuestionGroup> findAllByIdOrderBySectionOrder(@Param("ids") List<UUID> ids);
 
 }

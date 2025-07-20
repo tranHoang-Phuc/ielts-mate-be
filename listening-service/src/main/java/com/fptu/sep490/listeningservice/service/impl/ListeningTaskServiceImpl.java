@@ -9,7 +9,9 @@ import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.enumeration.IeltsType;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
+import com.fptu.sep490.listeningservice.model.enumeration.QuestionType;
 import com.fptu.sep490.listeningservice.model.enumeration.Status;
+import com.fptu.sep490.listeningservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
 import com.fptu.sep490.listeningservice.model.specification.ListeningTaskSpecification;
 import com.fptu.sep490.listeningservice.repository.*;
@@ -438,6 +440,258 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .status(currentVersion.getStatus().ordinal())
                 .questionGroups(groups.stream().sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)).toList())
                 .build();
+    }
+
+    @Override
+    public CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId) {
+        ListeningTask task = listeningTaskRepository.findById(UUID.fromString(taskId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.LISTENING_TASK_NOT_FOUND,
+                        Constants.ErrorCode.LISTENING_TASK_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+//        ListeningTask currentVersion = listeningTaskRepository.findCurrentVersionById(task.getTaskId())
+//                .orElseThrow(() -> new AppException(
+//                        Constants.ErrorCodeMessage.LISTENING_TASK_NOT_FOUND,
+//                        Constants.ErrorCode.LISTENING_TASK_NOT_FOUND,
+//                        HttpStatus.NOT_FOUND.value()
+//                ));
+
+        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByListeningTaskByTaskId(task.getTaskId());
+        if (questionGroups.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        Map<QuestionGroup, Map<Question, List<Choice>>> currentVersionChoicesByGroup = new HashMap<>();
+        Map<QuestionGroup, List<DragItem>> currentVersionDragItemsByGroup = new HashMap<>();
+        for (QuestionGroup group : questionGroups) {
+            List<Question> currentVersionQuestions = questionRepository.findCurrentVersionByGroup(group.getGroupId());
+            List<DragItem> currentVersionDragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId());
+            currentVersionDragItemsByGroup.put(group, currentVersionDragItems);
+            Map<Question, List<Choice>> currentVersionChoicesByQuestion = new HashMap<>();
+            for (Question currentVersionQuestion : currentVersionQuestions) {
+                QuestionVersion questionVersion = QuestionVersion.builder()
+                        .questionId(currentVersionQuestion.getQuestionId())
+                        .build();
+                if (currentVersionQuestion.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+
+                    List<UUID> choiceVersionIds = new ArrayList<>();
+                    if (currentVersionQuestion.getParent() == null) {
+                        List<Choice> currentVersionChoices = choiceRepository.getVersionChoiceByQuestionId(
+                                currentVersionQuestion.getQuestionId());
+                        currentVersionChoices.stream()
+                                .map(Choice::getChoiceId)
+                                .forEach(choiceVersionIds::add);
+
+                        if (currentVersionChoices.isEmpty()) {
+                            throw new AppException(
+                                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                    HttpStatus.NOT_FOUND.value()
+                            );
+                        }
+                        currentVersionChoicesByQuestion.put(currentVersionQuestion, currentVersionChoices);
+                    } else {
+                        List<Choice> originVersionChoices = choiceRepository.getVersionChoiceByParentQuestionId(
+                                currentVersionQuestion.getParent().getQuestionId());
+                        List<Choice> choices = new ArrayList<>();
+
+                        for (Choice choice : originVersionChoices) {
+                            if (!choice.getIsCurrent()) {
+                                Choice current = choiceRepository.getCurrentVersionChoiceByChoiceId(choice.getChoiceId());
+                                choices.add(current);
+
+                            } else {
+                                choices.add(choice);
+                            }
+                        }
+                        choices.stream()
+                                .map(Choice::getChoiceId)
+                                .forEach(choiceVersionIds::add);
+                        currentVersionChoicesByQuestion.put(currentVersionQuestion, choices);
+                    }
+                    questionVersion.setChoiceMapping(choiceVersionIds);
+                }
+
+                else {
+                    List<Choice> choices = new ArrayList<>();
+                    currentVersionChoicesByQuestion.put(currentVersionQuestion, choices);
+                }
+            }
+            currentVersionChoicesByGroup.put(group, currentVersionChoicesByQuestion);
+        }
+
+        List<AttemptResponse.QuestionGroupAttemptResponse> questionGroupResponses =
+                currentVersionChoicesByGroup.entrySet().stream()
+                        .map(groupEntry -> {
+                            QuestionGroup group = groupEntry.getKey();
+                            Map<Question, List<Choice>> questionChoices = groupEntry.getValue();
+
+                            List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionResponses =
+                                    questionChoices.entrySet().stream()
+                                            .map(questionEntry -> {
+                                                Question question = questionEntry.getKey();
+                                                List<Choice> choices = questionEntry.getValue();
+
+                                                List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse> choiceResponses =
+                                                        choices.stream()
+                                                                .map(choice -> new AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse(
+                                                                        choice.getChoiceId(),
+                                                                        choice.getLabel(),
+                                                                        choice.getContent(),
+                                                                        choice.getChoiceOrder()
+                                                                ))
+                                                                .collect(Collectors.toList());
+
+//
+                                                return AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse
+                                                        .builder()
+                                                        .questionId(question.getQuestionId())
+                                                        .questionOrder(question.getQuestionOrder())
+                                                        .questionType(question.getQuestionType().ordinal())
+                                                        .instructionForChoice(question.getInstructionForChoice())
+                                                        .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                                        .instructionForMatching(question.getInstructionForMatching())
+                                                        .choices(choiceResponses)
+                                                        .build();
+                                            })
+                                            .collect(Collectors.toList());
+
+                            return AttemptResponse.QuestionGroupAttemptResponse.builder()
+                                            .questionGroupId(group.getGroupId())
+                                    .sectionOrder(group.getSectionOrder())
+                                    .sectionLabel(group.getSectionLabel())
+                                    .instruction(group.getInstruction())
+                                    .questions(questionResponses)
+                                    .dragItems(currentVersionDragItemsByGroup.getOrDefault(group, Collections.emptyList()).stream()
+                                                    .filter(DragItem::getIsCurrent)
+                                                    .map(d -> AttemptResponse.QuestionGroupAttemptResponse.DragItemResponse.builder()
+                                                            .dragItemId(d.getParent() == null
+                                                                    ? d.getDragItemId().toString()
+                                                                    : d.getParent().getDragItemId().toString())
+                                                            .content(d.getContent())
+                                                            .build())
+                                                    .toList())
+                                    .build();
+                        })
+                        .collect(Collectors.toList());
+
+        return CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse.builder()
+                .taskId(task.getTaskId())
+                .ieltsType(task.getIeltsType().ordinal())
+                .partNumber(task.getPartNumber().ordinal())
+                .instruction(task.getInstruction())
+                .title(task.getTitle())
+                .audioFileId(task.getAudioFileId())
+                .questionGroups(questionGroupResponses)
+                .build();
+    }
+
+    @Override
+    public List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> fromExamAttemptHistory(ExamAttemptHistory history) {
+        List<ListeningTask> tasks = listeningTaskRepository.findAllByIdSortedByPartNumber(history.getTaskId());
+        List<QuestionGroup> questionGroups = questionGroupRepository.findAllByIdOrderBySectionOrder(history.getQuestionGroupIds());
+        List<Question> questions = questionRepository.findAllByIdOrderByQuestionOrder(history.getQuestionIds());
+
+        List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> taskResponses = new ArrayList<>();
+        for (ListeningTask task: tasks) {
+            int partNumber = task.getPartNumber().ordinal();
+
+            List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse> questionGroupsList = new ArrayList<>();
+            for (QuestionGroup group : questionGroups) {
+
+                if (group.getListeningTask().getPartNumber().ordinal()==partNumber) {
+                    List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses = new ArrayList<>();
+                    if (group.getDragItems()!=null && !group.getDragItems().isEmpty()) { //if group has type drag and drop
+                        List<UUID> dragItemIds = history.getGroupMapItems().getOrDefault(group.getGroupId(), Collections.emptyList());
+                        List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
+                        for (DragItem dragItem : dragItems) {
+                            UpdatedQuestionResponse.DragItemResponse dragItemResponse =
+                                    UpdatedQuestionResponse.DragItemResponse.builder()
+                                            .dragItemId(dragItem.getDragItemId().toString())
+                                            .content(dragItem.getContent())
+                                            .build();
+                            dragItemResponses.add(dragItemResponse);
+                        }
+                    }
+
+                    List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionAttemptResponses = new ArrayList<>();
+                    for (Question question : questions) {
+                        if (question.getQuestionGroup() != null && question.getQuestionGroup().getGroupId().equals(group.getGroupId())) {
+
+                            List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse> choiceAttemptResponses = new ArrayList<>();
+
+                            if (question.getQuestionType()== QuestionType.MULTIPLE_CHOICE) {
+                                for (UUID choiceId : history.getQuestionMapChoices().getOrDefault(question.getQuestionId(), Collections.emptyList())) {
+                                    Choice choice = choiceRepository.findById(choiceId)
+                                            .orElseThrow(() -> new AppException(
+                                                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                                                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                                                    HttpStatus.NOT_FOUND.value()
+                                            ));
+                                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse choiceAttemptResponse =
+                                            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
+                                                    .choiceId(choice.getChoiceId())
+                                                    .label(choice.getLabel())
+                                                    .content(choice.getContent())
+                                                    .choiceOrder(choice.getChoiceOrder())
+                                                    .isCorrect(choice.isCorrect())
+                                                    .build();
+                                    choiceAttemptResponses.add(choiceAttemptResponse);
+                                }
+                            }
+                            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionAttemptResponse =
+                                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
+                                            .questionId(question.getQuestionId())
+                                            .questionOrder(question.getQuestionOrder())
+                                            .questionType(question.getQuestionType().ordinal())
+                                            .blankIndex(question.getBlankIndex())
+                                            .instructionForChoice(question.getInstructionForChoice())
+                                            .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                            .instructionForMatching(question.getInstructionForMatching())
+                                            .zoneIndex( question.getZoneIndex())
+                                            .choices(choiceAttemptResponses)
+                                            .correctAnswer(question.getCorrectAnswer())
+                                            .correctAnswerForMatching( question.getCorrectAnswerForMatching())
+                                            .explanation( question.getExplanation())
+                                            .point( question.getPoint())
+                                            .build();
+
+                            questionAttemptResponses.add(questionAttemptResponse);
+                        }
+                    }
+
+                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse currentGroup = ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.builder()
+                            .questionGroupId(group.getGroupId())
+                            .sectionOrder(group.getSectionOrder())
+                            .sectionLabel(group.getSectionLabel())
+                            .instruction(group.getInstruction())
+                            .questions(questionAttemptResponses)
+                            .dragItems(dragItemResponses)
+                            .build();
+
+                    questionGroupsList.add(currentGroup);
+                }
+            }
+            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse listeningTaskResponse = ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.builder()
+                    .taskId(task.getTaskId())
+                    .title(task.getTitle())
+                    .instruction(task.getInstruction())
+                    .audioFileId(task.getAudioFileId())
+                    .ieltsType(task.getIeltsType().ordinal())
+                    .partNumber(task.getPartNumber().ordinal())
+                    .questionGroups(questionGroupsList)
+                    .build();
+
+            taskResponses.add(listeningTaskResponse);
+        }
+
+        return taskResponses;
     }
 
     private ListeningTaskGetResponse toListeningTaskGetResponse(ListeningTask listeningTask) {
