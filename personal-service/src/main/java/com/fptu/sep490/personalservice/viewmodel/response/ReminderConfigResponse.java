@@ -28,7 +28,5 @@ public record ReminderConfigResponse(
         String zone,
         @JsonProperty("recurrence")
         Integer recurrence,
-        @JsonProperty("days_of_week")
-        List<DayOfWeek> daysOfWeek,
         boolean enabled) {
 }

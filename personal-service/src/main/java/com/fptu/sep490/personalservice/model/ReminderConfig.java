@@ -4,6 +4,8 @@ import com.fptu.sep490.personalservice.model.enumeration.RecurrenceType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.*;
 import java.util.List;
@@ -41,9 +43,6 @@ public class ReminderConfig {
     @Enumerated(EnumType.ORDINAL)
     RecurrenceType recurrence;
 
-    @Column(name ="days_of_week")
-    List<DayOfWeek> daysOfWeek;
-
     @Column(name ="time_zone")
     String timeZone;
 
@@ -51,8 +50,10 @@ public class ReminderConfig {
     boolean enabled;
 
     @Column(name ="created_at")
+    @CreationTimestamp
     LocalDateTime createdAt;
 
     @Column(name ="updated_at")
+    @UpdateTimestamp
     LocalDateTime updatedAt;
 }

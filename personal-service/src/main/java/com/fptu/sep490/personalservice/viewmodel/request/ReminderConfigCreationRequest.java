@@ -1,6 +1,9 @@
 package com.fptu.sep490.personalservice.viewmodel.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fptu.sep490.personalservice.helper.LocalTimeDeserializer;
 import jakarta.validation.constraints.Email;
 import lombok.Builder;
 
@@ -16,15 +19,17 @@ public record ReminderConfigCreationRequest(
       String email,
       @JsonProperty("reminder_date")
       List<LocalDate> reminderDate,
-      @JsonProperty("reminder_time")
+       @JsonProperty("reminder_time")
+       @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
+       @JsonDeserialize(using = LocalTimeDeserializer.class)
       LocalTime reminderTime,
       @JsonProperty("recurrence")
       Integer recurrence,
-      @JsonProperty("days_of_week")
-      List<DayOfWeek> daysOfWeek,
       @JsonProperty("time_zone")
       String timeZone,
       @JsonProperty("enable")
-      Boolean enable
+      Boolean enable,
+       @JsonProperty("message")
+       String message
 ) {
 }
