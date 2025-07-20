@@ -12,4 +12,6 @@ public interface ConfigRepository extends CrudRepository<UserConfig, Integer> {
     Optional<String> getConfigByKeyAndAccountId(String key, UUID accountId);
 
     UserConfig findByConfigNameAndAccountId(String targetConfig, UUID uuid);
+
+    UserConfig findByAccountIdAndConfigName(UUID accountId, String configName);
 }
