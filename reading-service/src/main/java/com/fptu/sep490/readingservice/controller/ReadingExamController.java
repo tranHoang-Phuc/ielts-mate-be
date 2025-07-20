@@ -6,6 +6,7 @@ import com.fptu.sep490.readingservice.service.ReadingExamService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 
 import java.util.List;
+import java.util.UUID;
 
 @Tag(name = "Reading Exams", description = "Endpoints for managing reading exams")
 @RestController
@@ -214,5 +216,15 @@ public class ReadingExamController {
                         .data(response)
                         .build()
         );
+    }
+
+    @GetMapping("/internal/exam")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(@RequestParam("ids") List<UUID> ids) {
+        List<TaskTitle> data = readingExamService.getTaskTitle(ids);
+        BaseResponse<List<TaskTitle>> response = BaseResponse.<List<TaskTitle>>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

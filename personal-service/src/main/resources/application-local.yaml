@@ -84,3 +84,7 @@ kafka:
 
 reminder:
   cron: 0 * * * * *
+
+service:
+  reading-service: http://localhost:9000/reading
+  listening-service: http://localhost:8071/listening

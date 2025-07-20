@@ -71,4 +71,6 @@ public interface PassageService {
     CreateExamAttemptResponse.ReadingExamResponse.ReadingPassageResponse fromReadingPassage(String passageId);
 
     List<ExamAttemptGetDetail.ReadingExamResponse.ReadingPassageResponse> fromExamAttemptHistory(ExamAttemptHistory history);
+
+    List<TaskTitle> getTaskTitle(List<UUID> ids);
 }

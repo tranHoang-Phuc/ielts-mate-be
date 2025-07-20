@@ -87,6 +87,10 @@ public class Helper {
         return newToken;
     }
 
+    public String getAccessToken(HttpServletRequest request) {
+        return CookieUtils.getCookieValue(request, "Authorization");
+    }
+
     public String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
         if (token == null || token.isEmpty()) {

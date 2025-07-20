@@ -8,6 +8,7 @@ import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.QuestionGroupCreationRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.QuestionGroupResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -27,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 
 @RestController
@@ -235,4 +237,13 @@ public class ExamController {
     }
 
 
+    @GetMapping("/internal/exam")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<TaskTitle>>> getExamTitle(@RequestParam("ids")List<UUID> ids) {
+        List<TaskTitle> data = examService.getExamTitle(ids);
+        BaseResponse<List<TaskTitle>> response = BaseResponse.<List<TaskTitle>>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

@@ -9,6 +9,7 @@ public class Constants {
         public static final String INVALID_REQUEST = "INVALID_REQUEST";
         public static final String REMINDER_CONFIGURED = "REMINDER_CONFIGURED";
         public static final String REMINDER_NOT_FOUND = "REMINDER_NOT_FOUND";
+        public static final String MARK_UP_NOT_FOUND = "MARK_UP_NOT_FOUND";
     }
 
     public final class RedisKey {
@@ -24,6 +25,8 @@ public class Constants {
         public static final String INVALID_REQUEST = "500002";
         public static final String REMINDER_CONFIGURED = "500003";
         public static final String REMINDER_NOT_FOUND = "500004";
+        public static final String MARK_UP_NOT_FOUND = "500005";
+
 
     }
 

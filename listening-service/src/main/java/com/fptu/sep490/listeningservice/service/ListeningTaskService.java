@@ -2,6 +2,10 @@ package com.fptu.sep490.listeningservice.service;
 
 import com.fptu.sep490.listeningservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
+import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
@@ -35,4 +39,6 @@ public interface ListeningTaskService {
     CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId);
 
     List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> fromExamAttemptHistory(ExamAttemptHistory history);
+
+    List<TaskTitle> getTaskTitle(List<UUID> taskIds);
 }

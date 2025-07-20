@@ -12,6 +12,7 @@ import com.fptu.sep490.listeningservice.service.ExamService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -556,6 +557,12 @@ public class ExamServiceImpl implements ExamService {
 
         return exams.map(this::mapToExamResponse);
 
+    }
+
+    @Override
+    public List<TaskTitle> getExamTitle(List<UUID> ids) {
+        List<ListeningExam> exams = listeningExamRepository.findAllById(ids);
+        return exams.stream().map(e -> TaskTitle.builder().taskId(e.getListeningExamId()).title(e.getExamName()).build()).toList();
     }
 
     private ListeningTask findCurrentOrChildCurrentTask(ListeningTask listeningTask) {
