@@ -8,17 +8,23 @@ import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ExamAttempt;
 import com.fptu.sep490.listeningservice.model.ListeningExam;
 import com.fptu.sep490.listeningservice.model.json.ExamAttemptHistory;
+import com.fptu.sep490.listeningservice.model.specification.ExamAttemptSpecification;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.service.ExamAttemptService;
 import com.fptu.sep490.listeningservice.service.ListeningTaskService;
 import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
+import com.fptu.sep490.listeningservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserInformationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,5 +139,53 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .updatedAt(examAttempt.getUpdatedAt().toString())
                 .answers(history.getUserAnswers())
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public Page<UserGetHistoryExamAttemptResponse> getListExamHistory(
+            int page,
+            int size,
+            String listeningExamName,
+            String sortBy,
+            String sortDirection,
+            HttpServletRequest request
+    ) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        var spec = ExamAttemptSpecification.byConditions(
+                listeningExamName,
+                sortBy,
+                sortDirection,
+                helper.getUserIdFromToken(request)
+        );
+
+        Page<ExamAttempt> examAttemptsResult = examAttemptRepository.findAll(spec, pageable);
+
+        List<ExamAttempt> examAttempts = examAttemptsResult.getContent();
+
+        List<UserGetHistoryExamAttemptResponse> list = examAttempts.stream().map(examAttempt -> {
+            UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptListeningExamResponse listeningExamResponse =
+                    UserGetHistoryExamAttemptResponse.UserGetHistoryExamAttemptListeningExamResponse.builder()
+                            .listeningExamId(examAttempt.getListeningExam().getListeningExamId())
+                            .listeningExamName(examAttempt.getListeningExam().getExamName())
+                            .listeningExamDescription(examAttempt.getListeningExam().getExamDescription())
+                            .urlSlug(examAttempt.getListeningExam().getUrlSlug())
+                            .build();
+
+            return UserGetHistoryExamAttemptResponse.builder()
+                    .examAttemptId(examAttempt.getExamAttemptId())
+                    .listeningExam(listeningExamResponse)
+                    .duration(examAttempt.getDuration())
+                    .totalQuestion(examAttempt.getTotalPoint())
+                    .createdBy(helper.getUserInformationResponse(examAttempt.getCreatedBy()))
+                    .updatedBy(helper.getUserInformationResponse(examAttempt.getUpdatedBy()))
+                    .createdAt(examAttempt.getCreatedAt().toString())
+                    .updatedAt(examAttempt.getUpdatedAt().toString())
+                    .build();
+        }).toList();
+
+        return new PageImpl<>(list, pageable, examAttemptsResult.getTotalElements());
+
     }
 }
