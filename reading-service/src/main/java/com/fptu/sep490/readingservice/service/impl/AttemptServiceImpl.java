@@ -439,8 +439,6 @@ public class AttemptServiceImpl implements AttemptService {
                     .choiceIds(answerAttempt.getChoices() != null ? answerAttempt.getChoices() : Collections.emptyList())
                     .build();
             answerChoices.add(answerChoice);
-
-
         }
         return UserDataAttempt.builder()
                 .attemptId(attempt.getAttemptId())

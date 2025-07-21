@@ -38,7 +38,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ep-divine-credit-a1g68jhj-pooler.ap-southeast-1.aws.neon.tech:5432/file-service?sslmode=require&prepareThreshold=0
+    url: jdbc:postgresql://ep-damp-moon-a1f6wxe8-pooler.ap-southeast-1.aws.neon.tech:5432/file-service?sslmode=require&prepareThreshold=0
     username: neondb_owner
     password: npg_9abzQo8sNRpq
     hikari:
