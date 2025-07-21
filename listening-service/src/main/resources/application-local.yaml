@@ -38,7 +38,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://ep-damp-moon-a1f6wxe8-pooler.ap-southeast-1.aws.neon.tech:5432/listening_service?sslmode=require&prepareThreshold=0
     username: neondb_owner
-    password: npg_9abzQo8sNRpq
+    password: npg_0J4icdBoFmQf
     hikari:
       data-source-properties:
         prepareThreshold: 0
