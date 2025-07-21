@@ -787,8 +787,8 @@ public class QuestionServiceImpl implements QuestionService {
                     Constants.ErrorCode.QUESTION_NOT_BELONG_TO_GROUP, HttpStatus.BAD_REQUEST.value());
         }
 
-        question.setQuestionGroup(null);
-        question.setIsDeleted(false);
+//        question.setQuestionGroup(null);
+        question.setIsDeleted(true);
         question.setIsCurrent(false);
         questionRepository.save(question);
         questionGroup.setUpdatedBy(userId);
