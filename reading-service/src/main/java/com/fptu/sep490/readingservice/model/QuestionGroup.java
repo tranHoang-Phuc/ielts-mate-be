@@ -84,8 +84,8 @@ public class QuestionGroup {
     private Boolean isOriginal = true;
 
     @Enumerated(EnumType.ORDINAL)
-    @Column(name = "group_type")
-    private QuestionType groupType = QuestionType.MULTIPLE_CHOICE;
+    @Column(name = "question_type")
+    private QuestionType questionType = QuestionType.MULTIPLE_CHOICE;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

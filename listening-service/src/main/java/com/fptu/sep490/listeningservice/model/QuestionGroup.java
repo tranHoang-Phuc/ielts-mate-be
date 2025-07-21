@@ -1,5 +1,6 @@
 package com.fptu.sep490.listeningservice.model;
 
+import com.fptu.sep490.listeningservice.model.enumeration.QuestionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,6 +35,11 @@ public class QuestionGroup {
 
     @Column(name = "section_label", length = 255)
     private String sectionLabel;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "question_type")
+    private QuestionType questionType = QuestionType.MULTIPLE_CHOICE; // default value
+
 
     @Column(name = "instruction", columnDefinition = "TEXT")
     private String instruction;

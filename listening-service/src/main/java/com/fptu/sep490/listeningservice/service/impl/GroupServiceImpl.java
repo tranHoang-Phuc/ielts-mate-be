@@ -4,6 +4,7 @@ package com.fptu.sep490.listeningservice.service.impl;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
+import com.fptu.sep490.listeningservice.model.enumeration.QuestionType;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
 import com.fptu.sep490.listeningservice.model.ListeningTask;
 import com.fptu.sep490.listeningservice.model.QuestionGroup;
@@ -52,6 +53,7 @@ public class GroupServiceImpl implements GroupService {
                 .sectionOrder(request.sectionOrder())
                 .sectionLabel(request.sectionLabel())
                 .instruction(request.instruction())
+                .questionType(QuestionType.fromValue(request.questionType()))
                 .isCurrent(true)
                 .isOriginal(true)
                 .isDeleted(false)
@@ -74,6 +76,7 @@ public class GroupServiceImpl implements GroupService {
                 .updatedAt(group.getUpdatedAt())
                 .isCurrent(group.getIsCurrent())
                 .isDeleted(group.getIsDeleted())
+                .questionType(group.getQuestionType().ordinal())
                 .version(group.getVersion())
                 .isOriginal(group.getIsOriginal())
                 .parentId(group.getParent() != null ? group.getParent().getGroupId() : null)
