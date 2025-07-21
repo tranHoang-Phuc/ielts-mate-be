@@ -265,7 +265,7 @@ public class AttemptServiceImpl implements AttemptService {
             );
         }
 
-        attempt.setDuration(attempt.getDuration());
+        attempt.setDuration(answers.duration());
 
         for (SavedAnswersRequest ans : answers.answers()) {
             Question question = questionRepository.findById(ans.questionId())
