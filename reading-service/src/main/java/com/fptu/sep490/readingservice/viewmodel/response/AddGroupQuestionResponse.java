@@ -14,6 +14,8 @@ public record AddGroupQuestionResponse(
         String sectionLabel,
         @JsonProperty("instruction")
         String instruction,
+        @JsonProperty("question_type")
+        int questionType,
         @JsonProperty("questions")
         List<QuestionCreationRequest> questions,
         @JsonProperty("drag_item")

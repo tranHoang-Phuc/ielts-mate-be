@@ -747,7 +747,7 @@ public class PassageServiceImpl implements PassageService {
 
                 if (group.getReadingPassage().getPartNumber().ordinal()==partNumber) {
                     List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses = new ArrayList<>();
-                    if (group.getGroupType()==QuestionType.DRAG_AND_DROP) {
+                    if (group.getQuestionType()==QuestionType.DRAG_AND_DROP) {
                         List<UUID> dragItemIds = history.getGroupMapItems().getOrDefault(group.getGroupId(), Collections.emptyList());
                         List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
                         for (DragItem dragItem : dragItems) {
