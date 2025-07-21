@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -207,15 +208,36 @@ public class ReadingExamController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<BaseResponse<List<ReadingExamResponse>>> getAllReadingExams(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword,
             HttpServletRequest httpServletRequest
     ) throws Exception {
-        List<ReadingExamResponse> response = readingExamService.getAllReadingExams(httpServletRequest);
-        return ResponseEntity.ok(
-                BaseResponse.<List<ReadingExamResponse>>builder()
-                        .message("Get All Reading Exams for Creator")
-                        .data(response)
-                        .build()
+        Page<ReadingExamResponse> response = readingExamService.getAllReadingExams(
+                httpServletRequest, page, size, sortBy, sortDirection, keyword
         );
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(response.getNumber() + 1)
+                .totalPages(response.getTotalPages())
+                .pageSize(response.getSize())
+                .totalItems((int) response.getTotalElements())
+                .hasNextPage(response.hasNext())
+                .hasPreviousPage(response.hasPrevious())
+                .build();
+
+        BaseResponse<List<ReadingExamResponse>> baseResponse = BaseResponse.<List<ReadingExamResponse>>builder()
+                .data(response.getContent())
+                .pagination(pagination)
+                .message("Active listening exams retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+
+
     }
 
     @GetMapping("/internal/exam")

@@ -20,7 +20,7 @@ public interface ReadingExamService {
 
     Page<ReadingExamResponse> getAllReadingExamsForCreator(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection) throws Exception;
 
-    List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception;
+    Page<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception;
 
     List<TaskTitle> getTaskTitle(List<UUID> ids);
 }

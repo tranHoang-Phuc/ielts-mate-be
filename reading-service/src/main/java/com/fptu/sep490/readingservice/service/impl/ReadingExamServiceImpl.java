@@ -336,7 +336,75 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         // Only get exams with isDeleted = false
-        Page<ReadingExam> readingExamPage = readingExamRepository.findByCreatedByAndIsDeletedFalse(userId, pageable);
+        Page<ReadingExam> readingExamPage = readingExamRepository.findByIsDeletedFalse(pageable);
+        List<ReadingExamResponse> readingExamResponses = readingExamPage.getContent().stream()
+                .filter(exam -> exam.getPart1() != null && exam.getPart2() != null && exam.getPart3() != null)
+                .map(readingExam -> new ReadingExamResponse(
+                        readingExam.getReadingExamId().toString(),
+                        readingExam.getExamName(),
+                        readingExam.getExamDescription(),
+                        readingExam.getUrlSlug(),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart1().getPassageId().toString(),
+                                readingExam.getPart1().getTitle(),
+                                readingExam.getPart1().getContent()
+                        ),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
+                                readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
+                                readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
+                        ),
+                        new ReadingExamResponse.ReadingPassageResponse(
+                                readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
+                                readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
+                                readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
+                        )
+                ))
+                .toList();
+
+        return new PageImpl<>(readingExamResponses, pageable, readingExamPage.getTotalElements());
+    }
+
+    @Override
+    public Page<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception {
+        if (httpServletRequest == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null || userId.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
+        if (sortDirection == null || sortDirection.isBlank()) {
+            sortDirection = "asc";
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<ReadingExam> readingExamPage;
+        try {
+            readingExamPage = readingExamRepository.searchCurrentExams(keyword, pageable);
+        } catch (Exception e) {
+            log.error("Database error when fetching exams for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
 
         List<ReadingExamResponse> readingExamResponses = readingExamPage.getContent().stream()
                 .filter(exam -> exam.getPart1() != null && exam.getPart2() != null && exam.getPart3() != null)
@@ -367,83 +435,6 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
     }
 
     @Override
-    public List<ReadingExamResponse> getAllReadingExams(HttpServletRequest httpServletRequest) throws Exception {
-        if (httpServletRequest == null) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.INVALID_INPUT,
-                    Constants.ErrorCode.INVALID_INPUT,
-                    HttpStatus.BAD_REQUEST.value()
-            );
-        }
-        String userId;
-
-        userId = helper.getUserIdFromToken(httpServletRequest);
-        if (userId == null || userId.isEmpty()) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.UNAUTHORIZED,
-                    Constants.ErrorCode.UNAUTHORIZED,
-                    HttpStatus.UNAUTHORIZED.value()
-            );
-        }
-
-        List<ReadingExam> readingExams;
-        try {
-            readingExams = readingExamRepository.findAll();
-        } catch (Exception e) {
-            log.error("Database error when fetching exams for user: {}", userId, e);
-            throw new AppException(
-                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
-                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
-                    HttpStatus.INTERNAL_SERVER_ERROR.value()
-            );
-        }
-
-        // 3. Filter out deleted exams (soft delete)
-        List<ReadingExamResponse> readingExamResponses = new ArrayList<>();
-        for (ReadingExam readingExam : readingExams) {
-            if (Boolean.TRUE.equals(readingExam.getIsDeleted())) {
-                continue;
-            }
-            // 4. Validate required fields
-            if (readingExam.getPart1() == null) {
-                log.warn("ReadingExam {} missing part1, skipping", readingExam.getReadingExamId());
-                continue;
-            }
-            if (readingExam.getPart2() == null) {
-                log.warn("ReadingExam {} missing part2, skipping", readingExam.getReadingExamId());
-                continue;
-            }
-            if (readingExam.getPart3() == null) {
-                log.warn("ReadingExam {} missing part3, skipping", readingExam.getReadingExamId());
-                continue;
-            }
-            ReadingExamResponse response = new ReadingExamResponse(
-                    readingExam.getReadingExamId().toString(),
-                    readingExam.getExamName(),
-                    readingExam.getExamDescription(),
-                    readingExam.getUrlSlug(),
-                    new ReadingExamResponse.ReadingPassageResponse(
-                            readingExam.getPart1().getPassageId().toString(),
-                            readingExam.getPart1().getTitle(),
-                            readingExam.getPart1().getContent()
-                    ),
-                    new ReadingExamResponse.ReadingPassageResponse(
-                            readingExam.getPart2() != null ? readingExam.getPart2().getPassageId().toString() : null,
-                            readingExam.getPart2() != null ? readingExam.getPart2().getTitle() : null,
-                            readingExam.getPart2() != null ? readingExam.getPart2().getContent() : null
-                    ),
-                    new ReadingExamResponse.ReadingPassageResponse(
-                            readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
-                            readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
-                            readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
-                    )
-            );
-            readingExamResponses.add(response);
-        }
-        return readingExamResponses;
-    }
-
-    @Override
     public List<TaskTitle> getTaskTitle(List<UUID> ids) {
         List<ReadingExam> readingExams = readingExamRepository.findAllById(ids);
         return readingExams.stream().map(
@@ -456,3 +447,4 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
 
 
 }
+
