@@ -15,6 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -105,6 +106,26 @@ public class VocabularyServiceImpl  implements VocabularyService {
                         HttpStatus.NOT_FOUND.value()
                 ));
         vocabulary.setIsDeleted(true);
+    }
+
+    @Override
+    public Page<VocabularyResponse> getAllVocabulary(HttpServletRequest request, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception {
+        String UserId = helper.getUserIdFromToken(request);
+        if (UserId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+
+
+
+
+
+
+        return null;
     }
 
 

@@ -3,6 +3,7 @@ package com.fptu.sep490.personalservice.controller;
 
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.personalservice.service.VocabularyService;
 import com.fptu.sep490.personalservice.viewmodel.request.VocabularyRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.domain.Page;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -119,6 +123,46 @@ public class VocabularyController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);    }
 
+
+    @GetMapping("/my-vocabulary")
+    @Operation(
+            summary = "Get all vocabulary of user",
+            description = "Retrieve all vocabulary of user. Requires CREATOR role."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vocabulary retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<List<VocabularyResponse>>> getAllVocabulary(
+            HttpServletRequest request,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword
+
+    ) throws Exception {
+        Page<VocabularyResponse> responses = vocabularyService.getAllVocabulary(request, page, size, sortBy, sortDirection, keyword);
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(responses.getNumber() + 1)
+                .totalPages(responses.getTotalPages())
+                .pageSize(responses.getSize())
+                .totalItems((int) responses.getTotalElements())
+                .hasNextPage(responses.hasNext())
+                .hasPreviousPage(responses.hasPrevious())
+                .build();
+        BaseResponse<List<VocabularyResponse>> baseResponse = BaseResponse.<List<VocabularyResponse>>builder()
+                .data(responses.getContent())
+                .pagination(pagination)
+                .message("Active listening exams retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
 
 
 
