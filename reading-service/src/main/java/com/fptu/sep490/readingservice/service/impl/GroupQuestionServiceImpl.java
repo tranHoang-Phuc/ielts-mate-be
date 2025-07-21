@@ -51,6 +51,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
         group.setSectionOrder(request.sectionOrder());
         group.setSectionLabel(request.sectionLabel());
         group.setInstruction(request.instruction());
+        group.setQuestionType(QuestionType.fromValue(request.questionType()));
         group.setReadingPassage(readingPassage);
         group.setCreatedBy(userId);
 
@@ -190,6 +191,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                 group.getSectionOrder(),
                                 group.getSectionLabel(),
                                 group.getInstruction(),
+                                group.getQuestionType().ordinal(),
                                 group.getQuestions().stream()
                                         .map(q -> new QuestionCreationRequest(
                                                 q.getQuestionOrder(),
