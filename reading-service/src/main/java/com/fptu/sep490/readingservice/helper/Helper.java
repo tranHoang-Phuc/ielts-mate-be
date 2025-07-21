@@ -107,6 +107,7 @@ public class Helper {
                 request.sectionOrder(),
                 request.sectionLabel(),
                 request.instruction(),
+                request.questionType(),
                 request.questions(),
                 request.dragItems()
         );
