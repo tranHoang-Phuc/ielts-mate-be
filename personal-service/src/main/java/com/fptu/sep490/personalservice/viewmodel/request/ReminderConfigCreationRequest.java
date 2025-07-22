@@ -18,10 +18,14 @@ public record ReminderConfigCreationRequest(
        @JsonProperty("email")
       String email,
       @JsonProperty("reminder_date")
+       // nếu recurrence = NONE, Thì date chỉ cho user chọn 1 ngày duy nhất
+      // nếu recurrence = CUSTOME, thì date có thể là nhiều ngày
+      // neewus recurrence = DAILY,WEEKLY, MOnthly, yearly mặc định là ngày hôm nay
       List<LocalDate> reminderDate,
        @JsonProperty("reminder_time")
        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
        @JsonDeserialize(using = LocalTimeDeserializer.class)
+       //Nguowuowif dùng
       LocalTime reminderTime,
       @JsonProperty("recurrence")
       Integer recurrence,

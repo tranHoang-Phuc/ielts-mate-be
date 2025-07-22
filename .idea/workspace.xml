@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="fix: question type in listening group">
+    <list default="true" id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="fix: task status">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/request/ReminderConfigCreationRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/request/ReminderConfigCreationRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,7 +85,7 @@
     "Spring Boot.file.executor": "Run",
     "Spring Boot.gateway.executor": "Run",
     "Spring Boot.identity.executor": "Run",
-    "Spring Boot.listening.executor": "Debug",
+    "Spring Boot.listening.executor": "Run",
     "Spring Boot.notify.executor": "Run",
     "Spring Boot.reading.executor": "Run",
     "git-widget-placeholder": "local",
@@ -232,7 +231,8 @@
       <workItem from="1753073880077" duration="2770000" />
       <workItem from="1753085030822" duration="210000" />
       <workItem from="1753117485600" duration="912000" />
-      <workItem from="1753151318020" duration="8400000" />
+      <workItem from="1753151318020" duration="14783000" />
+      <workItem from="1753195661185" duration="1345000" />
     </task>
     <task id="LOCAL-00001" summary="fix: version exam attempt">
       <option name="closed" value="true" />
@@ -322,7 +322,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753163884578</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="fix: task status">
+      <option name="closed" value="true" />
+      <created>1753169915931</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1753169915931</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -338,7 +346,8 @@
     <MESSAGE value="refactor: secret" />
     <MESSAGE value="fix: group question type" />
     <MESSAGE value="fix: question type in listening group" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: question type in listening group" />
+    <MESSAGE value="fix: task status" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: task status" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -369,16 +378,21 @@
           <option name="timeStamp" value="32" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ListeningTaskController.java</url>
-          <line>88</line>
-          <option name="timeStamp" value="34" />
+          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
+          <line>282</line>
+          <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>193</line>
-          <option name="timeStamp" value="35" />
+          <line>315</line>
+          <option name="timeStamp" value="39" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="SpringBootApplicationConfigurationType">
+        <watch expression="((HashMap.Node)((HashMap)lastestVersion).entrySet().toArray()[4]).getValue()" custom="java.util.HashMap.Node,java.util.HashMap" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>

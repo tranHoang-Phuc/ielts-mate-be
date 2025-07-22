@@ -270,12 +270,24 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .stream().collect(Collectors.toMap(ListeningTask::getTaskId, Function.identity()));
 
         for(ListeningTask task : tasks) {
-            ListeningTask lastVersion = lastestVersion.get(task.getTaskId());
-            if (!Objects.isNull(lastVersion)) {
-                task.setTitle(lastVersion.getTitle());
-                task.setIeltsType(lastVersion.getIeltsType());
-                task.setPartNumber(lastVersion.getPartNumber());
-            }
+            lastestVersion.forEach((key, value) -> {
+                if(value.getParent() != null) {
+                    ListeningTask lastVersion = lastestVersion.get(value.getParent().getTaskId());
+                    if (!Objects.isNull(lastVersion)) {
+                        task.setTitle(lastVersion.getTitle());
+                        task.setIeltsType(lastVersion.getIeltsType());
+                        task.setPartNumber(lastVersion.getPartNumber());
+                    }
+                }
+            });
+//                ListeningTask lastVersion = lastestVersion.get(task.getParent().getTaskId());
+//                if (!Objects.isNull(lastVersion)) {
+//                    task.setTitle(lastVersion.getTitle());
+//                    task.setIeltsType(lastVersion.getIeltsType());
+//                    task.setPartNumber(lastVersion.getPartNumber());
+//                }
+
+
         }
         List<ListeningTaskGetResponse> responses = tasks.stream()
                 .map(this :: toListeningTaskGetResponse)
@@ -301,19 +313,55 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         Map<UUID, ListeningTask> lastestVersion = listeningTaskRepository.findCurrentVersionsByIds(taskIds)
                 .stream().collect(Collectors.toMap(ListeningTask::getTaskId, Function.identity()));
 
-        for(ListeningTask task : tasks) {
-            ListeningTask lastVersion = lastestVersion.get(task.getTaskId());
-            if (!Objects.isNull(lastVersion)) {
-                task.setTitle(lastVersion.getTitle());
-                task.setIeltsType(lastVersion.getIeltsType());
-                task.setPartNumber(lastVersion.getPartNumber());
-                task.setStatus(lastVersion.getStatus());
+//        for(ListeningTask task : tasks) {
+//            ListeningTask lastVersion = lastestVersion.get(task.getTaskId());
+//            if (!Objects.isNull(lastVersion)) {
+//                task.setTitle(lastVersion.getTitle());
+//                task.setIeltsType(lastVersion.getIeltsType());
+//                task.setPartNumber(lastVersion.getPartNumber());
+//                task.setStatus(lastVersion.getStatus());
+//            }
+//        }
+        List<ListeningTaskGetResponse> responses = new ArrayList<>();
+        lastestVersion.forEach((key, value) -> {
+            if(value.getParent() != null) {
+                try {
+                    var createdByProfile = getUserProfileById(value.getCreatedBy());
+                    var updatedByProfile = getUserProfileById(value.getUpdatedBy());
+                    ListeningTaskGetResponse data = ListeningTaskGetResponse.builder()
+                            .taskId(value.getParent().getTaskId())
+                            .title(value.getParent().getTitle())
+                            .ieltsType(value.getIeltsType().ordinal())
+                            .partNumber(value.getPartNumber().ordinal())
+                            .status(value.getStatus().ordinal())
+                            .createdAt(value.getCreatedAt().toString())
+                            .updatedAt(value.getUpdatedAt().toString())
+                            .createdBy(UserInformationResponse.builder()
+                                    .userId(createdByProfile.id())
+                                    .lastName(createdByProfile.lastName())
+                                    .firstName(createdByProfile.firstName())
+                                    .email(createdByProfile.email())
+                                    .build())
+                            .updatedBy(UserInformationResponse.builder()
+                                    .userId(updatedByProfile.id())
+                                    .lastName(updatedByProfile.lastName())
+                                    .firstName(updatedByProfile.firstName())
+                                    .email(updatedByProfile.email())
+                                    .build())
+                            .build();
+                    responses.add(data);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                ListeningTaskGetResponse data = toListeningTaskGetResponse(value);
+                responses.add(data);
             }
-        }
-        List<ListeningTaskGetResponse> responses = tasks.stream()
-                .map(this :: toListeningTaskGetResponse)
-                .toList();
-        return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+        });
+//        List<ListeningTaskGetResponse> responses = tasks.stream()
+//                .map(this :: toListeningTaskGetResponse)
+//                .toList();
+        return new PageImpl<>(responses.stream().sorted(Comparator.comparing(ListeningTaskGetResponse::createdAt).reversed()).toList(), pageable, pageResult.getTotalElements());
     }
 
     @Override
