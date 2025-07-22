@@ -435,7 +435,6 @@ public class PassageServiceImpl implements PassageService {
                                         .questionType(g.getQuestionType().ordinal())
                                         .instruction(g.getInstruction())
                                         .dragItems(
-
                                                 dragItemMap.getOrDefault(g, Collections.emptyList()).stream()
                                                         .filter(DragItem::getIsCurrent)
                                                         .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()

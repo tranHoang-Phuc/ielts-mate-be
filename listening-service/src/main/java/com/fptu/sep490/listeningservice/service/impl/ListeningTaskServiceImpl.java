@@ -419,6 +419,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                     .groupId(key.getParent() == null ? key.getGroupId() : key.getParent().getGroupId())
                     .sectionOrder(key.getSectionOrder())
                     .sectionLabel(key.getSectionLabel())
+                    .questionType(key.getQuestionType().ordinal())
                     .instruction(key.getInstruction())
                     .dragItems(dragItemResponses)
                     .questions(questionListResponse.stream()

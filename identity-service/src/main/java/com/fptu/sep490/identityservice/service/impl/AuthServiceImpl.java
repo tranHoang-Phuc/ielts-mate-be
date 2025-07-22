@@ -467,6 +467,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserProfileMappingRoles getUserProfile(String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
+        UserProfileMappingRoles profileCache = redisService.getValue(Constants.RedisKey.PROFILE + username, UserProfileMappingRoles.class);
+        if(profileCache != null) {
+            return profileCache;
+        }
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
         if (userAccessInfos.isEmpty()) {
@@ -477,15 +481,16 @@ public class AuthServiceImpl implements AuthService {
         var userRoles = keyCloakUserClient.getUserRoleMappings(realm, "Bearer " + clientToken, userAccessInfo.id());
         defaultRoles.addAll(userRoles.realmMappings());
 
-       return UserProfileMappingRoles.builder()
+       var response = UserProfileMappingRoles.builder()
                 .id(userAccessInfo.id())
                 .email(userAccessInfo.email())
                 .firstName(userAccessInfo.firstName())
                 .lastName(userAccessInfo.lastName())
                 .roles(defaultRoles.stream().map(RoleMappingResponse::name).toList())
                 .build();
-
-
+       redisService.saveValue(Constants.RedisKey.PROFILE + username, response);
+       redisService.setTTL(Constants.RedisKey.PROFILE + username, Duration.ofSeconds(Constants.Duration.PROFILE));
+       return response;
     }
 
     public boolean isValidCheckedToken(String token, String expectedAction, String expectedPurpose) {

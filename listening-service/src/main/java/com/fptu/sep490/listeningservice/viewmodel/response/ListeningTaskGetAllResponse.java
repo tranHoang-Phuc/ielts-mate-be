@@ -49,6 +49,9 @@ public record ListeningTaskGetAllResponse(
             @JsonProperty("drag_items")
             List<DragItemResponse> dragItems,
 
+            @JsonProperty("question_type")
+            Integer questionType,
+
             @JsonProperty("questions")
             List<QuestionResponse> questions
 

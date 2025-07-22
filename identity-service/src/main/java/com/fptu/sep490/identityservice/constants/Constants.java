@@ -1,6 +1,10 @@
 package com.fptu.sep490.identityservice.constants;
 
 public class Constants {
+    public final class Duration{
+        public static final Long PROFILE = 10L * 60;
+    }
+
     public final class ErrorCodeMessage {
         public static final String ACCESS_DENIED = "ACCESS_DENIED";
         public static final String SIGN_IN_REQUIRE_EXCEPTION = "SIGN_IN_REQUIRE_EXCEPTION";
@@ -32,6 +36,7 @@ public class Constants {
     public final class RedisKey {
         public static final String KEY_CLOAK_CLIENT_TOKEN = "keycloak-client-token";
         public static final String USER_PENDING_VERIFY = "keycloak-client-refresh-token";
+        public static final String PROFILE = "user:profile:";
     }
 
     public final class ErrorCode {
