@@ -561,6 +561,7 @@ public class PassageServiceImpl implements PassageService {
                 passage.setTitle(lastVersion.getTitle());
                 passage.setIeltsType(lastVersion.getIeltsType());
                 passage.setPartNumber(lastVersion.getPartNumber());
+                passage.setPassageStatus(lastVersion.getPassageStatus());
             }
         }
 

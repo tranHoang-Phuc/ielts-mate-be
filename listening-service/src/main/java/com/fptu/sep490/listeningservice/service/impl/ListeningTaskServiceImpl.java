@@ -161,6 +161,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         ListeningTask newVersion = ListeningTask.builder().build();
 
         if (!Objects.isNull(status)) {
+            task.setStatus(safeEnumFromOrdinal(Status.values(), status));
             newVersion.setStatus(safeEnumFromOrdinal(Status.values(), status));
         } else {
             newVersion.setStatus(task.getStatus());
@@ -306,6 +307,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 task.setTitle(lastVersion.getTitle());
                 task.setIeltsType(lastVersion.getIeltsType());
                 task.setPartNumber(lastVersion.getPartNumber());
+                task.setStatus(lastVersion.getStatus());
             }
         }
         List<ListeningTaskGetResponse> responses = tasks.stream()
@@ -401,17 +403,16 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                 .correctAnswerForMatching(question.getCorrectAnswerForMatching())
                                 .zoneIndex(question.getZoneIndex())
                                 .dragItemId(question.getDragItem() != null ? question.getDragItem().getDragItemId() : null)
-                                .choices(choices.stream()
+                                .choices(choices != null ? choices.stream()
                                         .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse
-                                                .ChoiceResponse.builder()
-                                                .choiceId(c.getParent() == null ? c.getChoiceId() : c.getParent().getChoiceId())
+                                                .ChoiceResponse.builder().choiceId(c.getParent() == null ? c.getChoiceId() : c.getParent().getChoiceId())
                                                 .label(c.getLabel())
                                                 .choiceOrder(c.getChoiceOrder())
                                                 .content(c.getContent())
                                                 .isCorrect(c.isCorrect())
                                                 .build())
                                         .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder))
-                                        .toList())
+                                        .toList() : null)
                                 .build();
                 questionListResponse.add(questionResponse);
             });

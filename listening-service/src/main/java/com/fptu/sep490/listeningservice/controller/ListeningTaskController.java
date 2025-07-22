@@ -84,7 +84,7 @@ public class ListeningTaskController {
             @RequestParam(value = "status", required = false) Integer status,
             @RequestParam(value = "title", required = false) String title,
             @RequestPart(value = "audio_file", required = false) MultipartFile audioFile,
-            @RequestParam(value = "transcription", required = false) String transcription,
+            @RequestParam(value = "transcript", required = false) String transcription,
             HttpServletRequest httpServletRequest) throws IOException {
         ListeningTaskResponse response = listeningTaskService.updateTask(taskId,status, ieltsType, partNumber, instruction,
                 title, audioFile, transcription, httpServletRequest);

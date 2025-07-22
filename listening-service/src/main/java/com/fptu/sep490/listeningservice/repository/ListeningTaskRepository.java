@@ -24,7 +24,7 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
     @Query("""
         SELECT lt FROM ListeningTask lt
         WHERE 
-            (lt.taskId IN :taskIds AND lt.isOriginal = true AND lt.isCurrent = true and lt.isDeleted = false)
+            (lt.taskId IN :taskIds AND lt.isCurrent = true and lt.isDeleted = false)
             OR 
             (lt.parent.taskId IN :taskIds AND lt.isCurrent = true and lt.isDeleted = false)
     """)
