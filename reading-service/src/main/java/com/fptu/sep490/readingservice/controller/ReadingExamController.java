@@ -156,7 +156,7 @@ public class ReadingExamController {
     }
 
     @GetMapping("/my-exams")
-    @PreAuthorize("hasRole('CREATOR', 'USER')")
+    @PreAuthorize("hasRole('CREATOR')")
     @Operation(
             summary = "Get all reading exams for creator",
             description = "Retrieve all reading exams created by the current user."
