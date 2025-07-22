@@ -216,7 +216,7 @@ public class ReadingExamController {
             HttpServletRequest httpServletRequest
     ) throws Exception {
         Page<ReadingExamResponse> response = readingExamService.getAllReadingExams(
-                httpServletRequest, page, size, sortBy, sortDirection, keyword
+                httpServletRequest, page-1, size, sortBy, sortDirection, keyword
         );
 
         Pagination pagination = Pagination.builder()
