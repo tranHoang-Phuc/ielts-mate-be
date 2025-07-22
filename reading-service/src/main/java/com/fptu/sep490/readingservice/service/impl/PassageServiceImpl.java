@@ -432,6 +432,7 @@ public class PassageServiceImpl implements PassageService {
                                         .groupId(g.getGroupId().toString())
                                         .sectionLabel(g.getSectionLabel())
                                         .sectionOrder(g.getSectionOrder())
+                                        .questionType(g.getQuestionType().ordinal())
                                         .instruction(g.getInstruction())
                                         .dragItems(
 

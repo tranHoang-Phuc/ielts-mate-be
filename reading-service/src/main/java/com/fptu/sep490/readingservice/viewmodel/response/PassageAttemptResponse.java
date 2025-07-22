@@ -55,6 +55,8 @@ public record PassageAttemptResponse(
                 Integer sectionOrder,
                 @JsonProperty("instruction")
                 String instruction,
+                @JsonProperty("question_type")
+                Integer questionType,
                 @JsonProperty("drag_items")
                 List<UpdatedQuestionResponse.DragItemResponse> dragItems,
                 @JsonProperty("questions")
