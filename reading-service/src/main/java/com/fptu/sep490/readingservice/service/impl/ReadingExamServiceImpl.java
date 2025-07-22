@@ -397,6 +397,8 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
         Page<ReadingExam> readingExamPage;
         try {
             readingExamPage = readingExamRepository.searchCurrentExams(keyword, pageable);
+//            readingExamPage = readingExamRepository.findAll(pageable);
+            int len = readingExamPage.getContent().size();
         } catch (Exception e) {
             log.error("Database error when fetching exams for user: {}", userId, e);
             throw new AppException(
