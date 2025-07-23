@@ -3,7 +3,7 @@ name: Ielts Mate Backend
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   docker-compose:
@@ -12,15 +12,17 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Sử dụng version mới hơn
+        uses: actions/checkout@v4
+        with:
+          ref: prod
         
       - name: Clean up old containers
         run: |
-          sudo docker compose -f docker-compose.yml down || true
+          sudo docker compose -f docker-compose-prod.yaml down || true
           sudo docker system prune -f
           
       - name: Build & Up containers
-        run: sudo docker compose -f docker-compose.yml up -d --build
+        run: sudo docker compose -f docker-compose-prod.yaml up -d --build
         
       - name: Verify deployment
-        run: sudo docker compose -f docker-compose.yml ps
+        run: sudo docker compose -f docker-compose-prod.yaml ps
