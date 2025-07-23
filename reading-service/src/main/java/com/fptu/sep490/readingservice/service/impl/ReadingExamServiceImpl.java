@@ -33,7 +33,7 @@ import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ReadingExamServiceImpl implements ReadingExamService  {
+public class  ReadingExamServiceImpl implements ReadingExamService  {
     Helper helper;
     ReadingPassageRepository readingPassageRepository;
     ReadingExamRepository readingExamRepository;
@@ -418,10 +418,12 @@ public class ReadingExamServiceImpl implements ReadingExamService  {
 
         Page<ReadingExam> readingExamPage;
         try {
-            readingExamPage = readingExamRepository.searchCurrentExams(keyword, pageable);
+
+                readingExamPage = readingExamRepository.searchCurrentExams(keyword, pageable);
+
         } catch (Exception e) {
             log.error("Database error when fetching exams for user: {}", userId, e);
-            throw new AppException(
+             throw new AppException(
                     Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
                     Constants.ErrorCode.INTERNAL_SERVER_ERROR,
                     HttpStatus.INTERNAL_SERVER_ERROR.value()

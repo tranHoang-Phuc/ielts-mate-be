@@ -39,6 +39,13 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
 """)
     Page<ReadingExam> searchCurrentExams(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("""
+    SELECT r FROM ReadingExam r
+    WHERE r.isDeleted = false
+      AND r.isCurrent = true
+      
+""")
+    Page<ReadingExam> searchCurrentExamsNotKeyword( Pageable pageable);
 
     @Query("""
         SELECT r FROM ReadingExam r
