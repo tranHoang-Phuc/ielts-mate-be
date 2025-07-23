@@ -144,7 +144,7 @@ public class VocabularyController {
             @RequestParam(required = false) String keyword
 
     ) throws Exception {
-        Page<VocabularyResponse> responses = vocabularyService.getAllVocabulary(request, page, size, sortBy, sortDirection, keyword);
+        Page<VocabularyResponse> responses = vocabularyService.getAllVocabulary(request, page -1, size, sortBy, sortDirection, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(responses.getNumber() + 1)
