@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: reading-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${READING_SERVICE_DB_URL}
+    username: ${READING_SERVICE_USERNAME}
+    password: ${READING_SERVICE_PASSWORD}
+    hikari:
+      data-source-properties:
+        prepareThreshold: 0
+server:
+  port: 9000
+  servlet:
+    context-path: /reading
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate: debug
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+keycloak:
+  base-uri: ${KEYCLOAK_BASE_URI}
+  token-uri: ${KEYCLOAK_TOKEN_URI}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_SECRET}
+  scope: ${KEYCLOAK_SCOPE}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI}
+
+kafka:
+  topic:
+    streak: streak-topic
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}

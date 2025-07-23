@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: listening-service
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        max.request.size: 10485760
+    consumer:
+      group-id: listening-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${LISTENING_SERVICE_DB_URL}
+    username: ${LISTENING_SERVICE_USERNAME}
+    password: ${LISTENING_SERVICE_PASSWORD}
+    hikari:
+      data-source-properties:
+        prepareThreshold: 0
+
+server:
+  port: 8071
+  servlet:
+    context-path: /listening
+
+logging:
+  level:
+    org.hibernate.type.descriptor.sql: trace
+    org.hibernate: debug
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+keycloak:
+  base-uri: ${KEYCLOAK_BASE_URI}
+  token-uri: ${KEYCLOAK_TOKEN_URI}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_SECRET}
+  scope: ${KEYCLOAK_SCOPE}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI}
+
+topic:
+  upload-audio: upload-audio-topic
+  update-listening-audio: update-listening-audio-topic
+  send-notification: send-notification-topic
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_NAME}
+  api-key: ${CLOUDINARY_KEY}
+  api-secret: ${CLOUDINARY_SECRET}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}

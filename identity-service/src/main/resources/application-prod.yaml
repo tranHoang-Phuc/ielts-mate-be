@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: identity-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+server:
+  port: 8090
+  servlet:
+    context-path: /identity
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}
+
+keycloak:
+  base-uri: ${KEYCLOAK_BASE_URI}
+  token-uri: ${KEYCLOAK_TOKEN_URI}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_SECRET}
+  scope: ${KEYCLOAK_SCOPE}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI}
+
+email:
+  secret: ${EMAIL_SECRET}
+  expiration: 300
+
+kafka:
+  topic:
+    user-verification: user-verification-topic
+
+client:
+  domain: ${CLIENT_DOMAIN}
+
+rate-limiter:
+  max-attempts: 5
+  block-duration: 3600
+
+app:
+  oauth2:
+    redirect-uri: ${OAUTH2_REDIRECT_URI}
+aes:
+  secret:
+    key: ${ASE_KEY}
+  algorithm: AES
+  cipher: AES/CBC/PKCS5Padding
+  iv-length: 16

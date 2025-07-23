@@ -1,3 +1,5 @@
 spring:
   application:
     name: personal-service
+  profiles:
+    active: prod

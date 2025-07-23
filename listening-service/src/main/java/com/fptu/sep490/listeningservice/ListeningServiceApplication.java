@@ -7,10 +7,9 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication(scanBasePackages = {"com.fptu.sep490.listeningservice", "com.fptu.sep490.commonlibrary"})
 @EnableFeignClients(basePackages = {"com.fptu.sep490.listeningservice.repository.client"})
+@EnableDiscoveryClient
 public class ListeningServiceApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(ListeningServiceApplication.class, args);
     }
-
 }

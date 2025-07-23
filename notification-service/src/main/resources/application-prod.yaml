@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: notification-service
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+server:
+  port: 8082
+  servlet:
+    context-path: /notification
+
+notification:
+  email:
+    brevo-url: ${BREVO_URL}
+    brevo-apikey: ${BREVO_KEY}
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}
+
+kafka:
+  topic:
+    user-verification: user-verification-topic
+    send-notification: send-notification-topic
+    reminder: reminder-topic

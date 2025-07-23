@@ -1,0 +1,128 @@
+logging:
+  level:
+    com.netflix.discovery: DEBUG
+    org.springframework.cloud.netflix.eureka: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.kafka: DEBUG
+management:
+  endpoints:
+    web:
+      expose:
+        include: '*'
+server:
+  port: 9191
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id : notification-sse
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notification/sse/stream/**
+          filters:
+            - StripPrefix=2
+            - SetResponseHeader=Cache-Control,no-cache
+            - SetResponseHeader=Content-Type,text/event-stream;charset=UTF-8
+            - AddResponseHeader=Connection,keep-alive
+            - AddResponseHeader=X-Accel-Buffering,no
+
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/identity/**
+          filters:
+            - StripPrefix=2
+
+        - id: reading-service
+          uri: lb://reading-service
+          predicates:
+            - Path=/api/v1/reading/**
+          filters:
+            - StripPrefix=2
+
+        - id: file-service
+          uri: lb://file-service
+          predicates:
+            - Path=/api/v1/resource/**
+          filters:
+            - StripPrefix=2
+
+        - id: listening-service
+          uri: lb://listening-service
+          predicates:
+            - Path=/api/v1/listening/**
+          filters:
+            - StripPrefix=2
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notification/**
+          filters:
+            - StripPrefix=2
+
+        - id: personal-service
+          uri: lb://personal-service
+          predicates:
+            - Path=/api/v1/personal/**
+          filters:
+            - StripPrefix=2
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "https://ielts-mate-fe.vercel.app"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+      httpclient:
+        connect-timeout: 10000
+        response-timeout: 3600s
+        pool:
+          max-idle-time: 3600s
+    discovery:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}/eureka
+    fetch-registry: true
+    register-with-eureka: true
+
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+    urls:
+      - name: identity-service
+        url: http://${SERVER_IP}:9191/api/v1/identity/v3/api-docs
+      - name: reading-service
+        url: http://${SERVER_IP}:9191/api/v1/reading/v3/api-docs
+      - name: file-service
+        url: http://${SERVER_IP}:9191/api/v1/resource/v3/api-docs
+      - name: listening-service
+        url: http://${SERVER_IP}:9191/api/v1/listening/v3/api-docs
+      - name: notification-service
+        url: http://${SERVER_IP}:9191/api/v1/notification/v3/api-docs
+      - name: personal-service
+        url: http://${SERVER_IP}:9191/api/v1/personal/v3/api-docs

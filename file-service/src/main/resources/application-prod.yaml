@@ -1,0 +1,71 @@
+server:
+  servlet:
+    context-path: /resource
+  port: 8070
+
+spring:
+  application:
+    name: file-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        max.request.size: 10485760
+
+    consumer:
+      group-id: file-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${FILE_SERVICE_DB_URL}
+    username: ${FILE_SERVICE_USERNAME}
+    password: ${FILE_SERVICE_PASSWORD}
+    hikari:
+      data-source-properties:
+        prepareThreshold: 0
+
+keycloak:
+  base-uri: ${KEYCLOAK_BASE_URI}
+  token-uri: ${KEYCLOAK_TOKEN_URI}
+  realm: ${KEYCLOAK_REALM}
+  client-id: ${KEYCLOAK_CLIENT_ID}
+  client-secret: ${KEYCLOAK_SECRET}
+  scope: ${KEYCLOAK_SCOPE}
+  redirect-uri: ${KEYCLOAK_REDIRECT_URI}
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVICE}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_NAME}
+  api-key: ${CLOUDINARY_KEY}
+  api-secret: ${CLOUDINARY_SECRET}
+
+topic:
+  upload-audio: upload-audio-topic
+  update-listening-audio: update-listening-audio-topic

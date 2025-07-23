@@ -1,58 +1,5 @@
-logging:
-  level:
-    com.netflix.discovery: DEBUG
-    org.springframework.cloud.netflix.eureka: DEBUG
-    org.springframework.cloud.gateway: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.kafka: DEBUG
-management:
-  endpoints:
-    web:
-      expose:
-        include: '*'
-
 spring:
   application:
     name: api-gateway
   profiles:
-    active: local
-  cloud:
-    gateway:
-      routes:
-        - id: identity-service
-          uri: http://47.128.245.17:8090
-          predicates:
-            - Path=/identity/**
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "https://ielts-mate-fe.vercel.app"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
-
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui
-    urls:
-      - name: identity-service
-        url: https://tootsstore.online/identity/v3/api-docs
-
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
-server:
-  port: 9191
+    active: prod

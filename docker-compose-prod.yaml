@@ -1,0 +1,272 @@
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:1.27.2
+    restart: unless-stopped
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates
+      - ./nginx/configuration/custom_proxy_settings.conf:/etc/nginx/conf.d/custom_proxy_settings.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - sep-network
+
+  identity:
+    container_name: identity
+    image: quay.io/keycloak/keycloak:26.0.2
+    command: 'start-dev --features=scripts --import-realm'
+    environment:
+      KC_FEATURES: scripts
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      KC_DB: postgres
+      KC_DB_URL: ${KEYCLOAK_DB_URL}
+      KC_DB_USERNAME: ${KEYCLOAK_USERNAME}
+      KC_DB_PASSWORD: ${KEYCLOAK_PASSWORD}
+      KC_HTTP_PORT: 80
+      KC_HTTP_ENABLED: "true"
+    volumes:
+      - ./identity/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - ./identity/themes/sep/theme:/opt/keycloak/themes
+      - keycloak_data:/var/lib/keycloak/data
+    networks:
+      - sep-network
+
+  kafka:
+    image: 'bitnami/kafka:3.7.0'
+    container_name: kafka
+    hostname: ${KAFKA_SERVICE_HOST}
+    ports:
+      - ${KAFKA_SERVICE_PORT}:${KAFKA_SERVICE_PORT}
+      - "9093:9093"
+      - "9094:9094"
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://kafka:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    networks:
+      - sep-network
+
+  redis:
+    container_name: redis
+    image: redis:7.4.1-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    environment:
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - redis:/var/lib/redis/data
+    networks:
+      - sep-network
+
+  discovery-service:
+    container_name: discovery-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: discovery-runtime
+    hostname: discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - sep-network
+
+  identity-service:
+    container_name: identity-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: identity-runtime
+    hostname: identity-service
+    ports:
+      - "8090:8090"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - KEYCLOAK_BASE_URI=${KEYCLOAK_BASE_URI}
+      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+      - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
+      - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
+      - EMAIL_SECRET=${EMAIL_SECRET}
+      - CLIENT_DOMAIN=${CLIENT_DOMAIN}
+      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI}
+      - ASE_KEY=${ASE_KEY}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+  file-service:
+    container_name: file-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: file-runtime
+    hostname: file-service
+    ports:
+      - "8091:8091"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - FILE_SERVICE_DB_URL=${FILE_SERVICE_DB_URL}
+      - FILE_SERVICE_USERNAME=${FILE_SERVICE_USERNAME}
+      - FILE_SERVICE_PASSWORD=${FILE_SERVICE_PASSWORD}
+      - KEYCLOAK_BASE_URI=${KEYCLOAK_BASE_URI}
+      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+      - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
+      - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_KEY=${CLOUDINARY_KEY}
+      - CLOUDINARY_SECRET=${CLOUDINARY_SECRET}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+  listening-service:
+    container_name: listening-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: listening-runtime
+    hostname: listening-service
+    ports:
+      - "8071:8071"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - LISTENING_SERVICE_DB_URL=${LISTENING_SERVICE_DB_URL}
+      - LISTENING_SERVICE_USERNAME=${LISTENING_SERVICE_USERNAME}
+      - LISTENING_SERVICE_PASSWORD=${LISTENING_SERVICE_PASSWORD}
+      - KEYCLOAK_BASE_URI=${KEYCLOAK_BASE_URI}
+      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+      - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
+      - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
+      - CLOUDINARY_NAME=${CLOUDINARY_NAME}
+      - CLOUDINARY_KEY=${CLOUDINARY_KEY}
+      - CLOUDINARY_SECRET=${CLOUDINARY_SECRET}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+  notification-service:
+    container_name: notification-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: notification-runtime
+    hostname: notification-service
+    ports:
+      - "8082:8082"
+    environment:
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - SPRING_PROFILES_ACTIVE=prod
+      - BREVO_URL=${BREVO_URL}
+      - BREVO_APIKEY=${BREVO_APIKEY}
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+  personal-service:
+    container_name: personal-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: personal-runtime
+    hostname: personal-service
+    ports:
+      - "8072:8072"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - PERSONAL_SERVICE_DB_URL=${PERSONAL_SERVICE_DB_URL}
+      - PERSONAL_SERVICE_USERNAME=${PERSONAL_SERVICE_USERNAME}
+      - PERSONAL_SERVICE_PASSWORD=${PERSONAL_SERVICE_PASSWORD}
+      - KEYCLOAK_BASE_URI=${KEYCLOAK_BASE_URI}
+      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+      - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
+      - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
+      - SERVER_IP=${SERVER_IP}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+  reading-service:
+    container_name: reading-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: reading-runtime
+    hostname: reading-service
+    ports:
+      - "9000:9000"
+    environment:
+      - ISSUER_URI=${ISSUER_URI}
+      - KAFKA_BOOSTRAP_SERVER=${KAFKA_BOOSTRAP_SERVER}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - READING_SERVICE_DB_URL=${READING_SERVICE_DB_URL}
+      - READING_SERVICE_USERNAME=${READING_SERVICE_USERNAME}
+      - READING_SERVICE_PASSWORD=${READING_SERVICE_PASSWORD}
+      - KEYCLOAK_BASE_URI=${KEYCLOAK_BASE_URI}
+      - KEYCLOAK_TOKEN_URI=${KEYCLOAK_TOKEN_URI}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_SECRET=${KEYCLOAK_SECRET}
+      - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
+      - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - kafka
+      - redis
+      - discovery-service
+      - identity
+    networks:
+      - sep-network
+
+
