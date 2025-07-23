@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name identity.sep.local;
+    server_name www.users.tootsstore.online users.tootsstore.online;
 
     large_client_header_buffers 8 32k;
 
@@ -14,6 +14,34 @@ server {
         if ($uri ~ "^(.*)/(protocol/openid-connect/auth|login/oauth2/code)(.*)") {
             add_header Access-Control-Allow-Origin *;
         }
+    }
+}
+
+
+server {
+    listen 80;
+    server_name www.discovery.tootsstore.online discovery.tootsstore.online;
+
+    location / {
+        proxy_pass http://discovery-service:8761;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+
+server {
+    listen 80;
+    server_name tootsstore.online www.tootsstore.online;
+
+    location / {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 

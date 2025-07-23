@@ -269,4 +269,32 @@ services:
     networks:
       - sep-network
 
+  api-gateway:
+    container_name: api-gateway
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: gateway-runtime
+    hostname: api-gateway
+    ports:
+      - "9191:9191"
+    environment:
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - discovery-service
+    networks:
+      - sep-network
 
+volumes:
+  postgres:
+    driver: local
+  redis:
+    driver: local
+  keycloak_data:
+    driver: local
+
+
+networks:
+  sep-network:
+    driver: bridge
