@@ -3,7 +3,7 @@ name: Ielts Mate Backend
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   docker-compose:
@@ -12,7 +12,9 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4  # Sử dụng version mới hơn
+        uses: actions/checkout@v4
+        with:
+          ref: prod
         
       - name: Clean up old containers
         run: |
