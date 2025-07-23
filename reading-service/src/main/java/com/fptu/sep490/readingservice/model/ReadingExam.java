@@ -59,7 +59,7 @@ public class ReadingExam {
     private String updatedBy;
 
     @Column(name="status")
-    private int status = 1; // Default status is true (active)
+    private Integer status = 1; // Default status is true (active)
 
     @UpdateTimestamp
     @Column(name = "updated_at")
