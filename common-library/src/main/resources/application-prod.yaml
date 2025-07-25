@@ -1,7 +1,3 @@
-server:
-  servlet:
-    context-path: /common-library
-
 spring:
   application:
     name: common-library
