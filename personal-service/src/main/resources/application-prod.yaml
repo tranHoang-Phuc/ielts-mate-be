@@ -72,8 +72,8 @@ reminder:
   cron: 0 * * * * *
 
 service:
-  reading-service: http://${SERVER_IP}:9000/reading
-  listening-service: http://${SERVER_IP}:8071/listening
+  reading-service: ${READING_SERVICE}
+  listening-service: ${LISTENING_SERVICE}
 
 eureka:
   client:
