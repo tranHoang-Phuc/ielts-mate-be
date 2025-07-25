@@ -16,6 +16,8 @@ services:
     container_name: identity
     image: quay.io/keycloak/keycloak:26.0.2
     command: 'start-dev --features=scripts --import-realm'
+    ports:
+      - "8080:80"
     environment:
       KC_FEATURES: scripts
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
@@ -195,7 +197,7 @@ services:
       - EUREKA_SERVICE=${EUREKA_SERVICE}
       - SPRING_PROFILES_ACTIVE=prod
       - BREVO_URL=${BREVO_URL}
-      - BREVO_APIKEY=${BREVO_APIKEY}
+      - BREVO_KEY=${BREVO_KEY}
     depends_on:
       - kafka
       - redis
