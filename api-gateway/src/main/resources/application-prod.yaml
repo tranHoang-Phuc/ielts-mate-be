@@ -24,7 +24,7 @@ spring:
           lower-case-service-id: true
       routes:
         - id : notification-sse
-          uri: ${NOTIFICATION_API}
+          uri: lb://notification-service
           predicates:
             - Path=/api/v1/notification/sse/stream/**
           filters:
@@ -34,7 +34,7 @@ spring:
             - AddResponseHeader=Connection,keep-alive
             - AddResponseHeader=X-Accel-Buffering,no
 
-        - id: ${IDENTITY_API}
+        - id: identity-service
           uri: lb://identity-service
           predicates:
             - Path=/api/v1/identity/**
@@ -42,35 +42,35 @@ spring:
             - StripPrefix=2
 
         - id: reading-service
-          uri: ${READING_API}
+          uri: lb://reading-service
           predicates:
             - Path=/api/v1/reading/**
           filters:
             - StripPrefix=2
 
         - id: file-service
-          uri: ${FILE_API}
+          uri: lb://file-service
           predicates:
             - Path=/api/v1/resource/**
           filters:
             - StripPrefix=2
 
         - id: listening-service
-          uri: ${LISTENING_API}
+          uri: lb://listening-service
           predicates:
             - Path=/api/v1/listening/**
           filters:
             - StripPrefix=2
 
         - id: notification-service
-          uri: ${NOTIFICATION_API}
+          uri: lb://notification-service
           predicates:
             - Path=/api/v1/notification/**
           filters:
             - StripPrefix=2
 
         - id: personal-service
-          uri: ${PERSONAL_API}
+          uri: lb://personal-service
           predicates:
             - Path=/api/v1/personal/**
           filters:
