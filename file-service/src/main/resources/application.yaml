@@ -2,4 +2,4 @@ spring:
   application:
     name: file-service
   profiles:
-    active: local
+    active: prod

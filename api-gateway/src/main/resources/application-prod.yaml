@@ -24,7 +24,7 @@ spring:
           lower-case-service-id: true
       routes:
         - id : notification-sse
-          uri: lb://notification-service
+          uri: ${NOTIFICATION_API}
           predicates:
             - Path=/api/v1/notification/sse/stream/**
           filters:
@@ -34,7 +34,7 @@ spring:
             - AddResponseHeader=Connection,keep-alive
             - AddResponseHeader=X-Accel-Buffering,no
 
-        - id: identity-service
+        - id: ${IDENTITY_API}
           uri: lb://identity-service
           predicates:
             - Path=/api/v1/identity/**
@@ -42,35 +42,35 @@ spring:
             - StripPrefix=2
 
         - id: reading-service
-          uri: lb://reading-service
+          uri: ${READING_API}
           predicates:
             - Path=/api/v1/reading/**
           filters:
             - StripPrefix=2
 
         - id: file-service
-          uri: lb://file-service
+          uri: ${FILE_API}
           predicates:
             - Path=/api/v1/resource/**
           filters:
             - StripPrefix=2
 
         - id: listening-service
-          uri: lb://listening-service
+          uri: ${LISTENING_API}
           predicates:
             - Path=/api/v1/listening/**
           filters:
             - StripPrefix=2
 
         - id: notification-service
-          uri: lb://notification-service
+          uri: ${NOTIFICATION_API}
           predicates:
             - Path=/api/v1/notification/**
           filters:
             - StripPrefix=2
 
         - id: personal-service
-          uri: lb://personal-service
+          uri: ${PERSONAL_API}
           predicates:
             - Path=/api/v1/personal/**
           filters:
@@ -107,22 +107,4 @@ eureka:
     register-with-eureka: true
 
 
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui
-    urls:
-      - name: identity-service
-        url: http://${SERVER_IP}:9191/api/v1/identity/v3/api-docs
-      - name: reading-service
-        url: http://${SERVER_IP}:9191/api/v1/reading/v3/api-docs
-      - name: file-service
-        url: http://${SERVER_IP}:9191/api/v1/resource/v3/api-docs
-      - name: listening-service
-        url: http://${SERVER_IP}:9191/api/v1/listening/v3/api-docs
-      - name: notification-service
-        url: http://${SERVER_IP}:9191/api/v1/notification/v3/api-docs
-      - name: personal-service
-        url: http://${SERVER_IP}:9191/api/v1/personal/v3/api-docs
+
