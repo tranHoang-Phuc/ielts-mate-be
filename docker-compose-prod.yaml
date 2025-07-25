@@ -231,11 +231,15 @@ services:
       - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
       - SERVER_IP=${SERVER_IP}
       - SPRING_PROFILES_ACTIVE=prod
+      - READING_SERVICE=${READING_SERVICE}
+      - LISTENING_SERVICE=${LISTENING_SERVICE}
     depends_on:
       - kafka
       - redis
       - discovery-service
       - identity
+      - listening-service
+      - reading-service
     networks:
       - sep-network
 
@@ -282,6 +286,12 @@ services:
       - "9191:9191"
     environment:
       - EUREKA_SERVICE=${EUREKA_SERVICE}
+      - NOTIFICATION_API=${NOTIFICATION_API}
+      - IDENTITY_API=${IDENTITY_API}
+      - READING_API=${READING_API}
+      - FILE_API=${FILE_API}
+      - LISTENING_API=${LISTENING_API}
+      - PERSONAL_API=${PERSONAL_API}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - discovery-service
