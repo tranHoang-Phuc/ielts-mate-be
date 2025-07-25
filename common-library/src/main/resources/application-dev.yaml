@@ -12,8 +12,8 @@ spring:
           issuer-uri: http://identity/realms/SEP490
   data:
     redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
+      host: redis
+      port: 6379
   kafka:
     bootstrap-servers: localhost:9094
 

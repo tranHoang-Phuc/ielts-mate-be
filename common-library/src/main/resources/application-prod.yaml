@@ -8,8 +8,8 @@ spring:
           issuer-uri: ${ISSUER_URI}
   data:
     redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
+      host: redis
+      port: 6379
   kafka:
     bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
 
