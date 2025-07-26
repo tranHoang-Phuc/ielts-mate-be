@@ -11,17 +11,17 @@ public class CookieUtils {
     public static void setTokenCookies(HttpServletResponse response, KeyCloakTokenResponse tokenResponse) {
         ResponseCookie accessCookie = ResponseCookie.from("Authorization", tokenResponse.accessToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(tokenResponse.expiresIn())
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", tokenResponse.refreshToken())
                 .httpOnly(true)
-                .secure(true)
+                .secure(false)
                 .path("/")
                 .maxAge(tokenResponse.expiresIn())
-                .sameSite("None")
+                .sameSite("Lax")
                 .build();
 
 
