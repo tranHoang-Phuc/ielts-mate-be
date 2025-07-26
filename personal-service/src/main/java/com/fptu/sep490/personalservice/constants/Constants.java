@@ -4,6 +4,8 @@ public class Constants {
     public final class ErrorCodeMessage {
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
         public static final String NOT_FOUND = "NOT_FOUND";
+        public static final String FORBIDDEN="FORBIDDEN";
+
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
         public static final String INVALID_REQUEST = "INVALID_REQUEST";
@@ -29,6 +31,7 @@ public class Constants {
         public static final String REMINDER_CONFIGURED = "500003";
         public static final String REMINDER_NOT_FOUND = "500004";
         public static final String MARK_UP_NOT_FOUND = "500005";
+        public static final String FORBIDDEN = "500006";
 
         //vocabulary
         public static final String VOCABULARY_ALREADY_EXISTS = "500006";

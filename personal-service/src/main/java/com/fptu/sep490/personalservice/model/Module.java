@@ -38,7 +38,7 @@ public class Module {
     private Boolean isPublic = false;
 
     @Builder.Default
-    @ManyToMany(mappedBy = "modules")
+    @ManyToMany(mappedBy = "modules", cascade = CascadeType.ALL)
     private Set<FlashCard> flashCards = new HashSet<>();
 
 

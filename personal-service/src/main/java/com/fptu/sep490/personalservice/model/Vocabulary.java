@@ -7,6 +7,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -23,7 +25,7 @@ public class Vocabulary {
     @Column(name = "word_id", updatable = false, nullable = false)
     private UUID wordId;
 
-    @Column(name = "word", unique = true)
+    @Column(name = "word", unique = false)
     private String word;
 
     @Column(name ="context", columnDefinition = "TEXT")
@@ -46,5 +48,8 @@ public class Vocabulary {
     private String updatedBy;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "vocabulary",orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<FlashCard> flashCards = new HashSet<>();
 
 }

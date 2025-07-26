@@ -68,6 +68,73 @@ public class ModuleController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
+
+    //API to get module by id
+    @GetMapping("/{moduleId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Get module by ID",
+            description = "Retrieve a module by its ID. Requires authentication.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Module retrieved successfully"),
+                    @ApiResponse(responseCode = "404", description = "Module not found", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<ModuleResponse>> getModuleById(
+            @PathVariable("moduleId") String moduleId,
+            HttpServletRequest request
+    ) throws Exception {
+        ModuleResponse response = moduleService.getModuleById(moduleId, request);
+        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
+                .data(response)
+                .message("Module retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    //API to update module by id
+    @PutMapping("/{moduleId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Update a module by ID",
+            description = "Update a module by its ID. Requires authentication.",
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "Request body to update a module",
+                    content = @Content(schema = @Schema(implementation = ModuleRequest.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Module updated successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "404", description = "Module not found", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<ModuleResponse>> updateModuleById(
+            @PathVariable("moduleId") String moduleId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ModuleRequest moduleRequest,
+            HttpServletRequest request
+    ) throws Exception {
+        ModuleResponse response = moduleService.updateModule(moduleId, moduleRequest, request);
+        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
+                .data(response)
+                .message("Module updated successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+
+
+
     //get all modules
     @GetMapping("/my-flash-cards")
     @PreAuthorize("isAuthenticated()")
@@ -107,12 +174,72 @@ public class ModuleController {
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
-
-
-
-
     }
 
+
+    //API get public modules
+    @GetMapping("/flash-cards")
+    @Operation(
+            summary = "Get all public modules",
+            description = "Retrieve all public modules. No authentication required.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Public modules retrieved successfully"),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<List<ModuleResponse>>> getPublicModules(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword,
+            HttpServletRequest request
+    ) throws Exception {
+        Page<ModuleResponse> responses = moduleService.getAllPublicModules(page - 1, size, sortBy, sortDirection, keyword, request);
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(responses.getNumber() + 1)
+                .totalPages(responses.getTotalPages())
+                .pageSize(responses.getSize())
+                .totalItems((int) responses.getTotalElements())
+                .hasNextPage(responses.hasNext())
+                .hasPreviousPage(responses.hasPrevious())
+                .build();
+        BaseResponse<List<ModuleResponse>> baseResponse = BaseResponse.<List<ModuleResponse>>builder()
+                .data(responses.getContent())
+                .pagination(pagination)
+                .message("Public modules retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+    @DeleteMapping("/{moduleId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Delete a module by ID",
+            description = "Delete a module by its ID. Requires authentication.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Module deleted successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<Void>> deleteModuleById(
+            @PathVariable("moduleId") String moduleId,
+            HttpServletRequest request
+    ) throws Exception {
+        moduleService.deleteModuleById(moduleId, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Module deleted successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
 
 
 
