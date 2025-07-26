@@ -142,8 +142,7 @@ services:
       - CLOUDINARY_KEY=${CLOUDINARY_KEY}
       - CLOUDINARY_SECRET=${CLOUDINARY_SECRET}
       - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
+
     depends_on:
       - kafka
       - redis
@@ -179,8 +178,6 @@ services:
       - CLOUDINARY_KEY=${CLOUDINARY_KEY}
       - CLOUDINARY_SECRET=${CLOUDINARY_SECRET}
       - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - kafka
       - redis
@@ -204,8 +201,6 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - BREVO_URL=${BREVO_URL}
       - BREVO_KEY=${BREVO_KEY}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - kafka
       - redis
@@ -241,8 +236,6 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - READING_SERVICE=${READING_SERVICE}
       - LISTENING_SERVICE=${LISTENING_SERVICE}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - kafka
       - redis
@@ -277,8 +270,6 @@ services:
       - KEYCLOAK_SCOPE=${KEYCLOAK_SCOPE}
       - KEYCLOAK_REDIRECT_URI=${KEYCLOAK_REDIRECT_URI}
       - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - kafka
       - redis
@@ -305,8 +296,6 @@ services:
       - LISTENING_API=${LISTENING_API}
       - PERSONAL_API=${PERSONAL_API}
       - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
     depends_on:
       - discovery-service
     networks:
