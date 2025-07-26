@@ -26,3 +26,6 @@ jobs:
         
       - name: Verify deployment
         run: sudo docker compose -f docker-compose-prod.yaml ps
+
+      - name: Remove unused image 
+        run: sudo docker image prune -a -f
