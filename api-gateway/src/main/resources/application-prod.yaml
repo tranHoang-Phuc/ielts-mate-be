@@ -78,9 +78,19 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: ['*']
-            allowedMethods: ['*']
-            allowedHeaders: ['*']
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "https://ielts-mate-fe.vercel.app"
+              - "https://tootsstore.online"
+              - "http://3.236.168.139"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
             allowCredentials: true
             maxAge: 3600
       httpclient:
