@@ -1,7 +1,3 @@
-server:
-  servlet:
-    context-path: /common-library
-
 spring:
   application:
     name: common-library
@@ -9,13 +5,13 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://identity/realms/SEP490
+          issuer-uri: ${ISSUER_URI}
   data:
     redis:
       host: redis
       port: 6379
   kafka:
-    bootstrap-servers: localhost:9094
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
 
 cors:
   allowed-origins: '*'
@@ -27,8 +23,5 @@ logging:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 keycloak:
-
-  token-uri: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
+  token-uri: ${KEYCLOAK_SERVICE}/realms/SEP490/protocol/openid-connect/token
   scope: openid
-
-

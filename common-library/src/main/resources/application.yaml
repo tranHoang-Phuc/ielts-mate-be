@@ -1,4 +1,29 @@
 spring:
   profiles:
     active: prod
+  application:
+    name: common-library
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  data:
+    redis:
+      host: redis
+      port: 6379
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOSTRAP_SERVER}
 
+cors:
+  allowed-origins: '*'
+  allowed-methods: '*'
+  allowed-headers: '*'
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+keycloak:
+  token-uri: ${KEYCLOAK_SERVICE}/realms/SEP490/protocol/openid-connect/token
+  scope: openid

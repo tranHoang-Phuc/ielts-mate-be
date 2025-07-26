@@ -50,9 +50,6 @@ server:
     context-path: /listening
 
 logging:
-  level:
-    org.hibernate.type.descriptor.sql: trace
-    org.hibernate: debug
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
