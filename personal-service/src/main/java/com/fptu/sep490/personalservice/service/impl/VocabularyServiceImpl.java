@@ -15,9 +15,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
@@ -40,12 +44,28 @@ public class VocabularyServiceImpl  implements VocabularyService {
             );
         }
 
+        if (vocabularyRequest.word() == null || vocabularyRequest.word().isBlank()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), UserId);
+        if (existingVocabulary != null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
+                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
+                    HttpStatus.CONFLICT.value()
+            );
+        }
         Vocabulary newVocabulary = new Vocabulary();
         newVocabulary.setWord(vocabularyRequest.word());
         newVocabulary.setContext(vocabularyRequest.context());
         newVocabulary.setMeaning(vocabularyRequest.meaning());
         newVocabulary.setCreatedBy(UserId);
 
+        vocabularyRepository.save(newVocabulary);
         // goi ve APi AI de set gia tri context va meaning
 
         VocabularyResponse response = VocabularyResponse.builder()
@@ -71,7 +91,7 @@ public class VocabularyServiceImpl  implements VocabularyService {
                     HttpStatus.UNAUTHORIZED.value()
             );
         }
-        Vocabulary vocabulary = vocabularyRepository.findById(Integer.parseInt(vocabularyId))
+        Vocabulary vocabulary = vocabularyRepository.findById(UUID.fromString(vocabularyId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.NOT_FOUND,
                         Constants.ErrorCodeMessage.NOT_FOUND,
@@ -99,13 +119,15 @@ public class VocabularyServiceImpl  implements VocabularyService {
             );
         }
 
-        Vocabulary vocabulary = vocabularyRepository.findById(Integer.parseInt(vocabularyId))
+        Vocabulary vocabulary = vocabularyRepository.findById(UUID.fromString(vocabularyId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.NOT_FOUND,
                         Constants.ErrorCodeMessage.NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         vocabulary.setIsDeleted(true);
+        vocabularyRepository.save(vocabulary); // Đừng quên lưu lại thay đổi!
+
     }
 
     @Override
@@ -118,14 +140,49 @@ public class VocabularyServiceImpl  implements VocabularyService {
                     HttpStatus.UNAUTHORIZED.value()
             );
         }
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
+        if (sortDirection == null || sortDirection.isBlank()) {
+            sortDirection = "asc";
+        }
+
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<Vocabulary> vocabularyPage;
+        try {
+
+            vocabularyPage = vocabularyRepository.searchVocabulary(keyword, pageable, UserId);
+
+        } catch (Exception e) {
+            log.error("Database error when fetching exams for user: {}", UserId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+        List<VocabularyResponse> vocabularyResponses = vocabularyPage.stream()
+                .map(vocabulary -> VocabularyResponse.builder()
+                        .vocabularyId(vocabulary.getWordId())
+                        .word(vocabulary.getWord())
+                        .context(vocabulary.getContext())
+                        .meaning(vocabulary.getMeaning())
+                        .createdBy(vocabulary.getCreatedBy())
+                        .createdAt(vocabulary.getCreatedAt())
+                        .build())
+                .toList();
+
+
+        return new PageImpl<>(vocabularyResponses, pageable, vocabularyPage.getTotalElements());
 
 
 
 
 
-
-
-        return null;
     }
 
 

@@ -10,6 +10,9 @@ public class Constants {
         public static final String REMINDER_CONFIGURED = "REMINDER_CONFIGURED";
         public static final String REMINDER_NOT_FOUND = "REMINDER_NOT_FOUND";
         public static final String MARK_UP_NOT_FOUND = "MARK_UP_NOT_FOUND";
+
+        //vocabulary
+        public static final String VOCABULARY_ALREADY_EXISTS = "VOCABULARY_ALREADY_EXISTS";
     }
 
     public final class RedisKey {
@@ -26,6 +29,9 @@ public class Constants {
         public static final String REMINDER_CONFIGURED = "500003";
         public static final String REMINDER_NOT_FOUND = "500004";
         public static final String MARK_UP_NOT_FOUND = "500005";
+
+        //vocabulary
+        public static final String VOCABULARY_ALREADY_EXISTS = "500006";
 
 
     }

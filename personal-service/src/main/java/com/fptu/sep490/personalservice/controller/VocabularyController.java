@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.controller;
 
 
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
@@ -38,7 +39,7 @@ public class VocabularyController {
 
 
     @PostMapping("/")
-    @PreAuthorize("hasRole('CREATOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Create a new vocabulary",
             description = "Create a new vocabulary with the provided details. Requires CREATOR role."
@@ -137,10 +138,10 @@ public class VocabularyController {
     })
     public ResponseEntity<BaseResponse<List<VocabularyResponse>>> getAllVocabulary(
             HttpServletRequest request,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String keyword
 
     ) throws Exception {

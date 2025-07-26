@@ -1,5 +1,6 @@
 package com.fptu.sep490.personalservice.model;
 
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -32,9 +33,19 @@ public class UserModuleProgress {
         @JoinColumn(name = "module_id", nullable = false)
         private Module module;
 
+        @Column(name = "status")
+        private LearningStatus status;
+
+        @Column(name="note" , columnDefinition = "TEXT")
+        private String note;
+
         @Column(name = "last_read_index")
         private Integer lastReadIndex;
 
         @Column(name = "last_read_at")
         private LocalDateTime lastReadAt;
+
+        @Column(name = "update_at")
+        @UpdateTimestamp
+        private LocalDateTime updatedAt;
 }
