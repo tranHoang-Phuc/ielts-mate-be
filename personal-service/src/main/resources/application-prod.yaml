@@ -78,4 +78,4 @@ service:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVICE_GATEWAY}
+      defaultZone: ${EUREKA_SERVICE}
