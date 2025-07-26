@@ -20,12 +20,14 @@ jobs:
         run: |
           sudo docker compose -f docker-compose-prod.yaml down || true
           sudo docker system prune -f
-          
+
+      - name: Remove unused image 
+        run: sudo docker image prune -a -f
+      
       - name: Build & Up containers
         run: sudo docker compose -f docker-compose-prod.yaml up -d --build
         
       - name: Verify deployment
         run: sudo docker compose -f docker-compose-prod.yaml ps
 
-      - name: Remove unused image 
-        run: sudo docker image prune -a -f
+      
