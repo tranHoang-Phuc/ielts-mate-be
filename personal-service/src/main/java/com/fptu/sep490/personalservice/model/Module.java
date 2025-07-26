@@ -28,8 +28,17 @@ public class Module {
     @Column(name = "module_name")
     private String moduleName;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+    @Column(name = "is_public")
+    private Boolean isPublic = false;
+
     @Builder.Default
-    @ManyToMany(mappedBy = "modules")
+    @ManyToMany(mappedBy = "modules", cascade = CascadeType.ALL)
     private Set<FlashCard> flashCards = new HashSet<>();
 
 

@@ -25,13 +25,13 @@ public class FlashCard {
     @Column(name = "card_id", updatable = false, nullable = false)
     private UUID cardId;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "word_id", referencedColumnName = "word_id", nullable = false)
     private Vocabulary vocabulary;
 
 
     @Builder.Default
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "flashcard_module",
             joinColumns = @JoinColumn(name = "card_id"),
