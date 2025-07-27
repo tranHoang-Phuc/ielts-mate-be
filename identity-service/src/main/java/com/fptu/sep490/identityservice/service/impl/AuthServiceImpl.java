@@ -27,6 +27,7 @@ import io.jsonwebtoken.security.Keys;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +51,7 @@ import java.util.Map;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
@@ -667,6 +669,8 @@ public class AuthServiceImpl implements AuthService {
         KeyCloakTokenResponse tokenResponse = keyCloakTokenClient.requestToken(form, realm);
         String newToken = tokenResponse.accessToken();
         var expiresIn = tokenResponse.expiresIn();
+        log.debug("Saving key={} with TTL={} and value={}", cacheKey, expiresIn, newToken);
+
         redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
         return newToken;
     }
