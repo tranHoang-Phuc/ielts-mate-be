@@ -206,7 +206,9 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         newVersion.setVersion(version + 1);
         newVersion.setParent(task);
         newVersion.setIsOriginal(false);
-
+        listeningTaskRepository.saveAll(allVersion);
+        newVersion = listeningTaskRepository.save(newVersion);
+        listeningTaskRepository.save(task);
         if(!Objects.isNull(audioFile)) {
             fileService.uploadAsync("listening-tasks", audioFile, newVersion.getTaskId(), UUID.fromString(userId));
         } else {
