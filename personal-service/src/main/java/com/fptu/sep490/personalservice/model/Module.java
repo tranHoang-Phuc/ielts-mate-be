@@ -39,6 +39,9 @@
         @Builder.Default
         private List<FlashCardModule> flashCardModules = new ArrayList<>();
 
+        @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+        @Builder.Default
+        private Set<ModuleUsers> moduleUsers = new HashSet<>();
 
         @Column(name = "createdBy")
         private String createdBy;

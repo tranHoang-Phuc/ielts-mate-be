@@ -3,18 +3,14 @@ package com.fptu.sep490.personalservice.service.impl;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
-import com.fptu.sep490.personalservice.model.FlashCard;
-import com.fptu.sep490.personalservice.model.FlashCardModule;
-import com.fptu.sep490.personalservice.model.Vocabulary;
-import com.fptu.sep490.personalservice.repository.FlashCardModuleRepository;
-import com.fptu.sep490.personalservice.repository.FlashCardRepository;
-import com.fptu.sep490.personalservice.repository.ModuleRepository;
-import com.fptu.sep490.personalservice.repository.VocabularyRepository;
+import com.fptu.sep490.personalservice.model.*;
+import com.fptu.sep490.personalservice.model.Module;
+import com.fptu.sep490.personalservice.repository.*;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.FlashCardResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
-import com.fptu.sep490.personalservice.model.Module;
 import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -39,6 +35,7 @@ public class ModuleServiceImpl implements ModuleService {
     ModuleRepository moduleRepository;
     VocabularyRepository vocabularyRepository;
     FlashCardModuleRepository flashCardModuleRepository;
+    ModuleUsersRepository moduleUsersRepository;
     Helper helper;
 
     @Override
@@ -444,6 +441,57 @@ public class ModuleServiceImpl implements ModuleService {
                 .createdBy(module.getCreatedBy())
                 .createdAt(module.getCreatedAt())
                 .build();
+    }
+
+    @Override
+    public void shareModule(String moduleId, ShareModuleRequest shareModuleRequest, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Module module = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (module.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        if (!module.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        for (String sharedUserId : shareModuleRequest.users()) {
+            if (sharedUserId.equals(userId)) {
+                continue; // Không chia sẻ cho chính mình
+            }
+            // Kiểm tra xem người dùng đã được chia sẻ chưa
+            boolean alreadyShared = module.getModuleUsers().stream()
+                    .anyMatch(moduleUser -> moduleUser.getUserId().equals(sharedUserId));
+            if (!alreadyShared) {
+                ModuleUsers moduleUsers = new ModuleUsers();
+                moduleUsers.setModule(module);
+                moduleUsers.setUserId(sharedUserId);
+                module.getModuleUsers().add(moduleUsers);
+                moduleUsersRepository.save(moduleUsers);
+            }
+        }
+        moduleRepository.save(module);
+
+
+
     }
 
 

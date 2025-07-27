@@ -6,6 +6,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -241,6 +242,39 @@ public class ModuleController {
                 .body(baseResponse);
     }
 
+    //API to share a module to other user, chỉ cần truyền list user_id ở body
+    @PostMapping("/{moduleId}/share")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Share a module with other users",
+            description = "Share a module with other users by providing their user IDs. Requires authentication.",
+            requestBody = @RequestBody(
+                    required = true,
+                    description = "Request body to share a module",
+                    content = @Content(schema = @Schema(implementation = ShareModuleRequest.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Module shared successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "404", description = "Module not found", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<Void>> shareModule(
+            @PathVariable("moduleId") String moduleId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ShareModuleRequest moduleRequest,
+            HttpServletRequest request
+    ) throws Exception {
+        moduleService.shareModule(moduleId, moduleRequest, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Module shared successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
 
 
 }

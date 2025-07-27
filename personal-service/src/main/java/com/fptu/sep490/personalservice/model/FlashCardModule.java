@@ -34,5 +34,5 @@ public class FlashCardModule {
     @JoinColumn(name = "card_id")
     private FlashCard flashCard;
 
-    private int orderIndex; // optional: nếu muốn sắp thứ tự
+    private Integer orderIndex; // optional: nếu muốn sắp thứ tự
 }
