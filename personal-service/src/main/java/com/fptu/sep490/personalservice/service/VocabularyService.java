@@ -14,4 +14,6 @@ public interface VocabularyService {
     void deleteVocabularyById(String vocabularyId, HttpServletRequest request) throws Exception;
 
     Page<VocabularyResponse> getAllVocabulary(HttpServletRequest request, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception;
+
+    VocabularyResponse updateVocabulary(String vocabularyId, @Valid VocabularyRequest vocabularyRequest, HttpServletRequest request) throws Exception;
 }
