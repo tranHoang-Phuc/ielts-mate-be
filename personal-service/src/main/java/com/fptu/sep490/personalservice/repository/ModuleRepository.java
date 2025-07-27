@@ -43,4 +43,6 @@ public interface ModuleRepository extends CrudRepository<Module, UUID> {
     Page<Module> searchMyAndPublicModules(@Param("keyword") String keyword,
                                           Pageable pageable,
                                           @Param("userId") String userId);
+
+
 }

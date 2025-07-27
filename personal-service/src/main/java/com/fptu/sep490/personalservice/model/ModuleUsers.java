@@ -3,7 +3,10 @@ package com.fptu.sep490.personalservice.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name ="modules_users")
@@ -25,6 +28,13 @@ public class ModuleUsers {
 
     @Column(name = "user_id")
     private String userId;
+
+    @Column(name="created_at")
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(name = "created_by")
+    private String createdBy;
 
     @Column(name = "status")
     private Integer status = 0; // 0: pending, 1: allowed, 2: denied
