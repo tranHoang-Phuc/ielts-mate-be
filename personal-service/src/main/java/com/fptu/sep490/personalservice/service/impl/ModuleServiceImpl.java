@@ -5,12 +5,14 @@ import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.model.*;
 import com.fptu.sep490.personalservice.model.Module;
+import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.repository.*;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.FlashCardResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.ModuleUserResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -477,18 +479,236 @@ public class ModuleServiceImpl implements ModuleService {
             if (sharedUserId.equals(userId)) {
                 continue; // Không chia sẻ cho chính mình
             }
-            // Kiểm tra xem người dùng đã được chia sẻ chưa
-            boolean alreadyShared = module.getModuleUsers().stream()
-                    .anyMatch(moduleUser -> moduleUser.getUserId().equals(sharedUserId));
-            if (!alreadyShared) {
+            Optional<ModuleUsers> existingModuleUserOpt = module.getModuleUsers().stream()
+                    .filter(mu -> mu.getUserId().equals(sharedUserId))
+                    .findFirst();
+            if (existingModuleUserOpt.isPresent()) {
+                ModuleUsers existingModuleUser = existingModuleUserOpt.get();
+                if (existingModuleUser.getStatus() == 2) {
+                    existingModuleUser.setStatus(0);
+                    moduleUsersRepository.save(existingModuleUser);
+                    log.info("Updated status of ModuleUsers for user {} to 0", sharedUserId);
+                } else {
+                    log.warn("Module {} is already shared with user {}", moduleId, sharedUserId);
+                }
+            } else {
                 ModuleUsers moduleUsers = new ModuleUsers();
                 moduleUsers.setModule(module);
                 moduleUsers.setUserId(sharedUserId);
+                moduleUsers.setStatus(0); // set default status when sharing
+                moduleUsers.setCreatedBy(userId);
                 module.getModuleUsers().add(moduleUsers);
                 moduleUsersRepository.save(moduleUsers);
+                log.info("Shared module {} with new user {}", moduleId, sharedUserId);
             }
         }
         moduleRepository.save(module);
+
+
+
+    }
+
+    @Override
+    public Page<ModuleUserResponse> getAllSharedModules(HttpServletRequest request, int page, int size, String sortBy, String sortDirection, String keyword, int status) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
+        if (sortDirection == null || sortDirection.isBlank()) {
+            sortDirection = "asc";
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<ModuleUsers> modulePage;
+        try {
+            modulePage = moduleUsersRepository.searchShareModules(keyword, pageable, userId, status);
+        } catch (Exception e) {
+            log.error("Database error when fetching shared modules for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+
+        List<ModuleUserResponse> moduleResponses = modulePage.stream()
+                .map(moduleUser -> {
+                    Module module = moduleUser.getModule();
+                    List<FlashCardResponse> flashCardResponses = new ArrayList<>();
+                    for (FlashCard flashCard : module.getFlashCards()) {
+                        flashCardResponses.add(FlashCardResponse.builder()
+                                .flashCardId(flashCard.getCardId().toString())
+                                .vocabularyResponse(
+                                        VocabularyResponse.builder()
+                                                .vocabularyId(flashCard.getVocabulary().getWordId())
+                                                .word(flashCard.getVocabulary().getWord())
+                                                .context(flashCard.getVocabulary().getContext())
+                                                .meaning(flashCard.getVocabulary().getMeaning())
+                                                .createdBy(flashCard.getVocabulary().getCreatedBy())
+                                                .createdAt(flashCard.getVocabulary().getCreatedAt())
+                                                .build()
+                                )
+                                .build());
+                    }
+                    return ModuleUserResponse.builder()
+                            .moduleId(module.getModuleId())
+                            .moduleName(module.getModuleName())
+                            .description(module.getDescription())
+                            .isPublic(module.getIsPublic())
+                            .flashCardIds(flashCardResponses)
+                            .createdBy(module.getCreatedBy())
+                            .createdAt(module.getCreatedAt())
+                            .updatedBy(module.getUpdatedBy())
+                            .status(moduleUser.getStatus())
+                            .updatedAt(module.getUpdatedAt())
+                            .build();
+                })
+                .toList();
+
+        return new PageImpl<>(moduleResponses, pageable, modulePage.getTotalElements());
+
+
+    }
+
+    @Override
+    public void updateSharedModuleRequest(String moduleId, int status, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Module module = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (module.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        Optional<ModuleUsers> moduleUserOpt = module.getModuleUsers().stream()
+                .filter(mu -> mu.getUserId().equals(userId))
+                .findFirst();
+        if (moduleUserOpt.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    "ModuleUser not found for user: " + userId,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        ModuleUsers moduleUser = moduleUserOpt.get();
+        if (moduleUser.getStatus() == 1) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    "You have already accepted this module",
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if (moduleUser.getStatus() == 2) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    "You have already denied this module",
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if (status == ModuleUserStatus.ACCEPTED.ordinal()) {
+            moduleUser.setStatus(1); // 1: allowed
+        } else if (status == ModuleUserStatus.REJECTED.ordinal()) {
+            moduleUser.setStatus(2); // 2: denied
+        } else {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    "Invalid status: " + status,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        moduleUsersRepository.save(moduleUser);
+
+    }
+
+    @Override
+    public Page<ModuleUserResponse> getAllMySharedModules(HttpServletRequest request, int i, int size, String sortBy, String sortDirection, String keyword) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "createdAt";
+        }
+        if (sortDirection == null || sortDirection.isBlank()) {
+            sortDirection = "asc";
+        }
+        Sort sort = sortDirection.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(i, size, sort);
+        Page<ModuleUsers> modulePage;
+        try {
+            modulePage = moduleUsersRepository.searchMyShareModules(keyword, pageable, userId);
+        } catch (Exception e) {
+            log.error("Database error when fetching shared modules for user: {}", userId, e);
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
+        List<ModuleUserResponse> moduleResponses = modulePage.stream()
+                .map(moduleUser -> {
+                    Module module = moduleUser.getModule();
+                    List<FlashCardResponse> flashCardResponses = new ArrayList<>();
+                    for (FlashCard flashCard : module.getFlashCards()) {
+                        flashCardResponses.add(FlashCardResponse.builder()
+                                .flashCardId(flashCard.getCardId().toString())
+                                .vocabularyResponse(
+                                        VocabularyResponse.builder()
+                                                .vocabularyId(flashCard.getVocabulary().getWordId())
+                                                .word(flashCard.getVocabulary().getWord())
+                                                .context(flashCard.getVocabulary().getContext())
+                                                .meaning(flashCard.getVocabulary().getMeaning())
+                                                .createdBy(flashCard.getVocabulary().getCreatedBy())
+                                                .createdAt(flashCard.getVocabulary().getCreatedAt())
+                                                .build()
+                                )
+                                .build());
+                    }
+                    return ModuleUserResponse.builder()
+                            .moduleId(module.getModuleId())
+                            .moduleName(module.getModuleName())
+                            .description(module.getDescription())
+                            .isPublic(module.getIsPublic())
+                            .flashCardIds(flashCardResponses)
+                            .createdBy(module.getCreatedBy())
+                            .createdAt(module.getCreatedAt())
+                            .updatedBy(module.getUpdatedBy())
+                            .updatedAt(module.getUpdatedAt())
+                            .status(moduleUser.getStatus())
+                            .build();
+                })
+                .toList();
+        return new PageImpl<>(moduleResponses, pageable, modulePage.getTotalElements());
+
 
 
 
