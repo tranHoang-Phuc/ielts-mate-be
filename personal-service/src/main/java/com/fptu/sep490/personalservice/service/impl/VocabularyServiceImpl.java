@@ -35,8 +35,8 @@ public class VocabularyServiceImpl  implements VocabularyService {
 
     @Override
     public VocabularyResponse createVocabulary(VocabularyRequest vocabularyRequest, HttpServletRequest httpServletRequest) throws Exception {
-        String UserId = helper.getUserIdFromToken(httpServletRequest);
-        if (UserId == null) {
+        String userId = helper.getUserIdFromToken(httpServletRequest);
+        if (userId == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
@@ -51,7 +51,7 @@ public class VocabularyServiceImpl  implements VocabularyService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), UserId);
+        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), userId);
         if (existingVocabulary != null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
@@ -62,14 +62,21 @@ public class VocabularyServiceImpl  implements VocabularyService {
         Vocabulary newVocabulary = new Vocabulary();
         newVocabulary.setWord(vocabularyRequest.word());
         newVocabulary.setContext(vocabularyRequest.context());
-        newVocabulary.setMeaning(vocabularyRequest.meaning());
         newVocabulary.setIsPublic(vocabularyRequest.isPublic());
-        newVocabulary.setCreatedBy(UserId);
+        newVocabulary.setCreatedBy(userId);
+
+        // Auto-fill meaning using AI API if not provided
+        String meaning = vocabularyRequest.meaning();
+        if (meaning == null || meaning.isBlank()) {
+            // Replace with your actual AI API call
+            meaning ="";
+//            meaning = aiApiService.getMeaning(newVocabulary.getWord(), newVocabulary.getContext());
+        }
+        newVocabulary.setMeaning(meaning);
 
         vocabularyRepository.save(newVocabulary);
-        // goi ve APi AI de set gia tri context va meaning
 
-        VocabularyResponse response = VocabularyResponse.builder()
+        return VocabularyResponse.builder()
                 .vocabularyId(newVocabulary.getWordId())
                 .word(newVocabulary.getWord())
                 .context(newVocabulary.getContext())
@@ -77,9 +84,6 @@ public class VocabularyServiceImpl  implements VocabularyService {
                 .createdBy(newVocabulary.getCreatedBy())
                 .createdAt(newVocabulary.getCreatedAt())
                 .build();
-
-        return response;
-
     }
 
     @Override
@@ -98,6 +102,13 @@ public class VocabularyServiceImpl  implements VocabularyService {
                         Constants.ErrorCodeMessage.NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+        if (vocabulary.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.GONE.value()
+            );
+        }
 
         return VocabularyResponse.builder()
                 .vocabularyId(vocabulary.getWordId())
