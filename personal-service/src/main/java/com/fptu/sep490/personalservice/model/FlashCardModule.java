@@ -23,7 +23,7 @@ import java.util.UUID;
 public class FlashCardModule {
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @GenericGenerator(name = "id", strategy = "org.hibernate.id.UUIDGenerator")
     private UUID id;
 
     @ManyToOne
@@ -31,7 +31,7 @@ public class FlashCardModule {
     private Module module;
 
     @ManyToOne
-    @JoinColumn(name = "flashcard_id")
+    @JoinColumn(name = "card_id")
     private FlashCard flashCard;
 
 
