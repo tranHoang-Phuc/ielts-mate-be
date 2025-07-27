@@ -11,6 +11,8 @@ public record VocabularyRequest(
         @JsonProperty("context")
         String context,
         @JsonProperty("meaning")
-        String meaning
+        String meaning,
+        @JsonProperty("is_public")
+        Boolean isPublic
 ) {
 }

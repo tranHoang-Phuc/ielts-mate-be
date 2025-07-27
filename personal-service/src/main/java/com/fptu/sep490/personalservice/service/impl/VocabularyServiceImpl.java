@@ -63,6 +63,7 @@ public class VocabularyServiceImpl  implements VocabularyService {
         newVocabulary.setWord(vocabularyRequest.word());
         newVocabulary.setContext(vocabularyRequest.context());
         newVocabulary.setMeaning(vocabularyRequest.meaning());
+        newVocabulary.setIsPublic(vocabularyRequest.isPublic());
         newVocabulary.setCreatedBy(UserId);
 
         vocabularyRepository.save(newVocabulary);
@@ -181,6 +182,62 @@ public class VocabularyServiceImpl  implements VocabularyService {
 
 
 
+
+
+    }
+
+    @Override
+    public VocabularyResponse updateVocabulary(String vocabularyId, VocabularyRequest vocabularyRequest, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Vocabulary vocabulary = vocabularyRepository.findById(UUID.fromString(vocabularyId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (!vocabulary.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        if (vocabularyRequest.word() == null || vocabularyRequest.word().isBlank()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_REQUEST,
+                    Constants.ErrorCode.INVALID_REQUEST,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), userId);
+        if (existingVocabulary != null && !existingVocabulary.getWordId().equals(vocabulary.getWordId())) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
+                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
+                    HttpStatus.CONFLICT.value()
+            );
+        }
+        vocabulary.setWord(vocabularyRequest.word());
+        vocabulary.setContext(vocabularyRequest.context());
+        vocabulary.setMeaning(vocabularyRequest.meaning());
+        vocabulary.setIsPublic(vocabularyRequest.isPublic());
+        vocabulary.setUpdatedBy(userId);
+        vocabularyRepository.save(vocabulary);
+        return VocabularyResponse.builder()
+                .vocabularyId(vocabulary.getWordId())
+                .word(vocabulary.getWord())
+                .context(vocabulary.getContext())
+                .meaning(vocabulary.getMeaning())
+                .createdBy(vocabulary.getCreatedBy())
+                .createdAt(vocabulary.getCreatedAt())
+                .build();
 
 
     }

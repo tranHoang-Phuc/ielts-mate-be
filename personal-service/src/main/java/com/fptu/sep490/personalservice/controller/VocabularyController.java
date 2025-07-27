@@ -72,8 +72,42 @@ public class VocabularyController {
 
     }
 
+    @PutMapping("/{vocabularyId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Update vocabulary by ID",
+            description = "Update an existing vocabulary by its ID. Requires CREATOR role."
+    )
+    @RequestBody(
+            description = "Request body to update a vocabulary",
+            required = true,
+            content = @Content(schema = @Schema(implementation = VocabularyRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vocabulary updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404", description = "Vocabulary not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<VocabularyResponse>> updateVocabulary(
+            @PathVariable("vocabularyId") String vocabularyId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody VocabularyRequest vocabularyRequest,
+            HttpServletRequest request
+    ) throws Exception {
+        VocabularyResponse response = vocabularyService.updateVocabulary(vocabularyId, vocabularyRequest, request);
+        BaseResponse<VocabularyResponse> baseResponse = BaseResponse.<VocabularyResponse>builder()
+                .data(response)
+                .message("Vocabulary updated successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
     @GetMapping("/{vocabularyId}")
-    @PreAuthorize("hasRole('CREATOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get vocabulary by ID",
             description = "Retrieve a vocabulary by its ID. Requires CREATOR role."
