@@ -148,7 +148,7 @@ public class ModuleServiceImpl implements ModuleService {
                                 .flashCardId(flashCard.getCardId().toString())
                                 .vocabularyResponse(
                                         VocabularyResponse.builder()
-                                                .vocabularyId(flashCard.getCardId())
+                                                .vocabularyId(flashCard.getVocabulary().getWordId())
                                                 .word(flashCard.getVocabulary().getWord())
                                                 .context(flashCard.getVocabulary().getContext())
                                                 .meaning(flashCard.getVocabulary().getMeaning())
@@ -313,7 +313,7 @@ public class ModuleServiceImpl implements ModuleService {
                     .flashCardId(flashCard.getCardId().toString())
                     .vocabularyResponse(
                             VocabularyResponse.builder()
-                                    .vocabularyId(flashCard.getCardId())
+                                    .vocabularyId(flashCard.getVocabulary().getWordId())
                                     .word(flashCard.getVocabulary().getWord())
                                     .context(flashCard.getVocabulary().getContext())
                                     .meaning(flashCard.getVocabulary().getMeaning())
