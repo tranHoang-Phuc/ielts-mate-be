@@ -111,6 +111,13 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
             );
         }
 
+        if (examAttempt.getHistory() == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_SUBMIT,
+                    Constants.ErrorCode.EXAM_ATTEMPT_NOT_SUBMIT,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
         ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
 
         List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> taskResponses = listeningTaskService.fromExamAttemptHistory(history);
