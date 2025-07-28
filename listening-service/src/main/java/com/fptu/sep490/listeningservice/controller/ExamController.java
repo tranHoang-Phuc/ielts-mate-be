@@ -215,7 +215,7 @@ public class ExamController {
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) String keyword,
             HttpServletRequest httpServletRequest) throws Exception {
-        Page<ExamResponse> response = examService.getActiveExams(page - 1 , size, sortBy, sortDirection, httpServletRequest, keyword);
+        Page<ExamResponse> response = examService.getActiveExams(page, size, sortBy, sortDirection, httpServletRequest, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(response.getNumber() + 1)
