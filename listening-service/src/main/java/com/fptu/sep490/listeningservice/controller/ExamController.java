@@ -72,7 +72,7 @@ public class ExamController {
     }
 
     @GetMapping("/{examId}")
-    @PreAuthorize("hasRole('CREATOR') or hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get a listening exam by ID",
             description = "This endpoint allows users to retrieve a specific listening exam by its ID."
@@ -215,7 +215,7 @@ public class ExamController {
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) String keyword,
             HttpServletRequest httpServletRequest) throws Exception {
-        Page<ExamResponse> response = examService.getActiveExams(page, size, sortBy, sortDirection, httpServletRequest, keyword);
+        Page<ExamResponse> response = examService.getActiveExams(page - 1 , size, sortBy, sortDirection, httpServletRequest, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(response.getNumber() + 1)

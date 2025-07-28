@@ -11,6 +11,9 @@ public record ExamRequest(
         @JsonProperty("exam_description")
         String examDescription,
 
+        @JsonProperty("status")
+        Integer status,
+
         @JsonProperty("url_slug")
         String urlSlug,
 

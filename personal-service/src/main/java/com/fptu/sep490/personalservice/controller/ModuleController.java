@@ -242,6 +242,36 @@ public class ModuleController {
                 .body(baseResponse);
     }
 
+    // api to clone a module
+    @PostMapping("/{moduleId}/clone")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Clone a module",
+            description = "Clone an existing module by its ID. Requires authentication.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Module cloned successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "404", description = "Module not found", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<ModuleResponse>> cloneModule(
+            @PathVariable("moduleId") String moduleId,
+            HttpServletRequest request
+    ) throws Exception {
+        ModuleResponse response = moduleService.cloneModule(moduleId, request);
+        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
+                .data(response)
+                .message("Module cloned successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+
 
 
 
