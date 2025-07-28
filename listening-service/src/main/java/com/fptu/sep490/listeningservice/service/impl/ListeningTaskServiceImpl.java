@@ -511,13 +511,13 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 //                ));
 
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByListeningTaskByTaskId(task.getTaskId());
-        if (questionGroups.isEmpty()) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
-                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
-                    HttpStatus.NOT_FOUND.value()
-            );
-        }
+//        if (questionGroups.isEmpty()) {
+//            throw new AppException(
+//                    Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
+//                    Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
+//                    HttpStatus.NOT_FOUND.value()
+//            );
+//        }
 
         Map<QuestionGroup, Map<Question, List<Choice>>> currentVersionChoicesByGroup = new HashMap<>();
         Map<QuestionGroup, List<DragItem>> currentVersionDragItemsByGroup = new HashMap<>();

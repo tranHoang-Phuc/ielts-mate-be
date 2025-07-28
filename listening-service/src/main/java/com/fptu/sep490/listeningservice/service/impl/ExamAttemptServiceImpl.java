@@ -80,6 +80,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .listeningTaskIdPart1(listeningTaskService.fromListeningTask(currentExam.getPart1().getTaskId().toString()))
                 .listeningTaskIdPart2(listeningTaskService.fromListeningTask(currentExam.getPart2().getTaskId().toString()))
                 .listeningTaskIdPart3(listeningTaskService.fromListeningTask(currentExam.getPart3().getTaskId().toString()))
+                .listeningTaskIdPart4(listeningTaskService.fromListeningTask(currentExam.getPart4().getTaskId().toString()))
                 .build();
         return CreateExamAttemptResponse.builder()
                 .examAttemptId(examAttempt.getExamAttemptId())
@@ -111,6 +112,13 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
             );
         }
 
+        if (examAttempt.getHistory() == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_SUBMIT,
+                    Constants.ErrorCode.EXAM_ATTEMPT_NOT_SUBMIT,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
         ExamAttemptHistory history = objectMapper.readValue(examAttempt.getHistory(), ExamAttemptHistory.class);
 
         List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> taskResponses = listeningTaskService.fromExamAttemptHistory(history);
@@ -125,6 +133,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .listeningTaskIdPart1(taskResponses.get(0))
                 .listeningTaskIdPart2(taskResponses.get(1))
                 .listeningTaskIdPart3(taskResponses.get(2))
+                .listeningTaskIdPart4(taskResponses.get(3))
                 .build();
         return ExamAttemptGetDetail.builder()
                 .examAttemptId(examAttempt.getExamAttemptId())
