@@ -32,4 +32,6 @@ public interface ModuleService {
     void updateSharedModuleRequest(String moduleId, int status, HttpServletRequest request) throws Exception;
 
     Page<ModuleUserResponse> getAllMySharedModules(HttpServletRequest request, int i, int size, String sortBy, String sortDirection, String keyword) throws Exception;
+
+    ModuleResponse cloneModule(String moduleId, HttpServletRequest request) throws Exception;
 }

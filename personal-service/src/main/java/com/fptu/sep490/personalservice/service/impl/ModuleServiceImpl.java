@@ -714,5 +714,103 @@ public class ModuleServiceImpl implements ModuleService {
 
     }
 
+    @Override
+    public ModuleResponse cloneModule(String moduleId, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+
+        Module originalModule = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        if (originalModule.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        Optional<ModuleUsers> moduleUser = moduleUsersRepository.findByModuleIdAndUserId(UUID.fromString(moduleId), userId);
+
+        if (!originalModule.getIsPublic() && moduleUser.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    "You do not have permission to clone this module",
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        // Tạo module mới
+        Module clonedModule = new Module();
+        clonedModule.setModuleName(originalModule.getModuleName() + " - Copy");
+        clonedModule.setDescription(originalModule.getDescription());
+        clonedModule.setIsPublic(false);
+        clonedModule.setCreatedBy(userId);
+
+        Module savedClonedModule = moduleRepository.save(clonedModule);
+
+        int index = 0; // optional: để đặt thứ tự nếu cần
+        for (FlashCard flashCard : originalModule.getFlashCards()) {
+            Vocabulary vocabulary = flashCard.getVocabulary();
+            Optional<FlashCard> existingFlashCard = flashCardRepository.findByVocabularyId(vocabulary.getWordId(), userId);
+
+            FlashCard flashCardClone = existingFlashCard.orElseGet(() -> {
+                FlashCard newCard = new FlashCard();
+                newCard.setVocabulary(vocabulary);
+                newCard.setCreatedBy(userId);
+                return flashCardRepository.save(newCard);
+            });
+
+            FlashCardModule flashCardModule = new FlashCardModule();
+            flashCardModule.setFlashCard(flashCardClone);
+            flashCardModule.setModule(savedClonedModule);
+            flashCardModule.setOrderIndex(index++); // nếu cần giữ thứ tự
+
+            flashCardModuleRepository.save(flashCardModule);
+
+            // Nếu có mappedBy (bidirectional)
+            flashCardClone.getFlashCardModules().add(flashCardModule);
+            savedClonedModule.getFlashCardModules().add(flashCardModule);
+        }
+
+        // Build response như ở createModule
+        List<FlashCardResponse> flashCardResponses = savedClonedModule.getFlashCards().stream()
+                .map(card -> FlashCardResponse.builder()
+                        .flashCardId(card.getCardId().toString())
+                        .vocabularyResponse(
+                                VocabularyResponse.builder()
+                                        .vocabularyId(card.getVocabulary().getWordId())
+                                        .word(card.getVocabulary().getWord())
+                                        .context(card.getVocabulary().getContext())
+                                        .meaning(card.getVocabulary().getMeaning())
+                                        .createdBy(card.getVocabulary().getCreatedBy())
+                                        .createdAt(card.getVocabulary().getCreatedAt())
+                                        .build()
+                        )
+                        .build())
+                .toList();
+
+        return ModuleResponse.builder()
+                .moduleId(savedClonedModule.getModuleId())
+                .moduleName(savedClonedModule.getModuleName())
+                .description(savedClonedModule.getDescription())
+                .isPublic(savedClonedModule.getIsPublic())
+                .flashCardIds(flashCardResponses)
+                .createdBy(savedClonedModule.getCreatedBy())
+                .createdAt(savedClonedModule.getCreatedAt())
+                .build();
+    }
+
+
 
 }

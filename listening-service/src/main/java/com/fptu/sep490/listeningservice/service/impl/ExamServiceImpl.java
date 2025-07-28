@@ -292,6 +292,8 @@ public class ExamServiceImpl implements ExamService {
             item.setIsDeleted(true);
             listeningExamRepository.save(item);
         }
+        exam.setIsDeleted(true);
+        listeningExamRepository.save(exam);
 
 
     }
@@ -319,6 +321,11 @@ public class ExamServiceImpl implements ExamService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
+        if(request.status() == 1){
+            listeningExam.setStatus(ExamStatus.ACTIVE);
+        }else if (request.status() == 0) {
+            listeningExam.setStatus(ExamStatus.INACTIVE);
+        }
         ListeningExam currentExam = findCurrentOrChildCurrentExam(listeningExam);
         if (currentExam == null) {
             throw new AppException(
@@ -333,6 +340,7 @@ public class ExamServiceImpl implements ExamService {
         newExam.setExamName(request.examName() != null ? request.examName() : currentExam.getExamName());
         newExam.setExamDescription(request.examDescription() != null ? request.examDescription(): currentExam.getExamDescription());
         newExam.setUrlSlug(request.urlSlug() != null ? request.urlSlug(): currentExam.getUrlSlug());
+        newExam.setStatus(currentExam.getStatus());
         if(request.part2Id()!= null){
             ListeningTask part1 = listeningTaskRepository.findById(request.part1Id())
                     .orElseThrow(() -> new AppException(
@@ -440,6 +448,7 @@ public class ExamServiceImpl implements ExamService {
         newExam.setIsCurrent(true);
         newExam.setVersion(currentExam.getVersion()+1);
         newExam.setParent(listeningExam);
+        newExam.setIsOriginal(false);
 
         listeningExamRepository.save(listeningExam);
         listeningExamRepository.save(currentExam);

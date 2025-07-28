@@ -17,6 +17,7 @@ public interface FlashCardRepository extends CrudRepository<FlashCard, UUID> {
             """
             SELECT f FROM FlashCard f
             WHERE f.vocabulary.wordId = :vocabularyId
+            AND f.createdBy = :userId
             
             """
     )

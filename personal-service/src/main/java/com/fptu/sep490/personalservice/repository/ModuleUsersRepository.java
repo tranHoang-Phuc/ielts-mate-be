@@ -53,4 +53,5 @@ public interface ModuleUsersRepository extends CrudRepository<ModuleUsers, UUID>
             Pageable pageable,
             @Param("userId") String userId
     );
+
 }
