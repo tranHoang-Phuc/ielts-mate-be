@@ -46,7 +46,9 @@ public record ExamAttemptGetDetail(
             @JsonProperty("listening_task_id_part2")
             ListeningTaskResponse listeningTaskIdPart2,
             @JsonProperty("listening_task_id_part3")
-            ListeningTaskResponse listeningTaskIdPart3
+            ListeningTaskResponse listeningTaskIdPart3,
+            @JsonProperty("listening_task_id_part4")
+            ListeningTaskResponse listeningTaskIdPart4
     ) {
         @Builder
         @JsonInclude(JsonInclude.Include.NON_NULL)
