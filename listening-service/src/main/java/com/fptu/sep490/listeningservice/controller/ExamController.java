@@ -175,7 +175,7 @@ public class ExamController {
             @RequestParam(defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String keyword
     ) throws Exception {
-        Page<ExamResponse> response = examService.getAllExamsForCreator(httpServletRequest, page -1, size, sortBy, sortDirection, keyword);
+        Page<ExamResponse> response = examService.getAllExamsForCreator(httpServletRequest, page, size, sortBy, sortDirection, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(response.getNumber() + 1)
