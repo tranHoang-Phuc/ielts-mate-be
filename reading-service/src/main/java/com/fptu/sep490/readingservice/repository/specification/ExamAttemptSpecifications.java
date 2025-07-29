@@ -28,7 +28,8 @@ public class ExamAttemptSpecifications {
             List<Predicate> predicates = new ArrayList<>();
 
             if (readingExamName != null && !readingExamName.isBlank()) {
-                predicates.add(cb.like(cb.lower(root.get("readingExamName")), "%" + readingExamName.toLowerCase() + "%"));
+                Join<Object, Object> readingExamJoin = root.join("readingExam", JoinType.INNER);
+                predicates.add(cb.like(cb.lower(readingExamJoin.get("examName")), "%" + readingExamName.toLowerCase() + "%"));
             }
 
             if (createdBy != null && !createdBy.isBlank()) {
