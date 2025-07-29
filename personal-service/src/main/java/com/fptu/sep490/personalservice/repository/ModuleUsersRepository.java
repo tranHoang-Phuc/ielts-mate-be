@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public interface ModuleUsersRepository extends CrudRepository<ModuleUsers, UUID> {
 
-    @Query("SELECT mu FROM ModuleUsers mu WHERE mu.module.id = :moduleId AND mu.userId = :userId")
+    @Query("SELECT mu FROM ModuleUsers mu WHERE mu.module.moduleId = :moduleId AND mu.userId = :userId")
     Optional<ModuleUsers> findByModuleIdAndUserId(@Param("moduleId") UUID moduleId, @Param("userId") String userId);
 
     // Search for module_user by keyword of module in module_user if not full and user ID

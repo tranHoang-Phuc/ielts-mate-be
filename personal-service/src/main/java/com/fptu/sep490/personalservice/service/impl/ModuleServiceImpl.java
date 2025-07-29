@@ -8,12 +8,10 @@ import com.fptu.sep490.personalservice.model.Module;
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.repository.*;
 import com.fptu.sep490.personalservice.service.ModuleService;
+import com.fptu.sep490.personalservice.viewmodel.request.ModuleProgressRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
-import com.fptu.sep490.personalservice.viewmodel.response.FlashCardResponse;
-import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
-import com.fptu.sep490.personalservice.viewmodel.response.ModuleUserResponse;
-import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +56,14 @@ public class ModuleServiceImpl implements ModuleService {
 
         // Save module first to get its ID
         Module savedModule = moduleRepository.save(newModule);
+
+        // Save connection at ModuleUsers then the creator can access the module
+        ModuleUsers moduleUsers = new ModuleUsers();
+        moduleUsers.setModule(savedModule);
+        moduleUsers.setUserId(userId);
+        moduleUsers.setStatus(ModuleUserStatus.ACCEPTED.ordinal());
+        moduleUsers.setCreatedBy(userId);
+        moduleUsersRepository.save(moduleUsers);
 
         for (UUID vocabularyId : vocabularyIds) {
             Vocabulary vocabulary = vocabularyRepository.findById(vocabularyId)
@@ -301,7 +307,10 @@ public class ModuleServiceImpl implements ModuleService {
                     HttpStatus.NOT_FOUND.value()
             );
         }
-        if (!module.getCreatedBy().equals(userId) && !module.getIsPublic()) {
+        ModuleUsers moduleUser = moduleUsersRepository.findByModuleIdAndUserId(UUID.fromString(moduleId), userId)
+                .orElse(null);
+
+        if (!module.getCreatedBy().equals(userId) && !module.getIsPublic() && moduleUser == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.FORBIDDEN,
                     Constants.ErrorCodeMessage.FORBIDDEN,
@@ -811,6 +820,120 @@ public class ModuleServiceImpl implements ModuleService {
                 .build();
     }
 
+    @Override
+    public ModuleProgressResponse getModuleProgress(String moduleId, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Module module = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (module.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        Optional<ModuleUsers> moduleUser = moduleUsersRepository.findByModuleIdAndUserId(UUID.fromString(moduleId), userId);
+        if (moduleUser.isEmpty()) {
+            throw new AppException(
+                    "you do not have permission to view this module, or still not clone this module",
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        ModuleUsers moduleUsers = moduleUser.get();
+        if (moduleUsers.getStatus() == 2) {
+            throw new AppException(
+                    "you have denied or still not accept this module, please contact the owner to re-allow you",
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+        ModuleProgressResponse progressResponse = ModuleProgressResponse.builder().
+                id(moduleUsers.getId())
+                .moduleId(module.getModuleId().toString())
+                .moduleName(module.getModuleName())
+                .userId(userId)
+                .status(moduleUsers.getStatus())
+                .lastIndexRead(moduleUsers.getLastIndexRead())
+                .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())
+                .build();
+
+
+
+        return progressResponse;
+    }
+
+    @Override
+    public ModuleProgressResponse updateModuleProgress(String moduleId, ModuleProgressRequest moduleProgressRequest, HttpServletRequest request) throws Exception {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Module module = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (module.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        Optional<ModuleUsers> moduleUser = moduleUsersRepository.findByModuleIdAndUserId(UUID.fromString(moduleId), userId);
+        if (moduleUser.isEmpty()) {
+            throw new AppException(
+                    "you do not have permission to view this module, or still not clone this module",
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        ModuleUsers moduleUsers = moduleUser.get();
+        if (moduleUsers.getStatus() == 2) {
+            throw new AppException(
+                    "you have denied or still not accept this module, please contact the owner to re-allow you",
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        moduleUsers.setStatus(moduleProgressRequest.status());
+        moduleUsers.setLastIndexRead(moduleProgressRequest.lastIndexRead());
+        moduleUsers.setHighlightedFlashcardIds(moduleProgressRequest.highlightedFlashcardIds());
+        moduleUsers.setUpdatedBy(userId);
+        moduleUsers = moduleUsersRepository.save(moduleUsers);
+        ModuleProgressResponse progressResponse = ModuleProgressResponse.builder()
+                .id(moduleUsers.getId())
+                .moduleId(module.getModuleId().toString())
+                .moduleName(module.getModuleName())
+                .userId(userId)
+                .status(moduleUsers.getStatus())
+                .lastIndexRead(moduleUsers.getLastIndexRead())
+                .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())
+                .build();
+
+        return  progressResponse;
+
+    }
 
 
 }

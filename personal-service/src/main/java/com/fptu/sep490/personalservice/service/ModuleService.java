@@ -1,8 +1,10 @@
 package com.fptu.sep490.personalservice.service;
 
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
+import com.fptu.sep490.personalservice.viewmodel.request.ModuleProgressRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
+import com.fptu.sep490.personalservice.viewmodel.response.ModuleProgressResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,4 +36,8 @@ public interface ModuleService {
     Page<ModuleUserResponse> getAllMySharedModules(HttpServletRequest request, int i, int size, String sortBy, String sortDirection, String keyword) throws Exception;
 
     ModuleResponse cloneModule(String moduleId, HttpServletRequest request) throws Exception;
+
+    ModuleProgressResponse getModuleProgress(String moduleId, HttpServletRequest request) throws Exception;
+
+    ModuleProgressResponse updateModuleProgress(String moduleId, @Valid ModuleProgressRequest moduleProgressRequest, HttpServletRequest request) throws Exception;
 }
