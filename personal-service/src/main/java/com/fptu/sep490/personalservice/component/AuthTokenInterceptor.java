@@ -25,7 +25,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AuthTokenInterceptor implements HandlerInterceptor {
-
     ObjectProvider<KeyCloakTokenClient> keyCloakTokenClient;
     @Value("${keycloak.realm}")
     @NonFinal
