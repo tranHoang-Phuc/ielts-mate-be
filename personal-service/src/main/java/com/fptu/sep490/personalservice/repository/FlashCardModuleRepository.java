@@ -4,6 +4,8 @@ import com.fptu.sep490.personalservice.model.FlashCard;
 import com.fptu.sep490.personalservice.model.FlashCardModule;
 import com.fptu.sep490.personalservice.model.Module;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -25,4 +27,16 @@ public interface FlashCardModuleRepository extends CrudRepository<FlashCardModul
 
     boolean existsByFlashCardAndModule(FlashCard flashCard, Module module);
 
+    // Search for flash card modules by keyword if not full and user ID
+    @Query("""
+        SELECT fcm FROM FlashCardModule fcm
+        WHERE fcm.module.isDeleted = false
+          AND fcm.module.createdBy = :userId
+          AND (
+            :keyword IS NULL OR :keyword = '' OR
+            LOWER(fcm.module.moduleName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+            LOWER(fcm.module.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+          )
+    """)
+    Page<Module> searchShareModules(String keyword, Pageable pageable, String userId);
 }

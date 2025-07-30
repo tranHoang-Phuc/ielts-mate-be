@@ -26,6 +26,7 @@ public class Constants {
         public static final String LISTENING_TASK_NOT_FOUND = "LISTENING_TASK_NOT_FOUND";
         public static final String CHOICE_NOT_FOUND = "CHOICE_NOT_FOUND";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "EXAM_ATTEMPT_NOT_FOUND";
+        public static final String EXAM_ATTEMPT_NOT_SUBMIT = "EXAM_ATTEMPT_NOT_SUBMIT";
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
     }
@@ -66,6 +67,7 @@ public class Constants {
         public static final String LISTENING_TASK_NOT_FOUND = "400022";
         public static final String CHOICE_NOT_FOUND = "400023";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "400024";
+        public static final String EXAM_ATTEMPT_NOT_SUBMIT = "400025";
 
         public static final String INTERNAL_SERVER_ERROR = "400999";
 

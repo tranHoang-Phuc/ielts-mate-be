@@ -1,13 +1,16 @@
 package com.fptu.sep490.personalservice.controller;
 
 
+
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
+import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.ModuleUserResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.VocabularyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,85 +35,25 @@ import java.util.List;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-@RequestMapping("/module")
+@RequestMapping("/module-share")
 @Slf4j
-public class ModuleController {
+public class ShareModuleController {
+
     ModuleService moduleService;
 
-
-    @PostMapping("")
+    //API to share a module to other user, chỉ cần truyền list user_id ở body
+    @PostMapping("/{moduleId}/share")
     @PreAuthorize("isAuthenticated()")
     @Operation(
-            summary = "Create a new module",
-            description = "Create a new module with the provided details. Requires authentication.",
+            summary = "Share a module with other users",
+            description = "Share a module with other users by providing their user IDs. Requires authentication.",
             requestBody = @RequestBody(
                     required = true,
-                    description = "Request body to create a module",
-                    content = @Content(schema = @Schema(implementation = ModuleRequest.class))
+                    description = "Request body to share a module",
+                    content = @Content(schema = @Schema(implementation = ShareModuleRequest.class))
             ),
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Module created successfully"),
-                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
-            }
-    )
-    public ResponseEntity<BaseResponse<ModuleResponse>> createModule(
-            @Valid @org.springframework.web.bind.annotation.RequestBody ModuleRequest moduleRequest,
-            HttpServletRequest request
-    ) throws Exception {
-        ModuleResponse response = moduleService.createModule(moduleRequest, request);
-        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
-                .data(response)
-                .message("Vocabulary created successfully")
-                .build();
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(baseResponse);
-    }
-
-    //API to get module by id
-    @GetMapping("/{moduleId}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(
-            summary = "Get module by ID",
-            description = "Retrieve a module by its ID. Requires authentication.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Module retrieved successfully"),
-                    @ApiResponse(responseCode = "404", description = "Module not found", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
-            }
-    )
-    public ResponseEntity<BaseResponse<ModuleResponse>> getModuleById(
-            @PathVariable("moduleId") String moduleId,
-            HttpServletRequest request
-    ) throws Exception {
-        ModuleResponse response = moduleService.getModuleById(moduleId, request);
-        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
-                .data(response)
-                .message("Module retrieved successfully")
-                .build();
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(baseResponse);
-    }
-
-    //API to update module by id
-    @PutMapping("/{moduleId}")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(
-            summary = "Update a module by ID",
-            description = "Update a module by its ID. Requires authentication.",
-            requestBody = @RequestBody(
-                    required = true,
-                    description = "Request body to update a module",
-                    content = @Content(schema = @Schema(implementation = ModuleRequest.class))
-            ),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Module updated successfully"),
+                    @ApiResponse(responseCode = "200", description = "Module shared successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
@@ -118,85 +61,42 @@ public class ModuleController {
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
             }
     )
-    public ResponseEntity<BaseResponse<ModuleResponse>> updateModuleById(
+    public ResponseEntity<BaseResponse<Void>> shareModule(
             @PathVariable("moduleId") String moduleId,
-            @Valid @org.springframework.web.bind.annotation.RequestBody ModuleRequest moduleRequest,
+            @Valid @org.springframework.web.bind.annotation.RequestBody ShareModuleRequest moduleRequest,
             HttpServletRequest request
     ) throws Exception {
-        ModuleResponse response = moduleService.updateModule(moduleId, moduleRequest, request);
-        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
-                .data(response)
-                .message("Module updated successfully")
+        moduleService.shareModule(moduleId, moduleRequest, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Module shared successfully")
                 .build();
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
 
-
-
-
-    //get all modules
-    @GetMapping("/my-flash-cards")
+    //API to get all shared modules of user
+    @GetMapping("/my-shared")
     @PreAuthorize("isAuthenticated()")
     @Operation(
-            summary = "Get all modules",
-            description = "Retrieve all modules. Requires authentication.",
+            summary = "Get all shared modules user accepted",
+            description = "Retrieve all modules shared with the authenticated user.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Modules retrieved successfully"),
+                    @ApiResponse(responseCode = "200", description = "Shared modules retrieved successfully"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
             }
     )
-    public ResponseEntity<BaseResponse<List<ModuleResponse>>> getAllModules(
+    public ResponseEntity<BaseResponse<List<ModuleUserResponse>>> getAllSharedModules(
             HttpServletRequest request,
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
-            @RequestParam(required = false) String keyword)
-    throws Exception {
-        Page<ModuleResponse> responses = moduleService.getAllModules(request, page - 1, size, sortBy, sortDirection, keyword);
-
-        Pagination pagination = Pagination.builder()
-                .currentPage(responses.getNumber() + 1)
-                .totalPages(responses.getTotalPages())
-                .pageSize(responses.getSize())
-                .totalItems((int) responses.getTotalElements())
-                .hasNextPage(responses.hasNext())
-                .hasPreviousPage(responses.hasPrevious())
-                .build();
-        BaseResponse<List<ModuleResponse>> baseResponse = BaseResponse.<List<ModuleResponse>>builder()
-                .data(responses.getContent())
-                .pagination(pagination)
-                .message("Modules retrieved successfully")
-                .build();
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(baseResponse);
-    }
-
-
-    //API get public modules
-    @GetMapping("/flash-cards")
-    @Operation(
-            summary = "Get all public modules",
-            description = "Retrieve all public modules. No authentication required.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Public modules retrieved successfully"),
-                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
-            }
-    )
-    public ResponseEntity<BaseResponse<List<ModuleResponse>>> getPublicModules(
-            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
-            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
-            @RequestParam(required = false) String keyword,
-            HttpServletRequest request
+            @RequestParam(required = false) String keyword
     ) throws Exception {
-        Page<ModuleResponse> responses = moduleService.getAllPublicModules(page - 1, size, sortBy, sortDirection, keyword, request);
+        Page<ModuleUserResponse> responses = moduleService.getAllSharedModules(request, page - 1, size, sortBy, sortDirection, keyword, ModuleUserStatus.ACCEPTED.ordinal());
 
         Pagination pagination = Pagination.builder()
                 .currentPage(responses.getNumber() + 1)
@@ -206,50 +106,64 @@ public class ModuleController {
                 .hasNextPage(responses.hasNext())
                 .hasPreviousPage(responses.hasPrevious())
                 .build();
-        BaseResponse<List<ModuleResponse>> baseResponse = BaseResponse.<List<ModuleResponse>>builder()
+        BaseResponse<List<ModuleUserResponse>> baseResponse = BaseResponse.<List<ModuleUserResponse>>builder()
                 .data(responses.getContent())
                 .pagination(pagination)
-                .message("Public modules retrieved successfully")
+                .message("Shared modules retrieved successfully")
                 .build();
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
 
-    @DeleteMapping("/{moduleId}")
+    //API to get all shared modules of user with status 0 (pending) -> i can accept or deny the request
+    @GetMapping("/my-shared/requests")
     @PreAuthorize("isAuthenticated()")
     @Operation(
-            summary = "Delete a module by ID",
-            description = "Delete a module by its ID. Requires authentication.",
+            summary = "Get all shared module requests are pending, i can accept or deny",
+            description = "Retrieve all module sharing requests for the authenticated user.",
             responses = {
-                    @ApiResponse(responseCode = "204", description = "Module deleted successfully"),
-                    @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "200", description = "Shared module requests retrieved successfully"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
             }
     )
-    public ResponseEntity<BaseResponse<Void>> deleteModuleById(
-            @PathVariable("moduleId") String moduleId,
-            HttpServletRequest request
+    public ResponseEntity<BaseResponse<List<ModuleUserResponse>>> getAllSharedModuleRequests(
+            HttpServletRequest request,
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword
     ) throws Exception {
-        moduleService.deleteModuleById(moduleId, request);
-        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
-                .message("Module deleted successfully")
+        Page<ModuleUserResponse> responses = moduleService.getAllSharedModules(request, page - 1, size, sortBy, sortDirection, keyword, ModuleUserStatus.PENDING.ordinal());
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(responses.getNumber() + 1)
+                .totalPages(responses.getTotalPages())
+                .pageSize(responses.getSize())
+                .totalItems((int) responses.getTotalElements())
+                .hasNextPage(responses.hasNext())
+                .hasPreviousPage(responses.hasPrevious())
                 .build();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+        BaseResponse<List<ModuleUserResponse>> baseResponse = BaseResponse.<List<ModuleUserResponse>>builder()
+                .data(responses.getContent())
+                .pagination(pagination)
+                .message("Shared module requests retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
-
-    // api to clone a module
-    @PostMapping("/{moduleId}/clone")
+    //API to accept or deny a shared module request
+    @PutMapping("/{moduleId}")
     @PreAuthorize("isAuthenticated()")
     @Operation(
-            summary = "Clone a module",
-            description = "Clone an existing module by its ID. Requires authentication.",
+            summary = "Accept or deny a shared module request",
+            description = "Accept or deny a shared module request by providing the module ID and status.",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Module cloned successfully"),
+                    @ApiResponse(responseCode = "200", description = "Shared module request updated successfully"),
                     @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
                     @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
@@ -257,22 +171,60 @@ public class ModuleController {
                     @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
             }
     )
-    public ResponseEntity<BaseResponse<ModuleResponse>> cloneModule(
+    public ResponseEntity<BaseResponse<Void>> updateSharedModuleRequest(
             @PathVariable("moduleId") String moduleId,
+            @RequestParam("status") int status,
             HttpServletRequest request
     ) throws Exception {
-        ModuleResponse response = moduleService.cloneModule(moduleId, request);
-        BaseResponse<ModuleResponse> baseResponse = BaseResponse.<ModuleResponse>builder()
-                .data(response)
-                .message("Module cloned successfully")
+        moduleService.updateSharedModuleRequest(moduleId, status, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Shared module request updated successfully")
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
     }
 
+    // API to get all my shared modules
+    @GetMapping("/my-shared/requested")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Get all modules shared by me",
+            description = "Retrieve all modules that I have shared with other users.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Shared modules retrieved successfully"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = Exception.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Exception.class)))
+            }
+    )
+    public ResponseEntity<BaseResponse<List<ModuleUserResponse>>> getAllMySharedModules(
+            HttpServletRequest request,
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword
+    ) throws Exception {
+        Page<ModuleUserResponse> responses = moduleService.getAllMySharedModules(request, page - 1, size, sortBy, sortDirection, keyword);
 
-
+        Pagination pagination = Pagination.builder()
+                .currentPage(responses.getNumber() + 1)
+                .totalPages(responses.getTotalPages())
+                .pageSize(responses.getSize())
+                .totalItems((int) responses.getTotalElements())
+                .hasNextPage(responses.hasNext())
+                .hasPreviousPage(responses.hasPrevious())
+                .build();
+        BaseResponse<List<ModuleUserResponse>> baseResponse = BaseResponse.<List<ModuleUserResponse>>builder()
+                .data(responses.getContent())
+                .pagination(pagination)
+                .message("My shared modules retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
 
 
 }
