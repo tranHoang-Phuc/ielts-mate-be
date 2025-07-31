@@ -174,7 +174,7 @@ public class ReadingExamController {
             HttpServletRequest httpServletRequest
     ) throws Exception {
         Page<ReadingExamResponse> examPage = readingExamService.getAllReadingExamsForCreator(
-                httpServletRequest, page, size, sortBy, sortDirection
+                httpServletRequest, page -1, size, sortBy, sortDirection
         );
 
         Pagination pagination = Pagination.builder()
@@ -196,6 +196,50 @@ public class ReadingExamController {
                 .status(HttpStatus.OK)
                 .body(body);
     }
+
+    @GetMapping("/active-exams")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Get all active reading exams",
+            description = "Retrieve all active reading exams (for creator)."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of active exams"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<List<ReadingExamResponse>>> getAllActiveReadingExams(
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
+            @RequestParam(required = false) String keyword,
+            HttpServletRequest httpServletRequest
+    ) throws Exception {
+        Page<ReadingExamResponse> response = readingExamService.getAllActiveReadingExams(
+                httpServletRequest, page-1, size, sortBy, sortDirection, keyword
+        );
+
+        Pagination pagination = Pagination.builder()
+                .currentPage(response.getNumber() + 1)
+                .totalPages(response.getTotalPages())
+                .pageSize(response.getSize())
+                .totalItems((int) response.getTotalElements())
+                .hasNextPage(response.hasNext())
+                .hasPreviousPage(response.hasPrevious())
+                .build();
+
+        BaseResponse<List<ReadingExamResponse>> baseResponse = BaseResponse.<List<ReadingExamResponse>>builder()
+                .data(response.getContent())
+                .pagination(pagination)
+                .message("Active reading exams retrieved successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
+
     @GetMapping("")
     @PreAuthorize("hasAnyRole('CREATOR', 'USER')")
     @Operation(

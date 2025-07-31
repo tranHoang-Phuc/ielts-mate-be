@@ -28,6 +28,7 @@ public class Constants {
         public static final String ATTEMPT_ALREADY_SUBMITTED = "ATTEMPT_ALREADY_SUBMITTED";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "EXAM_ATTEMPT_NOT_FOUND";
         public static final String CANT_UPDATE_TEST_TO_ANOTHER = "CANT_UPDATE_TEST_TO_ANOTHER";
+        public static final String EXAM_ATTEMPT_NOT_SUBMIT = "EXAM_ATTEMPT_NOT_SUBMIT";
     }
     public final class RedisKey {
 
@@ -63,6 +64,7 @@ public class Constants {
         public static final String ATTEMPT_ALREADY_SUBMITTED = "100026";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "100027";
         public static final String CANT_UPDATE_TEST_TO_ANOTHER = "100028";
+        public static final String EXAM_ATTEMPT_NOT_SUBMIT = "100029";
 
 
     }

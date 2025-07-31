@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.controller;
 
 
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
@@ -38,7 +39,7 @@ public class VocabularyController {
 
 
     @PostMapping("/")
-    @PreAuthorize("hasRole('CREATOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Create a new vocabulary",
             description = "Create a new vocabulary with the provided details. Requires CREATOR role."
@@ -71,8 +72,42 @@ public class VocabularyController {
 
     }
 
+    @PutMapping("/{vocabularyId}")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Update vocabulary by ID",
+            description = "Update an existing vocabulary by its ID. Requires CREATOR role."
+    )
+    @RequestBody(
+            description = "Request body to update a vocabulary",
+            required = true,
+            content = @Content(schema = @Schema(implementation = VocabularyRequest.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Vocabulary updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "404", description = "Vocabulary not found", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
+    public ResponseEntity<BaseResponse<VocabularyResponse>> updateVocabulary(
+            @PathVariable("vocabularyId") String vocabularyId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody VocabularyRequest vocabularyRequest,
+            HttpServletRequest request
+    ) throws Exception {
+        VocabularyResponse response = vocabularyService.updateVocabulary(vocabularyId, vocabularyRequest, request);
+        BaseResponse<VocabularyResponse> baseResponse = BaseResponse.<VocabularyResponse>builder()
+                .data(response)
+                .message("Vocabulary updated successfully")
+                .build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
+    }
+
     @GetMapping("/{vocabularyId}")
-    @PreAuthorize("hasRole('CREATOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get vocabulary by ID",
             description = "Retrieve a vocabulary by its ID. Requires CREATOR role."
@@ -137,14 +172,14 @@ public class VocabularyController {
     })
     public ResponseEntity<BaseResponse<List<VocabularyResponse>>> getAllVocabulary(
             HttpServletRequest request,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value = "size", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
+            @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String keyword
 
     ) throws Exception {
-        Page<VocabularyResponse> responses = vocabularyService.getAllVocabulary(request, page, size, sortBy, sortDirection, keyword);
+        Page<VocabularyResponse> responses = vocabularyService.getAllVocabulary(request, page -1, size, sortBy, sortDirection, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(responses.getNumber() + 1)

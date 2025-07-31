@@ -72,7 +72,7 @@ public class ExamController {
     }
 
     @GetMapping("/{examId}")
-    @PreAuthorize("hasRole('CREATOR') or hasRole('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get a listening exam by ID",
             description = "This endpoint allows users to retrieve a specific listening exam by its ID."

@@ -58,6 +58,9 @@ public class ReadingExam {
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
 
+    @Column(name="status")
+    private Integer status = 1; // Default status is true (active)
+
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

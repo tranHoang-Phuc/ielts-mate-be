@@ -9,6 +9,8 @@ public record ReadingExamCreationRequest(
         String readingExamDescription,
         @JsonProperty("url_slug")
         String urlSlug,
+        @JsonProperty("status")
+        int status,
         @JsonProperty("reading_passage_id_part1")
         String readingPassageIdPart1,
         @JsonProperty("reading_passage_id_part2")

@@ -77,7 +77,7 @@ public class AttemptController {
                 .build());
     }
 
-    @PutMapping("/submite/{attempt-id}")
+    @PutMapping("/submit/{attempt-id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitAttempt(
             @PathVariable("attempt-id") String attemptId,

@@ -7,9 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name ="flash_cards")
@@ -25,19 +23,14 @@ public class FlashCard {
     @Column(name = "card_id", updatable = false, nullable = false)
     private UUID cardId;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "word_id", referencedColumnName = "word_id", nullable = false)
     private Vocabulary vocabulary;
 
 
+    @OneToMany(mappedBy = "flashCard", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-    @JoinTable(
-            name = "flashcard_module",
-            joinColumns = @JoinColumn(name = "card_id"),
-            inverseJoinColumns = @JoinColumn(name = "module_id")
-    )
-    private Set<Module> modules = new HashSet<>();
+    private List<FlashCardModule> flashCardModules = new ArrayList<>();
 
     @Column(name = "createdBy")
     private String createdBy;
@@ -47,4 +40,12 @@ public class FlashCard {
     private String updatedBy;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+
+    public List<Module> getModules() {
+        return flashCardModules.stream()
+                .map(FlashCardModule::getModule)
+                .toList();
+    }
+
 }
