@@ -298,6 +298,60 @@ public class ChoiceServiceImpl implements ChoiceService {
         choiceRepository.save(choice);
     }
 
+    @Override
+    public void switchChoicesOrder(String questionId, String choiceId1, String choiceId2, HttpServletRequest request) {
+        Question question = questionRepository.findById(UUID.fromString(questionId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (question.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        Choice choice1 = choiceRepository.findById(UUID.fromString(choiceId1))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        Choice choice2 = choiceRepository.findById(UUID.fromString(choiceId2))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (choice1.getIsDeleted() || choice2.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        if (!choice1.getQuestion().getQuestionId().equals(question.getQuestionId()) ||
+                !choice2.getQuestion().getQuestionId().equals(question.getQuestionId())) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                    Constants.ErrorCode.CHOICE_NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        Choice currentChoice1 = findCurrentOrChildCurrentChoice(choice1);
+        Choice currentChoice2 = findCurrentOrChildCurrentChoice(choice2);
+        int tempOrder = currentChoice1.getChoiceOrder();
+        currentChoice1.setChoiceOrder(currentChoice2.getChoiceOrder());
+        currentChoice2.setChoiceOrder(tempOrder);
+        choiceRepository.save(currentChoice1);
+        choiceRepository.save(currentChoice2);
+
+
+
+    }
+
     public Choice findCurrentOrChildCurrentChoice(Choice choice) {
         if (choice.getIsCurrent() && !choice.getIsDeleted()) {
             return choice;

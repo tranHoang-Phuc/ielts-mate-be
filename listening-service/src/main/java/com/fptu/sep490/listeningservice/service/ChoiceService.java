@@ -17,4 +17,6 @@ public interface ChoiceService {
     List<ChoiceResponse> getAllChoicesOfQuestion(String questionId, HttpServletRequest request);
 
     void deleteChoice(String questionId, String choiceId, HttpServletRequest request);
+
+    void switchChoicesOrder(String questionId, String choiceId1, String choiceId2, HttpServletRequest request);
 }

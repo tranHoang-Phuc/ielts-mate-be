@@ -95,5 +95,21 @@ public class ChoiceController {
     }
 
 
+    // this api for switch order of 2 choices
+    @PutMapping("/questions/{question-id}/choices/switch/{choice-id-1}/{choice-id-2}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> switchChoicesOrder(
+            @PathVariable("question-id") String questionId,
+            @PathVariable("choice-id-1") String choiceId1,
+            @PathVariable("choice-id-2") String choiceId2,
+            HttpServletRequest request) throws Exception {
+        choiceService.switchChoicesOrder(questionId, choiceId1, choiceId2, request);
+        BaseResponse<Void> response = BaseResponse.<Void>builder()
+                .message("Choices order switched successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
 
 }
