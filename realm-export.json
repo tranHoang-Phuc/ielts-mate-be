@@ -47,6 +47,15 @@
   "roles": {
     "realm": [
       {
+        "id": "94159995-6a42-47ea-996c-aac1fe982604",
+        "name": "CREATOR",
+        "description": "",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "abee49f3-755f-4005-9e89-e2de785884c2",
+        "attributes": {}
+      },
+      {
         "id": "e2431590-d8de-431b-abf3-b663149f7e00",
         "name": "default-roles-sep490",
         "description": "${role_default-roles}",
@@ -75,15 +84,6 @@
         "id": "49a472f8-dd6a-4c77-9db4-eb345ee42ce0",
         "name": "offline_access",
         "description": "${role_offline-access}",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "abee49f3-755f-4005-9e89-e2de785884c2",
-        "attributes": {}
-      },
-      {
-        "id": "4d28ba87-d567-4398-95ad-6e3c557079c0",
-        "name": "TEACHER",
-        "description": "",
         "composite": false,
         "clientRole": false,
         "containerId": "abee49f3-755f-4005-9e89-e2de785884c2",
@@ -523,6 +523,10 @@
         "USER"
       ],
       "clientRoles": {
+        "realm-management": [
+          "query-realms",
+          "manage-realm"
+        ],
         "fptu_sep490": [
           "uma_protection"
         ]
@@ -775,7 +779,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "access.token.lifespan": "43200",
-        "client.secret.creation.time": "1747794460",
+        "client.secret.creation.time": "1754011333",
         "client.introspection.response.allow.jwt.claim.enabled": "false",
         "post.logout.redirect.uris": "+",
         "oauth2.device.authorization.grant.enabled": "true",
@@ -1218,8 +1222,8 @@
           "consentRequired": false,
           "config": {
             "id.token.claim": "true",
-            "introspection.token.claim": "true",
             "access.token.claim": "true",
+            "introspection.token.claim": "true",
             "userinfo.token.claim": "true"
           }
         }
@@ -1620,8 +1624,8 @@
           "protocolMapper": "oidc-allowed-origins-mapper",
           "consentRequired": false,
           "config": {
-            "introspection.token.claim": "true",
-            "access.token.claim": "true"
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
           }
         }
       ]
@@ -1788,14 +1792,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-full-name-mapper",
+            "oidc-usermodel-attribute-mapper",
+            "saml-user-attribute-mapper",
             "saml-role-list-mapper",
             "oidc-address-mapper",
             "oidc-sha256-pairwise-sub-mapper",
-            "oidc-usermodel-property-mapper",
-            "saml-user-attribute-mapper",
-            "oidc-usermodel-attribute-mapper",
-            "saml-user-property-mapper"
+            "saml-user-property-mapper",
+            "oidc-full-name-mapper",
+            "oidc-usermodel-property-mapper"
           ]
         }
       },
@@ -1807,14 +1811,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-usermodel-property-mapper",
+            "saml-user-attribute-mapper",
             "oidc-address-mapper",
-            "saml-role-list-mapper",
-            "saml-user-property-mapper",
+            "oidc-usermodel-property-mapper",
             "oidc-sha256-pairwise-sub-mapper",
             "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper"
+            "saml-user-property-mapper",
+            "saml-role-list-mapper"
           ]
         }
       },
