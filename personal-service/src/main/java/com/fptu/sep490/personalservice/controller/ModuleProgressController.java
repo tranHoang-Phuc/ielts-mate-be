@@ -4,6 +4,7 @@ package com.fptu.sep490.personalservice.controller;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleProgressRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.FlashcardProgressRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleProgressResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,6 +68,27 @@ public class ModuleProgressController {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(baseResponse);
 
+    }
+
+    @PutMapping("/progress/{moduleId}/flashcard")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Update flashcard progress",
+            description = "This API updates flashcard learning progress for a specific module."
+    )
+    public ResponseEntity<BaseResponse<String>> updateFlashcardProgress(
+            @PathVariable("moduleId") String moduleId,
+            @Valid @org.springframework.web.bind.annotation.RequestBody FlashcardProgressRequest request,
+            HttpServletRequest httpRequest
+    ) throws Exception {
+        moduleService.updateFlashcardProgress(moduleId, request, httpRequest);
+        BaseResponse<String> baseResponse = BaseResponse.<String>builder()
+                .data("Progress updated successfully")
+                .message("Flashcard progress updated successfully")
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(baseResponse);
     }
 
 }

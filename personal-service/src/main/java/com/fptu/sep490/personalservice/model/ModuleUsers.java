@@ -60,4 +60,14 @@ public class ModuleUsers {
     @Column(name = "flashcard_id")
     private List<String> highlightedFlashcardIds = new ArrayList<>();
 
+    @PrePersist
+    @PreUpdate
+    public void initializeDefaults() {
+        if (this.status == null) {
+            this.status = 0; // Default to PENDING status
+        }
+        if (this.lastIndexRead == null) {
+            this.lastIndexRead = 0;
+        }
+    }
 }
