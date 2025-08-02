@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.repository;
 
 import com.fptu.sep490.listeningservice.model.Choice;
+import com.fptu.sep490.listeningservice.model.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -55,4 +56,6 @@ public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
             SELECT c FROM Choice c where c.parent.choiceId = :choiceId AND c.isCurrent = true
         """)
     Choice getCurrentVersionChoiceByChoiceId(UUID choiceId);
+
+    List<Choice> findByQuestionAndIsDeletedAndIsCurrentOrderByChoiceOrderAsc(Question question, boolean isDeleted, Boolean isCurrent);
 }
