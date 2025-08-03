@@ -38,7 +38,7 @@ public class ConfigController {
     })
     @GetMapping("/streak")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<StreakConfigResponse>> getStreak(HttpServletRequest request) {
+    public ResponseEntity<BaseResponse<StreakConfigResponse>> getStreak(HttpServletRequest request) throws JsonProcessingException {
         StreakConfigResponse data = configService.getStreak(request);
         BaseResponse<StreakConfigResponse> response = BaseResponse.<StreakConfigResponse>builder()
                 .data(data)
@@ -101,7 +101,7 @@ public class ConfigController {
     })
     @GetMapping("target")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<TargetConfig>> getTarget(HttpServletRequest request) {
+    public ResponseEntity<BaseResponse<TargetConfig>> getTarget(HttpServletRequest request) throws JsonProcessingException {
         TargetConfig data = configService.getTarget(request);
         BaseResponse<TargetConfig> response = BaseResponse.<TargetConfig>builder()
                 .data(data)

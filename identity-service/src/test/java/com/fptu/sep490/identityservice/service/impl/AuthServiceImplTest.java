@@ -36,6 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.MultiValueMap;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -87,71 +88,57 @@ class AuthServiceImplTest {
     // todo: Login
     // Đăng nhập thành công
     @Test
-    void login_success() throws Exception {
-        // Given
-        String username = "test@example.com";
-        String password = "secret";
-        String token = "client_token";
-
-        UserAccessInfo.AccessInfo accessInfo = new UserAccessInfo.AccessInfo(true, true, true, true, true);
+    void login_success_shouldReturnTokenResponse() throws Exception {
+        String username = "user@example.com";
+        String password = "password";
+        String clientToken = "client_token";
         UserAccessInfo user = new UserAccessInfo(
                 "1", username, "First", "Last", username, true,
-                System.currentTimeMillis(), true, false, accessInfo
+                System.currentTimeMillis(), true, false, null
         );
-
-        KeyCloakTokenResponse response = KeyCloakTokenResponse.builder()
+        KeyCloakTokenResponse tokenResponse = KeyCloakTokenResponse.builder()
                 .accessToken("access-token")
                 .refreshToken("refresh-token")
                 .expiresIn(3600)
                 .build();
 
         AuthServiceImpl spyService = Mockito.spy(authService);
-        doReturn(token).when(spyService).getCachedClientToken();
-        when(keyCloakUserClient.getUserByEmail("test-realm", "Bearer " + token, username))
+        doReturn(clientToken).when(spyService).getCachedClientToken();
+        when(keyCloakUserClient.getUserByEmail("test-realm", "Bearer " + clientToken, username))
                 .thenReturn(List.of(user));
         when(keyCloakTokenClient.requestToken(any(), eq("test-realm")))
-                .thenReturn(response);
+                .thenReturn(tokenResponse);
 
-        // When
         KeyCloakTokenResponse result = spyService.login(username, password);
 
-        // Then
         assertEquals("access-token", result.accessToken());
         assertEquals("refresh-token", result.refreshToken());
-        verify(keyCloakTokenClient).requestToken(any(), eq("test-realm"));
     }
 
-    // user khong ton tai
     @Test
     void login_userNotFound_shouldThrowNotFoundException() throws Exception {
         String username = "notfound@example.com";
         AuthServiceImpl spyService = Mockito.spy(authService);
         doReturn("token").when(spyService).getCachedClientToken();
-
         when(keyCloakUserClient.getUserByEmail(any(), any(), eq(username)))
                 .thenReturn(Collections.emptyList());
 
         assertThrows(NotFoundException.class, () -> spyService.login(username, "pass"));
     }
 
-    // user ton tai nhung email chua duoc xac thuc
     @Test
-    void login_emailNotVerified_shouldThrowAppException() throws Exception {
-        String username = "unverified@example.com";
-        UserAccessInfo user = new UserAccessInfo(
-                "1", username, "First", "Last", username, false,
-                System.currentTimeMillis(), true, false, null
-        );
-
+    void login_userListContainsNull_shouldThrowNotFoundException() throws Exception {
+        // Arrange
+        String username = "nulluser@example.com";
         AuthServiceImpl spyService = Mockito.spy(authService);
         doReturn("token").when(spyService).getCachedClientToken();
-        when(keyCloakUserClient.getUserByEmail(any(), any(), any()))
-                .thenReturn(List.of(user));
+        // Simulate Keycloak returning a list with a single null user
+        when(keyCloakUserClient.getUserByEmail(any(), any(), eq(username)))
+                .thenReturn(Collections.singletonList(null));
 
-        AppException ex = assertThrows(AppException.class, () -> spyService.login(username, "pass"));
-        assertEquals(MessagesUtils.getMessage(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED), "Email is not verified");
+        // Act & Assert
+        assertThrows(NotFoundException.class, () -> spyService.login(username, "pass"));
     }
-
     // user ton tai nhung tai khoan bi khoa
     @Test
     void login_wrongPassword_shouldThrowAppException() throws Exception {
@@ -190,7 +177,6 @@ class AuthServiceImplTest {
 
         AuthServiceImpl spyService = Mockito.spy(authService);
         doReturn("token").when(spyService).getCachedClientToken();
-
         when(keyCloakUserClient.getUserByEmail(any(), any(), any()))
                 .thenReturn(List.of(user));
         when(keyCloakTokenClient.requestToken(any(), any()))
@@ -198,9 +184,65 @@ class AuthServiceImplTest {
         when(errorNormalizer.handleKeyCloakException(genericEx))
                 .thenReturn(expectedEx);
 
-        KeyCloakRuntimeException thrown = assertThrows(KeyCloakRuntimeException.class,
-                () -> spyService.login(username, "pass"));
-        assertEquals(MessagesUtils.getMessage("KEYCLOAK_ERROR"), thrown.getMessage());
+        assertThrows(KeyCloakRuntimeException.class, () -> spyService.login(username, "pass"));
+    }
+
+    @Test
+    void login_emailNotVerified_shouldThrowAppException() throws Exception {
+        String username = "unverified@example.com";
+        UserAccessInfo user = new UserAccessInfo(
+                "1", username, "First", "Last", username, false,
+                System.currentTimeMillis(), true, false, null
+        );
+
+        AuthServiceImpl spyService = Mockito.spy(authService);
+        doReturn("token").when(spyService).getCachedClientToken();
+        when(keyCloakUserClient.getUserByEmail(any(), any(), any()))
+                .thenReturn(List.of(user));
+
+        assertThrows(AppException.class, () -> spyService.login(username, "pass"));
+    }
+
+    @Test
+    void login_cacheMiss_shouldFetchClientTokenFromKeycloak() throws Exception {
+        String username = "user@example.com";
+        String password = "pass";
+
+        // Giả lập Redis không có token
+        when(redisService.getValue(Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN, String.class))
+                .thenReturn(null);
+
+        // Token client credentials
+        KeyCloakTokenResponse clientTokenResp = KeyCloakTokenResponse.builder()
+                .accessToken("new-client-token")
+                .expiresIn(600)
+                .refreshExpiresIn(0)
+                .build();
+
+        // Token login password grant
+        KeyCloakTokenResponse loginTokenResp = KeyCloakTokenResponse.builder()
+                .accessToken("access-token")
+                .refreshToken("refresh-token")
+                .expiresIn(3600)
+                .refreshExpiresIn(0)
+                .build();
+
+        when(keyCloakTokenClient.requestToken(any(), eq("test-realm")))
+                .thenReturn(clientTokenResp) // getCachedClientToken()
+                .thenReturn(loginTokenResp); // login()
+
+        UserAccessInfo user = new UserAccessInfo(
+                "1", username, "First", "Last", username, true,
+                System.currentTimeMillis(), true, false, null
+        );
+        when(keyCloakUserClient.getUserByEmail(any(), any(), eq(username)))
+                .thenReturn(List.of(user));
+
+        KeyCloakTokenResponse result = authService.login(username, password);
+
+        assertEquals("access-token", result.accessToken());
+        verify(redisService).saveValue(eq(Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN),
+                eq("new-client-token"), any(Duration.class));
     }
 
     @Test

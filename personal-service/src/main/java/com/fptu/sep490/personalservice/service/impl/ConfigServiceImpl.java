@@ -123,28 +123,41 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public StreakConfigResponse getStreak(HttpServletRequest request) {
         String userId = helper.getUserIdFromToken(request);
-        var streakConfig = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, UUID.fromString(userId))
-                .orElseGet(() -> {
-                    StreakConfig config = StreakConfig.builder()
-                            .startDate(null)
-                            .lastUpdated(null)
-                            .currentStreak(0)
-                            .build();
-                    try {
-                        return objectMapper.writeValueAsString(config);
-                    } catch (JsonProcessingException e) {
-                        throw new AppException(Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
-                                Constants.ErrorCode.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
 
-                    }
-                });
-        StreakConfig config = objectMapper.convertValue(streakConfig, StreakConfig.class);
-        return StreakConfigResponse.builder()
-                .currentStreak(config.getCurrentStreak())
-                .lastUpdated(config.getLastUpdated())
-                .startDate(config.getStartDate())
-                .build();
+        // Lấy dữ liệu config từ DB (kiểu String JSON)
+        String streakConfigJson = configRepository
+                .getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, UUID.fromString(userId))
+                .orElse(null);
+
+        // Nếu không có config -> trả default
+        if (streakConfigJson == null) {
+            return StreakConfigResponse.builder()
+                    .currentStreak(0)
+                    .lastUpdated(LocalDate.now())
+                    .startDate(LocalDate.now())
+                    .build();
+        }
+
+        try {
+            // Parse JSON thành object
+            StreakConfig config = objectMapper.readValue(streakConfigJson, StreakConfig.class);
+
+            return StreakConfigResponse.builder()
+                    .currentStreak(config.getCurrentStreak())
+                    .lastUpdated(config.getLastUpdated())
+                    .startDate(config.getStartDate())
+                    .build();
+
+        } catch (JsonProcessingException e) {
+            // Nếu dữ liệu JSON trong DB bị lỗi format
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
+                    HttpStatus.INTERNAL_SERVER_ERROR.value()
+            );
+        }
     }
+
 
     @Override
     public ReminderConfigResponse getReminder(HttpServletRequest request) {
@@ -231,12 +244,12 @@ public class ConfigServiceImpl implements ConfigService {
     }
 
     @Override
-    public TargetConfig getTarget(HttpServletRequest request) {
+    public TargetConfig getTarget(HttpServletRequest request) throws JsonProcessingException {
         UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
         String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)
                 .orElseGet(()->null);
         if(targetValue == null) return null;
-        return objectMapper.convertValue(targetValue, TargetConfig.class);
+        return objectMapper.readValue(targetValue, TargetConfig.class);
     }
 
     @Override
