@@ -62,7 +62,7 @@ public class ConfigServiceImpl implements ConfigService {
         LocalDate today = LocalDate.now();
         var streakConfig = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId())
                 .orElseGet(() -> {
-                    StreakConfig  config =  StreakConfig.builder()
+                    StreakConfig config = StreakConfig.builder()
                             .startDate(today)
                             .lastUpdated(today)
                             .currentStreak(1)
@@ -92,7 +92,7 @@ public class ConfigServiceImpl implements ConfigService {
         StreakConfig config = objectMapper.convertValue(streakConfig, StreakConfig.class);
 
         // nếu  lastUpdated là 1 ngày ngay trước ngày hôm nay thì check ntnt
-        if(!config.getLastUpdated().isEqual(today)) {
+        if (!config.getLastUpdated().isEqual(today)) {
             LocalDate last = config.getLastUpdated();
             if (last.isEqual(today.minusDays(1))) {
                 config.setCurrentStreak(config.getCurrentStreak() + 1);
@@ -105,7 +105,7 @@ public class ConfigServiceImpl implements ConfigService {
         UserConfig userConfig = configRepository.findByConfigNameAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId());
         userConfig.setValue(objectMapper.writeValueAsString(config));
         configRepository.save(userConfig);
-        if(config.getCurrentStreak() == Constants.Streak.TPL_3 ||
+        if (config.getCurrentStreak() == Constants.Streak.TPL_3 ||
                 config.getCurrentStreak() == Constants.Streak.TPL_10 ||
                 config.getCurrentStreak() == Constants.Streak.TPL_30 ||
                 config.getCurrentStreak() == Constants.Streak.TPL_90) {
@@ -163,7 +163,7 @@ public class ConfigServiceImpl implements ConfigService {
     public ReminderConfigResponse getReminder(HttpServletRequest request) {
         UUID userId = UUID.fromString(helper.getUserIdFromToken(request));
         ReminderConfig reminderConfig = (ReminderConfig) reminderConfigRepository.findByAccountId(userId);
-        if(reminderConfig == null) return null;
+        if (reminderConfig == null) return null;
         return ReminderConfigResponse.builder()
                 .configId(reminderConfig.getConfigId())
                 .email(reminderConfig.getEmail())
@@ -183,18 +183,18 @@ public class ConfigServiceImpl implements ConfigService {
         UtcConverter.UtcResult result = convertToUtc(reminderConfigCreationRequest.timeZone(),
                 reminderConfigCreationRequest.reminderDate(), reminderConfigCreationRequest.reminderTime());
 
-        if(reminderConfigRepository.existsByAccountId(accountId)) {
+        if (reminderConfigRepository.existsByAccountId(accountId)) {
             throw new AppException(Constants.ErrorCodeMessage.REMINDER_CONFIGURED,
-                    Constants.ErrorCode.REMINDER_CONFIGURED,HttpStatus.CONFLICT.value());
+                    Constants.ErrorCode.REMINDER_CONFIGURED, HttpStatus.CONFLICT.value());
         }
 
-        ReminderConfig config =ReminderConfig.builder()
+        ReminderConfig config = ReminderConfig.builder()
                 .email(reminderConfigCreationRequest.email())
                 .accountId(accountId)
                 .message(reminderConfigCreationRequest.message())
                 .reminderDate(result.getUtcDates())
                 .reminderTime(result.getUtcTime())
-                .recurrence(safeEnumFromOrdinal(RecurrenceType.values(),reminderConfigCreationRequest.recurrence()))
+                .recurrence(safeEnumFromOrdinal(RecurrenceType.values(), reminderConfigCreationRequest.recurrence()))
                 .timeZone(reminderConfigCreationRequest.timeZone())
                 .enabled(reminderConfigCreationRequest.enable())
                 .build();
@@ -215,9 +215,9 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public ReminderConfigResponse updateReminder(ReminderConfigUpdateRequest reminderConfig, HttpServletRequest request) {
         UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
-        if(!reminderConfigRepository.existsByAccountId(accountId)) {
+        if (!reminderConfigRepository.existsByAccountId(accountId)) {
             throw new AppException(Constants.ErrorCodeMessage.REMINDER_NOT_FOUND,
-                    Constants.ErrorCode.REMINDER_NOT_FOUND,HttpStatus.CONFLICT.value());
+                    Constants.ErrorCode.REMINDER_NOT_FOUND, HttpStatus.CONFLICT.value());
         }
         UtcConverter.UtcResult result = convertToUtc(reminderConfig.timeZone(),
                 reminderConfig.reminderDate(), reminderConfig.reminderTime());
@@ -226,7 +226,7 @@ public class ConfigServiceImpl implements ConfigService {
         config.setMessage(reminderConfig.message());
         config.setReminderDate(result.getUtcDates());
         config.setReminderTime(result.getUtcTime());
-        config.setRecurrence(safeEnumFromOrdinal(RecurrenceType.values(),reminderConfig.recurrence()));
+        config.setRecurrence(safeEnumFromOrdinal(RecurrenceType.values(), reminderConfig.recurrence()));
         config.setTimeZone(reminderConfig.timeZone());
         config.setEnabled(reminderConfig.enable());
 
@@ -256,9 +256,9 @@ public class ConfigServiceImpl implements ConfigService {
     public TargetConfig addOrUpdate(HttpServletRequest request, TargetConfig targetConfig) throws JsonProcessingException {
         UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));
         String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)
-                .orElseGet(()->null);
+                .orElseGet(() -> null);
         String value = objectMapper.writeValueAsString(targetConfig);
-        if(targetValue == null) {
+        if (targetValue == null) {
 
             UserConfig config = UserConfig.builder()
                     .accountId(accountId)
@@ -269,7 +269,7 @@ public class ConfigServiceImpl implements ConfigService {
             configRepository.save(config);
             return targetConfig;
         } else {
-            UserConfig config = configRepository.findByAccountIdAndConfigName(accountId,Constants.Config.TARGET_CONFIG);
+            UserConfig config = configRepository.findByAccountIdAndConfigName(accountId, Constants.Config.TARGET_CONFIG);
             config.setValue(value);
             configRepository.save(config);
             return targetConfig;
@@ -278,10 +278,10 @@ public class ConfigServiceImpl implements ConfigService {
 
     private String buildMessage(int streak) {
         int milestone = 0;
-        if (streak % Constants.Streak.TPL_90 == 0)  milestone = Constants.Streak.TPL_90;
+        if (streak % Constants.Streak.TPL_90 == 0) milestone = Constants.Streak.TPL_90;
         else if (streak % Constants.Streak.TPL_30 == 0) milestone = Constants.Streak.TPL_30;
         else if (streak % Constants.Streak.TPL_10 == 0) milestone = Constants.Streak.TPL_10;
-        else if (streak % Constants.Streak.TPL_3 == 0)  milestone = Constants.Streak.TPL_3;
+        else if (streak % Constants.Streak.TPL_3 == 0) milestone = Constants.Streak.TPL_3;
 
         if (milestone == 0) {
             return null;
@@ -289,15 +289,24 @@ public class ConfigServiceImpl implements ConfigService {
 
         String[] tpl;
         switch (milestone) {
-            case Constants.Streak.TPL_90: tpl = Constants.StreakMessage.TPL_90 ; break;
-            case Constants.Streak.TPL_30: tpl = Constants.StreakMessage.TPL_30; break;
-            case Constants.Streak.TPL_10: tpl = Constants.StreakMessage.TPL_10; break;
-            default:  tpl = Constants.StreakMessage.TPL_3;  break;
+            case Constants.Streak.TPL_90:
+                tpl = Constants.StreakMessage.TPL_90;
+                break;
+            case Constants.Streak.TPL_30:
+                tpl = Constants.StreakMessage.TPL_30;
+                break;
+            case Constants.Streak.TPL_10:
+                tpl = Constants.StreakMessage.TPL_10;
+                break;
+            default:
+                tpl = Constants.StreakMessage.TPL_3;
+                break;
         }
 
         int idx = ThreadLocalRandom.current().nextInt(tpl.length);
         return String.format(tpl[idx], streak);
     }
+
     private <T extends Enum<T>> T safeEnumFromOrdinal(T[] values, int ordinal) {
         if (ordinal < 0 || ordinal >= values.length) {
             throw new AppException(
