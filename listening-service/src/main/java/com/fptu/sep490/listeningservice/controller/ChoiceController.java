@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.listeningservice.service.ChoiceService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ChoiceRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ChoiceResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -26,6 +27,10 @@ public class ChoiceController {
 
 
     @PostMapping("/questions/{question-id}/choices")
+    @Operation(
+            summary = "Create a new choice for a question",
+            description = "Create a new choice associated with a specific question by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<ChoiceResponse>> createChoice(
             @PathVariable("question-id") String questionId,
@@ -40,6 +45,10 @@ public class ChoiceController {
     }
 
     @PutMapping("/questions/{question-id}/choices/{choice-id}")
+    @Operation(
+            summary = "Update an existing choice for a question",
+            description = "Update an existing choice associated with a specific question by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<ChoiceResponse>> updateChoice(
             @PathVariable("question-id") String questionId,
@@ -55,6 +64,10 @@ public class ChoiceController {
     }
 
     @GetMapping("/questions/{question-id}/choices/{choice-id}")
+    @Operation(
+            summary = "Get a choice by its ID",
+            description = "Retrieve a specific choice associated with a question by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<ChoiceResponse>> getChoiceById(
             @PathVariable("question-id") String questionId,
@@ -69,6 +82,10 @@ public class ChoiceController {
     }
 
     @GetMapping("/questions/{question-id}/choices")
+    @Operation(
+            summary = "Get all choices of a question",
+            description = "Retrieve all choices associated with a specific question by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<ChoiceResponse>>> getChoicesByQuestionId(
             @PathVariable("question-id") String questionId,
@@ -82,6 +99,10 @@ public class ChoiceController {
         return ResponseEntity.ok(response);
     }
     @DeleteMapping("/questions/{question-id}/choices/{choice-id}")
+    @Operation(
+            summary = "Delete a choice for a question",
+            description = "Delete a specific choice associated with a question by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Void>> deleteChoice(
             @PathVariable("question-id") String questionId,
@@ -97,6 +118,10 @@ public class ChoiceController {
 
     // this api for switch order of 2 choices
     @PutMapping("/questions/{question-id}/choices/switch/{choice-id-1}/{choice-id-2}")
+    @Operation(
+            summary = "Switch the order of two choices",
+            description = "Switch the order of two choices associated with a specific question by their IDs."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Void>> switchChoicesOrder(
             @PathVariable("question-id") String questionId,

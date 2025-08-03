@@ -12,6 +12,7 @@ import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
 import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -37,6 +38,10 @@ public class ExamAttemptController {
     ExamAttemptService examAttemptService;
 
     @PutMapping("/save/{attempt-id}")
+    @Operation(
+            summary = "Save exam attempt answers",
+            description = "Save the current state of an exam attempt by its ID, including the user's answers."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitExamAttempt(
             @PathVariable("attempt-id") String attemptId,
@@ -52,6 +57,10 @@ public class ExamAttemptController {
     }
 
     @PostMapping("/{url-slug}")
+    @Operation(
+            summary = "Create a new IELTS Reading exam attempt",
+            description = "Create a new exam attempt for the specified IELTS Reading exam identified by its URL slug."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<CreateExamAttemptResponse>> createReadingExam(
             @PathVariable("url-slug") String urlSlug,
@@ -73,6 +82,10 @@ public class ExamAttemptController {
     //xem lai bai thi: get("/{examAttemptId}")
 
     @GetMapping("/{examAttemptId}")
+    @Operation(
+            summary = "Get exam attempt details by ID",
+            description = "Retrieve the details of a specific exam attempt using its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<ExamAttemptGetDetail>> getExamAttemptById(
             @PathVariable("examAttemptId") String examAttemptId,
@@ -88,6 +101,10 @@ public class ExamAttemptController {
 
     //xem tat ca lich su lam bai: get("/history")
     @GetMapping("/history")
+    @Operation(
+            summary = "Get exam history",
+            description = "Retrieve the history of exam attempts made by the user, with optional filtering and pagination."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<UserGetHistoryExamAttemptResponse>>> getExamHistory(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,

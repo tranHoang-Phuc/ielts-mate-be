@@ -351,7 +351,7 @@ public class AuthController {
                 .build());
     }
 
-    private String extractAccessToken(HttpServletRequest request) {
+    String extractAccessToken(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
         if (header != null && !header.isBlank() && header.startsWith("Bearer ")) {
             String token = header.substring(7).trim();

@@ -10,6 +10,7 @@ import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResp
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
 import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,10 @@ public class ExamAttemptController {
     ExamAttemptService examAttemptService;
 
     @PostMapping("/{url-slug}")
+    @Operation(
+            summary = "Create a new IELTS Listening exam attempt",
+            description = "Create a new exam attempt for the specified IELTS Listening exam identified by its URL slug."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<CreateExamAttemptResponse>> createReadingExam(
             @PathVariable("url-slug") String urlSlug,
@@ -51,6 +56,10 @@ public class ExamAttemptController {
     }
 
     @GetMapping("/{examAttemptId}")
+    @Operation(
+            summary = "Get exam attempt by ID",
+            description = "Retrieve the details of an exam attempt using its unique ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<ExamAttemptGetDetail>> getExamAttemptById(
             @PathVariable("examAttemptId") String examAttemptId,
@@ -65,6 +74,10 @@ public class ExamAttemptController {
     }
 
     @GetMapping("/history")
+    @Operation(
+            summary = "Get exam history",
+            description = "Retrieve a paginated list of the user's exam attempts history, optionally filtered by listening exam name."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<UserGetHistoryExamAttemptResponse>>> getExamHistory(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
@@ -104,6 +117,10 @@ public class ExamAttemptController {
     }
 
     @PutMapping("/save/{attempt-id}")
+    @Operation(
+            summary = "Submit exam attempt answers",
+            description = "Submit the answers for an exam attempt identified by its ID, marking it as completed."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<SubmittedExamAttemptResponse>> submitExamAttempt(
             @PathVariable("attempt-id") String attemptId,

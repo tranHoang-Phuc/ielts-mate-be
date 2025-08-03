@@ -637,21 +637,21 @@ public class AuthServiceImpl implements AuthService {
         return token;
     }
 
-    private String getPasswordKey(String email) {
+    String getPasswordKey(String email) {
         return String.format("password:%s", email);
     }
     private String getVerifyTokenKey(String email, String action) {
         return String.format("verify-token:%s:%s", action, email);
     }
 
-    private String extractUserId(ResponseEntity<?> response) {
+    String extractUserId(ResponseEntity<?> response) {
         String location = response.getHeaders().get("Location").getFirst();
         String[] splitedStr = location.split("/");
         return splitedStr[splitedStr.length - 1];
     }
 
 
-    private String getCachedClientToken() throws JsonProcessingException {
+    public String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
 
         String cachedToken = redisService.getValue(cacheKey, String.class);
@@ -670,4 +670,5 @@ public class AuthServiceImpl implements AuthService {
         redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
         return newToken;
     }
+
 }

@@ -62,7 +62,7 @@ public interface PassageService {
                                                int size,
                                                List<Integer> ieltsType,
                                                List<Integer> partNumber,
-                                               String questionCategory,
+                                                String questionCategory,
                                                String sortBy,
                                                String sortDirection,
                                                String title,
