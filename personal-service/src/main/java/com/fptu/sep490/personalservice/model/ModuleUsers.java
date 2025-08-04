@@ -52,6 +52,11 @@ public class ModuleUsers {
     @Column(name = "last_index_read") // this is index that user last read in module, then when user open it, it will show the last read
     private Integer lastIndexRead = 0;
 
+    @Column(name ="time_spent")
+    private Long timeSpent = 0L; // Time spent in milliseconds
+
+    @Column(name = "progress")
+    private Double progress = 0.0; // Progress in percentage (0.0 to 100.0)
     @ElementCollection
     @CollectionTable(
             name = "highlighted_flashcards",
