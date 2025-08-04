@@ -15,7 +15,7 @@ import java.util.UUID;
 @FeignClient(name = "listening-client", url = "${service.listening-service}")
 public interface ListeningClient {
     @GetMapping(value = "/listens/internal/task", consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<BaseResponse<List<TaskTitle>>> getListeningTitle(@RequestParam("ids") List<UUID> ids,
+    ResponseEntity<BaseResponse<List<TaskTitle>>> getListeningTitle(@RequestParam("task-ids") List<UUID> ids,
                                                                     @RequestHeader("Authorization") String token);
 
     @GetMapping(value = "/exams/internal/exam", consumes = MediaType.APPLICATION_JSON_VALUE)
