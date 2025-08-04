@@ -5,6 +5,7 @@ import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.model.*;
 import com.fptu.sep490.personalservice.model.Module;
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.repository.*;
 import com.fptu.sep490.personalservice.service.ModuleService;
@@ -37,6 +38,7 @@ public class ModuleServiceImpl implements ModuleService {
     VocabularyRepository vocabularyRepository;
     FlashCardModuleRepository flashCardModuleRepository;
     ModuleUsersRepository moduleUsersRepository;
+    FlashCardProgressRepository flashCardProgressRepository;
     Helper helper;
 
     @Override
@@ -64,6 +66,7 @@ public class ModuleServiceImpl implements ModuleService {
         moduleUsers.setUserId(userId);
         moduleUsers.setStatus(ModuleUserStatus.ACCEPTED.ordinal());
         moduleUsers.setCreatedBy(userId);
+        moduleUsers.setStatus(1);
         moduleUsersRepository.save(moduleUsers);
 
         for (UUID vocabularyId : vocabularyIds) {
@@ -174,6 +177,7 @@ public class ModuleServiceImpl implements ModuleService {
 
                     Long timeSpent = moduleUser != null ? moduleUser.getTimeSpent() : null;
                     Double progress = moduleUser != null ? moduleUser.getProgress() : null;
+                    LearningStatus learningStatus = moduleUser != null ? moduleUser.getLearningStatus() :null;
                     return ModuleResponse.builder()
                             .moduleId(module.getModuleId())
                             .moduleName(module.getModuleName())
@@ -186,6 +190,7 @@ public class ModuleServiceImpl implements ModuleService {
                             .updatedAt(module.getUpdatedAt())
                             .timeSpent(timeSpent)
                             .progress(progress)
+                            .learningStatus(learningStatus)
                             .build();
                 })
                 .toList();
@@ -578,13 +583,24 @@ public class ModuleServiceImpl implements ModuleService {
                                 )
                                 .build());
                     }
+                    UserProfileResponse user = UserProfileResponse.builder().build();
+                    try {
+                        user = helper.getUserProfileById(module.getCreatedBy());
+                    }catch (Exception e){
+                        log.error("Error fetching user profile for module creator: {}", module.getCreatedBy());
+                        throw new AppException(
+                                Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                                "Error fetching user profile",
+                                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                        );
+                    }
                     return ModuleUserResponse.builder()
                             .moduleId(module.getModuleId())
                             .moduleName(module.getModuleName())
                             .description(module.getDescription())
                             .isPublic(module.getIsPublic())
                             .flashCardIds(flashCardResponses)
-                            .createdBy(module.getCreatedBy())
+                            .createdBy(user != null ? user.email() : module.getCreatedBy())
                             .createdAt(module.getCreatedAt())
                             .updatedBy(module.getUpdatedBy())
                             .status(moduleUser.getStatus() != null ? moduleUser.getStatus() : 0)
@@ -712,13 +728,24 @@ public class ModuleServiceImpl implements ModuleService {
                                 )
                                 .build());
                     }
+                    UserProfileResponse user = UserProfileResponse.builder().build();
+                    try {
+                        user = helper.getUserProfileById(module.getCreatedBy());
+                    } catch (Exception e) {
+                        log.error("Error fetching user profile for module creator: {}", module.getCreatedBy());
+                        throw new AppException(
+                                Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
+                                "Error fetching user profile",
+                                HttpStatus.INTERNAL_SERVER_ERROR.value()
+                        );
+                    }
                     return ModuleUserResponse.builder()
                             .moduleId(module.getModuleId())
                             .moduleName(module.getModuleName())
                             .description(module.getDescription())
                             .isPublic(module.getIsPublic())
                             .flashCardIds(flashCardResponses)
-                            .createdBy(module.getCreatedBy())
+                            .createdBy(user != null ? user.email() : module.getCreatedBy())
                             .createdAt(module.getCreatedAt())
                             .updatedBy(module.getUpdatedBy())
                             .updatedAt(module.getUpdatedAt())
@@ -871,6 +898,31 @@ public class ModuleServiceImpl implements ModuleService {
                     HttpStatus.FORBIDDEN.value()
             );
         }
+        List<FlashCard> flashCards = module.getFlashCards();
+        for( FlashCard flashCard : flashCards) {
+            if(flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashCard.getCardId().toString()).isEmpty()) {
+                FlashCardProgress flashCardProgress = new FlashCardProgress();
+                flashCardProgress.setFlashcardId(flashCard.getCardId().toString());
+                flashCardProgress.setModuleUsers(moduleUsers);
+                flashCardProgress.setStatus(0); // default status
+                flashCardProgressRepository.save(flashCardProgress);
+                moduleUsers.getFlashcardProgressList().add(flashCardProgress);
+            }
+        }
+
+        // tra ve thong tin cua flash card progress
+        List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
+        List<FlashCardProgressResponse> flashCardProgressResponses = flashCardProgresses.stream()
+                .map(flashCardProgress -> FlashCardProgressResponse.builder()
+                        .flashcardId(flashCardProgress.getFlashcardId())
+                        .status(flashCardProgress.getStatus())
+                        .build())
+                .toList();
+
+
+
+
+
         ModuleProgressResponse progressResponse = ModuleProgressResponse.builder().
                 id(moduleUsers.getId())
                 .moduleId(module.getModuleId().toString())
@@ -878,9 +930,10 @@ public class ModuleServiceImpl implements ModuleService {
                 .userId(userId)
                 .status(status)
                 .progress(moduleUsers.getProgress())
+                .learningStatus(moduleUsers.getLearningStatus())
                 .timeSpent(moduleUsers.getTimeSpent() != null ? moduleUsers.getTimeSpent() : 0L)
                 .lastIndexRead(moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0)
-                .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())
+                .flashcardProgresses(flashCardProgressResponses)
                 .build();
 
 
@@ -937,7 +990,20 @@ public class ModuleServiceImpl implements ModuleService {
             moduleUsers.setLastIndexRead(moduleProgressRequest.lastIndexRead());
         }
         if (moduleProgressRequest.highlightedFlashcardIds() != null) {
-            moduleUsers.setHighlightedFlashcardIds(moduleProgressRequest.highlightedFlashcardIds());
+            for (String flashcardId : moduleProgressRequest.highlightedFlashcardIds()) {
+                if (moduleUsers.getFlashcardProgressList() == null) {
+                    moduleUsers.setFlashcardProgressList(new ArrayList<>());
+                }
+
+                if (flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashcardId).isEmpty()) {
+                    FlashCardProgress flashcardProgress = new FlashCardProgress();
+                    flashcardProgress.setFlashcardId(flashcardId);
+                    flashcardProgress.setModuleUsers(moduleUsers);
+                    flashcardProgress.setStatus(0); // default status
+                    flashcardProgress = flashCardProgressRepository.save(flashcardProgress);
+                    moduleUsers.getFlashcardProgressList().add(flashcardProgress);
+                }
+            }
         }
         if (moduleProgressRequest.timeSpent() != null) {
             Long current = moduleUsers.getTimeSpent() == null ? 0L : moduleUsers.getTimeSpent();
@@ -946,9 +1012,19 @@ public class ModuleServiceImpl implements ModuleService {
         if (moduleProgressRequest.progress() != null) {
             moduleUsers.setProgress(moduleProgressRequest.progress());
         }
+        if (moduleProgressRequest.learningStatus() != null) {
+            moduleUsers.setLearningStatus(LearningStatus.valueOf(moduleProgressRequest.learningStatus()));
+        }
 
         moduleUsers.setUpdatedBy(userId);
         moduleUsers = moduleUsersRepository.save(moduleUsers);
+        List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
+        List<FlashCardProgressResponse> flashCardProgressResponses = flashCardProgresses.stream()
+                .map(flashCardProgress -> FlashCardProgressResponse.builder()
+                        .flashcardId(flashCardProgress.getFlashcardId())
+                        .status(flashCardProgress.getStatus())
+                        .build())
+                .toList();
         ModuleProgressResponse progressResponse = ModuleProgressResponse.builder()
                 .id(moduleUsers.getId())
                 .moduleId(module.getModuleId().toString())
@@ -958,7 +1034,8 @@ public class ModuleServiceImpl implements ModuleService {
                 .progress(moduleUsers.getProgress())
                 .status(moduleUsers.getStatus() != null ? moduleUsers.getStatus() : 0)
                 .lastIndexRead(moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0)
-                .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())
+                .learningStatus(moduleUsers.getLearningStatus())
+                .flashcardProgresses(flashCardProgressResponses)
                 .build();
 
         return  progressResponse;
@@ -1011,6 +1088,7 @@ public class ModuleServiceImpl implements ModuleService {
                     HttpStatus.FORBIDDEN.value()
             );
         }
+        moduleUsers.setLearningStatus(LearningStatus.LEARNING);
         
         // Update last index read (increment if correct answer)
         if (flashcardProgressRequest.isCorrect()) {
@@ -1019,24 +1097,30 @@ public class ModuleServiceImpl implements ModuleService {
         }
         
         // Add to highlighted flashcards if incorrect
-        if (!flashcardProgressRequest.isCorrect()) {
-            List<String> highlighted = moduleUsers.getHighlightedFlashcardIds();
-            if (highlighted == null) {
-                highlighted = new ArrayList<>();
-            }
-            if (!highlighted.contains(flashcardProgressRequest.flashcardId())) {
-                highlighted.add(flashcardProgressRequest.flashcardId());
-                moduleUsers.setHighlightedFlashcardIds(highlighted);
-            }
+        List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
+        if (flashCardProgresses == null) {
+            flashCardProgresses = new ArrayList<>();
         }
+        if (flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashcardProgressRequest.flashcardId()).isEmpty()) {
+            FlashCardProgress flashcardProgress = new FlashCardProgress();
+            flashcardProgress.setFlashcardId(flashcardProgressRequest.flashcardId());
+            flashcardProgress.setModuleUsers(moduleUsers);
+            if (flashcardProgressRequest.isCorrect()) {
+
+                flashcardProgress.setStatus(2);
+            }else{
+                flashcardProgress.setStatus(1);
+
+            }
+            flashcardProgress = flashCardProgressRepository.save(flashcardProgress);
+            flashCardProgresses.add(flashcardProgress);
+        }
+
         
         moduleUsers.setUpdatedBy(userId);
         moduleUsersRepository.save(moduleUsers);
         
-        // Log the progress for analytics (optional)
-        log.info("User {} updated flashcard progress for module {}: flashcard={}, correct={}, time={}s", 
-                userId, moduleId, flashcardProgressRequest.flashcardId(), 
-                flashcardProgressRequest.isCorrect(), flashcardProgressRequest.timeSpent());
+
     }
 
 
