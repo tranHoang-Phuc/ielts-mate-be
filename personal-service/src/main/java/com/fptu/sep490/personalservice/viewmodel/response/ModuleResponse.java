@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -43,7 +44,9 @@ public record ModuleResponse(
         Long timeSpent,
 
         @JsonProperty("progress")
-        Double progress
+        Double progress,
+        @JsonProperty("learning_status")
+        LearningStatus learningStatus
 
 
 
