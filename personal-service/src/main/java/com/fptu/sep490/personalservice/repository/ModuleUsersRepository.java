@@ -22,7 +22,8 @@ public interface ModuleUsersRepository extends CrudRepository<ModuleUsers, UUID>
     @Query("""
     SELECT mu FROM ModuleUsers mu
     WHERE mu.module.isDeleted = false
-      AND mu.userId = :userId
+      AND mu.module.createdBy = :userId
+      AND mu.module.createdBy != mu.userId
       AND mu.status = :status
       AND (
         :keyword IS NULL OR :keyword = '' OR

@@ -584,8 +584,10 @@ public class ModuleServiceImpl implements ModuleService {
                                 .build());
                     }
                     UserProfileResponse user = UserProfileResponse.builder().build();
+                    UserProfileResponse share_to = UserProfileResponse.builder().build();
                     try {
                         user = helper.getUserProfileById(module.getCreatedBy());
+                        share_to = helper.getUserProfileById(moduleUser.getUserId());
                     }catch (Exception e){
                         log.error("Error fetching user profile for module creator: {}", module.getCreatedBy());
                         throw new AppException(
@@ -601,6 +603,7 @@ public class ModuleServiceImpl implements ModuleService {
                             .isPublic(module.getIsPublic())
                             .flashCardIds(flashCardResponses)
                             .createdBy(user != null ? user.email() : module.getCreatedBy())
+                            .shareTo(share_to != null ? share_to.email() : moduleUser.getUserId())
                             .createdAt(module.getCreatedAt())
                             .updatedBy(module.getUpdatedBy())
                             .status(moduleUser.getStatus() != null ? moduleUser.getStatus() : 0)
@@ -910,14 +913,40 @@ public class ModuleServiceImpl implements ModuleService {
             }
         }
 
-        // tra ve thong tin cua flash card progress
-        List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
-        List<FlashCardProgressResponse> flashCardProgressResponses = flashCardProgresses.stream()
-                .map(flashCardProgress -> FlashCardProgressResponse.builder()
-                        .flashcardId(flashCardProgress.getFlashcardId())
-                        .status(flashCardProgress.getStatus())
-                        .build())
+        List<FlashCardProgressResponse> flashCardProgressResponses = moduleUsers.getFlashcardProgressList().stream()
+                .map(flashCardProgress -> {
+
+                    FlashCard flashCard = flashCardRepository.findById(UUID.fromString(flashCardProgress.getFlashcardId()))
+                            .orElseThrow(() -> new AppException(
+                                    Constants.ErrorCodeMessage.NOT_FOUND,
+                                    "Flashcard not found: " + flashCardProgress.getFlashcardId(),
+                                    HttpStatus.NOT_FOUND.value()
+                            ));
+
+                    Vocabulary vocabulary = flashCard.getVocabulary();
+
+                    FlashCardResponse flashCardResponse = FlashCardResponse.builder()
+                            .flashCardId(flashCard.getCardId().toString())
+                            .vocabularyResponse(
+                                    VocabularyResponse.builder()
+                                            .vocabularyId(vocabulary.getWordId())
+                                            .word(vocabulary.getWord())
+                                            .context(vocabulary.getContext())
+                                            .meaning(vocabulary.getMeaning())
+                                            .createdBy(vocabulary.getCreatedBy())
+                                            .createdAt(vocabulary.getCreatedAt())
+                                            .build()
+                            )
+                            .build();
+
+                    return FlashCardProgressResponse.builder()
+                            .flashcardId(flashCardProgress.getFlashcardId())
+                            .status(flashCardProgress.getStatus())
+                            .flashcardDetail(flashCardResponse)
+                            .build();
+                })
                 .toList();
+
 
 
 
