@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a79ef717-218c-493d-87aa-9fd5f6aa9bd5" name="Changes" comment="fix">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env" beforeDir="false" afterPath="$PROJECT_DIR$/.env" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -201,6 +201,7 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Spring Boot.PersonalServiceApplication" />
         <item itemvalue="Spring Boot.PersonalServiceApplication" />
         <item itemvalue="Spring Boot.PersonalServiceApplication" />
       </list>
@@ -571,13 +572,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/controller/SseController.java</url>
-          <line>28</line>
+          <line>23</line>
           <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/component/ReminderScheduler.java</url>
-          <line>64</line>
-          <option name="timeStamp" value="28" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/component/ReminderScheduler.java</url>
@@ -591,17 +587,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>282</line>
+          <line>286</line>
           <option name="timeStamp" value="38" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java</url>
-          <line>315</line>
+          <line>319</line>
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/notification-service/src/main/java/com/fptu/sep490/notificationservice/controller/SseController.java</url>
-          <line>29</line>
+          <line>24</line>
           <option name="timeStamp" value="40" />
         </line-breakpoint>
       </breakpoints>
