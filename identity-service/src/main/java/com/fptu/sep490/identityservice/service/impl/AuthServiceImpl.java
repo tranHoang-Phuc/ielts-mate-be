@@ -377,7 +377,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void changePassword(String accessToken, PasswordChange changePasswordRequest) throws JsonProcessingException {
-        String email = getEmailFromToken(accessToken);
+        String email = getEmailFromAccessToken(accessToken);
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
             form.add("grant_type", "password");
