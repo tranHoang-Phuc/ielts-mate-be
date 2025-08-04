@@ -20,7 +20,7 @@ server:
 notification:
   email:
     brevo-url: https://api.brevo.com
-    brevo-apikey: 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
+    brevo-apikey: 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
 
 springdoc:
   paths-to-match: /**
