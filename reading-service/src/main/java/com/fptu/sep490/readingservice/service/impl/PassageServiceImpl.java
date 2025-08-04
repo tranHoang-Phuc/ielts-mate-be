@@ -406,37 +406,40 @@ public class PassageServiceImpl implements PassageService {
             Map<UUID, List<Choice>> questionMapChoices = currentGroupIdMapQuestionIdMapCurrentChoice.get(key.getGroupId());
 
             List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
+            if(questions != null) {
+                questions.forEach(question -> {
+                    List<Choice> choices = questionMapChoices.get(question.getQuestionId());
 
-            questions.forEach(question -> {
-                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
-
-                PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse questionResponse =
-                        PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
-                                .questionId(question.getParent() == null ? question.getQuestionId().toString() : question.getParent().getQuestionId().toString())
-                                .questionOrder(question.getQuestionOrder())
-                                .questionType(question.getQuestionType().ordinal())
-                                .point(question.getPoint())
-                                .explanation(question.getExplanation())
-                                .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
-                                .instructionForChoice(question.getInstructionForChoice())
-                                .blankIndex(question.getBlankIndex())
-                                .correctAnswer(question.getCorrectAnswer())
-                                .instructionForMatching(question.getInstructionForMatching())
-                                .correctAnswerForMatching(question.getCorrectAnswerForMatching())
-                                .zoneIndex(question.getZoneIndex())
-                                .dragItemId(question.getDragItem() != null ? question.getDragItem().getDragItemId().toString() : null)
-                                .choices(choices != null ? choices.stream()
-                                        .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder().choiceId(c.getParent() == null ? c.getChoiceId().toString() : c.getParent().getChoiceId().toString())
-                                                .label(c.getLabel())
-                                                .choiceOrder(c.getChoiceOrder())
-                                                .content(c.getContent())
-                                                .isCorrect(c.isCorrect())
-                                                .build())
-                                        .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
-                                        .toList() : null)
-                                .build();
-                questionListResponse.add(questionResponse);
-            });
+                    PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse questionResponse =
+                            PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                    .questionId(question.getParent() == null ? question.getQuestionId().toString() : question.getParent().getQuestionId().toString())
+                                    .questionOrder(question.getQuestionOrder())
+                                    .questionType(question.getQuestionType().ordinal())
+                                    .point(question.getPoint())
+                                    .explanation(question.getExplanation())
+                                    .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                    .instructionForChoice(question.getInstructionForChoice())
+                                    .blankIndex(question.getBlankIndex())
+                                    .correctAnswer(question.getCorrectAnswer())
+                                    .instructionForMatching(question.getInstructionForMatching())
+                                    .correctAnswerForMatching(question.getCorrectAnswerForMatching())
+                                    .zoneIndex(question.getZoneIndex())
+                                    .dragItemId(question.getDragItem() != null ? question.getDragItem().getDragItemId().toString() : null)
+                                    .choices(choices != null ? choices.stream()
+                                            .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder().choiceId(c.getParent() == null ? c.getChoiceId().toString() : c.getParent().getChoiceId().toString())
+                                                    .label(c.getLabel())
+                                                    .choiceOrder(c.getChoiceOrder())
+                                                    .content(c.getContent())
+                                                    .isCorrect(c.isCorrect())
+                                                    .build())
+                                            .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
+                                            .toList() : null)
+                                    .build();
+                    questionListResponse.add(questionResponse);
+                });
+            } else {
+                questions = new ArrayList<>();
+            }
             PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse group = PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
                     .groupId(key.getParent() == null ? key.getGroupId().toString() : key.getParent().getGroupId().toString())
                     .sectionOrder(key.getSectionOrder())

@@ -592,6 +592,7 @@ public class AttemptServiceImpl implements AttemptService {
                 .build();
     }
 
+   
     @Override
     public Page<UserAttemptResponse> getAttemptByUser(int page, int size, List<Integer> ieltsTypeList, List<Integer> statusList, List<Integer> partNumberList, String sortBy, String sortDirection, String title, UUID passageId, HttpServletRequest request) {
         String userId = helper.getUserIdFromToken(request);
