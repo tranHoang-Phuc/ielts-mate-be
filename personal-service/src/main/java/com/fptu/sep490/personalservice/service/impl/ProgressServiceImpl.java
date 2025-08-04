@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -99,11 +100,19 @@ public class ProgressServiceImpl implements ProgressService {
                 .numberOfListeningExams(l.getNumberOfExamsInTimeFrame())
                 .build();
 
+        LocalDateTime lastLearningDate = Optional.ofNullable(r.getLastLearningDate())
+                .map(rDate -> {
+                    LocalDateTime lDate = l.getLastLearningDate();
+                    if (lDate == null) return rDate;
+                    return rDate.isAfter(lDate) ? rDate : lDate;
+                })
+                .orElse(l.getLastLearningDate());
+
         OverviewProgressResponse response = OverviewProgressResponse.builder()
                 .reading(reading)
                 .listening(listening)
                 .bandStats(bandStats)
-                .lastLearningDate(r.getLastLearningDate().isAfter(l.getLastLearningDate()) ? r.getLastLearningDate() : l.getLastLearningDate())
+                .lastLearningDate(lastLearningDate)
                 .build();
 
         return response;

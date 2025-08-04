@@ -30,8 +30,8 @@ public class ProgressController {
 
     @GetMapping("/overview")
     @Operation(
-            summary = "Get overview progress of reading and listening exams",
-            description = "This endpoint retrieves the overview progress of reading and listening exams for the authenticated user."
+            summary = "Get overview progress of reading and listening exams of the authenticated user",
+            description = "RequestBody: timeFrame: 1d, 1w, 1m, 1y, ... Nếu truyền sai format -> default 1w"
     )
     public ResponseEntity<BaseResponse<OverviewProgressResponse>> getReadingProgress(HttpServletRequest request, OverviewProgressReq overviewProgressReq) {
 
