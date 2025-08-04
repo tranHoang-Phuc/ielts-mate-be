@@ -35,10 +35,12 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import javax.crypto.SecretKey;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -595,11 +597,13 @@ public class AuthServiceImpl implements AuthService {
         return jwt.getClaim("preferred_username");
     }
 
+    private JwtDecoder getHs256Decoder() {
+        SecretKey key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
+        return NimbusJwtDecoder.withSecretKey(key).build();
+    }
     public String getEmailFromToken(String accessToken) {
         try {
-            Jwt jwt = JwtDecoders.fromIssuerLocation(issuerUri).decode(accessToken);
-
-
+            Jwt jwt = getHs256Decoder().decode(accessToken);
             return jwt.getClaimAsString("email");
         } catch (JwtException e) {
             throw new BadRequestException(Constants.ErrorCode.INVALID_VERIFIED_TOKEN,
