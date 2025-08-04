@@ -17,6 +17,8 @@ public record ModuleUserResponse(
 
         @JsonProperty("description")
         String description,
+        @JsonProperty("share_to")
+        String shareTo,
 
         @JsonProperty("is_public")
         Boolean isPublic,
