@@ -10,7 +10,9 @@ public class OverviewProgress {
     private Integer task;
     private Integer totalExams;
     private Integer totalTasks;
-    private String timeFrame;
-    private Double averageBand;
-    private Date lastLearningDate;
+    private String timeFrame; //1w, 1m, 3m, 3d, ...
+    private Double averageBandInTimeFrame;
+    private Integer numberOfExamsInTimeFrame;
+    private Integer numberOfTasksInTimeFrame;
+    private String lastLearningDate;
 }

@@ -73,4 +73,12 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
 //    Optional<ReadingExam> findByParentReadingExamReadingExamIdAndIsCurrentTrue(UUID parentId);
 
 //    Optional<ReadingPassage> findByParentPassageIdAndIsCurrentTrue(UUID parentId);
+
+    @Query("""
+        SELECT COUNT(distinct r.urlSlug) FROM ReadingExam r
+        WHERE r.isDeleted = false
+        AND r.isCurrent = true
+        AND r.status = 1
+    """)
+    Integer numberOfActiveExams();
 }

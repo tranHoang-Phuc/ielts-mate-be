@@ -2,16 +2,13 @@ package com.fptu.sep490.readingservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
-import com.fptu.sep490.commonlibrary.constants.PageableConstant;
+import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
-import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.service.ExamAttemptService;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
-import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
@@ -127,5 +123,15 @@ public class ExamAttemptController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(response);
+    }
+
+    @PostMapping("/internal/overview-progress")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<OverviewProgress>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody OverviewProgressReq body) throws JsonProcessingException {
+        OverviewProgress data = examAttemptService.getOverViewProgress(body, token);
+        BaseResponse<OverviewProgress> response = BaseResponse.<OverviewProgress>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
     }
 }
