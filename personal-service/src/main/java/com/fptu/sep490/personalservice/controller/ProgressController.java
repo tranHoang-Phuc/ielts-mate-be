@@ -6,6 +6,9 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.repository.client.ReadingClient;
+import com.fptu.sep490.personalservice.service.ProgressService;
+import com.fptu.sep490.personalservice.viewmodel.response.OverviewProgressResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +26,22 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class ProgressController {
 
-    ReadingClient readingClient;
-    Helper helper;
+    ProgressService progressService;
 
-    @GetMapping("/reading")
-    public ResponseEntity<BaseResponse<OverviewProgress>> getReadingProgress(HttpServletRequest request) {
-        String accessToken = helper.getAccessToken(request);
-        OverviewProgressReq overviewProgressReq = new OverviewProgressReq();
-        overviewProgressReq.setTimeFrame("1w");
+    @GetMapping("/overview")
+    @Operation(
+            summary = "Get overview progress of reading and listening exams",
+            description = "This endpoint retrieves the overview progress of reading and listening exams for the authenticated user."
+    )
+    public ResponseEntity<BaseResponse<OverviewProgressResponse>> getReadingProgress(HttpServletRequest request, OverviewProgressReq overviewProgressReq) {
 
-        ResponseEntity<BaseResponse<OverviewProgress>> overviewProgress = readingClient.getExamOverview(overviewProgressReq, "Bearer " + accessToken);
-        BaseResponse<OverviewProgress> response = BaseResponse.<OverviewProgress>builder()
-                .data(overviewProgress.getBody().data())
-                .message("Reading progress retrieved successfully")
-                .build();
-        return ResponseEntity.ok(response);
+        OverviewProgressResponse overviewProgress = progressService.getOverviewProgress(overviewProgressReq, request);
+        return ResponseEntity.ok(
+                BaseResponse.<OverviewProgressResponse>builder()
+                        .message(null)
+                        .data(overviewProgress)
+                        .build()
+        );
     }
 
 }

@@ -3,6 +3,7 @@ package com.fptu.sep490.readingservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.constants.Constants;
@@ -408,19 +409,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         overviewProgress.setTotalTasks(numberOfTasks);
 
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate;
-
-// 2. Parse timeFrame để tính startDate
-        String unit = body.getTimeFrame().substring(body.getTimeFrame().length() - 1);
-        int value = Integer.parseInt(body.getTimeFrame().substring(0, body.getTimeFrame().length() - 1));
-
-        startDate = switch (unit) {
-            case "d" -> endDate.minusDays(value);
-            case "w" -> endDate.minusWeeks(value);
-            case "m" -> endDate.minusMonths(value);
-            case "y" -> endDate.minusYears(value);
-            default -> endDate.minusWeeks(1); // Mặc định là 1 tuần
-        };
+        LocalDateTime startDate = DateTimeUtils.calculateStartDateFromTimeFrame(body.getTimeFrame());
 
 // 3. Duyệt qua các bài thi và cập nhật lastLearningDate
         double totalScore = 0.0;
@@ -429,15 +418,14 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         for (ExamAttempt exam : exams) {
             LocalDateTime createdAt = exam.getCreatedAt();
             if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
-                String lastDateStr = overviewProgress.getLastLearningDate();
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
                 totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
                 numberOfExamsInTimeFrame++;
                 if (lastDateStr == null) {
-                    overviewProgress.setLastLearningDate(createdAt.toString()); // dùng format mặc định
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
                 } else {
-                    LocalDateTime lastDate = LocalDateTime.parse(lastDateStr); // parse theo ISO mặc định
-                    if (createdAt.isAfter(lastDate)) {
-                        overviewProgress.setLastLearningDate(createdAt.toString());
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
                     }
                 }
             }
@@ -445,14 +433,13 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         for (Attempt task : tasks) {
             LocalDateTime createdAt = task.getCreatedAt();
             if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
-                String lastDateStr = overviewProgress.getLastLearningDate();
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
                 numberOfTasksInTimeFrame++;
                 if (lastDateStr == null) {
-                    overviewProgress.setLastLearningDate(createdAt.toString()); // dùng format mặc định
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
                 } else {
-                    LocalDateTime lastDate = LocalDateTime.parse(lastDateStr); // parse theo ISO mặc định
-                    if (createdAt.isAfter(lastDate)) {
-                        overviewProgress.setLastLearningDate(createdAt.toString());
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
                     }
                 }
             }

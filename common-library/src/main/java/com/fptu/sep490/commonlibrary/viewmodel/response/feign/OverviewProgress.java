@@ -2,6 +2,7 @@ package com.fptu.sep490.commonlibrary.viewmodel.response.feign;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -14,5 +15,5 @@ public class OverviewProgress {
     private Double averageBandInTimeFrame;
     private Integer numberOfExamsInTimeFrame;
     private Integer numberOfTasksInTimeFrame;
-    private String lastLearningDate;
+    private LocalDateTime lastLearningDate;
 }
