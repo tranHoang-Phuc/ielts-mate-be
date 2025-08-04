@@ -422,7 +422,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserCreationProfile updateUserProfile(String accessToken, UserUpdateRequest userUpdateRequest) throws JsonProcessingException {
-        String email = getEmailFromToken(accessToken);
+        String email = getEmailFromAccessToken(accessToken);
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient
                 .getUserByEmail(realm, "Bearer " + clientToken, email);
@@ -601,6 +601,17 @@ public class AuthServiceImpl implements AuthService {
         SecretKey key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
         return NimbusJwtDecoder.withSecretKey(key).build();
     }
+
+    public String getEmailFromAccessToken(String accessToken) {
+        try {
+            Jwt jwt = JwtDecoders.fromIssuerLocation(issuerUri).decode(accessToken);
+            return jwt.getClaimAsString("email");
+        } catch (JwtException e) {
+            throw new BadRequestException(Constants.ErrorCode.INVALID_VERIFIED_TOKEN,
+                    Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
+        }
+    }
+
     public String getEmailFromToken(String accessToken) {
         try {
             Jwt jwt = getHs256Decoder().decode(accessToken);
