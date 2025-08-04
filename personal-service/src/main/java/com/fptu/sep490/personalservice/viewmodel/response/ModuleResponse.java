@@ -37,7 +37,13 @@ public record ModuleResponse(
         String updatedBy,
 
         @JsonProperty("updated_at")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @JsonProperty("time_spent")
+        Long timeSpent,
+
+        @JsonProperty("progress")
+        Double progress
 
 
 

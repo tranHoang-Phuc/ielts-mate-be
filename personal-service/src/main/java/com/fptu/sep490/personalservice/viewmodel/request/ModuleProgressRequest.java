@@ -5,6 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record ModuleProgressRequest(
+        @JsonProperty("time_spent")
+        Long timeSpent, // in seconds
+        @JsonProperty("progress")
+        Double progress, // percentage of completion, e.g., 0.75 for 75%
         @JsonProperty("status")
         Integer status, // 0: pending, 1: allowed, 2: denied
         @JsonProperty("last_index_read")

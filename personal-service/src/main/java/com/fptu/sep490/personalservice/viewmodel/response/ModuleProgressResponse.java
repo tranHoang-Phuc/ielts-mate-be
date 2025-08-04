@@ -15,8 +15,12 @@ public record ModuleProgressResponse(
         String moduleName,
         @JsonProperty("user_id")
         String userId,
+        @JsonProperty("time_spent")
+        Long timeSpent, // in seconds
         @JsonProperty("status")
         Integer status, // 0: pending, 1: allowed, 2: denied
+        @JsonProperty("progress")
+        Double progress, // percentage of module completed
         @JsonProperty("last_index_read")
         Integer lastIndexRead, // this is index that user last read in module, then when user open it, it will show the last read
         @JsonProperty("highlighted_flashcard_ids")
