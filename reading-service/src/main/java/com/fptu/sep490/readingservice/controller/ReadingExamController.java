@@ -286,6 +286,10 @@ public class ReadingExamController {
     }
 
     @GetMapping("/internal/exam")
+    @Operation(
+            summary = "Get task titles by IDs",
+            description = "Retrieve task titles for a list of task IDs."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(@RequestParam("ids") List<UUID> ids) {
         List<TaskTitle> data = readingExamService.getTaskTitle(ids);

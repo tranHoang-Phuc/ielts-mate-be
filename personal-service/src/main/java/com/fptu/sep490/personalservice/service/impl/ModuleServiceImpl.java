@@ -140,7 +140,7 @@ public class ModuleServiceImpl implements ModuleService {
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Module> modulePage;
         try {
-            modulePage = moduleRepository.searchModule(keyword, pageable, UserId);
+            modulePage = moduleRepository.searchModuleByUser(keyword, pageable, UserId);
         } catch (Exception e) {
             log.error("Database error when fetching modules for user: {}", UserId, e);
             throw new AppException(
@@ -167,6 +167,13 @@ public class ModuleServiceImpl implements ModuleService {
                                 )
                                 .build());
                     }
+                    ModuleUsers moduleUser = module.getModuleUsers().stream()
+                            .filter(mu -> mu.getUserId().equals(UserId))
+                            .findFirst()
+                            .orElse(null);
+
+                    Long timeSpent = moduleUser != null ? moduleUser.getTimeSpent() : null;
+                    Double progress = moduleUser != null ? moduleUser.getProgress() : null;
                     return ModuleResponse.builder()
                             .moduleId(module.getModuleId())
                             .moduleName(module.getModuleName())
@@ -177,6 +184,8 @@ public class ModuleServiceImpl implements ModuleService {
                             .createdAt(module.getCreatedAt())
                             .updatedBy(module.getUpdatedBy())
                             .updatedAt(module.getUpdatedAt())
+                            .timeSpent(timeSpent)
+                            .progress(progress)
                             .build();
                 })
                 .toList();
@@ -868,6 +877,8 @@ public class ModuleServiceImpl implements ModuleService {
                 .moduleName(module.getModuleName())
                 .userId(userId)
                 .status(status)
+                .progress(moduleUsers.getProgress())
+                .timeSpent(moduleUsers.getTimeSpent() != null ? moduleUsers.getTimeSpent() : 0L)
                 .lastIndexRead(moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0)
                 .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())
                 .build();
@@ -928,6 +939,14 @@ public class ModuleServiceImpl implements ModuleService {
         if (moduleProgressRequest.highlightedFlashcardIds() != null) {
             moduleUsers.setHighlightedFlashcardIds(moduleProgressRequest.highlightedFlashcardIds());
         }
+        if (moduleProgressRequest.timeSpent() != null) {
+            Long current = moduleUsers.getTimeSpent() == null ? 0L : moduleUsers.getTimeSpent();
+            moduleUsers.setTimeSpent(current + moduleProgressRequest.timeSpent());
+        }
+        if (moduleProgressRequest.progress() != null) {
+            moduleUsers.setProgress(moduleProgressRequest.progress());
+        }
+
         moduleUsers.setUpdatedBy(userId);
         moduleUsers = moduleUsersRepository.save(moduleUsers);
         ModuleProgressResponse progressResponse = ModuleProgressResponse.builder()
@@ -935,6 +954,8 @@ public class ModuleServiceImpl implements ModuleService {
                 .moduleId(module.getModuleId().toString())
                 .moduleName(module.getModuleName())
                 .userId(userId)
+                .timeSpent(moduleUsers.getTimeSpent())
+                .progress(moduleUsers.getProgress())
                 .status(moduleUsers.getStatus() != null ? moduleUsers.getStatus() : 0)
                 .lastIndexRead(moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0)
                 .highlightedFlashcardIds(moduleUsers.getHighlightedFlashcardIds())

@@ -25,9 +25,10 @@ public record ReminderConfigCreationRequest(
        @JsonProperty("reminder_time")
        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
        @JsonDeserialize(using = LocalTimeDeserializer.class)
-       //Nguowuowif dùng
+       //Nhận thời gian 24h format HH:mm
       LocalTime reminderTime,
       @JsonProperty("recurrence")
+      // 0: NONE, 1: DAILY, 2: WEEKLY, 3: MONTHLY, 4: YEARLY, 5: CUSTOM
       Integer recurrence,
       @JsonProperty("time_zone")
       String timeZone,

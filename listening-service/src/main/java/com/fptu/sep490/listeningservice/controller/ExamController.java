@@ -238,6 +238,11 @@ public class ExamController {
 
 
     @GetMapping("/internal/exam")
+    @Operation(
+            summary = "Get exam titles by IDs",
+            description = "This endpoint retrieves a list of exam titles based on the provided IDs. " +
+                    "It is intended for internal use to fetch exam titles."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<TaskTitle>>> getExamTitle(@RequestParam("ids")List<UUID> ids) {
         List<TaskTitle> data = examService.getExamTitle(ids);

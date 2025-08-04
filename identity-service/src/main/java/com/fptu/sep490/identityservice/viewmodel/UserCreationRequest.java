@@ -3,8 +3,10 @@ package com.fptu.sep490.identityservice.viewmodel;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import org.hibernate.validator.constraints.Length;
 
+@Builder
 public record UserCreationRequest(
         @NotNull(message = "ERROR_PASSWORD_REQUIRED")
         @Length(min = 8, max = 32, message = "ERROR_INVALID_PASSWORD_LENGTH") String password,

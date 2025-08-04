@@ -13,4 +13,4 @@ public interface GroupQuestionService {
     AddGroupQuestionResponse updateGroupQuestion(String passageId, String groupId, AddGroupQuestionRequest request, HttpServletRequest httpServletRequest) throws Exception;
 
     void deleteGroupQuestion(String passageId, String groupId, HttpServletRequest httpServletRequest) throws Exception;
-}
+ }

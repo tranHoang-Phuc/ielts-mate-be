@@ -6,6 +6,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.personalservice.service.MarkupService;
 import com.fptu.sep490.personalservice.viewmodel.request.MarkupCreationRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.MarkUpResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,10 @@ public class MarkupController {
     MarkupService markupService;
 
     @PostMapping
+    @Operation(
+            summary = "Add a new markup",
+            description = "Create a new markup for a task. The request should include the necessary details for the markup."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Void>> addMarkup(HttpServletRequest request, MarkupCreationRequest markup) {
         markupService.addMarkup(request, markup);
@@ -43,6 +48,10 @@ public class MarkupController {
     }
 
     @DeleteMapping("/{task-id}")
+    @Operation(
+            summary = "Delete a markup",
+            description = "Delete an existing markup by its task ID. This operation will remove the markup from the system."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Void>> deleteMarkup(
             HttpServletRequest request, @PathVariable("task-id") UUID taskId) {
@@ -55,6 +64,10 @@ public class MarkupController {
     }
 
     @GetMapping("/task")
+    @Operation(
+            summary = "Get all markups for tasks",
+            description = "Retrieve a paginated list of all markups associated with tasks. You can filter by markup type, task type, and practice type."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<MarkUpResponse>>> getAllTask(
         HttpServletRequest request,

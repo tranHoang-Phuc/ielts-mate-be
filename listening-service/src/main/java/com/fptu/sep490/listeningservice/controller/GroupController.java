@@ -6,6 +6,7 @@ import com.fptu.sep490.listeningservice.service.GroupService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.QuestionGroupCreationRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.QuestionGroupResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +42,10 @@ public class GroupController {
      * @throws IOException if an I/O error occurs
      */
     @PostMapping(value = "/{listening-task-id}/groups", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(
+            summary = "Create a new question group for a listening task",
+            description = "Create a new question group associated with a specific listening task by its ID."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<QuestionGroupResponse>> createGroup(
             @PathVariable("listening-task-id") String listeningTaskId,
@@ -58,6 +63,10 @@ public class GroupController {
 
     //delete group
     @DeleteMapping("/{listening-task-id}/groups/{group-id}")
+    @Operation(
+            summary = "Delete a question group by its ID",
+            description = "Delete a specific question group associated with a listening task by its ID."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<QuestionGroupResponse>> deleteGroup(
             @PathVariable("listening-task-id") UUID listeningTaskId,

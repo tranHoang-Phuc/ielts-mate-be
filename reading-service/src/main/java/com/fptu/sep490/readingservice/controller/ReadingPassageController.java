@@ -475,6 +475,17 @@ public class ReadingPassageController {
     }
 
     @GetMapping("/internal/task")
+    @Operation(
+            summary = "Get task titles by IDs",
+            description = "This endpoint retrieves task titles based on a list of provided IDs."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Task titles retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden access", content = @Content(schema = @Schema(implementation = AppException.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
+    })
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(@RequestParam("ids") List<UUID> ids) {
         List<TaskTitle> data = passageService.getTaskTitle(ids);

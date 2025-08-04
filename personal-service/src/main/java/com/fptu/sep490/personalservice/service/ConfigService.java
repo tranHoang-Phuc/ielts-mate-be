@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface ConfigService {
     StreakConfig getOrAddStreakConfig( StreakEvent streakEvent) throws JsonProcessingException;
 
-    StreakConfigResponse getStreak(HttpServletRequest request);
+    StreakConfigResponse getStreak(HttpServletRequest request) throws JsonProcessingException;
 
     ReminderConfigResponse getReminder(HttpServletRequest request);
 
@@ -22,7 +22,7 @@ public interface ConfigService {
 
     ReminderConfigResponse updateReminder(ReminderConfigUpdateRequest reminderConfig, HttpServletRequest request);
 
-    TargetConfig getTarget(HttpServletRequest request);
+    TargetConfig getTarget(HttpServletRequest request) throws JsonProcessingException;
 
     TargetConfig addOrUpdate(HttpServletRequest request, TargetConfig targetConfig) throws JsonProcessingException;
 }
