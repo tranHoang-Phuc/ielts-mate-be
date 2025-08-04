@@ -48,4 +48,12 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
 
     @Query("SELECT rp FROM ReadingPassage rp WHERE rp.passageId IN :ids ORDER BY rp.partNumber ASC")
     List<ReadingPassage> findAllByIdSortedByPartNumber(List<UUID> ids);
+
+    @Query("""
+    SELECT COUNT(p) FROM ReadingPassage p
+    WHERE p.passageStatus = 1
+    AND p.isCurrent = true
+    AND p.isDeleted = false
+    """)
+    Integer numberOfPublishedPassages();
 }

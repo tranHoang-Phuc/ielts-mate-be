@@ -1,6 +1,8 @@
 package com.fptu.sep490.listeningservice.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamAttemptAnswersRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
@@ -25,4 +27,6 @@ public interface ExamAttemptService {
     );
 
     SubmittedExamAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException;
+
+    OverviewProgress getOverViewProgress(OverviewProgressReq body, String token);
 }

@@ -3,6 +3,9 @@ package com.fptu.sep490.listeningservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,6 +48,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     DragItemRepository dragItemRepository;
     Helper helper;
     ListeningTaskService listeningTaskService;
+    AttemptRepository attemptRepository;
+    ListeningTaskRepository listeningTaskRepository;
 
     @Transactional
     @Override
@@ -362,6 +368,68 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         boolean isCorrect = numberOfCorrect == correctAnswers.size();
         resultSet.setCorrect(isCorrect);
         return resultSet;
+    }
+
+    @Override
+    public OverviewProgress getOverViewProgress(OverviewProgressReq body, String token) {
+        String userId = helper.getUserIdFromToken(token);
+
+        List<ExamAttempt> exams = examAttemptRepository.findAllByUserId(userId);
+        Integer numberOfExams = listeningExamRepository.numberOfActiveExams();
+
+        List<Attempt> tasks = attemptRepository.findAllByUserId(userId);
+        Integer numberOfTasks = listeningTaskRepository.numberOfPublishedTasks();
+
+        OverviewProgress overviewProgress = new OverviewProgress();
+        overviewProgress.setExam(exams.size());
+        overviewProgress.setTask(tasks.size());
+        overviewProgress.setTotalExams(numberOfExams);
+        overviewProgress.setTotalTasks(numberOfTasks);
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = DateTimeUtils.calculateStartDateFromTimeFrame(body.getTimeFrame());
+
+// 3. Duyệt qua các bài thi và cập nhật lastLearningDate
+        double totalScore = 0.0;
+        int numberOfExamsInTimeFrame = 0;
+        int numberOfTasksInTimeFrame = 0;
+        for (ExamAttempt exam : exams) {
+            LocalDateTime createdAt = exam.getCreatedAt();
+            if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
+                totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
+                numberOfExamsInTimeFrame++;
+                if (lastDateStr == null) {
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
+                } else {
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
+                    }
+                }
+            }
+        }
+        for (Attempt task : tasks) {
+            LocalDateTime createdAt = task.getCreatedAt();
+            if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
+                numberOfTasksInTimeFrame++;
+                if (lastDateStr == null) {
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
+                } else {
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
+                    }
+                }
+            }
+        }
+
+        overviewProgress.setAverageBandInTimeFrame(
+                numberOfExamsInTimeFrame > 0 ? totalScore / numberOfExamsInTimeFrame : null
+        );
+
+        overviewProgress.setNumberOfExamsInTimeFrame(numberOfExamsInTimeFrame);
+        overviewProgress.setNumberOfTasksInTimeFrame(numberOfTasksInTimeFrame);
+        return overviewProgress;
     }
 
 }

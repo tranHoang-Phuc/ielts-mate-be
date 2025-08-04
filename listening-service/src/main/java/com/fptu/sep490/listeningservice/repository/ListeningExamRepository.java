@@ -63,4 +63,12 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
         AND l.isCurrent = true
     """)
     Optional<ListeningExam> findCurrentChildByParentId(@Param("parentId") UUID parentId);
+
+    @Query("""
+        SELECT COUNT(distinct r.urlSlug) FROM ListeningExam r
+        WHERE r.isDeleted = false
+        AND r.isCurrent = true
+        AND r.status = 1
+    """)
+    Integer numberOfActiveExams();
 }

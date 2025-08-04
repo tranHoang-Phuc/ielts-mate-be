@@ -51,6 +51,8 @@ logging:
   level:
     org.hibernate.type.descriptor.sql: trace
     org.hibernate: debug
+    com.example.personal.feign: DEBUG
+    feign: DEBUG
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 

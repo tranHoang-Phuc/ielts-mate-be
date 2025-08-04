@@ -61,4 +61,12 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
 
     @Query("SELECT rp FROM ListeningTask rp WHERE rp.taskId IN :ids ORDER BY rp.partNumber ASC")
     List<ListeningTask> findAllByIdSortedByPartNumber(List<UUID> ids);
+
+    @Query("""
+    SELECT COUNT(p) FROM ListeningTask p
+    WHERE p.status = 1
+    AND p.isCurrent = true
+    AND p.isDeleted = false
+    """)
+    Integer numberOfPublishedTasks();
 }
