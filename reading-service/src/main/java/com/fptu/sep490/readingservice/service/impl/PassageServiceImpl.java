@@ -351,160 +351,117 @@ public class PassageServiceImpl implements PassageService {
                         HttpStatus.NOT_FOUND.value()
                 ));
 
-        List<QuestionGroup> questionGroups = readingPassage.getQuestionGroups();
+        List<QuestionGroup> originalVersionGroupQuestion = questionGroupRepository
+                .findOriginalVersionByTaskId(readingPassage.getPassageId());
 
-        Map<QuestionGroup, List<Question>> questionGroupMap = new HashMap<>();
-        Map<UUID, List<Choice>> choiceMap = new HashMap<>();
-        Map<QuestionGroup, List<DragItem>> dragItemMap = new HashMap<>();
-        for (QuestionGroup group : questionGroups) {
-            List<Question> filteredQuestions = group.getQuestions().stream()
-                    .filter(Objects::nonNull)
-                    .filter(q -> (q.getParent() == null && Boolean.TRUE.equals(q.getIsOriginal()))
-                            || Boolean.TRUE.equals(q.getIsCurrent()))
-                    .filter(q -> !Boolean.TRUE.equals(q.getIsDeleted()))
-                    .collect(Collectors.toList());
+        Map<QuestionGroup, List<DragItem>> currentGroupMapCurrentDragItem = new HashMap<>();
+        Map<UUID,List<Question>>  currentGroupIdQuestions = new HashMap<>();
+        Map<UUID, Map<UUID, List<Choice>>> currentGroupIdMapQuestionIdMapCurrentChoice = new HashMap<>();
+        originalVersionGroupQuestion.forEach(g -> {
+            // Get All Current DragItem
+            List<DragItem> currentVersionDragItem = dragItemRepository.findCurrentVersionByGroupId(g.getGroupId());
+            QuestionGroup latestVersion = questionGroupRepository.findLatestVersionByOriginalId(g.getGroupId());
+            currentGroupMapCurrentDragItem.put(latestVersion, currentVersionDragItem);
 
-            List<DragItem> dragItems = dragItemRepository.findCurrentVersionsByGroupId(group.getGroupId())
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .filter(d -> (d.getParent() == null && Boolean.TRUE.equals(d.getIsOriginal()))
-                            || Boolean.TRUE.equals(d.getIsCurrent()))
-                    .filter(d -> !Boolean.TRUE.equals(d.getIsDeleted()))
-                    .collect(Collectors.toList());
+            // Get All Original Question
+            List<UUID> originalQuestionId = questionRepository.findOriginalVersionByGroupId(g.getGroupId());
+            List<Question> currentQuestion = questionRepository.findAllCurrentVersion(originalQuestionId);
+            currentGroupIdQuestions.put(g.getGroupId(), currentQuestion);
+
+            Map<UUID, List<Choice>> questionIdMapCurrentChoice = new HashMap<>();
+            List<QuestionVersion> questionVersionList = new ArrayList<>();
+            currentQuestion.forEach(q -> {
+                if(q.getIsOriginal()) {
+                    List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getQuestionId());
+                    questionIdMapCurrentChoice.put(q.getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
+                } else {
+                    List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getParent().getQuestionId());
+                    questionIdMapCurrentChoice.put(q.getParent().getQuestionId(), currentChoice);
+                    QuestionVersion questionVersion = QuestionVersion.builder()
+                            .questionId(q.getQuestionId())
+                            .choiceMapping(currentChoice.stream().map(Choice::getChoiceId).toList())
+                            .build();
+                    questionVersionList.add(questionVersion);
+                }
+            });
+            currentGroupIdMapQuestionIdMapCurrentChoice.put(g.getGroupId(), questionIdMapCurrentChoice);
+        });
+
+        List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse> groups = new ArrayList<>();
+        currentGroupMapCurrentDragItem.forEach((key, value) -> {
+            List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses =
+                    value.stream()
+                            .map(item -> UpdatedQuestionResponse.DragItemResponse
+                                    .builder()
+                                    .dragItemId(item.getParent() == null ? item.getDragItemId().toString() : item.getParent().getDragItemId().toString())
+                                    .content(item.getContent())
+                                    .build())
+                            .toList();
+            List<Question> questions = currentGroupIdQuestions.get(key.getGroupId());
+            Map<UUID, List<Choice>> questionMapChoices = currentGroupIdMapQuestionIdMapCurrentChoice.get(key.getGroupId());
+
+            List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
+
+            questions.forEach(question -> {
+                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+
+                PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse questionResponse =
+                        PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                .questionId(question.getParent() == null ? question.getQuestionId().toString() : question.getParent().getQuestionId().toString())
+                                .questionOrder(question.getQuestionOrder())
+                                .questionType(question.getQuestionType().ordinal())
+                                .point(question.getPoint())
+                                .explanation(question.getExplanation())
+                                .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
+                                .instructionForChoice(question.getInstructionForChoice())
+                                .blankIndex(question.getBlankIndex())
+                                .correctAnswer(question.getCorrectAnswer())
+                                .instructionForMatching(question.getInstructionForMatching())
+                                .correctAnswerForMatching(question.getCorrectAnswerForMatching())
+                                .zoneIndex(question.getZoneIndex())
+                                .dragItemId(question.getDragItem() != null ? question.getDragItem().getDragItemId().toString() : null)
+                                .choices(choices != null ? choices.stream()
+                                        .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder().choiceId(c.getParent() == null ? c.getChoiceId().toString() : c.getParent().getChoiceId().toString())
+                                                .label(c.getLabel())
+                                                .choiceOrder(c.getChoiceOrder())
+                                                .content(c.getContent())
+                                                .isCorrect(c.isCorrect())
+                                                .build())
+                                        .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
+                                        .toList() : null)
+                                .build();
+                questionListResponse.add(questionResponse);
+            });
+            PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse group = PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
+                    .groupId(key.getParent() == null ? key.getGroupId().toString() : key.getParent().getGroupId().toString())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .questionType(key.getQuestionType().ordinal())
+                    .instruction(key.getInstruction())
+                    .dragItems(dragItemResponses)
+                    .questions(questionListResponse.stream()
+                            .sorted(Comparator.comparing(PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .build();
+            groups.add(group);
+        });
 
 
-            for (Question q : filteredQuestions) {
-                List<Choice> filteredChoices = q.getChoices().stream()
-                        .filter(Objects::nonNull)
-                        .filter(c -> (c.getParent() == null && Boolean.TRUE.equals(c.getIsOriginal()))
-                                || Boolean.TRUE.equals(c.getIsCurrent()))
-                        .filter(c -> !Boolean.TRUE.equals(c.getIsDeleted()))
-                        .collect(Collectors.toList());
-                choiceMap.put(q.getQuestionId(), filteredChoices);
-            }
-            dragItemMap.put(group, dragItems);
-            questionGroupMap.put(group, filteredQuestions);
-        }
-
-        UserProfileResponse createdByProfile;
-        UserProfileResponse updatedByProfile;
-        try {
-            createdByProfile = getUserProfileById(readingPassage.getCreatedBy());
-            updatedByProfile = getUserProfileById(passage.getUpdatedBy());
-        } catch (JsonProcessingException e) {
-            throw new InternalServerErrorException(
-                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,
-                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,
-                    HttpStatus.INTERNAL_SERVER_ERROR.value()
-            );
-        }
-
-        UserInformationResponse createdBy = UserInformationResponse.builder()
-                .userId(createdByProfile.id())
-                .lastName(createdByProfile.lastName())
-                .firstName(createdByProfile.firstName())
-                .email(createdByProfile.email())
-                .build();
-
-        UserInformationResponse updatedBy = UserInformationResponse.builder()
-                .userId(updatedByProfile.id())
-                .lastName(updatedByProfile.lastName())
-                .firstName(updatedByProfile.firstName())
-                .email(updatedByProfile.email())
-                .build();
 
         return PassageDetailResponse.builder()
-                .passageId(passage.getPassageId().toString())
+                .passageId(passageId.toString())
                 .title(passage.getTitle())
+                .instruction(passage.getInstruction())
                 .ieltsType(passage.getIeltsType().ordinal())
                 .partNumber(passage.getPartNumber().ordinal())
                 .content(passage.getContent())
                 .contentWithHighlightKeywords(passage.getContentWithHighlightKeyword())
-                .instruction(passage.getInstruction())
                 .passageStatus(passage.getPassageStatus().ordinal())
-                .createdBy(createdBy)
-                .updatedBy(updatedBy)
-                .createdAt(readingPassage.getCreatedAt().toString())
-                .updatedAt(passage.getUpdatedAt().toString())
-                .questionGroups(
-                        questionGroups.stream()
-                                .map(g -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.builder()
-                                        .groupId(g.getGroupId().toString())
-                                        .sectionLabel(g.getSectionLabel())
-                                        .sectionOrder(g.getSectionOrder())
-                                        .questionType(g.getQuestionType().ordinal())
-                                        .instruction(g.getInstruction())
-                                        .dragItems(
-                                                dragItemMap.getOrDefault(g, Collections.emptyList()).stream()
-                                                        .filter(DragItem::getIsCurrent)
-                                                        .map(d -> UpdatedQuestionResponse.DragItemResponse.builder()
-                                                                .dragItemId(d.getParent() == null
-                                                                        ? d.getDragItemId().toString()
-                                                                        : d.getParent().getDragItemId().toString())
-                                                                .content(d.getContent())
-                                                                .build())
-                                                        .toList()
-                                        )
-                                        .questions(
-                                                questionGroupMap.getOrDefault(g, Collections.emptyList()).stream()
-                                                        .filter(Question::getIsCurrent)
-                                                        .map(q -> PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()
-                                                                .questionId(q.getParent() == null
-                                                                        ? q.getQuestionId().toString()
-                                                                        : q.getParent().getQuestionId().toString())
-                                                                .questionOrder(q.getQuestionOrder())
-                                                                .questionType(q.getQuestionType().ordinal())
-                                                                .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
-                                                                .explanation(q.getExplanation())
-                                                                .point(q.getPoint())
-                                                                .instructionForChoice(q.getInstructionForChoice())
-                                                                .choices((q.getParent() == null && Boolean.TRUE.equals(g.getIsCurrent())) ?
-                                                                         q.getChoices().stream()
-                                                                                .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
-                                                                                .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
-                                                                                        .choiceId(c.getChoiceId().toString())
-                                                                                        .label(c.getLabel())
-                                                                                        .choiceOrder(c.getChoiceOrder())
-                                                                                        .content(c.getContent())
-                                                                                        .isCorrect(c.isCorrect())
-                                                                                        .build())
-                                                                                .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
-                                                                                .toList()
-                                                                        : q.getParent() != null?q.getParent().getChoices().stream()
-                                                                        .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
-                                                                        .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
-                                                                                .choiceId(c.getChoiceId().toString())
-                                                                                .label(c.getLabel())
-                                                                                .choiceOrder(c.getChoiceOrder())
-                                                                                .content(c.getContent())
-                                                                                .isCorrect(c.isCorrect())
-                                                                                .build())
-                                                                        .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
-                                                                        .toList() : null
-                                                                )
-                                                                .blankIndex(q.getBlankIndex())
-                                                                .correctAnswer(q.getCorrectAnswer())
-                                                                .instructionForMatching(q.getInstructionForMatching())
-                                                                .correctAnswerForMatching(q.getCorrectAnswerForMatching())
-                                                                .zoneIndex(q.getZoneIndex())
-                                                                .dragItemId(
-                                                                        q.getQuestionType() == QuestionType.DRAG_AND_DROP ?
-                                                                        q.getIsOriginal()?
-                                                                                (dragItemRepository.findByQuestionId(q.getQuestionId()) != null ?dragItemRepository.findByQuestionId(q.getQuestionId()).getDragItemId().toString() : null)
-                                                                                :
-                                                                                (dragItemRepository.findByQuestionId(q.getParent().getQuestionId()) != null?dragItemRepository.findByQuestionId(q.getParent().getQuestionId()) .getDragItemId().toString() : null)
-                                                                                        : null)
-                                                                .build())
-                                                        .sorted(Comparator.comparing(PassageAttemptResponse.
-                                                                ReadingPassageResponse.QuestionGroupResponse.
-                                                                QuestionResponse::questionOrder))
-                                                        .toList()
-                                        )
-                                        .build())
-                                .sorted(Comparator.comparing(PassageAttemptResponse.ReadingPassageResponse.
-                                        QuestionGroupResponse::sectionOrder))
-                                .toList()
-                )
+                .questionGroups(groups.stream().sorted(Comparator.comparing(PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse::sectionOrder)).toList())
                 .build();
     }
 
