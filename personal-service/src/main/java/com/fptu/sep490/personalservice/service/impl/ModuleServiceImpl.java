@@ -732,8 +732,10 @@ public class ModuleServiceImpl implements ModuleService {
                                 .build());
                     }
                     UserProfileResponse user = UserProfileResponse.builder().build();
+                    UserProfileResponse share_to = UserProfileResponse.builder().build();
                     try {
                         user = helper.getUserProfileById(module.getCreatedBy());
+                        share_to = helper.getUserProfileById(moduleUser.getUserId());
                     } catch (Exception e) {
                         log.error("Error fetching user profile for module creator: {}", module.getCreatedBy());
                         throw new AppException(
@@ -749,6 +751,7 @@ public class ModuleServiceImpl implements ModuleService {
                             .isPublic(module.getIsPublic())
                             .flashCardIds(flashCardResponses)
                             .createdBy(user != null ? user.email() : module.getCreatedBy())
+                            .shareTo(share_to != null ? share_to.email() : moduleUser.getUserId())
                             .createdAt(module.getCreatedAt())
                             .updatedBy(module.getUpdatedBy())
                             .updatedAt(module.getUpdatedAt())
