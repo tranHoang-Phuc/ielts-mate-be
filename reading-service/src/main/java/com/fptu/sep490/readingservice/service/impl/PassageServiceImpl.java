@@ -470,7 +470,7 @@ public class PassageServiceImpl implements PassageService {
                                                                                         .build())
                                                                                 .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
                                                                                 .toList()
-                                                                        : q.getParent().getChoices().stream()
+                                                                        : q.getParent() != null?q.getParent().getChoices().stream()
                                                                         .filter(c -> c.getIsCurrent() && !c.getIsDeleted())
                                                                         .map(c -> UpdatedQuestionResponse.ChoiceResponse.builder()
                                                                                 .choiceId(c.getChoiceId().toString())
@@ -480,7 +480,7 @@ public class PassageServiceImpl implements PassageService {
                                                                                 .isCorrect(c.isCorrect())
                                                                                 .build())
                                                                         .sorted(Comparator.comparing(UpdatedQuestionResponse.ChoiceResponse::choiceOrder))
-                                                                        .toList()
+                                                                        .toList() : null
                                                                 )
                                                                 .blankIndex(q.getBlankIndex())
                                                                 .correctAnswer(q.getCorrectAnswer())
