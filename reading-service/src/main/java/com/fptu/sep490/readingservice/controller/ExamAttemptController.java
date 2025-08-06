@@ -159,7 +159,7 @@ public class ExamAttemptController {
 
     @PostMapping("/internal/band-chart")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<List<LineChartData>>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody LineChartReq body) throws JsonProcessingException {
+    public ResponseEntity<BaseResponse<List<LineChartData>>> getBandChart(@RequestHeader("Authorization") String token, @RequestBody LineChartReq body) throws JsonProcessingException {
         List<LineChartData> data = examAttemptService.getBandChart(body, token);
         BaseResponse<List<LineChartData>> response = BaseResponse.<List<LineChartData>>builder()
                 .data(data)
