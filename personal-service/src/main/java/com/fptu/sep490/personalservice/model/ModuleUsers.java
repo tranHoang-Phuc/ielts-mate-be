@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.model;
 
 
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -57,13 +58,14 @@ public class ModuleUsers {
 
     @Column(name = "progress")
     private Double progress = 0.0; // Progress in percentage (0.0 to 100.0)
-    @ElementCollection
-    @CollectionTable(
-            name = "highlighted_flashcards",
-            joinColumns = @JoinColumn(name = "module_user_id") // Khóa ngoại trỏ về ModuleUser.id
-    )
-    @Column(name = "flashcard_id")
-    private List<String> highlightedFlashcardIds = new ArrayList<>();
+
+    @Column(name = "learning_status")
+    @Enumerated(EnumType.ORDINAL)
+    private LearningStatus learningStatus = LearningStatus.NEW; // 0: not started, 1: in progress, 2: completed
+
+    @OneToMany(mappedBy = "moduleUsers", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FlashCardProgress> flashcardProgressList = new ArrayList<>();
+
 
     @PrePersist
     @PreUpdate

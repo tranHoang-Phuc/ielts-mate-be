@@ -44,7 +44,7 @@ import static com.fptu.sep490.personalservice.helper.UtcConverter.convertToUtc;
 @Service
 @FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
 @Slf4j
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor
 public class ConfigServiceImpl implements ConfigService {
     ConfigRepository configRepository;
     ObjectMapper objectMapper;

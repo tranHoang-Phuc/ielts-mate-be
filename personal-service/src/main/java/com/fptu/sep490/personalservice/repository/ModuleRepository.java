@@ -18,6 +18,7 @@ public interface ModuleRepository extends CrudRepository<Module, UUID> {
     JOIN ModuleUsers mu ON mu.module = m
     WHERE m.isDeleted = false
       AND mu.userId = :userId
+      AND mu.status = 1
       AND (
         :keyword IS NULL OR :keyword = '' OR
         LOWER(m.moduleName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
