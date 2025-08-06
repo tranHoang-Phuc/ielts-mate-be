@@ -56,4 +56,7 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
     AND p.isDeleted = false
     """)
     Integer numberOfPublishedPassages();
+
+    @Query(value = "select count(*) from reading_passages where is_original = true and is_deleted = false", nativeQuery = true)
+    int getNumberOfPassages();
 }

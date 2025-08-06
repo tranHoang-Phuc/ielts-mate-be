@@ -18,4 +18,6 @@ public interface AttemptRepository extends CrudRepository<Attempt, UUID> {
     @Query("SELECT a FROM Attempt a WHERE a.createdBy = :userId AND a.totalPoints IS NOT NULL")
     List<Attempt> findAllByUserId(String userId);
 
+    @Query(value = "select count(*) fro", nativeQuery = true)
+    int getNumberOfAttempts();
 }

@@ -81,4 +81,7 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
         AND r.status = 1
     """)
     Integer numberOfActiveExams();
+
+    @Query(value = "select count(*) from reading_exam where is_original = true and is_deleted = false", nativeQuery = true)
+    int getNumberOfExams();
 }
