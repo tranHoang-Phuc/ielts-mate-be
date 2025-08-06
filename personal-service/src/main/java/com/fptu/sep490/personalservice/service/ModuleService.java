@@ -2,6 +2,7 @@ package com.fptu.sep490.personalservice.service;
 
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleProgressRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.FlashcardProgressRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.ModuleProgressResponse;
@@ -40,4 +41,6 @@ public interface ModuleService {
     ModuleProgressResponse getModuleProgress(String moduleId, HttpServletRequest request) throws Exception;
 
     ModuleProgressResponse updateModuleProgress(String moduleId, @Valid ModuleProgressRequest moduleProgressRequest, HttpServletRequest request) throws Exception;
+
+    void updateFlashcardProgress(String moduleId, @Valid FlashcardProgressRequest flashcardProgressRequest, HttpServletRequest request) throws Exception;
 }

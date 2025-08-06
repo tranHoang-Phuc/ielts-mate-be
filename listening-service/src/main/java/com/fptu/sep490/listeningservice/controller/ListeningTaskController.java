@@ -9,6 +9,7 @@ import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetAllRe
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskGetResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,6 +37,10 @@ public class ListeningTaskController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('CREATOR')")
+    @Operation(
+           summary = "Create a new listening task",
+              description = "Create a new listening task with the provided details, including audio file and transcription."
+    )
     public ResponseEntity<BaseResponse<ListeningTaskResponse>> createListeningTask(
             @RequestParam("ielts_type") Integer ieltsType,
             @RequestParam("part_number") Integer partNumber,
@@ -64,6 +69,10 @@ public class ListeningTaskController {
     }
 
     @GetMapping("/{task-Id}")
+    @Operation(
+            summary = "Get listening task by ID",
+            description = "Retrieve a specific listening task by its ID."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ListeningTaskGetAllResponse>> getTaskById(@PathVariable("task-Id") UUID taskId) {
         ListeningTaskGetAllResponse data = listeningTaskService.getTaskById(taskId);
@@ -75,6 +84,10 @@ public class ListeningTaskController {
     }
 
     @PutMapping(value = "/{task-id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+            summary = "Update an existing listening task",
+            description = "Update the details of an existing listening task, including audio file and transcription."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<ListeningTaskResponse>> updateListeningTask(
             @PathVariable("task-id") UUID taskId,
@@ -96,6 +109,10 @@ public class ListeningTaskController {
     }
 
     @DeleteMapping("/{task-id}")
+    @Operation(
+            summary = "Delete a listening task",
+            description = "Delete a specific listening task by its ID."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<?>> deleteTask(@PathVariable("task-id") UUID taskId) {
         listeningTaskService.deleteTask(taskId);
@@ -106,6 +123,10 @@ public class ListeningTaskController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Get activated listening tasks",
+            description = "Retrieve a paginated list of activated listening tasks with optional filters."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<ListeningTaskGetResponse>>> getActivatedTask(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
@@ -142,6 +163,10 @@ public class ListeningTaskController {
     }
 
     @GetMapping("/creator")
+    @Operation(
+            summary = "Get listening tasks for creators",
+                description = "Retrieve a paginated list of listening tasks created by the user with optional filters."
+    )
     @PreAuthorize("hasRole('CREATOR')")
     public ResponseEntity<BaseResponse<List<ListeningTaskGetResponse>>> getListeningTask(
             @RequestParam(value = "page", required = false, defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
@@ -180,6 +205,10 @@ public class ListeningTaskController {
     }
 
     @GetMapping("/internal/task")
+    @Operation(
+            summary = "Get task titles by IDs",
+            description = "Retrieve a list of task titles based on the provided task IDs."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(
             @RequestParam("task-ids") List<UUID> taskIds

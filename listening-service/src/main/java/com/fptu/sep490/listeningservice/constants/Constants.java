@@ -16,6 +16,8 @@ public class Constants {
         public static final String QUESTION_LIST_EMPTY = "QUESTION_LIST_EMPTY";
         public static final String QUESTION_GROUP_NOT_FOUND = "QUESTION_GROUP_NOT_FOUND";
         public static final String CHOICES_LIST_EMPTY = "CHOICES_LIST_EMPTY";
+        public static final String CHOICE_ORDER_EXISTS = "CHOICE_ORDER_EXISTS";
+
         public static final String INVALID_NUMBER_OF_CORRECT_ANSWERS = "INVALID_NUMBER_OF_CORRECT_ANSWERS";
         public static final String INVALID_BLANK_INDEX = "INVALID_BLANK_INDEX";
         public static final String QUESTION_NOT_BELONG_TO_GROUP = "QUESTION_NOT_BELONG_TO_GROUP";
@@ -68,6 +70,7 @@ public class Constants {
         public static final String CHOICE_NOT_FOUND = "400023";
         public static final String EXAM_ATTEMPT_NOT_FOUND = "400024";
         public static final String EXAM_ATTEMPT_NOT_SUBMIT = "400025";
+        public static final String CHOICE_ORDER_EXISTS = "400026";
 
         public static final String INTERNAL_SERVER_ERROR = "400999";
 

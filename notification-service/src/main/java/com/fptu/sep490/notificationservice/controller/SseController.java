@@ -1,6 +1,7 @@
 package com.fptu.sep490.notificationservice.controller;
 
 import com.fptu.sep490.notificationservice.service.SseService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.security.PermitAll;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,10 @@ public class SseController {
     SseService sseService;
 
     @GetMapping("/stream/{user-id}")
+    @Operation(
+            summary = "Subscribe to SSE stream",
+            description = "Establish a Server-Sent Events (SSE) connection for a specific user by their ID."
+    )
     @PermitAll
     public SseEmitter stream(@PathVariable("user-id") UUID clientId) {
         return sseService.subscribe(clientId);

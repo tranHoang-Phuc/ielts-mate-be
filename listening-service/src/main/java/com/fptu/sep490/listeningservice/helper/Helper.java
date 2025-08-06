@@ -101,6 +101,17 @@ public class Helper {
         }
     }
 
+    public String getUserIdFromToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+        try {
+            return SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value());
+        }
+    }
     public UserInformationResponse getUserInformationResponse(String userId) {
         try {
             UserProfileResponse user = getUserProfileById(userId);

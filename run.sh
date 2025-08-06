@@ -17,11 +17,22 @@ modules=(
   "identity-service"
   "notification-service"
   "reading-service"
+  "listening-service"
+  "personal-service"
 )
 
 log_dir="logs"
 if [ ! -d "$log_dir" ]; then
   mkdir "$log_dir"
+fi
+# 0. Build common module
+echo "============================================"
+echo " Building common module (skip tests) with mvn..."
+cd common-library || { echo "Cannot cd into common-library"; exit 1; }
+mvn clean install -DskipTests
+if [ $? -ne 0 ]; then
+  echo "Common module build failed. Exiting."
+  exit 1
 fi
 
 # 1. Build project cha (skip tests) bằng mvn
@@ -29,23 +40,23 @@ echo "============================================"
 echo "🔨 Building parent project (skip tests) with mvn..."
 mvn clean package -DskipTests
 if [ $? -ne 0 ]; then
-  echo "❌ Parent build failed. Exiting."
+  echo "Parent build failed. Exiting."
   exit 1
 fi
-echo "✅ Build parent & all modules thành công."
+echo "Build parent & all modules thành công."
 echo "============================================"
 echo
 
 for module in "${modules[@]}"; do
   echo "============================================"
-  echo "🚀 Entering module: $module"
+  echo "Entering module: $module"
 
   if [ ! -d "$module" ]; then
-    echo "❌ Directory '$module' does not exist! Skipping."
+    echo "Directory '$module' does not exist! Skipping."
     continue
   fi
 
-  cd "$module" || { echo "❌ Cannot cd into $module"; exit 1; }
+  cd "$module" || { echo "Cannot cd into $module"; exit 1; }
 
   jar_file=$(find target -maxdepth 1 -type f -name "*.jar" | head -n 1)
   if [ -z "$jar_file" ]; then

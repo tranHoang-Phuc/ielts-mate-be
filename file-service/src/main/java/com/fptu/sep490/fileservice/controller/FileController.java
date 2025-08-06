@@ -4,6 +4,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.fileservice.constants.Constants;
 import com.fptu.sep490.fileservice.model.File;
 import com.fptu.sep490.fileservice.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,6 +37,10 @@ public class FileController {
     }
 
     @GetMapping("/download/{id}")
+    @Operation(
+            summary = "Download a file by ID",
+            description = "Retrieve a file's content by its unique identifier."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<byte[]> getFileById(@PathVariable UUID id) {
         try {
@@ -70,6 +75,10 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(
+            summary = "Delete a file by ID",
+            description = "Remove a file from the system using its unique identifier."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteFile(@PathVariable UUID id) {
         try {
@@ -83,6 +92,10 @@ public class FileController {
     }
 
     @GetMapping("/public")
+    @Operation(
+            summary = "Download a file by public URL",
+            description = "Retrieve a file's content using its public URL."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<byte[]> getFileByPublicUrl(@RequestParam("url") String publicUrl) {
         try {

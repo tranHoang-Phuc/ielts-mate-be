@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.model;
 
 
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -52,12 +53,28 @@ public class ModuleUsers {
     @Column(name = "last_index_read") // this is index that user last read in module, then when user open it, it will show the last read
     private Integer lastIndexRead = 0;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "highlighted_flashcards",
-            joinColumns = @JoinColumn(name = "module_user_id") // Khóa ngoại trỏ về ModuleUser.id
-    )
-    @Column(name = "flashcard_id")
-    private List<String> highlightedFlashcardIds = new ArrayList<>();
+    @Column(name ="time_spent")
+    private Long timeSpent = 0L; // Time spent in milliseconds
 
+    @Column(name = "progress")
+    private Double progress = 0.0; // Progress in percentage (0.0 to 100.0)
+
+    @Column(name = "learning_status")
+    @Enumerated(EnumType.ORDINAL)
+    private LearningStatus learningStatus = LearningStatus.NEW; // 0: not started, 1: in progress, 2: completed
+
+    @OneToMany(mappedBy = "moduleUsers", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FlashCardProgress> flashcardProgressList = new ArrayList<>();
+
+
+    @PrePersist
+    @PreUpdate
+    public void initializeDefaults() {
+        if (this.status == null) {
+            this.status = 0; // Default to PENDING status
+        }
+        if (this.lastIndexRead == null) {
+            this.lastIndexRead = 0;
+        }
+    }
 }

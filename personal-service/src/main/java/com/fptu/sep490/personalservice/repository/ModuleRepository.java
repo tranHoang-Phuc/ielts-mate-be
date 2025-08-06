@@ -14,18 +14,20 @@ public interface ModuleRepository extends CrudRepository<Module, UUID> {
 
 
     @Query("""
-        SELECT m FROM Module m
-        WHERE m.isDeleted = false
-          AND m.createdBy = :userId
-          AND (
-            :keyword IS NULL OR :keyword = '' OR
-            LOWER(m.moduleName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-            LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-    """)
-    Page<Module> searchModule(@Param("keyword") String keyword,
-                              Pageable pageable,
-                              @Param("userId") String userId);
+    SELECT m FROM Module m
+    JOIN ModuleUsers mu ON mu.module = m
+    WHERE m.isDeleted = false
+      AND mu.userId = :userId
+      AND mu.status = 1
+      AND (
+        :keyword IS NULL OR :keyword = '' OR
+        LOWER(m.moduleName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
+        LOWER(m.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+""")
+    Page<Module> searchModuleByUser(@Param("keyword") String keyword,
+                                    Pageable pageable,
+                                    @Param("userId") String userId);
 
     @Query("""
     SELECT m FROM Module m

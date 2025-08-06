@@ -2,6 +2,7 @@ package com.fptu.sep490.readingservice.controller;
 
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.service.ReadingExamService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
@@ -285,6 +286,10 @@ public class ReadingExamController {
     }
 
     @GetMapping("/internal/exam")
+    @Operation(
+            summary = "Get task titles by IDs",
+            description = "Retrieve task titles for a list of task IDs."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<TaskTitle>>> getTaskTitle(@RequestParam("ids") List<UUID> ids) {
         List<TaskTitle> data = readingExamService.getTaskTitle(ids);

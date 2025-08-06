@@ -10,6 +10,7 @@ import com.fptu.sep490.listeningservice.viewmodel.response.AttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserAttemptResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.UserDataAttempt;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -35,6 +36,10 @@ public class AttemptController {
     AttemptService attemptService;
 
     @PostMapping("/{listening-task-id}")
+    @Operation(
+            summary = "Create a new attempt for a listening task",
+            description = "Create a new attempt associated with a specific listening task by its ID."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<AttemptResponse>> createAttempt(
             @PathVariable("listening-task-id") UUID listeningTaskId,
@@ -52,6 +57,10 @@ public class AttemptController {
     }
 
     @PutMapping("/save/{attempt-id}")
+    @Operation(
+            summary = "Save an attempt",
+            description = "Save the current state of an attempt by its ID, including the user's answers."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<Void>> saveAttempt(
             @PathVariable("attempt-id") String attemptId,
@@ -65,6 +74,10 @@ public class AttemptController {
     }
 
     @GetMapping("/load/{attempt-id}")
+    @Operation(
+            summary = "Load an attempt",
+            description = "Load an attempt by its ID, retrieving the user's data and answers."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<UserDataAttempt>> loadAttempt(
             @PathVariable("attempt-id") String attemptId,
@@ -78,6 +91,10 @@ public class AttemptController {
     }
 
     @PutMapping("/submit/{attempt-id}")
+    @Operation(
+            summary = "Submit an attempt",
+            description = "Submit the answers for an attempt by its ID, finalizing the attempt."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<SubmittedAttemptResponse>> submitAttempt(
             @PathVariable("attempt-id") String attemptId,
@@ -92,6 +109,10 @@ public class AttemptController {
     }
 
     @GetMapping
+    @Operation(
+            summary = "Get all user attempts",
+            description = "Retrieve all attempts made by the user, with optional filtering and pagination."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<UserAttemptResponse>>> getAllUserAttempt(
             HttpServletRequest request,
@@ -131,6 +152,10 @@ public class AttemptController {
     }
 
     @GetMapping("/result/{attempt-id}")
+    @Operation(
+            summary = "Retrieve the result of an attempt",
+            description = "Get the result of a specific attempt by its ID, including user data and answers."
+    )
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<UserDataAttempt>> result(
             @PathVariable("attempt-id") UUID attemptId,

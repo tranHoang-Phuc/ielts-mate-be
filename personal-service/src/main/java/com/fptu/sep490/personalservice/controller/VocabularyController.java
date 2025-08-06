@@ -42,7 +42,7 @@ public class VocabularyController {
     @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Create a new vocabulary",
-            description = "Create a new vocabulary with the provided details. Requires CREATOR role."
+            description = "Create a new vocabulary with the provided details."
     )
     @RequestBody(
             description = "Request body to create a vocabulary",

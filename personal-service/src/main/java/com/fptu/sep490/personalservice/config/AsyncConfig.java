@@ -20,4 +20,26 @@ public class AsyncConfig {
         exec.initialize();
         return exec;
     }
+
+    @Bean(name = "progressExecutor")
+    public Executor progressExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("progress-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "statsExecutor")
+    public Executor statsExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(50);
+        executor.setThreadNamePrefix("stats-");
+        executor.initialize();
+        return executor;
+    }
 }

@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -37,7 +38,15 @@ public record ModuleResponse(
         String updatedBy,
 
         @JsonProperty("updated_at")
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+
+        @JsonProperty("time_spent")
+        Long timeSpent,
+
+        @JsonProperty("progress")
+        Double progress,
+        @JsonProperty("learning_status")
+        LearningStatus learningStatus
 
 
 

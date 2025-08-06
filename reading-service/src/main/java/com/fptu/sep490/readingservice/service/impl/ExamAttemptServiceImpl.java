@@ -3,6 +3,9 @@ package com.fptu.sep490.readingservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
@@ -21,14 +24,21 @@ import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +58,12 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     Helper helper;
     PassageService passageService;
     ReadingExamRepository readingExamRepository;
+    AttemptRepository attemptRepository;
+    ReadingPassageRepository readingPassageRepository;
+
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
+    @NonFinal
+    String issuerUri;
 
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
@@ -374,5 +390,67 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .updatedAt(examAttempt.getUpdatedAt().toString())
                 .answers(history.getUserAnswers())
                 .build();
+    }
+
+    @Override
+    public OverviewProgress getOverViewProgress(OverviewProgressReq body, String token) {
+        String userId = helper.getUserIdFromToken(token);
+
+        List<ExamAttempt> exams = examAttemptRepository.findAllByUserId(userId);
+        Integer numberOfExams = readingExamRepository.numberOfActiveExams();
+
+        List<Attempt> tasks = attemptRepository.findAllByUserId(userId);
+        Integer numberOfTasks = readingPassageRepository.numberOfPublishedPassages();
+
+        OverviewProgress overviewProgress = new OverviewProgress();
+        overviewProgress.setExam(exams.size());
+        overviewProgress.setTask(tasks.size());
+        overviewProgress.setTotalExams(numberOfExams);
+        overviewProgress.setTotalTasks(numberOfTasks);
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = DateTimeUtils.calculateStartDateFromTimeFrame(body.getTimeFrame());
+
+// 3. Duyệt qua các bài thi và cập nhật lastLearningDate
+        double totalScore = 0.0;
+        int numberOfExamsInTimeFrame = 0;
+        int numberOfTasksInTimeFrame = 0;
+        for (ExamAttempt exam : exams) {
+            LocalDateTime createdAt = exam.getCreatedAt();
+            if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
+                totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
+                numberOfExamsInTimeFrame++;
+                if (lastDateStr == null) {
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
+                } else {
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
+                    }
+                }
+            }
+        }
+        for (Attempt task : tasks) {
+            LocalDateTime createdAt = task.getCreatedAt();
+            if ((createdAt.isAfter(startDate) || createdAt.isEqual(startDate)) && createdAt.isBefore(endDate)) {
+                LocalDateTime lastDateStr = overviewProgress.getLastLearningDate();
+                numberOfTasksInTimeFrame++;
+                if (lastDateStr == null) {
+                    overviewProgress.setLastLearningDate(createdAt); // dùng format mặc định
+                } else {
+                    if (createdAt.isAfter(lastDateStr)) {
+                        overviewProgress.setLastLearningDate(createdAt);
+                    }
+                }
+            }
+        }
+
+        overviewProgress.setAverageBandInTimeFrame(
+                numberOfExamsInTimeFrame > 0 ? totalScore / numberOfExamsInTimeFrame : null
+        );
+
+        overviewProgress.setNumberOfExamsInTimeFrame(numberOfExamsInTimeFrame);
+        overviewProgress.setNumberOfTasksInTimeFrame(numberOfTasksInTimeFrame);
+        return overviewProgress;
     }
 }
