@@ -39,11 +39,7 @@ public class DragItemServiceImpl implements DragItemService {
 
     private final DragItemRepository dragItemRepository;
     private final QuestionGroupRepository questionGroupRepository;
-    private final QuestionRepository questionRepository;
     private final Helper helper;
-    KeyCloakTokenClient keyCloakTokenClient;
-    KeyCloakUserClient keyCloakUserClient;
-    RedisService redisService;
 
     @Override
     public List<DragItemResponse> createDragItem(UUID groupId, CreateDragItemRequest request, HttpServletRequest httpServletRequest) throws AppException {
@@ -252,7 +248,7 @@ public class DragItemServiceImpl implements DragItemService {
                 ));
 
         // 2. Lấy danh sách DragItem theo groupId
-        var items = dragItemRepository.findAllByQuestionGroup_GroupId(groupId);
+        var items = dragItemRepository.findCurrentVersionsByGroupId(groupId);
 
         // 3. Chuyển đổi sang response
         DragItemListResponse response = DragItemListResponse.builder()

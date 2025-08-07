@@ -29,11 +29,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class DragItemServiceImpl implements DragItemService {
-    ListeningTaskRepository listeningTaskRepository;
     QuestionGroupRepository questionGroupRepository;
     DragItemRepository dragItemRepository;
-    QuestionRepository questionRepository;
-    ChoiceRepository choiceRepository;
 
     Helper helper;
 
