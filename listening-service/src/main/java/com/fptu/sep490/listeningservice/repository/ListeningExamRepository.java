@@ -71,4 +71,7 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
         AND r.status = 1
     """)
     Integer numberOfActiveExams();
+
+    @Query(value ="select count(*) from listening_exam where is_original = true and is_deleted = false", nativeQuery = true)
+    int getNumberOfExams();
 }

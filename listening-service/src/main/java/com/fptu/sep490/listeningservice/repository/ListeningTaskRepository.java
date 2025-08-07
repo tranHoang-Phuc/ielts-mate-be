@@ -69,4 +69,8 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
     AND p.isDeleted = false
     """)
     Integer numberOfPublishedTasks();
+
+    @Query(value = "select count(*) from listening_task where is_original = true and " +
+            "is_deleted = false ", nativeQuery = true)
+    int getNumberOfTasks();
 }
