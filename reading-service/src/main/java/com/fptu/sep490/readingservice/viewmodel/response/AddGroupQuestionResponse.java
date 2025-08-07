@@ -19,5 +19,5 @@ public record AddGroupQuestionResponse(
         @JsonProperty("questions")
         List<QuestionCreationRequest> questions,
         @JsonProperty("drag_item")
-        List<String> dragItem
+        List<QuestionCreationResponse.DragItemResponse> dragItem
 ) {}

@@ -9,6 +9,7 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.UserProfileResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
@@ -26,6 +27,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -114,6 +116,12 @@ public class Helper {
         }
     }
     public static AddGroupQuestionResponse mapToGroupQuestionResponse(QuestionGroup group, AddGroupQuestionRequest request) {
+        List<QuestionCreationResponse.DragItemResponse> dragItemResponse = group.getDragItems().stream()
+                .map(dragItem -> new QuestionCreationResponse.DragItemResponse(
+                        dragItem.getDragItemId() == null ? null : dragItem.getDragItemId().toString(),
+                        dragItem.getContent()
+                )).toList();
+
         return new AddGroupQuestionResponse(
                 group.getGroupId() == null ? null : group.getGroupId().toString(),
                 request.sectionOrder(),
@@ -121,7 +129,28 @@ public class Helper {
                 request.instruction(),
                 request.questionType(),
                 request.questions(),
-                request.dragItems()
+                dragItemResponse
+        );
+    }
+
+    public static AddGroupQuestionResponse mapToGroupQuestionResponse1(
+            QuestionGroup group,
+            AddGroupQuestionResponse request
+    ) {
+        List<QuestionCreationResponse.DragItemResponse> dragItemResponse = group.getDragItems().stream()
+                .map(dragItem -> new QuestionCreationResponse.DragItemResponse(
+                        dragItem.getDragItemId() == null ? null : dragItem.getDragItemId().toString(),
+                        dragItem.getContent()
+                )).toList();
+
+        return new AddGroupQuestionResponse(
+                group.getGroupId() == null ? null : group.getGroupId().toString(),
+                request.sectionOrder(),
+                request.sectionLabel(),
+                request.instruction(),
+                request.questionType(),
+                request.questions(),
+                dragItemResponse
         );
     }
 
