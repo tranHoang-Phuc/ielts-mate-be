@@ -18,5 +18,4 @@ public record AddGroupQuestionRequest(
         @JsonProperty("drag_items")
         List<String> dragItems
 ) {
-
 }
