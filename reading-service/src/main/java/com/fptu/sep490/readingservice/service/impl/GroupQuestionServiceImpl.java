@@ -222,7 +222,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                                 q.getDragItem() != null
                                                         ? q.getDragItem().getDragItemId().toString()
                                                         : null,
-                                                q.getDragItem() != null
+                                                getCurrentDragItem(q.getDragItem()) != null
                                                         ? getCurrentDragItem(q.getDragItem()).getContent()
                                                         : null
                                         ))
