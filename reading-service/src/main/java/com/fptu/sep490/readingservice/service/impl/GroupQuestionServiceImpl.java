@@ -222,8 +222,8 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                                 q.getDragItem() != null
                                                         ? q.getDragItem().getDragItemId().toString()
                                                         : null,
-                                                q.getDragItem() != null
-                                                        ? q.getDragItem().getContent()
+                                                getCurrentDragItem(q.getDragItem()) != null
+                                                        ? getCurrentDragItem(q.getDragItem()).getContent()
                                                         : null
                                         ))
                                         .toList(),
@@ -233,6 +233,21 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         )
                 ))
                 .toList();
+
+    }
+
+    public DragItem getCurrentDragItem(DragItem dragItem){
+        if(dragItem.getIsCurrent() && !dragItem.getIsDeleted()) {
+            return dragItem;
+        }
+        for(DragItem item: dragItem.getChildren()) {
+            if (item.getIsCurrent() && !item.getIsDeleted()) {
+                return getCurrentDragItem(item);
+            }
+        }
+        return null;
+
+
 
     }
 
