@@ -16,6 +16,7 @@ import com.fptu.sep490.readingservice.service.GroupQuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.ChoiceCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -219,6 +220,9 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                                 q.getCorrectAnswerForMatching(),
                                                 q.getZoneIndex(),
                                                 q.getDragItem() != null
+                                                        ? q.getDragItem().getDragItemId().toString()
+                                                        : null,
+                                                q.getDragItem() != null
                                                         ? q.getDragItem().getContent()
                                                         : null
                                         ))
@@ -229,6 +233,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                         )
                 ))
                 .toList();
+
     }
 
 

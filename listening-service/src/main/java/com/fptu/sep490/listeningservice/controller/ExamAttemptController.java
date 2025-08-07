@@ -2,9 +2,11 @@ package com.fptu.sep490.listeningservice.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.PageableConstant;
+import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.service.ExamAttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamAttemptAnswersRequest;
@@ -142,6 +144,16 @@ public class ExamAttemptController {
     public ResponseEntity<BaseResponse<OverviewProgress>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody OverviewProgressReq body) throws JsonProcessingException {
         OverviewProgress data = examAttemptService.getOverViewProgress(body, token);
         BaseResponse<OverviewProgress> response = BaseResponse.<OverviewProgress>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/internal/band-chart")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<LineChartData>>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody LineChartReq body) throws JsonProcessingException {
+        List<LineChartData> data = examAttemptService.getBandChart(body, token);
+        BaseResponse<List<LineChartData>> response = BaseResponse.<List<LineChartData>>builder()
                 .data(data)
                 .build();
         return ResponseEntity.ok(response);
