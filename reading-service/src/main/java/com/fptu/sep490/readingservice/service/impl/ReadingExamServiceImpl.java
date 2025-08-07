@@ -82,7 +82,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         HttpStatus.NOT_FOUND.value()
                 );
             }
-            if(readingPassagePart2.get().getPartNumber() != PartNumber.PART_1){
+            if(readingPassagePart2.get().getPartNumber() != PartNumber.PART_2){
                 throw new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
                         Constants.ErrorCode.PASSAGE_INVALID_PART,
@@ -101,7 +101,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         HttpStatus.NOT_FOUND.value()
                 );
             }
-            if(readingPassagePart3.get().getPartNumber() != PartNumber.PART_1){
+            if(readingPassagePart3.get().getPartNumber() != PartNumber.PART_3){
                 throw new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
                         Constants.ErrorCode.PASSAGE_INVALID_PART,
