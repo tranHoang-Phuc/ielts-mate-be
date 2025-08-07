@@ -26,10 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -189,7 +186,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                     Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
         }
 
-        return result.stream()
+        List<AddGroupQuestionResponse>  final_result = result.stream()
                 .map(group -> Helper.mapToGroupQuestionResponse1(
                         group,
                         new AddGroupQuestionResponse(
@@ -245,14 +242,22 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
                                         })
                                         .toList(),
                                 group.getDragItems().stream()
+                                        .filter(d -> Boolean.TRUE.equals(d.getIsCurrent()) && Boolean.FALSE.equals(d.getIsDeleted()))
                                         .map(d -> QuestionCreationResponse.DragItemResponse.builder()
                                                 .dragItemId(d.getDragItemId().toString())
                                                 .content(d.getContent())
+                                                .isCurrent(d.getIsCurrent())
                                                 .build())
                                         .toList()
+
+
                         )
                 ))
                 .toList();
+
+
+
+        return final_result;
     }
 
 

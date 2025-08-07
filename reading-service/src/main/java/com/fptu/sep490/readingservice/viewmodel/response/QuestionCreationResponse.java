@@ -75,7 +75,9 @@ public record QuestionCreationResponse(
         @JsonProperty("drag_item_id")
         String dragItemId,
         @JsonProperty("content")
-        String content
+        String content,
+        @JsonProperty("is_current")
+        boolean isCurrent
     ) {
     }
 }

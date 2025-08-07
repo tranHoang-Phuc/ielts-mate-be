@@ -119,7 +119,8 @@ public class Helper {
         List<QuestionCreationResponse.DragItemResponse> dragItemResponse = group.getDragItems().stream()
                 .map(dragItem -> new QuestionCreationResponse.DragItemResponse(
                         dragItem.getDragItemId() == null ? null : dragItem.getDragItemId().toString(),
-                        dragItem.getContent()
+                        dragItem.getContent(),
+                        dragItem.getIsCurrent()
                 )).toList();
 
         return new AddGroupQuestionResponse(
@@ -140,7 +141,8 @@ public class Helper {
         List<QuestionCreationResponse.DragItemResponse> dragItemResponse = group.getDragItems().stream()
                 .map(dragItem -> new QuestionCreationResponse.DragItemResponse(
                         dragItem.getDragItemId() == null ? null : dragItem.getDragItemId().toString(),
-                        dragItem.getContent()
+                        dragItem.getContent(),
+                        dragItem.getIsCurrent()
                 )).toList();
 
         return new AddGroupQuestionResponse(
@@ -150,7 +152,7 @@ public class Helper {
                 request.instruction(),
                 request.questionType(),
                 request.questions(),
-                dragItemResponse
+                request.dragItem()
         );
     }
 
