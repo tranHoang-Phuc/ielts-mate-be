@@ -1,7 +1,9 @@
 package com.fptu.sep490.personalservice.repository.client;
 
+import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.personalservice.viewmodel.response.DataStats;
 import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
@@ -25,6 +27,10 @@ public interface ListeningClient {
 
     @PostMapping(value = "/exam/attempts/internal/overview-progress", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<OverviewProgress>> getExamOverview(@RequestBody OverviewProgressReq overviewProgressReq,
+                                                                   @RequestHeader("Authorization") String token);
+
+    @PostMapping(value = "/exam/attempts/internal/band-chart", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<List<LineChartData>>> getBandChart(@RequestBody LineChartReq lineChartReq,
                                                                    @RequestHeader("Authorization") String token);
 
     @GetMapping(value = "/dashboard/internal/get-quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
