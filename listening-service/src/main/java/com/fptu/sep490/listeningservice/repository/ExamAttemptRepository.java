@@ -24,8 +24,8 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, UUID> 
       SELECT e
       FROM ExamAttempt e
       WHERE e.createdBy   = :userId
-        AND (:startDate IS NULL OR e.createdAt >= :startDate)
-        AND (:endDate   IS NULL OR e.createdAt <= :endDate)
+        AND e.createdAt >= COALESCE(:startDate, e.createdAt)
+        AND e.createdAt <= COALESCE(:endDate,   e.createdAt)
         AND e.totalPoint IS NOT NULL
       ORDER BY e.createdAt
     """)

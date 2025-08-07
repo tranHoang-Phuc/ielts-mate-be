@@ -141,7 +141,7 @@ public class ProgressServiceImpl implements ProgressService {
     }
 
     @Override
-    public List<BandLineChartResponse> getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request) {
+    public BandLineChartResponse getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request) {
         String accessToken = helper.getAccessToken(request);
         LineChartReq lineChartReq = LineChartReq.builder()
                 .timeFrame(timeFrame)
@@ -154,29 +154,10 @@ public class ProgressServiceImpl implements ProgressService {
         List<LineChartData> readingData = readingLineChart.join();
         List<LineChartData> listeningData = listeningLineChart.join();
 
-        List<BandLineChartResponse> response = readingData.stream()
-                .map(data -> BandLineChartResponse.builder().date(data.getDate())
-                        .readingBand(data.getValue())
-                        .listeningBand(null)
-                        .build())
-                .toList();
-
-        listeningData.forEach(data -> {
-            LocalDate date = data.getDate();
-            Optional<BandLineChartResponse> existing = response.stream()
-                    .filter(r -> r.getDate().equals(date))
-                    .findFirst();
-            if (existing.isPresent()) {
-                existing.get().setListeningBand(data.getValue());
-            } else {
-                response.add(BandLineChartResponse.builder()
-                        .date(date)
-                        .readingBand(null)
-                        .listeningBand(data.getValue())
-                        .build());
-            }
-        });
-        response.sort((a, b) -> a.getDate().compareTo(b.getDate()));
+        BandLineChartResponse response = BandLineChartResponse.builder()
+                .readingData(readingData)
+                .listeningData(listeningData)
+                .build();
 
         return response;
     }

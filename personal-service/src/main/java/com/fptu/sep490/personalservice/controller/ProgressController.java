@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -56,7 +55,7 @@ public class ProgressController {
             summary = "Get band chart data for reading and listening exams",
             description = "Fetches band chart data based on the provided time frame."
     )
-    public ResponseEntity<BaseResponse<List<BandLineChartResponse>>> getBandChartData(
+    public ResponseEntity<BaseResponse<BandLineChartResponse>> getBandChartData(
             HttpServletRequest request,
             @Parameter(
                     description = "Time frame for the band chart data. Default is 1 day (1d). Group các nhóm theo timeFrame: 1d, 3d, 1w, 1m, 1y",
@@ -64,22 +63,22 @@ public class ProgressController {
             )
             @RequestParam(value = "timeFrame",  defaultValue = "1d") String timeFrame,
             @Parameter(
-                    description = "Start date for the band chart data. Format: yyyy-MM-dd",
+                    description = "Start date for the band chart data. Format: yyyy-MM-dd. Nếu ko truyền vào thì lấy band từ exam đầu tiên",
                     example = "2023-01-01"
             )
             @RequestParam(value = "startDate",  required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @Parameter(
-                    description = "End date for the band chart data. Format: yyyy-MM-dd",
+                    description = "End date for the band chart data. Format: yyyy-MM-dd. Nếu ko truyền vào thì lấy band đến exam cuối",
                     example = "2023-12-31"
             )
             @RequestParam(value = "endDate",    required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
             ) {
 
-        List<BandLineChartResponse> bandChartData = progressService.getBandChart(timeFrame, startDate, endDate, request);
+        BandLineChartResponse bandChartData = progressService.getBandChart(timeFrame, startDate, endDate, request);
 
         return ResponseEntity.ok(
-                BaseResponse.<List<BandLineChartResponse>>builder()
-                        .message("Band chart data retrieved successfully")
+                BaseResponse.<BandLineChartResponse>builder()
+                        .message(null)
                         .data(bandChartData)
                         .build()
         );

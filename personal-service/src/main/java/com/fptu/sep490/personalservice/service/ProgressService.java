@@ -15,5 +15,5 @@ public interface ProgressService {
             HttpServletRequest request
     );
 
-    List<BandLineChartResponse> getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request);
+    BandLineChartResponse getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request);
 }

@@ -442,7 +442,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 body.getStartDate() != null ? body.getStartDate().atStartOfDay() : null,
                 body.getEndDate() != null ? body.getEndDate().atTime(LocalTime.MAX) : null);
 
-        LocalDate startDate = exams.get(0).getCreatedAt().toLocalDate();
+        if (exams == null || exams.isEmpty()) {
+            return Collections.emptyList(); // Trả về danh sách rỗng
+        }
+
+        LocalDate startDate = exams.getFirst().getCreatedAt().toLocalDate();
         // 2. Grouping + averaging
         Map<LocalDate, Double> avgByPeriod = exams.stream()
                 .collect(Collectors.groupingBy(
