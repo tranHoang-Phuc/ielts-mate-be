@@ -5,19 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b2dedeca-2967-4a4d-909f-12c53c4c5ca2" name="Changes" comment="fix: create exam">
-      <change afterPath="$PROJECT_DIR$/common-library/src/main/java/com/fptu/sep490/commonlibrary/constants/DataMarkup.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/MarkedUpResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/client/MarkupClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/MarkedUpResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/MarkupController.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/MarkupController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/MarkupService.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/MarkupService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingPassageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingPassageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/PassageService.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/PassageService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/PassageGetResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/PassageGetResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,11 +60,19 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.ApiGatewayApplication.executor": "Run",
     "Spring Boot.DiscoveryServiceApplication.executor": "Run",
+    "Spring Boot.FileServiceApplication.executor": "Run",
     "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.ListeningServiceApplication.executor": "Run",
+    "Spring Boot.NotificationServiceApplication.executor": "Run",
+    "Spring Boot.PersonalServiceApplication.executor": "Run",
     "Spring Boot.ReadingServiceApplication.executor": "Run",
     "git-widget-placeholder": "local",
     "node.js.detected.package.eslint": "true",
@@ -104,29 +100,21 @@
         <option value="SpringBootApplicationConfigurationType" />
       </set>
     </option>
-    <option name="hiddenConfigurations">
-      <map>
-        <entry key="SpringBootApplicationConfigurationType">
-          <value>
-            <set>
-              <option value="FileServiceApplication" />
-              <option value="ListeningServiceApplication" />
-              <option value="NotificationServiceApplication" />
-              <option value="PersonalServiceApplication" />
-            </set>
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.ApiGatewayApplication">
+  <component name="RunManager" selected="Spring Boot.ReadingServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="personal-service" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="personal-service" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
     <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="api-gateway" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
       <method v="2">
@@ -134,6 +122,7 @@
       </method>
     </configuration>
     <configuration name="DiscoveryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="discovery-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="fptu.sep490.registryservice.DiscoveryServiceApplication" />
       <method v="2">
@@ -141,6 +130,7 @@
       </method>
     </configuration>
     <configuration name="FileServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="file-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.fileservice.FileServiceApplication" />
       <method v="2">
@@ -148,6 +138,7 @@
       </method>
     </configuration>
     <configuration name="IdentityServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="identity-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.identityservice.IdentityServiceApplication" />
       <method v="2">
@@ -155,6 +146,7 @@
       </method>
     </configuration>
     <configuration name="ListeningServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="listening-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.listeningservice.ListeningServiceApplication" />
       <method v="2">
@@ -162,6 +154,7 @@
       </method>
     </configuration>
     <configuration name="NotificationServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="notification-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.notificationservice.NotificationServiceApplication" />
       <method v="2">
@@ -169,6 +162,7 @@
       </method>
     </configuration>
     <configuration name="PersonalServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="personal-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.personalservice.PersonalServiceApplication" />
       <method v="2">
@@ -176,12 +170,23 @@
       </method>
     </configuration>
     <configuration name="ReadingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="reading-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.readingservice.ReadingServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Spring Boot.ApiGatewayApplication" />
+      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
+      <item itemvalue="Spring Boot.FileServiceApplication" />
+      <item itemvalue="Spring Boot.IdentityServiceApplication" />
+      <item itemvalue="Spring Boot.ListeningServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
+      <item itemvalue="Spring Boot.PersonalServiceApplication" />
+      <item itemvalue="Spring Boot.ReadingServiceApplication" />
+    </list>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>

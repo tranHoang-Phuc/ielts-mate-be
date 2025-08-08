@@ -148,9 +148,10 @@ public class MarkupServiceImpl implements MarkupService {
 
     @Override
     public MarkedUpResponse getMarkedUpData(String type) {
-        switch (type) {
-            case Data
-        }
+//        switch (type) {
+//            case Data
+//        }
+        return null;
     }
 
     @Async("markupExecutor")
