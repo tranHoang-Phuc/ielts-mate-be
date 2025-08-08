@@ -573,15 +573,15 @@ public class PassageServiceImpl implements PassageService {
         // Call sang lấy list markup
         List<UUID> passageIdsMarkedUp;
         String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        if(accessToken != null) {
-            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_TASK);
-            if(response.getStatusCode() == HttpStatus.OK) {
-                var body = response.getBody();
-                if (body != null) {
-                    passageIdsMarkedUp = body.data().markedUpIds();
-                }
-            }
-        }
+//        if(accessToken != null) {
+//            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_TASK);
+//            if(response.getStatusCode() == HttpStatus.OK) {
+//                var body = response.getBody();
+//                if (body != null) {
+//                    passageIdsMarkedUp = body.data().markedUpIds();
+//                }
+//            }
+//        }
 
         return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
     }
