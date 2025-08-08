@@ -1,5 +1,6 @@
 package com.fptu.sep490.personalservice.service.impl;
 
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.personalservice.constants.Constants;
@@ -147,10 +148,26 @@ public class MarkupServiceImpl implements MarkupService {
     }
 
     @Override
-    public MarkedUpResponse getMarkedUpData(String type) {
-//        switch (type) {
-//            case Data
-//        }
+    public MarkedUpResponse getMarkedUpData(String type, HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+
+        switch (type) {
+            case DataMarkup.READING_TASK:
+                List<Markup> readingTaskMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.READING.ordinal(),
+                        PracticeType.TASK.ordinal()
+                );
+                Map<UUID, Integer> markUpMappingType = readingTaskMarkups.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(markUpMappingType)
+                        .build();
+
+        }
         return null;
     }
 

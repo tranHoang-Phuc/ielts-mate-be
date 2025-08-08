@@ -45,7 +45,7 @@ public class ReadingPassageController {
     GroupQuestionService groupQuestionService;
 
     @GetMapping
-    @PreAuthorize("permitAll()")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get list of active reading passages",
             description = "This endpoint retrieves a list of active reading passages based on the specified conditions. " +

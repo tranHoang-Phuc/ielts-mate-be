@@ -104,8 +104,8 @@ public class MarkupController {
     }
 
     @GetMapping("/internal/marked-up/{type}")
-    public ResponseEntity<BaseResponse<MarkedUpResponse>> getMarkedUpData(@PathVariable("type") String type) {
-        MarkedUpResponse markedUpResponse = markupService.getMarkedUpData(type);
+    public ResponseEntity<BaseResponse<MarkedUpResponse>> getMarkedUpData(@PathVariable("type") String type, HttpServletRequest request) {
+        MarkedUpResponse markedUpResponse = markupService.getMarkedUpData(type, request);
         BaseResponse<MarkedUpResponse> response = BaseResponse.<MarkedUpResponse>builder()
                 .data(markedUpResponse)
                 .message("Marked up data retrieved successfully")
