@@ -1,9 +1,11 @@
 package com.fptu.sep490.readingservice.viewmodel.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record PassageGetResponse(
         @JsonProperty("passage_id")
         String passageId,
@@ -22,6 +24,10 @@ public record PassageGetResponse(
         @JsonProperty("created_at")
         String createdAt,
         @JsonProperty("updated_at")
-        String updatedAt
+        String updatedAt,
+        @JsonProperty("is_marked_up")
+        Boolean isMarkedUp,
+        @JsonProperty("markup_type")
+        Integer markupTypes
 ) {
 }

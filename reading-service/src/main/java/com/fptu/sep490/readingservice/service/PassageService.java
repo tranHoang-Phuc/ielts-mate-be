@@ -66,7 +66,7 @@ public interface PassageService {
                                                String sortBy,
                                                String sortDirection,
                                                String title,
-                                               String createdBy);
+                                               String createdBy, HttpServletRequest request);
 
     CreateExamAttemptResponse.ReadingExamResponse.ReadingPassageResponse fromReadingPassage(String passageId);
 
