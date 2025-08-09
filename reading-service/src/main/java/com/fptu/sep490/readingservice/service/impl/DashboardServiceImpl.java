@@ -1,8 +1,9 @@
-package com.fptu.sep490.readingservice.service;
+package com.fptu.sep490.readingservice.service.impl;
 
 import com.fptu.sep490.readingservice.repository.AttemptRepository;
 import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
 import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
+import com.fptu.sep490.readingservice.service.DashboardService;
 import com.fptu.sep490.readingservice.viewmodel.response.DataStats;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;

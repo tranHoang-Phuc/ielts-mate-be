@@ -5,6 +5,7 @@ import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
+import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +42,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
     public ReadingExamResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception {
         String userId = helper.getUserIdFromToken(request);
 
+
         if (readingExamCreationRequest == null) {
             throw new IllegalArgumentException("Reading exam creation request cannot be null");
         }
@@ -59,7 +61,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart1.get().getPartNumber() != PartNumber.PART_1){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart1(readingPassagePart1.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart2().isEmpty()){
@@ -70,7 +80,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart2.get().getPartNumber() != PartNumber.PART_2){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart2(readingPassagePart2.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart3().isEmpty()){
@@ -81,7 +99,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart3.get().getPartNumber() != PartNumber.PART_3){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart3(readingPassagePart3.get());
         }
         readingExam.setCreatedBy(userId);

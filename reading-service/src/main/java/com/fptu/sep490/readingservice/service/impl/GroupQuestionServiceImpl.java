@@ -16,6 +16,7 @@ import com.fptu.sep490.readingservice.service.GroupQuestionService;
 import com.fptu.sep490.readingservice.viewmodel.request.ChoiceCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.request.QuestionCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.AddGroupQuestionResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.QuestionCreationResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -168,67 +166,114 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
     @Override
     public List<AddGroupQuestionResponse> getAllQuestionsGroupsOfPassages(String passageId, HttpServletRequest httpsRequest) throws Exception {
         String userId = helper.getUserIdFromToken(httpsRequest);
+
         ReadingPassage readingPassage = readingPassageRepository.findById(UUID.fromString(passageId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+
         List<QuestionGroup> questionGroups = questionGroupRepository.findAllByReadingPassageByPassageId(UUID.fromString(passageId));
         List<QuestionGroup> result = new ArrayList<>();
+
         for (QuestionGroup group : questionGroups) {
             QuestionGroup latest = getLatestCurrentGroup(group);
             if (latest != null) {
                 result.add(latest);
             }
         }
+
         if (result.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                     Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND, HttpStatus.NOT_FOUND.value());
         }
 
-        return result.stream()
-                .map(group -> Helper.mapToGroupQuestionResponse(
+        List<AddGroupQuestionResponse>  final_result = result.stream()
+                .map(group -> Helper.mapToGroupQuestionResponse1(
                         group,
-                        new AddGroupQuestionRequest(
+                        new AddGroupQuestionResponse(
+                                group.getGroupId().toString(),
                                 group.getSectionOrder(),
                                 group.getSectionLabel(),
                                 group.getInstruction(),
                                 group.getQuestionType().ordinal(),
                                 group.getQuestions().stream()
-                                        .map(q -> new QuestionCreationRequest(
-                                                q.getQuestionOrder(),
-                                                q.getPoint(),
-                                                q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
-                                                group.getGroupId().toString(),
-                                                q.getCategories() != null
-                                                        ? q.getCategories().stream()
-                                                        .map(Enum::name)
-                                                        .collect(Collectors.toList())
-                                                        : null,
-                                                q.getExplanation(),
-                                                q.getNumberOfCorrectAnswers(),
-                                                q.getInstructionForChoice(),
-                                                q.getChoices().stream()
-                                                        .map(c -> new QuestionCreationRequest.ChoiceRequest(
-                                                                c.getLabel(),
-                                                                c.getContent(),
-                                                                c.getChoiceOrder(),
-                                                                c.isCorrect()))
-                                                        .toList(),
-                                                q.getBlankIndex(),
-                                                q.getCorrectAnswer(),
-                                                q.getInstructionForMatching(),
-                                                q.getCorrectAnswerForMatching(),
-                                                q.getZoneIndex(),
-                                                q.getDragItem() != null
-                                                        ? q.getDragItem().getContent()
-                                                        : null
-                                        ))
+                                        .map(q -> {
+                                            String dragItemId = null;
+                                            String dragItemContent = null;
+
+                                            if (q.getDragItem() != null) {
+                                                dragItemId = q.getDragItem().getDragItemId() != null
+                                                        ? q.getDragItem().getDragItemId().toString()
+                                                        : null;
+
+                                                DragItem currentDragItem = getCurrentDragItem(q.getDragItem());
+                                                dragItemContent = currentDragItem != null
+                                                        ? currentDragItem.getContent()
+                                                        : null;
+                                            }
+
+                                            return new QuestionCreationRequest(
+                                                    q.getQuestionOrder(),
+                                                    q.getPoint(),
+                                                    q.getQuestionType() != null ? q.getQuestionType().ordinal() : null,
+                                                    group.getGroupId().toString(),
+                                                    q.getCategories() != null
+                                                            ? q.getCategories().stream()
+                                                            .map(Enum::name)
+                                                            .toList()
+                                                            : null,
+                                                    q.getExplanation(),
+                                                    q.getNumberOfCorrectAnswers(),
+                                                    q.getInstructionForChoice(),
+                                                    q.getChoices().stream()
+                                                            .map(c -> new QuestionCreationRequest.ChoiceRequest(
+                                                                    c.getLabel(),
+                                                                    c.getContent(),
+                                                                    c.getChoiceOrder(),
+                                                                    c.isCorrect()))
+                                                            .toList(),
+                                                    q.getBlankIndex(),
+                                                    q.getCorrectAnswer(),
+                                                    q.getInstructionForMatching(),
+                                                    q.getCorrectAnswerForMatching(),
+                                                    q.getZoneIndex(),
+                                                    dragItemId,
+                                                    dragItemContent
+                                            );
+                                        })
                                         .toList(),
                                 group.getDragItems().stream()
-                                        .map(DragItem::getContent)
+                                        .filter(d -> Boolean.TRUE.equals(d.getIsCurrent()) && Boolean.FALSE.equals(d.getIsDeleted()))
+                                        .map(d -> QuestionCreationResponse.DragItemResponse.builder()
+                                                .dragItemId(d.getDragItemId().toString())
+                                                .content(d.getContent())
+                                                .isCurrent(d.getIsCurrent())
+                                                .build())
                                         .toList()
+
+
                         )
                 ))
                 .toList();
+
+
+
+        return final_result;
+    }
+
+
+    public DragItem getCurrentDragItem(DragItem dragItem){
+        if(dragItem.getIsCurrent() && !dragItem.getIsDeleted()) {
+            return dragItem;
+        }
+        for(DragItem item: dragItem.getChildren()) {
+            if (item.getIsCurrent() && !item.getIsDeleted()) {
+                return getCurrentDragItem(item);
+            }
+        }
+        return null;
+
+
+
     }
 
 

@@ -67,14 +67,15 @@ public class ReadingPassageController {
             @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
             @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "createdBy", required = false) String createdBy
+            @RequestParam(value = "createdBy", required = false) String createdBy,
+            HttpServletRequest request
     ) {
         // Parse comma-separated strings to get first value for active passages (public endpoint)
         List<Integer> ieltsTypeList = parseCommaSeparatedIntegers(ieltsType);
         List<Integer> partNumberList = parseCommaSeparatedIntegers(partNumber);
         
         Page<PassageGetResponse> pageablePassages = passageService.getActivePassages(page - 1, size, ieltsTypeList,
-                partNumberList, questionCategory, sortBy, sortDirection, title, createdBy);
+                partNumberList, questionCategory, sortBy, sortDirection, title, createdBy, request);
         Pagination pagination = Pagination.builder()
                 .currentPage(pageablePassages.getNumber() + 1)
                 .totalPages(pageablePassages.getTotalPages())

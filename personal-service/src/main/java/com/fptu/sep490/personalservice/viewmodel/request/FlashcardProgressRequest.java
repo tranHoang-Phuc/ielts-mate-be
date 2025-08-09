@@ -11,7 +11,11 @@ public record FlashcardProgressRequest(
         
         @JsonProperty("is_correct")
         @NotNull(message = "Is correct flag is required")
-        Boolean isCorrect
+        Boolean isCorrect,
+
+        @JsonProperty("is_highlighted")
+        Boolean isHighlighted // Optional, can be null if not highlighted
+
 //        @JsonProperty("status")
         
 //        @JsonProperty("time_spent")

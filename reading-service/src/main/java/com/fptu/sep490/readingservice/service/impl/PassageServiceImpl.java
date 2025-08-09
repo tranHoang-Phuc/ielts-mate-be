@@ -1,6 +1,8 @@
 package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.constants.CookieConstants;
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
@@ -17,6 +19,7 @@ import com.fptu.sep490.readingservice.model.json.QuestionVersion;
 import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.readingservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.readingservice.repository.client.MarkupClient;
 import com.fptu.sep490.readingservice.repository.specification.PassageSpecifications;
 import com.fptu.sep490.readingservice.service.PassageService;
 import com.fptu.sep490.readingservice.viewmodel.request.PassageCreationRequest;
@@ -57,7 +60,7 @@ public class PassageServiceImpl implements PassageService {
     KeyCloakUserClient keyCloakUserClient;
     DragItemRepository dragItemRepository;
     RedisService redisService;
-
+    MarkupClient markupClient;
 
 
     @Value("${keycloak.realm}")
@@ -525,7 +528,6 @@ public class PassageServiceImpl implements PassageService {
     }
 
     @Override
-
     @Transactional
     public Page<PassageGetResponse> getActivePassages(int page,
                                                       int size,
@@ -535,7 +537,7 @@ public class PassageServiceImpl implements PassageService {
                                                       String sortBy,
                                                       String sortDirection,
                                                       String title,
-                                                      String createdBy) {
+                                                      String createdBy, HttpServletRequest request) {
 
         Pageable pageable = PageRequest.of(page, size);
         var spec = PassageSpecifications.byConditions(
@@ -568,6 +570,18 @@ public class PassageServiceImpl implements PassageService {
         List<PassageGetResponse> responseList = passages.stream()
                 .map(this::toPassageGetResponse)
                 .toList();
+        // Call sang lấy list markup
+        List<UUID> passageIdsMarkedUp;
+        String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+//        if(accessToken != null) {
+//            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_TASK);
+//            if(response.getStatusCode() == HttpStatus.OK) {
+//                var body = response.getBody();
+//                if (body != null) {
+//                    passageIdsMarkedUp = body.data().markedUpIds();
+//                }
+//            }
+//        }
 
         return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
     }
@@ -849,6 +863,7 @@ public class PassageServiceImpl implements PassageService {
 
 
     private PassageGetResponse toPassageGetResponse(ReadingPassage readingPassage) {
+
         UserProfileResponse createdByProfile;
         UserProfileResponse updatedByProfile;
         try {

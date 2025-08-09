@@ -15,6 +15,7 @@ import com.fptu.sep490.personalservice.repository.specification.MarkupSpecificat
 import com.fptu.sep490.personalservice.service.MarkupService;
 import com.fptu.sep490.personalservice.viewmodel.request.MarkupCreationRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.MarkUpResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.MarkedUpResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -144,6 +145,15 @@ public class MarkupServiceImpl implements MarkupService {
         }).toList();
         return new PageImpl<>(response, pageable, pageResult.getTotalElements());
     }
+
+    @Override
+    public MarkedUpResponse getMarkedUpData(String type) {
+//        switch (type) {
+//            case Data
+//        }
+        return null;
+    }
+
     @Async("markupExecutor")
     public CompletableFuture<Map<UUID, String>> fetchReadingTitlesAsync(String accessToken, List<UUID> taskId) {
         ResponseEntity<BaseResponse<List<TaskTitle>>> response = readingClient

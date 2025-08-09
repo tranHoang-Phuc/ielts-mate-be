@@ -1,13 +1,16 @@
 package com.fptu.sep490.personalservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.repository.client.ListeningClient;
 import com.fptu.sep490.personalservice.repository.client.ReadingClient;
 import com.fptu.sep490.personalservice.service.ProgressService;
+import com.fptu.sep490.personalservice.viewmodel.response.BandLineChartResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.OverviewProgressResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -18,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -47,11 +52,14 @@ public class ProgressServiceImpl implements ProgressService {
 
     @Override
     public OverviewProgressResponse getOverviewProgress(
-            OverviewProgressReq overviewProgressReq,
+            String timeFrame,
             HttpServletRequest request
     ) {
 
         String accessToken = helper.getAccessToken(request);
+        OverviewProgressReq overviewProgressReq = OverviewProgressReq.builder()
+                .timeFrame(timeFrame)
+                .build();
 
         CompletableFuture<OverviewProgress> readingOverview = fetchReadingOverviewProgress(accessToken, overviewProgressReq);
         CompletableFuture<OverviewProgress> listeningOverview = fetchListeningOverviewProgress(accessToken, overviewProgressReq);
@@ -113,6 +121,42 @@ public class ProgressServiceImpl implements ProgressService {
                 .listening(listening)
                 .bandStats(bandStats)
                 .lastLearningDate(lastLearningDate)
+                .build();
+
+        return response;
+    }
+
+    @Async("progressExecutor")
+    public CompletableFuture<List<LineChartData>> fetchReadingLineChart(String accessToken, LineChartReq lineChartReq) {
+        ResponseEntity<BaseResponse<List<LineChartData>>> response = readingClient.getBandChart(lineChartReq, "Bearer " + accessToken);
+        List<LineChartData> body = response.getBody().data();
+        return CompletableFuture.completedFuture(body);
+    }
+
+    @Async("progressExecutor")
+    public CompletableFuture<List<LineChartData>> fetchListeningLineChart(String accessToken, LineChartReq lineChartReq) {
+        ResponseEntity<BaseResponse<List<LineChartData>>> response = listeningClient.getBandChart(lineChartReq, "Bearer " + accessToken);
+        List<LineChartData> body = response.getBody().data();
+        return CompletableFuture.completedFuture(body);
+    }
+
+    @Override
+    public BandLineChartResponse getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        LineChartReq lineChartReq = LineChartReq.builder()
+                .timeFrame(timeFrame)
+                .startDate(startDate)
+                .endDate(endDate)
+                .build();
+        CompletableFuture<List<LineChartData>> readingLineChart = fetchReadingLineChart(accessToken, lineChartReq);
+        CompletableFuture<List<LineChartData>> listeningLineChart = fetchListeningLineChart(accessToken, lineChartReq);
+        CompletableFuture.allOf(readingLineChart, listeningLineChart).join();
+        List<LineChartData> readingData = readingLineChart.join();
+        List<LineChartData> listeningData = listeningLineChart.join();
+
+        BandLineChartResponse response = BandLineChartResponse.builder()
+                .readingData(readingData)
+                .listeningData(listeningData)
                 .build();
 
         return response;

@@ -69,6 +69,8 @@ springdoc:
     authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
     token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
 
+service:
+  personal-service: http://localhost:8072/personal
 
 kafka:
   topic:
