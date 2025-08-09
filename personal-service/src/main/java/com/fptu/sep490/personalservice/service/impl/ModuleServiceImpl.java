@@ -945,6 +945,7 @@ public class ModuleServiceImpl implements ModuleService {
                     return FlashCardProgressResponse.builder()
                             .flashcardId(flashCardProgress.getFlashcardId())
                             .status(flashCardProgress.getStatus())
+                            .isHighlighted(flashCardProgress.getIsHighlighted())
                             .flashcardDetail(flashCardResponse)
                             .build();
                 })
@@ -1055,6 +1056,7 @@ public class ModuleServiceImpl implements ModuleService {
                 .map(flashCardProgress -> FlashCardProgressResponse.builder()
                         .flashcardId(flashCardProgress.getFlashcardId())
                         .status(flashCardProgress.getStatus())
+                        .isHighlighted(flashCardProgress.getIsHighlighted())
                         .build())
                 .toList();
         ModuleProgressResponse progressResponse = ModuleProgressResponse.builder()
@@ -1126,19 +1128,23 @@ public class ModuleServiceImpl implements ModuleService {
         if (flashcardProgressRequest.isCorrect()) {
             Integer currentIndex = moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0;
             moduleUsers.setLastIndexRead(currentIndex + 1);
+
+
         }
+
         
         // Add to highlighted flashcards if incorrect
         List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
         if (flashCardProgresses == null) {
             flashCardProgresses = new ArrayList<>();
         }
-        if (flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashcardProgressRequest.flashcardId()).isEmpty()) {
+        FlashCardProgress existingProgress = flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashcardProgressRequest.flashcardId())
+                .orElse(null);
+        if (existingProgress == null) {
             FlashCardProgress flashcardProgress = new FlashCardProgress();
             flashcardProgress.setFlashcardId(flashcardProgressRequest.flashcardId());
             flashcardProgress.setModuleUsers(moduleUsers);
             if (flashcardProgressRequest.isCorrect()) {
-
                 flashcardProgress.setStatus(2);
             }else{
                 flashcardProgress.setStatus(1);
@@ -1146,12 +1152,38 @@ public class ModuleServiceImpl implements ModuleService {
             }
             flashcardProgress = flashCardProgressRepository.save(flashcardProgress);
             flashCardProgresses.add(flashcardProgress);
+        }else{
+            existingProgress.setStatus(flashcardProgressRequest.isCorrect() ? 2 : 1);
+            flashCardProgressRepository.save(existingProgress);
+        }
+        if (flashcardProgressRequest.isHighlighted()){
+            Optional<FlashCardProgress> flashCardProgress = flashCardProgressRepository.findByModuleUserIdAndFlashcardId(moduleUsers.getId(), flashcardProgressRequest.flashcardId());
+            FlashCardProgress flashcardProgress2 = flashCardProgress.orElseThrow(() -> new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    "Flashcard progress not found for module user: " + moduleUsers.getId() + " and flashcard: " + flashcardProgressRequest.flashcardId(),
+                    HttpStatus.NOT_FOUND.value()
+            ));
+            flashcardProgress2.setIsHighlighted(flashcardProgressRequest.isHighlighted());
+            flashCardProgressRepository.save(flashcardProgress2);
+
+        }
+        // Update progress
+        Double currentProgress = moduleUsers.getProgress() != null ? moduleUsers.getProgress() : 0.0;
+        // caculate the correct flashcard vs total flashcard of thif moduleUsers
+        long correctCount = flashCardProgresses.stream()
+                .filter(fcp -> fcp.getStatus() == 2) // Assuming status 2 means correct
+                .count();
+        long totalCount = flashCardProgresses.size();
+        if (totalCount > 0) {
+            double newProgress = (double) correctCount / totalCount * 100; // Calculate percentage
+            moduleUsers.setProgress(newProgress);
+        } else {
+            moduleUsers.setProgress(0.0); // No flashcards, reset progress
         }
 
         
         moduleUsers.setUpdatedBy(userId);
         moduleUsersRepository.save(moduleUsers);
-        
 
     }
 
