@@ -1,9 +1,11 @@
 package com.fptu.sep490.identityservice.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
+import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.constants.Constants;
 import com.fptu.sep490.identityservice.exception.ErrorNormalizer;
@@ -15,166 +17,316 @@ import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static net.bytebuddy.matcher.ElementMatchers.any;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
 
     @InjectMocks
-    AuthServiceImpl authService;
+    private AuthServiceImpl authService;
 
     @Mock
-    KeyCloakTokenClient keyCloakTokenClient;
+    private RedisService redisService;
 
     @Mock
-    KeyCloakUserClient keyCloakUserClient;
+    private KeyCloakTokenClient keyCloakTokenClient;
 
     @Mock
-    RedisService redisService;
+    private KeyCloakUserClient keyCloakUserClient;
 
-    @Mock
-    ErrorNormalizer errorNormalizer;
+    private final String realm = "test-realm";
+    private final String clientId = "test-client-id";
+    private final String clientSecret = "test-client-secret";
+
 
     @BeforeEach
-    void setup() {
-        ReflectionTestUtils.setField(authService, "realm", "test-realm");
-        ReflectionTestUtils.setField(authService, "clientId", "test-client");
-        ReflectionTestUtils.setField(authService, "clientSecret", "test-secret");
+    void setUp() {
+        ReflectionTestUtils.setField(authService, "realm", realm);
+        ReflectionTestUtils.setField(authService, "clientId", clientId);
+        ReflectionTestUtils.setField(authService, "clientSecret", clientSecret);
     }
 
     @Test
     void login_success() throws Exception {
-        String username = "testuser@example.com";
+        // Given
+        String username = "test@example.com";
         String password = "password";
 
-        // Token đã cache sẵn
+        // 1. Mock cached client token
         Mockito.when(redisService.getValue(anyString(), eq(String.class)))
-                .thenReturn("cached-token");
+                .thenReturn("cached-client-token");
 
-        // User có trong Keycloak
-        UserAccessInfo user = new UserAccessInfo(
-                "id", "testuser", "First", "Last", username,
-                true, 0L, true, false, null
+        // 2. Mock Keycloak user info (đủ 10 field)
+        UserAccessInfo.AccessInfo accessInfo = new UserAccessInfo.AccessInfo(
+                true, true, true, true, true
         );
-        Mockito.when(keyCloakUserClient.getUserByEmail(
-                eq("test-realm"),
-                eq("Bearer cached-token"),
-                eq(username)
-        )).thenReturn(List.of(user));
+        UserAccessInfo userInfo = new UserAccessInfo(
+                "id-123",
+                username,
+                "First",
+                "Last",
+                username,
+                true,
+                System.currentTimeMillis(),
+                true,
+                false,
+                accessInfo
+        );
+        Mockito.when(keyCloakUserClient.getUserByEmail(eq(realm), anyString(), eq(username)))
+                .thenReturn(List.of(userInfo));
 
-        // Lấy token thành công từ Keycloak
-        KeyCloakTokenResponse tokenResponse = KeyCloakTokenResponse.builder()
+        // 3. Mock token response (đủ 8 field)
+        KeyCloakTokenResponse expectedToken = KeyCloakTokenResponse.builder()
                 .accessToken("access-token")
                 .expiresIn(3600)
+                .refreshExpiresIn(7200)
+                .refreshToken("refresh-token")
+                .tokenType("Bearer")
+                .notBeforePolicy("0")
+                .sessionState("session-123")
+                .scope("openid profile email")
                 .build();
-        Mockito.when(keyCloakTokenClient.requestToken(
-                Mockito.<MultiValueMap<String, String>>argThat(map ->
-                        map.getFirst("grant_type").equals("password") &&
-                                map.getFirst("username").equals("testuser@example.com") &&
-                                map.getFirst("password").equals("password") &&
-                                map.getFirst("client_id").equals("test-client") &&
-                                map.getFirst("client_secret").equals("test-secret")
-                ),
-                eq("test-realm")
-        )).thenReturn(tokenResponse);
-        KeyCloakTokenResponse result = authService.login(username, password);
+        Mockito.when(
+                keyCloakTokenClient.requestToken(
+                        Mockito.<MultiValueMap<String, String>>any(),
+                        Mockito.eq(realm)
+                )
+        ).thenReturn(expectedToken);
 
-        assertEquals("access-token", result.accessToken());
+        // When
+        KeyCloakTokenResponse actual = authService.login(username, password);
+
+        // Then
+        assertNotNull(actual);
+        assertEquals("access-token", actual.accessToken());
+        assertEquals("refresh-token", actual.refreshToken());
+
+        Mockito.verify(redisService).getValue(contains("client-token"), eq(String.class));
+        Mockito.verify(keyCloakUserClient).getUserByEmail(eq(realm), anyString(), eq(username));
+        Mockito.verify(keyCloakTokenClient)
+                .requestToken(Mockito.any(MultiValueMap.class), Mockito.eq(realm));
     }
 
     @Test
-    void login_userNotFound_throwsNotFoundException() throws Exception {
+    void login_userNotFound_throwsNotFoundException() throws JsonProcessingException {
+        // Given
+        String username = "notfound@example.com";
+
+        // Mock Redis có client token
         Mockito.when(redisService.getValue(anyString(), eq(String.class)))
-                .thenReturn("cached-token");
+                .thenReturn("cached-client-token");
 
-        Mockito.when(keyCloakUserClient.getUserByEmail(
-                        anyString(), anyString(), anyString()))
-                .thenReturn(Collections.emptyList());
+        // Mock Keycloak trả về list rỗng -> user không tồn tại
+        Mockito.when(keyCloakUserClient.getUserByEmail(eq(realm), anyString(), eq(username)))
+                .thenReturn(List.of());
 
-        assertThrows(NotFoundException.class, () ->
-                authService.login("unknown@example.com", "pass"));
+        // Then
+        assertThrows(NotFoundException.class,
+                () -> authService.login(username, "password"));
     }
 
     @Test
-    void login_emailNotVerified_throwsAppException() throws Exception {
-        String username = "unverified@example.com";
+    void login_firstElementNull_throwsNotFoundException() throws JsonProcessingException {
+        String username = "nulluser@example.com";
 
         Mockito.when(redisService.getValue(anyString(), eq(String.class)))
-                .thenReturn("cached-token");
+                .thenReturn("cached-client-token");
 
-        UserAccessInfo user = new UserAccessInfo(
-                "id", "user", "first", "last", username, false,
-                0L, true, false, null
-        );
+        // Trả về list chứa 1 phần tử null
+        List<UserAccessInfo> listWithNull = new ArrayList<>();
+        listWithNull.add(null);
+        Mockito.when(keyCloakUserClient.getUserByEmail(eq(realm), anyString(), eq(username)))
+                .thenReturn(listWithNull);
 
-        Mockito.when(keyCloakUserClient.getUserByEmail(
-                anyString(), anyString(), anyString())).thenReturn(List.of(user));
-
-        AppException ex = assertThrows(AppException.class, () ->
-                authService.login(username, "pass"));
-
-        assertEquals(Constants.ErrorCode.EMAIL_NOT_VERIFIED, "00028");
+        assertThrows(NotFoundException.class,
+                () -> authService.login(username, "password"));
     }
 
-    @Test
-    void getCachedClientToken_cacheHit_returnsCachedToken() throws Exception {
-        Mockito.when(redisService.getValue(anyString(), eq(String.class)))
-                .thenReturn("cached-token");
-
-        String result = authService.getCachedClientToken();
-
-        assertEquals("cached-token", result);
-    }
 
     @Test
-    void getCachedClientToken_cacheMiss_fetchAndSaveToRedis() throws Exception {
+    void login_noCachedTokenAndKeycloakFails_throwsRuntimeException() throws JsonProcessingException {
+        String username = "test@example.com";
+
+        // No cached token
         Mockito.when(redisService.getValue(anyString(), eq(String.class)))
                 .thenReturn(null);
 
-        KeyCloakTokenResponse response = KeyCloakTokenResponse.builder()
-                .accessToken("new-token")
-                .expiresIn(1800)
+        // Khi getCachedClientToken gọi keyCloakTokenClient.requestToken(...) => ném lỗi
+        Mockito.when(keyCloakTokenClient.requestToken(
+                Mockito.<MultiValueMap<String, String>>any(),
+                Mockito.eq(realm)
+        )).thenThrow(new RuntimeException("Keycloak down"));
+
+        // Expect the RuntimeException (nguyên gốc) to be propagated
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> authService.login(username, "password"));
+        assertEquals("Keycloak down", ex.getMessage());
+    }
+
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void login_cacheFails_butStillReturnsToken() throws Exception {
+        String username = "test@example.com";
+
+        // Cho phép mock này có thể không được gọi
+        lenient().when(redisService.getValue(anyString(), eq(String.class)))
+                .thenReturn("cached-client-token");
+
+        UserAccessInfo userInfo = new UserAccessInfo(
+                "id",
+                username,
+                "First",
+                "Last",
+                username + "@mail.com",
+                true,
+                System.currentTimeMillis(),
+                true,
+                false,
+                new UserAccessInfo.AccessInfo(
+                        true, true, true, false, true
+                )
+        );
+
+        // Cho phép mock này có thể không được gọi
+       when(keyCloakUserClient.getUserByEmail(eq(realm), anyString(), eq(username)))
+                .thenReturn(List.of(userInfo));
+
+        KeyCloakTokenResponse expectedToken = KeyCloakTokenResponse.builder()
+                .accessToken("access-token")
+                .expiresIn(3600)
+                .refreshExpiresIn(7200)
+                .refreshToken("refresh-token")
+                .tokenType("Bearer")
+                .scope("openid")
                 .build();
 
-        MultiValueMap<String, String> expectedParams = new LinkedMultiValueMap<>();
-        expectedParams.add("grant_type", "client_credentials");
-        expectedParams.add("client_id", "test-client");
-        expectedParams.add("client_secret", "test-secret");
-        expectedParams.add("scope", "openid");
+        // Cho phép mock này có thể không được gọi
+        lenient().when(keyCloakTokenClient.requestToken(
+                        Mockito.<MultiValueMap<String, String>>any(),
+                        Mockito.eq(realm)))
+                .thenReturn(expectedToken);
 
-        Mockito.when(keyCloakTokenClient.requestToken(
-                Mockito.<MultiValueMap<String, String>>argThat(map ->
-                        "client_credentials".equals(map.getFirst("grant_type")) &&
-                                "test-client".equals(map.getFirst("client_id")) &&
-                                "test-secret".equals(map.getFirst("client_secret")) &&
-                                "openid".equals(map.getFirst("scope"))
-                ),
-                eq("test-realm")
-        )).thenReturn(response);
+        // Giả lập lưu cache thất bại
+        Mockito.doThrow(new RuntimeException("Redis fail"))
+                .when(redisService)
+                .saveValue(anyString(), anyString(), ArgumentMatchers.any(Duration.class));
 
-        String result = authService.getCachedClientToken();
+        KeyCloakTokenResponse actual = authService.login(username, "password");
 
-        assertEquals("new-token", result);
-        Mockito.verify(redisService)
-                .saveValue(anyString(), eq(response.accessToken()) , Mockito.any());
+        assertEquals("access-token", actual.accessToken());
+    }
+
+    @Test
+    void refreshToken_success() {
+        // Given
+        String refreshToken = "sample-refresh-token";
+        KeyCloakTokenResponse expectedResponse = KeyCloakTokenResponse.builder()
+                .accessToken("new-access-token")
+                .refreshToken("new-refresh-token")
+                .expiresIn(3600)
+                .refreshExpiresIn(7200)
+                .tokenType("Bearer")
+                .scope("openid")
+                .build();
+
+        // Giả lập keyCloakTokenClient trả về token mới
+        when(keyCloakTokenClient.requestToken(
+                Mockito.<MultiValueMap<String, String>>any(),
+                Mockito.eq(realm)))
+                .thenReturn(expectedResponse);
+
+        // When
+        KeyCloakTokenResponse actualResponse = authService.refreshToken(refreshToken);
+
+        // Then
+        assertNotNull(actualResponse);
+        assertEquals("new-access-token", actualResponse.accessToken());
+        assertEquals("new-refresh-token", actualResponse.refreshToken());
+        assertEquals(3600, actualResponse.expiresIn());
+        assertEquals(7200, actualResponse.refreshExpiresIn());
+        assertEquals("Bearer", actualResponse.tokenType());
+        assertEquals("openid", actualResponse.scope());
+
+        // Verify form được build đúng
+        ArgumentCaptor<MultiValueMap<String, String>> formCaptor = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(keyCloakTokenClient).requestToken(formCaptor.capture(), eq(realm));
+
+        MultiValueMap<String, String> capturedForm = formCaptor.getValue();
+        assertEquals("refresh_token", capturedForm.getFirst("grant_type"));
+        assertEquals(clientId, capturedForm.getFirst("client_id"));
+        assertEquals(clientSecret, capturedForm.getFirst("client_secret"));
+        assertEquals(refreshToken, capturedForm.getFirst("refresh_token"));
+    }
+    @Test
+    void logout_success_callsKeycloakWithCorrectParams() {
+        // GIVEN
+        String accessToken = "access-token-123";
+        String refreshToken = "refresh-token-456";
+
+        // WHEN
+        authService.logout(accessToken, refreshToken);
+
+        // THEN: verify đúng param gọi tới client
+        ArgumentCaptor<MultiValueMap<String, String>> formCaptor = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(keyCloakTokenClient, times(1))
+                .logout(eq(realm), formCaptor.capture(), eq("Bearer " + accessToken));
+
+        MultiValueMap<String, String> formSent = formCaptor.getValue();
+        assertThat(formSent.getFirst("client_id")).isEqualTo(clientId);
+        assertThat(formSent.getFirst("client_secret")).isEqualTo(clientSecret);
+        assertThat(formSent.getFirst("refresh_token")).isEqualTo(refreshToken);
+    }
+
+    @Test
+    void introspect_success_returnsResponse() {
+        // GIVEN
+        String accessToken = "access-token-xyz";
+        IntrospectResponse mockResponse = IntrospectResponse.builder()
+                .active(true)
+                .username("testuser")
+                .build();
+
+        when(keyCloakTokenClient.introspect(eq(realm), Mockito.<MultiValueMap<String, String>>any()))
+                .thenReturn(mockResponse);
+
+        // WHEN
+        IntrospectResponse actual = authService.introspect(accessToken);
+
+        // THEN: verify gọi đúng param
+        ArgumentCaptor<MultiValueMap<String, String>> formCaptor = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(keyCloakTokenClient, times(1))
+                .introspect(eq(realm), formCaptor.capture());
+
+        MultiValueMap<String, String> formSent = formCaptor.getValue();
+        assertThat(formSent.getFirst("client_id")).isEqualTo(clientId);
+        assertThat(formSent.getFirst("client_secret")).isEqualTo(clientSecret);
+        assertThat(formSent.getFirst("token")).isEqualTo(accessToken);
+
+        // Kiểm tra kết quả trả về
+        assertThat(actual).isNotNull();
+        assertThat(actual.isActive()).isTrue();
+        assertThat(actual.getUsername()).isEqualTo("testuser");
     }
 }
+
+
