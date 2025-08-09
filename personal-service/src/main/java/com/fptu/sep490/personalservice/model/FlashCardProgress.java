@@ -28,5 +28,9 @@ public class FlashCardProgress {
     private String flashcardId;
 
     @Column(name = "status", nullable = false)
-    private Integer status; // 0:new, 1: learning, 2: learned, 3: highlighted
+    private Integer status; // 0:new, 1: learning, 2: learned
+
+    @Column(name = "is_highlighted")
+    private Boolean isHighlighted = false; // Default to false, indicating not highlighted
+
 }

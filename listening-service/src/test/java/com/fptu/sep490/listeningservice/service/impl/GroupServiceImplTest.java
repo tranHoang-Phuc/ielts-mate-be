@@ -53,8 +53,9 @@ class GroupServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        groupId = UUID.fromString("test-group-id");
-        taskId = UUID.fromString("test-task-id");
+        groupId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+        taskId = UUID.fromString("123e4567-e89b-12d3-a456-426614174111");
+
         userId = "mocked-user-id";
         mockListeningTask = ListeningTask.builder()
                 .taskId(taskId)

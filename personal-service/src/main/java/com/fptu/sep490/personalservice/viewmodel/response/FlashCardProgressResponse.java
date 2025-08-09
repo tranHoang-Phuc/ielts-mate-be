@@ -9,6 +9,8 @@ public record FlashCardProgressResponse(
         String flashcardId, // ID of the flashcard
         @JsonProperty("status")
         Integer status, // 0: pending, 1: allowed, 2: denied
+        @JsonProperty("is_highlighted")
+        Boolean isHighlighted, // Optional, can be null if not highlighted
         @JsonProperty("flashcard_detail")
         FlashCardResponse flashcardDetail // Details of the flashcard
 
