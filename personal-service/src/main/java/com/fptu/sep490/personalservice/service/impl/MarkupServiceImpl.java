@@ -150,7 +150,9 @@ public class MarkupServiceImpl implements MarkupService {
     @Override
     public MarkedUpResponse getMarkedUpData(String type, HttpServletRequest request) {
         String userId = helper.getUserIdFromToken(request);
-
+        if(userId == null) {
+            userId = helper.getUserIdFromToken();
+        }
         switch (type) {
             case DataMarkup.READING_TASK:
                 List<Markup> readingTaskMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
@@ -166,7 +168,48 @@ public class MarkupServiceImpl implements MarkupService {
                 return MarkedUpResponse.builder()
                         .markedUpIdsMapping(markUpMappingType)
                         .build();
-
+            case DataMarkup.READING_EXAM:
+                List<Markup> readingExamMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.READING.ordinal(),
+                        PracticeType.EXAM.ordinal()
+                );
+                Map<UUID, Integer> markUpExamMappingType = readingExamMarkups.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(markUpExamMappingType)
+                        .build();
+            case DataMarkup.LISTENING_EXAM:
+                List<Markup> listeningExam = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.LISTENING.ordinal(),
+                        PracticeType.EXAM.ordinal()
+                );
+                Map<UUID, Integer> listeningExamMapping = listeningExam.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(listeningExamMapping)
+                        .build();
+            case DataMarkup.LISTENING_TASK:
+                List<Markup> listeningTask = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.LISTENING.ordinal(),
+                        PracticeType.TASK.ordinal()
+                );
+                Map<UUID, Integer> listeningTaskMapping = listeningTask.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(listeningTaskMapping)
+                        .build();
         }
         return null;
     }

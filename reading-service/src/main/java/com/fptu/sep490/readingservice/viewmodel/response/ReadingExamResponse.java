@@ -1,7 +1,10 @@
 package com.fptu.sep490.readingservice.viewmodel.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.core.util.Json;
+import lombok.Builder;
 
+@Builder
 public record ReadingExamResponse(
 
         @JsonProperty("reading_exam_id")
@@ -17,7 +20,11 @@ public record ReadingExamResponse(
         @JsonProperty("reading_passage_id_part2")
         ReadingPassageResponse readingPassageIdPart2,
         @JsonProperty("reading_passage_id_part3")
-        ReadingPassageResponse readingPassageIdPart3
+        ReadingPassageResponse readingPassageIdPart3,
+        @JsonProperty("is_marked_up")
+        Boolean isMarkedUp,
+        @JsonProperty("markup_type")
+        Integer markupTypes
 ) {
     public record ReadingPassageResponse(
             @JsonProperty("reading_passage_id")

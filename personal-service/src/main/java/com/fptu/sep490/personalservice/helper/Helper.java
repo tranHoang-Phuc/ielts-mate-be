@@ -91,6 +91,10 @@ public class Helper {
         return CookieUtils.getCookieValue(request, "Authorization");
     }
 
+    public String getUserIdFromToken() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     public String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
         if (token == null || token.isEmpty()) {

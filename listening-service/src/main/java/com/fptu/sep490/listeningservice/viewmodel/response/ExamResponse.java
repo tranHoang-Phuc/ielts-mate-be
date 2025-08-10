@@ -54,7 +54,13 @@ public record ExamResponse(
         Boolean isOriginal,
 
         @JsonProperty("is_deleted")
-        Boolean isDeleted
+        Boolean isDeleted,
+
+        @JsonProperty("is_marked_up")
+        Boolean isMarkedUp,
+
+        @JsonProperty("markup_type")
+        Integer markupTypes
 
 ) {
 }

@@ -27,7 +27,7 @@ public interface ListeningTaskService {
 
     Page<ListeningTaskGetResponse> getActivatedTask(int page, int size, List<Integer> ieltsTypeList,
                                                     List<Integer> partNumberList, String questionCategory,
-                                                    String sortBy, String sortDirection, String title, String createdBy);
+                                                    String sortBy, String sortDirection, String title, String createdBy, HttpServletRequest httpServletRequest);
 
     Page<ListeningTaskGetResponse> getListeningTask(int page, int size, List<Integer>status, List<Integer> ieltsType,
                                                     List<Integer> partNumber, String questionCategory,

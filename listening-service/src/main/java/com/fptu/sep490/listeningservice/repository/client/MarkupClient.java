@@ -1,7 +1,7 @@
-package com.fptu.sep490.readingservice.repository.client;
+package com.fptu.sep490.listeningservice.repository.client;
 
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.MarkedUpResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.MarkedUpResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,5 +14,5 @@ public interface MarkupClient {
 
     @GetMapping(value = "/markup/internal/marked-up/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<MarkedUpResponse>> getMarkedUpData(@RequestHeader("Authorization") String accessToken,
-                                                        @PathVariable("type") String type);
+                                                                   @PathVariable("type") String type);
 }

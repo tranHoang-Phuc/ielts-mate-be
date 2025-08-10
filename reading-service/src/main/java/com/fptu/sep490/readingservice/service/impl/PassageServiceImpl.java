@@ -590,8 +590,8 @@ public class PassageServiceImpl implements PassageService {
                                     .updatedBy(p.updatedBy())
                                     .createdAt(p.createdAt())
                                     .updatedAt(p.updatedAt())
-                                    .isMarkedUp(passageIdsMarkedUp.get(p.passageId()) != null ? true : false)
-                                    .markupTypes(passageIdsMarkedUp.get(p.passageId()))
+                                    .isMarkedUp(passageIdsMarkedUp.get(UUID.fromString(p.passageId())) != null)
+                                    .markupTypes(passageIdsMarkedUp.get(UUID.fromString(p.passageId())))
                                     .build())
                             .toList();
                     return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());

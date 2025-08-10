@@ -1,8 +1,11 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fptu.sep490.commonlibrary.constants.CookieConstants;
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
+import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
@@ -17,6 +20,7 @@ import com.fptu.sep490.listeningservice.model.specification.ListeningTaskSpecifi
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.listeningservice.repository.client.MarkupClient;
 import com.fptu.sep490.listeningservice.service.FileService;
 import com.fptu.sep490.listeningservice.service.ListeningTaskService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ListeningTaskCreationRequest;
@@ -61,6 +65,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     RedisService redisService;
     KeyCloakUserClient keyCloakUserClient;
     KeyCloakTokenClient keyCloakTokenClient;
+    MarkupClient markupClient;
 
     @Value("${topic.upload-audio}")
     @NonFinal
@@ -257,7 +262,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     public Page<ListeningTaskGetResponse> getActivatedTask(int page, int size, List<Integer> ieltsType,
                                                            List<Integer> partNumber, String questionCategory,
                                                            String sortBy, String sortDirection, String title,
-                                                           String createdBy) {
+                                                           String createdBy, HttpServletRequest request) {
         Pageable pageable = PageRequest.of(page, size);
         var spec = ListeningTaskSpecification.byCondition(
                 ieltsType, List.of(1), partNumber, questionCategory,
@@ -294,6 +299,34 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         List<ListeningTaskGetResponse> responses = tasks.stream()
                 .map(this :: toListeningTaskGetResponse)
                 .toList();
+        Map<UUID, Integer> taskIdsMarkup;
+        String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        if(accessToken != null) {
+            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.LISTENING_TASK);
+            if(response.getStatusCode() == HttpStatus.OK) {
+                var body = response.getBody();
+                if (body != null) {
+                    taskIdsMarkup = body.data().markedUpIdsMapping();
+                    responses = responses.stream()
+                            .map(t -> ListeningTaskGetResponse.builder()
+                                    .taskId(t.taskId())
+                                    .ieltsType(t.ieltsType())
+                                    .partNumber(t.partNumber())
+                                    .status(t.status())
+                                    .title(t.title())
+                                    .createdBy(t.createdBy())
+                                    .createdAt(t.createdAt())
+                                    .updatedBy(t.updatedBy())
+                                    .updatedAt(t.updatedAt())
+                                    .isMarkedUp(taskIdsMarkup.get(t.taskId()) != null)
+                                    .markupTypes(taskIdsMarkup.get(t.taskId()))
+                                    .build())
+                            .toList();
+                    return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+                }
+            }
+        }
+
         return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
     }
 

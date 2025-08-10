@@ -87,3 +87,6 @@ cloudinary:
   cloud-name: dbrm5eowo
   api-key: 566182576423582
   api-secret: mYJD0DbR4oXl4oD8g22RtvJx9kU
+
+service:
+  personal-service: http://localhost:8072/personal

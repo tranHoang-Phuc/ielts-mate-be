@@ -137,13 +137,14 @@ public class ListeningTaskController {
             @RequestParam(value = "sortBy", required = false, defaultValue = "updatedAt") String sortBy,
             @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(value = "title", required = false) String title,
-            @RequestParam(value = "createdBy", required = false) String createdBy
+            @RequestParam(value = "createdBy", required = false) String createdBy,
+            HttpServletRequest httpServletRequest
     ) {
         List<Integer> ieltsTypeList = parseCommaSeparatedIntegers(ieltsType);
         List<Integer> partNumberList = parseCommaSeparatedIntegers(partNumber);
 
         Page<ListeningTaskGetResponse> pageableTask = listeningTaskService.getActivatedTask(page - 1, size, ieltsTypeList,
-                partNumberList, questionCategory, sortBy, sortDirection, title, createdBy);
+                partNumberList, questionCategory, sortBy, sortDirection, title, createdBy, httpServletRequest);
         Pagination pagination = Pagination.builder()
                 .currentPage(pageableTask.getNumber() + 1)
                 .totalPages(pageableTask.getTotalPages())
