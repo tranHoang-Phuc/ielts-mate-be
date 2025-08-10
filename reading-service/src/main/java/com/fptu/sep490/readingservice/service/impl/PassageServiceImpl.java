@@ -9,6 +9,7 @@ import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
@@ -61,6 +62,7 @@ public class PassageServiceImpl implements PassageService {
     DragItemRepository dragItemRepository;
     RedisService redisService;
     MarkupClient markupClient;
+    private final Helper helper;
 
 
     @Value("${keycloak.realm}")
@@ -566,22 +568,40 @@ public class PassageServiceImpl implements PassageService {
                 passage.setPassageStatus(lastVersion.getPassageStatus());
             }
         }
-
         List<PassageGetResponse> responseList = passages.stream()
                 .map(this::toPassageGetResponse)
                 .toList();
-        // Call sang lấy list markup
-        List<UUID> passageIdsMarkedUp;
+        Map<UUID, Integer> passageIdsMarkedUp;
         String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-//        if(accessToken != null) {
-//            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_TASK);
-//            if(response.getStatusCode() == HttpStatus.OK) {
-//                var body = response.getBody();
-//                if (body != null) {
-//                    passageIdsMarkedUp = body.data().markedUpIds();
-//                }
-//            }
-//        }
+        if(accessToken != null) {
+            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_TASK);
+            if(response.getStatusCode() == HttpStatus.OK) {
+                var body = response.getBody();
+                if (body != null) {
+                    passageIdsMarkedUp = body.data().markedUpIdsMapping();
+                    responseList = responseList.stream()
+                            .map(p -> PassageGetResponse.builder()
+                                    .passageId(p.passageId())
+                                    .ieltsType(p.ieltsType())
+                                    .partNumber(p.partNumber())
+                                    .passageStatus(p.passageStatus())
+                                    .title(p.title())
+                                    .createdBy(p.createdBy())
+                                    .updatedBy(p.updatedBy())
+                                    .createdAt(p.createdAt())
+                                    .updatedAt(p.updatedAt())
+                                    .isMarkedUp(passageIdsMarkedUp.get(p.passageId()) != null ? true : false)
+                                    .markupTypes(passageIdsMarkedUp.get(p.passageId()))
+                                    .build())
+                            .toList();
+                    return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
+                }
+            }
+        }
+
+
+        // Call sang lấy list markup
+
 
         return new PageImpl<>(responseList, pageable, pageResult.getTotalElements());
     }

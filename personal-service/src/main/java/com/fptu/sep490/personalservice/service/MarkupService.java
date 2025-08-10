@@ -16,5 +16,5 @@ public interface MarkupService {
 
     Page<MarkUpResponse> getMarkup(int page, int size, List<Integer> markupTypeList, List<Integer> taskTypeList, List<Integer> practiceTypeList, HttpServletRequest request);
 
-    MarkedUpResponse getMarkedUpData(String type);
+    MarkedUpResponse getMarkedUpData(String type, HttpServletRequest request);
 }
