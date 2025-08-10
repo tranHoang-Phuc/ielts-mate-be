@@ -4,11 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/identity-service/src/main/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/identity-service/src/main/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplLoginTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplLoginTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,22 +20,22 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "tranHoang-Phuc"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;tranHoang-Phuc&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/tranHoang-Phuc/ielts-mate-be.git",
-    "accountId": "5ea8103d-a79c-4e58-8ae3-2d325d43e98d"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/tranHoang-Phuc/ielts-mate-be.git&quot;,
+    &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
   }
-}]]></component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -46,9 +43,9 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4
+}</component>
   <component name="ProjectId" id="312ktstG3H3eSjkUlhRDMtnvHWt" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -61,8 +58,19 @@
   "keyToString": {
     "JUnit.AuthServiceImplTest.createUser_keycloakError_throwsAppException.executor": "Run",
     "JUnit.AuthServiceImplTest.createUser_success.executor": "Run",
+    "JUnit.GroupControllerTest.executor": "Run",
+    "JUnit.GroupServiceImplTest.executor": "Coverage",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.ApiGatewayApplication.executor": "Run",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
+    "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.PersonalServiceApplication.executor": "Run",
+    "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
@@ -86,8 +94,21 @@
         <option value="SpringBootApplicationConfigurationType" />
       </set>
     </option>
+    <option name="hiddenConfigurations">
+      <map>
+        <entry key="SpringBootApplicationConfigurationType">
+          <value>
+            <set>
+              <option value="FileServiceApplication" />
+              <option value="ListeningServiceApplication" />
+              <option value="NotificationServiceApplication" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
-  <component name="RunManager" selected="JUnit.AuthServiceImplTest.createUser_runtimeException_throwsAppException">
+  <component name="RunManager" selected="Spring Boot.ApiGatewayApplication">
     <configuration name="AuthServiceImplTest.createUser_keycloakError_throwsAppException" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="identity-service" />
       <extension name="coverage">
@@ -136,6 +157,36 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="GroupControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="listening-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.fptu.sep490.listeningservice.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.fptu.sep490.listeningservice.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.listeningservice.controller.GroupControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="GroupServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="listening-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.fptu.sep490.listeningservice.service.impl.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.fptu.sep490.listeningservice.service.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.listeningservice.service.impl.GroupServiceImplTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -146,6 +197,7 @@
       <method v="2" />
     </configuration>
     <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="api-gateway" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
       <method v="2">
@@ -153,6 +205,7 @@
       </method>
     </configuration>
     <configuration name="DiscoveryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="discovery-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="fptu.sep490.registryservice.DiscoveryServiceApplication" />
       <method v="2">
@@ -160,6 +213,7 @@
       </method>
     </configuration>
     <configuration name="FileServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="file-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.fileservice.FileServiceApplication" />
       <method v="2">
@@ -167,6 +221,7 @@
       </method>
     </configuration>
     <configuration name="IdentityServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="identity-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.identityservice.IdentityServiceApplication" />
       <method v="2">
@@ -174,6 +229,7 @@
       </method>
     </configuration>
     <configuration name="ListeningServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="listening-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.listeningservice.ListeningServiceApplication" />
       <method v="2">
@@ -181,6 +237,7 @@
       </method>
     </configuration>
     <configuration name="NotificationServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="notification-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.notificationservice.NotificationServiceApplication" />
       <method v="2">
@@ -188,6 +245,7 @@
       </method>
     </configuration>
     <configuration name="PersonalServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="personal-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.personalservice.PersonalServiceApplication" />
       <method v="2">
@@ -195,14 +253,32 @@
       </method>
     </configuration>
     <configuration name="ReadingServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="reading-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.readingservice.ReadingServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="JUnit.AuthServiceImplTest.createUser_keycloakError_throwsAppException" />
+      <item itemvalue="JUnit.AuthServiceImplTest.createUser_runtimeException_throwsAppException" />
+      <item itemvalue="JUnit.AuthServiceImplTest.createUser_success" />
+      <item itemvalue="JUnit.GroupControllerTest" />
+      <item itemvalue="JUnit.GroupServiceImplTest" />
+      <item itemvalue="Spring Boot.ApiGatewayApplication" />
+      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
+      <item itemvalue="Spring Boot.FileServiceApplication" />
+      <item itemvalue="Spring Boot.IdentityServiceApplication" />
+      <item itemvalue="Spring Boot.ListeningServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
+      <item itemvalue="Spring Boot.PersonalServiceApplication" />
+      <item itemvalue="Spring Boot.ReadingServiceApplication" />
+    </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.GroupControllerTest" />
+        <item itemvalue="JUnit.GroupServiceImplTest" />
         <item itemvalue="JUnit.AuthServiceImplTest.createUser_runtimeException_throwsAppException" />
         <item itemvalue="JUnit.AuthServiceImplTest.createUser_keycloakError_throwsAppException" />
         <item itemvalue="JUnit.AuthServiceImplTest.createUser_success" />
@@ -225,7 +301,17 @@
       <option name="presentableId" value="Default" />
       <updated>1754729777927</updated>
       <workItem from="1754729780730" duration="3114000" />
+      <workItem from="1754786533055" duration="393000" />
     </task>
+    <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <option name="closed" value="true" />
+      <created>1754733572466</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1754733572466</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -241,7 +327,7 @@
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplLoginTest.java</url>
           <line>336</line>
-          <properties class="com.fptu.sep490.identityservice.service.impl.AuthServiceImplTest" method="createUser_keycloakError_throwsAppException">
+          <properties class="com.fptu.sep490.identityservice.service.impl.AuthServiceImplTest">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
@@ -249,5 +335,10 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/ielts_mate_be$GroupServiceImplTest.ic" NAME="GroupServiceImplTest Coverage Results" MODIFIED="1754733934408" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
+    </SUITE>
   </component>
 </project>
