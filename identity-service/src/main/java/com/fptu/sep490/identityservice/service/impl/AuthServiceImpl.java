@@ -247,7 +247,7 @@ public class AuthServiceImpl implements AuthService {
     public UserAccessInfo getUserAccessInfoByEmail(String email, String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
         String clientToken = getCachedClientToken();
-        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, email);
 
     if (userAccessInfos.isEmpty()) {
         throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, email);

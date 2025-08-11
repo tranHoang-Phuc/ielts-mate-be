@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.model.*;
@@ -8,6 +9,7 @@ import com.fptu.sep490.personalservice.model.Module;
 import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.repository.*;
+import com.fptu.sep490.personalservice.repository.client.AuthClient;
 import com.fptu.sep490.personalservice.service.ModuleService;
 import com.fptu.sep490.personalservice.viewmodel.request.*;
 import com.fptu.sep490.personalservice.viewmodel.response.*;
@@ -18,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,6 +41,7 @@ public class ModuleServiceImpl implements ModuleService {
     ModuleUsersRepository moduleUsersRepository;
     FlashCardProgressRepository flashCardProgressRepository;
     Helper helper;
+    AuthClient authClient;
 
     @Override
     public ModuleResponse createModule(ModuleRequest moduleRequest, HttpServletRequest request) throws Exception {
@@ -470,6 +474,8 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     public void shareModule(String moduleId, ShareModuleRequest shareModuleRequest, HttpServletRequest request) throws Exception {
         String userId = helper.getUserIdFromToken(request);
+        String accessToken = helper.getAccessToken(request);
+
         if (userId == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
@@ -497,7 +503,11 @@ public class ModuleServiceImpl implements ModuleService {
                     HttpStatus.FORBIDDEN.value()
             );
         }
-        for (String sharedUserId : shareModuleRequest.users()) {
+        // now not share with usser, that is email
+        for (String email : shareModuleRequest.users()) {
+            ResponseEntity<BaseResponse<UserAccessInfo>> user = authClient.getUserInfoByEmail(email, "Bearer " + accessToken);
+            var body = user.getBody();
+            String sharedUserId = body.data().id();
             if (sharedUserId.equals(userId)) {
                 continue; // Không chia sẻ cho chính mình
             }
