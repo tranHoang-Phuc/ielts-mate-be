@@ -90,3 +90,9 @@ reminder:
 service:
   reading-service: http://localhost:9000/reading
   listening-service: http://localhost:8071/listening
+  identity-service : http://localhost:8090/identity
+
+openai:
+  api:
+    key: AIzaSyAIu-3DUPcpv6JOO7ySB0c2J1F4TTjhO94
+
