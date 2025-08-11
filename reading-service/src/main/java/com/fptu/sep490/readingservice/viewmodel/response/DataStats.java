@@ -1,5 +1,6 @@
 package com.fptu.sep490.readingservice.viewmodel.response;
 
+import com.fptu.sep490.readingservice.model.UserInBranch;
 import lombok.Builder;
 
 import java.util.List;

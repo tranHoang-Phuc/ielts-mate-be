@@ -117,6 +117,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else if (item.getPracticeType().equals(PracticeType.EXAM) && item.getTaskType().equals(TaskType.READING)) {
                 return MarkUpResponse.builder()
@@ -125,6 +126,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else if(item.getPracticeType().equals(PracticeType.TASK) && item.getTaskType().equals(TaskType.LISTENING)) {
                 return MarkUpResponse.builder()
@@ -133,6 +135,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else {
                 return MarkUpResponse.builder()
@@ -141,6 +144,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             }
         }).toList();

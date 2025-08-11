@@ -1,7 +1,7 @@
 package com.fptu.sep490.readingservice.repository;
 
 import com.fptu.sep490.readingservice.model.ReadingExam;
-import com.fptu.sep490.readingservice.viewmodel.response.UserInBranch;
+import com.fptu.sep490.readingservice.model.UserInBranch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
