@@ -26,7 +26,7 @@ public class ExamAttempt {
     @Column(name = "duration")
     private Integer duration;
 
-    @Column(name = "total_question")
+    @Column(name = "total_point")
     private Integer totalPoint;
 
     @Column(name = "history", columnDefinition = "TEXT")

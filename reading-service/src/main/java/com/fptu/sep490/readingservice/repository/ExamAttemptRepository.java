@@ -35,4 +35,6 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, UUID> 
             @Param("endDate")   LocalDateTime  endDate
     );
 
+    @Query(value = "select count(*) from exam_attempt et where et.total_point > 0 ", nativeQuery = true)
+    int getNumberOfExamAttempts();
 }
