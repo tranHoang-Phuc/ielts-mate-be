@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
-    private final String[] WHITE_LIST = {
+    public static final String[] WHITE_LIST = {
             "/v3/api-docs/**",
             "/v3/api-docs",
             "/swagger-ui/**",
