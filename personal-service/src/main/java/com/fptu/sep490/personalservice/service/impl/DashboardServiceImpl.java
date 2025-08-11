@@ -7,6 +7,7 @@ import com.fptu.sep490.personalservice.repository.client.ReadingClient;
 import com.fptu.sep490.personalservice.service.DashboardService;
 import com.fptu.sep490.personalservice.viewmodel.response.CreatorDefaultDashboard;
 import com.fptu.sep490.personalservice.viewmodel.response.DataStats;
+import com.fptu.sep490.personalservice.viewmodel.response.UserBranchScore;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,11 @@ public class DashboardServiceImpl implements DashboardService {
                 .numberOfListeningTasks(listeningStatsData.numberOfTasks())
                 .numberOfReadingExams(readingStatsData.numberOfExams())
                 .numberOfListeningExams(listeningStatsData.numberOfExams())
+                .userInAvgBranchScoreListening(readingStatsData.userInBranchAvg().stream()
+                        .map(p -> UserBranchScore.builder()
+                                .branchScore(p.branchScore())
+                                .numberOfUsers(p.numberOfUsers())
+                                .build()).toList())
                 .build();
     }
 

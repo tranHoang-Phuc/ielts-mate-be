@@ -3,6 +3,8 @@ package com.fptu.sep490.personalservice.viewmodel.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
+import java.util.UUID;
+
 @Builder
 public record MarkUpResponse(
         @JsonProperty("markup_id")
@@ -14,7 +16,9 @@ public record MarkUpResponse(
        @JsonProperty("practice_type")
        Integer practiceType,
        @JsonProperty("task_title")
-       String taskTitle
+       String taskTitle,
+       @JsonProperty("task_id")
+        UUID taskId
 
 ) {
 }

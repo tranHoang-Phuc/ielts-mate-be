@@ -1,4 +1,4 @@
-package com.fptu.sep490.personalservice.model;
+package com.fptu.sep490.readingservice.model;
 
 public interface UserInBranch {
     String getBranchScore();

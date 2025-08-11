@@ -1,6 +1,6 @@
 package com.fptu.sep490.readingservice.service.impl;
 
-import com.fptu.sep490.readingservice.viewmodel.response.UserInBranch;
+import com.fptu.sep490.readingservice.model.UserInBranch;
 import com.fptu.sep490.readingservice.repository.AttemptRepository;
 import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
 import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
