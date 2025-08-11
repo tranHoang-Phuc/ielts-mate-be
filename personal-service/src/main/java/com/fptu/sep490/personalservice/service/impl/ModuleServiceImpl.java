@@ -9,10 +9,7 @@ import com.fptu.sep490.personalservice.model.enumeration.LearningStatus;
 import com.fptu.sep490.personalservice.model.enumeration.ModuleUserStatus;
 import com.fptu.sep490.personalservice.repository.*;
 import com.fptu.sep490.personalservice.service.ModuleService;
-import com.fptu.sep490.personalservice.viewmodel.request.ModuleProgressRequest;
-import com.fptu.sep490.personalservice.viewmodel.request.FlashcardProgressRequest;
-import com.fptu.sep490.personalservice.viewmodel.request.ModuleRequest;
-import com.fptu.sep490.personalservice.viewmodel.request.ShareModuleRequest;
+import com.fptu.sep490.personalservice.viewmodel.request.*;
 import com.fptu.sep490.personalservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -23,6 +20,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -962,6 +960,7 @@ public class ModuleServiceImpl implements ModuleService {
                 .moduleName(module.getModuleName())
                 .userId(userId)
                 .status(status)
+                .attempts(moduleUsers.getAttempts())
                 .progress(moduleUsers.getProgress())
                 .learningStatus(moduleUsers.getLearningStatus())
                 .timeSpent(moduleUsers.getTimeSpent() != null ? moduleUsers.getTimeSpent() : 0L)
@@ -1063,6 +1062,7 @@ public class ModuleServiceImpl implements ModuleService {
                 .id(moduleUsers.getId())
                 .moduleId(module.getModuleId().toString())
                 .moduleName(module.getModuleName())
+                .attempts(moduleUsers.getAttempts())
                 .userId(userId)
                 .timeSpent(moduleUsers.getTimeSpent())
                 .progress(moduleUsers.getProgress())
@@ -1177,6 +1177,13 @@ public class ModuleServiceImpl implements ModuleService {
         if (totalCount > 0) {
             double newProgress = (double) correctCount / totalCount * 100; // Calculate percentage
             moduleUsers.setProgress(newProgress);
+            if (newProgress >= 100.0) {
+                moduleUsers.setLearningStatus(LearningStatus.MASTERED);
+            } else if (newProgress > 0.0) {
+                moduleUsers.setLearningStatus(LearningStatus.LEARNING);
+            } else {
+                moduleUsers.setLearningStatus(LearningStatus.NEW);
+            }
         } else {
             moduleUsers.setProgress(0.0); // No flashcards, reset progress
         }
@@ -1184,6 +1191,79 @@ public class ModuleServiceImpl implements ModuleService {
         
         moduleUsers.setUpdatedBy(userId);
         moduleUsersRepository.save(moduleUsers);
+
+    }
+
+    @Override
+    public ModuleProgressResponse refreshModuleProgress(String moduleId, ModuleFlashCardRequest moduleFlashCardRequest, HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        if (userId == null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    HttpStatus.UNAUTHORIZED.value()
+            );
+        }
+        Module module = moduleRepository.findById(UUID.fromString(moduleId))
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        if (module.getIsDeleted()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    Constants.ErrorCodeMessage.NOT_FOUND,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+        ModuleUsers moduleUsers = moduleUsersRepository.findByModuleIdAndUserId(UUID.fromString(moduleId), userId)
+                .orElseThrow(() -> new AppException(
+                        "You do not have permission to view this module, or still not clone this module",
+                        Constants.ErrorCodeMessage.FORBIDDEN,
+                        HttpStatus.FORBIDDEN.value()
+                ));
+        moduleUsers.setProgress(0.0);
+        if(moduleUsers.getLearningStatus() != LearningStatus.NEW && moduleFlashCardRequest.learningStatus() == LearningStatus.NEW) {
+            moduleUsers.setLearningStatus(LearningStatus.LEARNING);
+            moduleUsers.setAttempts(moduleUsers.getAttempts() != null ? moduleUsers.getAttempts() + 1 : 1);
+        }
+        moduleUsers.setLearningStatus(moduleFlashCardRequest.learningStatus());
+        moduleUsers.setUpdatedBy(userId);
+        moduleUsers.setUpdatedAt(LocalDateTime.now());
+        if(moduleFlashCardRequest.learningStatus() == LearningStatus.NEW){
+            List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
+            for(FlashCardProgress flashCardProgress : flashCardProgresses) {
+                flashCardProgress.setStatus(0); // reset status to 0
+                flashCardProgress.setIsHighlighted(false); // reset highlight
+                flashCardProgressRepository.save(flashCardProgress);
+            }
+
+        }
+        moduleUsers = moduleUsersRepository.save(moduleUsers);
+        List<FlashCardProgress> flashCardProgresses = moduleUsers.getFlashcardProgressList();
+        List<FlashCardProgressResponse> flashCardProgressResponses = flashCardProgresses.stream()
+                .map(flashCardProgress -> FlashCardProgressResponse.builder()
+                        .flashcardId(flashCardProgress.getFlashcardId())
+                        .status(flashCardProgress.getStatus())
+                        .isHighlighted(flashCardProgress.getIsHighlighted())
+                        .build())
+                .toList();
+        ModuleProgressResponse progressResponse = ModuleProgressResponse.builder()
+                .id(moduleUsers.getId())
+                .moduleId(module.getModuleId().toString())
+                .moduleName(module.getModuleName())
+                .attempts(moduleUsers.getAttempts())
+                .userId(userId)
+                .timeSpent(moduleUsers.getTimeSpent())
+                .progress(moduleUsers.getProgress())
+                .status(moduleUsers.getStatus() != null ? moduleUsers.getStatus() : 0)
+                .lastIndexRead(moduleUsers.getLastIndexRead() != null ? moduleUsers.getLastIndexRead() : 0)
+                .learningStatus(moduleUsers.getLearningStatus())
+                .flashcardProgresses(flashCardProgressResponses)
+                .build();
+
+        return  progressResponse;
 
     }
 

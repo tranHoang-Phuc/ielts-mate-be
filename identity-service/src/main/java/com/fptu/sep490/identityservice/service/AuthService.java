@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.identityservice.viewmodel.*;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 public interface AuthService {
@@ -21,6 +22,8 @@ public interface AuthService {
 
     UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException;
 
+    UserAccessInfo getUserAccessInfoByEmail(String email, String accessToken) throws JsonProcessingException;
+
     void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException;
 
     void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws JsonProcessingException;
@@ -37,4 +40,6 @@ public interface AuthService {
     void changePassword(String accessToken, @Valid PasswordChange changePasswordRequest) throws JsonProcessingException;
 
     UserCreationProfile updateUserProfile(String accessToken, @Valid UserUpdateRequest userUpdateRequest) throws JsonProcessingException;
+
+
 }
