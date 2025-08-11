@@ -60,6 +60,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ReadingExamRepository readingExamRepository;
     AttemptRepository attemptRepository;
     ReadingPassageRepository readingPassageRepository;
+    ReportDataRepository reportDataRepository;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     @NonFinal
@@ -96,7 +97,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
             });
         }
 
-
+        List<ReportData> reportData = new ArrayList<>();
 
         // Convert user answers for mapping questions and answers
         Map<UUID, List<String>> userAnswers = answers.answers().stream()
@@ -133,6 +134,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 SubmittedAttemptResponse.ResultSet result = checkMultipleChoiceQuestion(question, userSelectedAnswers);
                 points += result.isCorrect() ? question.getPoint() : 0;
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                                .questionType(question.getQuestionType())
+                                .questionId(question.getQuestionId())
+                                .isCorrect(points > 0)
+                        .build());
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
@@ -147,6 +153,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     points += question.getPoint();
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
             if (question.getQuestionType() == QuestionType.MATCHING) {
@@ -162,6 +173,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     points += question.getPoint();
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
             if( question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
@@ -176,6 +192,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
 
@@ -183,6 +204,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         examAttempt.setTotalPoint(points);
 
         examAttempt = examAttemptRepository.save(examAttempt);
+        reportDataRepository.saveAll(reportData);
         return SubmittedAttemptResponse.builder()
                 .duration(examAttempt.getDuration().longValue())
                 .resultSets(resultSets)

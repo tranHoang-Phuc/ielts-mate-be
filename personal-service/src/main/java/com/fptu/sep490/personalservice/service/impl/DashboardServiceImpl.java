@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -40,17 +42,26 @@ public class DashboardServiceImpl implements DashboardService {
         DataStats listeningStatsData = listeningStats.join();
 
         // Count attempted tasks and exams
-
+        Set<String> usedColorsInAvgReading = new HashSet<>();
+        Set<String> usedColorsInAvgListening = new HashSet<>();
 
         return CreatorDefaultDashboard.builder()
                 .numberOfReadingTasks(readingStatsData.numberOfTasks())
                 .numberOfListeningTasks(listeningStatsData.numberOfTasks())
                 .numberOfReadingExams(readingStatsData.numberOfExams())
                 .numberOfListeningExams(listeningStatsData.numberOfExams())
-                .userInAvgBranchScoreListening(readingStatsData.userInBranchAvg().stream()
+                .userInAvgBranchScoreReading(readingStatsData.userInBranchAvg().stream()
                         .map(p -> UserBranchScore.builder()
                                 .branchScore(p.branchScore())
                                 .numberOfUsers(p.numberOfUsers())
+                                // random color for each branch and color does not repeat
+                                .color(helper.getRandomColor(usedColorsInAvgReading))
+                                .build()).toList())
+                .userInAvgBranchScoreListening(listeningStatsData.userInBranchAvg().stream()
+                        .map(p -> UserBranchScore.builder()
+                                .branchScore(p.branchScore())
+                                .numberOfUsers(p.numberOfUsers())
+                                .color(helper.getRandomColor(usedColorsInAvgListening))
                                 .build()).toList())
                 .build();
     }

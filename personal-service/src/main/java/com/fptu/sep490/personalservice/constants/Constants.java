@@ -1,5 +1,7 @@
 package com.fptu.sep490.personalservice.constants;
 
+import java.util.List;
+
 public class Constants {
     public final class ErrorCodeMessage {
         public static final String UNAUTHORIZED = "UNAUTHORIZED";
@@ -69,5 +71,30 @@ public class Constants {
                 "Phenomenal! %d days—90-day milestone. You’re unstoppable!",
                 "Quarter‑year streak! %d days straight of learning. Bravo!"
         };
+    }
+    public final class Color {
+        public static final List<String> COLOR_LIST = List.of(
+                "#8dc5ff",
+                "#85bdfb",
+                "#7db5f7",
+                "#75adf3",
+                "#6da5ef",
+                "#659deb",
+                "#5d95e7",
+                "#558de3",
+                "#4d85df",
+                "#457ddb",
+                "#3d75d7",
+                "#356dd3",
+                "#2d65cf",
+                "#255dcb",
+                "#1d55c7",
+                "#154dc3",
+                "#0d45bf",
+                "#053dbb",
+                "#0035b7",
+                "#002db3"
+        );
+
     }
 }
