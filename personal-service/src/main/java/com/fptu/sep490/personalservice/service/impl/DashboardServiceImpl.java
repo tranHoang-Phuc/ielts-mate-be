@@ -51,7 +51,6 @@ public class DashboardServiceImpl implements DashboardService {
                         .map(p -> UserBranchScore.builder()
                                 .branchScore(p.branchScore())
                                 .numberOfUsers(p.numberOfUsers())
-                                .color()
                                 .build()).toList())
                 .build();
     }
