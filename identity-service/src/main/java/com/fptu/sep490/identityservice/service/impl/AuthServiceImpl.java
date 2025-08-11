@@ -24,6 +24,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -126,6 +127,8 @@ public class AuthServiceImpl implements AuthService {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
     }
+
+
 
     @Override
     public KeyCloakTokenResponse refreshToken(String refreshToken) {
@@ -239,6 +242,19 @@ public class AuthServiceImpl implements AuthService {
         }
         return userAccessInfos.getFirst();
     }
+
+    @Override
+    public UserAccessInfo getUserAccessInfoByEmail(String email, String accessToken) throws JsonProcessingException {
+        String username = getUsernameFromToken(accessToken);
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
+
+    if (userAccessInfos.isEmpty()) {
+        throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, email);
+        }
+        return userAccessInfos.getFirst();
+    }
+
 
     @Override
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) throws JsonProcessingException {
