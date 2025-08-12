@@ -64,6 +64,7 @@ kafka:
     streak: streak-topic
     send-notification: send-notification-topic
     reminder: reminder-topic
+    topic-master: topic-master
 
 reminder:
   cron: 0 * * * * *
