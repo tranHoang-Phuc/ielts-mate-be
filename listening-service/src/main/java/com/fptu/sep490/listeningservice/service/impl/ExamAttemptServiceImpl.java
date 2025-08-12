@@ -274,6 +274,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 SubmittedExamAttemptResponse.ResultSet result = checkMultipleChoiceQuestion(question, userSelectedAnswers);
                 points += result.isCorrect() ? question.getPoint() : 0;
                 resultSets.add(result);
+
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedExamAttemptResponse.ResultSet result = SubmittedExamAttemptResponse.ResultSet.builder()

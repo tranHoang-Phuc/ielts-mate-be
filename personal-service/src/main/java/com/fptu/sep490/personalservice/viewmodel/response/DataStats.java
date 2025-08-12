@@ -11,6 +11,8 @@ public record DataStats(
         int taskAttempted,
         int examAttempted,
         List<UserInBranch> userInBranchAvg,
-        List<UserInBranch> userInBranchHighest
+        List<UserInBranch> userInBranchHighest,
+        List<ReportQuestionTypeStats> questionTypeStats,
+        List<ReportQuestionTypeStatsWrong> questionTypeStatsWrong
 ) {
 }

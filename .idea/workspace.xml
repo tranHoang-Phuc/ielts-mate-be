@@ -4,13 +4,40 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add a data report table">
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ReportQuestionTypeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ReportQuestionTypeStatsWrong.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ReportDataRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/QuestionTypeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/QuestionTypeStatsWrong.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/ReportQuestionTypeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/ReportQuestionTypeStatsWrong.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/ReportQuestionTypeStats.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/ReportQuestionTypeStatsWrong.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/DataStats.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/CreatorDefaultDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/CreatorDefaultDashboard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/DataStats.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReportDataRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReportDataRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/DataStats.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Record" />
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -69,8 +96,9 @@
     "Spring Boot.ApiGatewayApplication.executor": "Run",
     "Spring Boot.DiscoveryServiceApplication.executor": "Run",
     "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.PersonalServiceApplication.executor": "Run",
-    "Spring Boot.ReadingServiceApplication.executor": "Debug",
+    "Spring Boot.ReadingServiceApplication.executor": "Run",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
@@ -79,11 +107,24 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "run.configurations.included.in.services": "true",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
   }
 }]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.fptu.sep490.listeningservice.model" />
+      <recent name="com.fptu.sep490.readingservice.model" />
+      <recent name="com.fptu.sep490.personalservice.model" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="configurationTypes">
@@ -99,8 +140,10 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
+              <option value="ApiGatewayApplication" />
+              <option value="DiscoveryServiceApplication" />
               <option value="FileServiceApplication" />
-              <option value="ListeningServiceApplication" />
+              <option value="IdentityServiceApplication" />
               <option value="NotificationServiceApplication" />
             </set>
           </value>
@@ -302,6 +345,12 @@
       <updated>1754729777927</updated>
       <workItem from="1754729780730" duration="3114000" />
       <workItem from="1754786533055" duration="393000" />
+      <workItem from="1754790425666" duration="2900000" />
+      <workItem from="1754794862326" duration="3351000" />
+      <workItem from="1754811804358" duration="3920000" />
+      <workItem from="1754816248842" duration="9069000" />
+      <workItem from="1754897752477" duration="142000" />
+      <workItem from="1754949046671" duration="8933000" />
     </task>
     <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
@@ -311,7 +360,39 @@
       <option name="project" value="LOCAL" />
       <updated>1754733572466</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Merge branch 'temp' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
+      <option name="closed" value="true" />
+      <created>1754787098977</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1754787098977</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feature: markup">
+      <option name="closed" value="true" />
+      <created>1754796336577</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1754796336577</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix: 403">
+      <option name="closed" value="true" />
+      <created>1754897786204</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1754897786204</updated>
+    </task>
+    <task id="LOCAL-00005" summary="feature: add a data report table">
+      <option name="closed" value="true" />
+      <created>1754952105362</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1754952105362</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -319,7 +400,10 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix" />
+    <MESSAGE value="feature: markup" />
+    <MESSAGE value="fix: 403" />
+    <MESSAGE value="feature: add a data report table" />
+    <option name="LAST_COMMIT_MESSAGE" value="feature: add a data report table" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -332,6 +416,21 @@
             <option name="WATCH_EXIT" value="false" />
           </properties>
           <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java</url>
+          <line>151</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java</url>
+          <line>190</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java</url>
+          <line>80</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

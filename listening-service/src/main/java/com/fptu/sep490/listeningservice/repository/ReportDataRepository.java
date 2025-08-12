@@ -1,15 +1,14 @@
-package com.fptu.sep490.readingservice.repository;
+package com.fptu.sep490.listeningservice.repository;
 
-import com.fptu.sep490.readingservice.model.ReportData;
-import com.fptu.sep490.readingservice.model.ReportQuestionTypeStats;
-import com.fptu.sep490.readingservice.model.ReportQuestionTypeStatsWrong;
+import com.fptu.sep490.listeningservice.model.ReportData;
+import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStats;
+import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStatsWrong;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
-
 
 public interface ReportDataRepository extends JpaRepository<ReportData, Integer> {
     @Query(value = """
@@ -44,8 +43,8 @@ public interface ReportDataRepository extends JpaRepository<ReportData, Integer>
             UNION ALL SELECT 3
         )
         SELECT 
-            t.questionType AS "questionType", 
-            COALESCE(COUNT(r.id), 0) AS "wrongCount"
+            t.questionType AS questionType, 
+            COALESCE(COUNT(r.id), 0) AS wrongCount
         FROM types t
         LEFT JOIN report_data r 
             ON r.question_type = t.questionType

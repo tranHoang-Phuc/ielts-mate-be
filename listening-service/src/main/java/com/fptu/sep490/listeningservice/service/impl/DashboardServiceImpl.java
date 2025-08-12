@@ -1,10 +1,9 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
+import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStats;
+import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStatsWrong;
 import com.fptu.sep490.listeningservice.model.UserInBranch;
-import com.fptu.sep490.listeningservice.repository.AttemptRepository;
-import com.fptu.sep490.listeningservice.repository.ExamAttemptRepository;
-import com.fptu.sep490.listeningservice.repository.ListeningExamRepository;
-import com.fptu.sep490.listeningservice.repository.ListeningTaskRepository;
+import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.service.DashboardService;
 import com.fptu.sep490.listeningservice.viewmodel.response.DataStats;
 import lombok.AccessLevel;
@@ -25,7 +24,7 @@ public class DashboardServiceImpl implements DashboardService {
     ListeningExamRepository listeningExamRepository;
     AttemptRepository attemptRepository;
     ExamAttemptRepository examAttemptRepository;
-
+    ReportDataRepository reportDataRepository;
     @Override
     public DataStats getDataStats() {
         int numberOfTasks = listeningTaskRepository.getNumberOfTasks();
@@ -34,7 +33,8 @@ public class DashboardServiceImpl implements DashboardService {
         int numberOfExamAttempts = examAttemptRepository.getNumberOfExamAttempts();
         List<UserInBranch> userInBranchAvg = examAttemptRepository.getNumberOfUsersInBranchAvg();
         List<UserInBranch> userInBranchHighest = examAttemptRepository.getNumberOfUsersInBranchHighest();
-
+        List<ReportQuestionTypeStats> questionTypeStats = reportDataRepository.countCorrectByQuestionType(null, null);
+        List<ReportQuestionTypeStatsWrong> questionTypeStatsWrong = reportDataRepository.countWrongByQuestionType(null, null);
         return DataStats.builder()
                 .numberOfTasks(numberOfTasks)
                 .numberOfExams(numberOfExams)
@@ -42,6 +42,8 @@ public class DashboardServiceImpl implements DashboardService {
                 .taskAttempted(numberOfAttempts)
                 .userInBranchAvg(userInBranchAvg)
                 .userInBranchHighest(userInBranchHighest)
+                .questionTypeStats(questionTypeStats)
+                .questionTypeStatsWrong(questionTypeStatsWrong)
                 .build();
     }
 }

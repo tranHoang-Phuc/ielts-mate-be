@@ -22,13 +22,22 @@ public record CreatorDefaultDashboard(
         @JsonProperty("users_in_avg_branch_score_reading")
         List<UserBranchScore> userInAvgBranchScoreReading,
 
-        @JsonProperty("users_in_highest_branch_score_reading")
-        List<UserBranchScore> userInHighestBranchScoreReading,
 
         @JsonProperty("users_in_avg_branch_score_listening")
         List<UserBranchScore> userInAvgBranchScoreListening,
 
-        @JsonProperty("users_in_highest_branch_score_listening")
-        List<UserBranchScore> userInHighestBranchScoreListening
+        @JsonProperty("question_type_stats_reading")
+        List<QuestionTypeStats> questionTypeStatsReading,
+
+        @JsonProperty("question_type_stats_listening")
+        List<QuestionTypeStats> questionTypeStatsListening,
+
+        @JsonProperty("question_type_stats_reading_wrong")
+        List<QuestionTypeStatsWrong> questionTypeStatsReadingWrong,
+
+        @JsonProperty("question_type_stats_listening_wrong")
+        List<QuestionTypeStatsWrong> questionTypeStatsListeningWrong
+
+
 ) {
 }

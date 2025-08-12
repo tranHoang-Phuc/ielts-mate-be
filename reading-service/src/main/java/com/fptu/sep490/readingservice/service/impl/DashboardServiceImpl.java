@@ -1,10 +1,9 @@
 package com.fptu.sep490.readingservice.service.impl;
 
+import com.fptu.sep490.readingservice.model.ReportQuestionTypeStats;
+import com.fptu.sep490.readingservice.model.ReportQuestionTypeStatsWrong;
 import com.fptu.sep490.readingservice.model.UserInBranch;
-import com.fptu.sep490.readingservice.repository.AttemptRepository;
-import com.fptu.sep490.readingservice.repository.ExamAttemptRepository;
-import com.fptu.sep490.readingservice.repository.ReadingExamRepository;
-import com.fptu.sep490.readingservice.repository.ReadingPassageRepository;
+import com.fptu.sep490.readingservice.repository.*;
 import com.fptu.sep490.readingservice.service.DashboardService;
 import com.fptu.sep490.readingservice.viewmodel.response.DataStats;
 import jakarta.transaction.Transactional;
@@ -25,7 +24,7 @@ public class DashboardServiceImpl implements DashboardService {
     ReadingExamRepository readingExamRepository;
     AttemptRepository attemptRepository;
     ExamAttemptRepository examAttemptRepository;
-
+    ReportDataRepository reportDataRepository;
     @Override
     @Transactional
     public DataStats getDataStats() {
@@ -35,6 +34,8 @@ public class DashboardServiceImpl implements DashboardService {
         int numberOfExamAttempts = examAttemptRepository.getNumberOfExamAttempts();
         List<UserInBranch> userInBranchAvg = readingExamRepository.getNumberOfUsersInBranchAvg();
         List<UserInBranch> userInBranchHighest = readingExamRepository.getNumberOfUsersInBranchHighest();
+        List<ReportQuestionTypeStats> questionTypeStats = reportDataRepository.countCorrectByQuestionType(null, null);
+        List<ReportQuestionTypeStatsWrong> questionTypeStatsWrong = reportDataRepository.countWrongByQuestionType(null, null);
         return DataStats.builder()
                 .numberOfTasks(numberOfTasks)
                 .numberOfExams(numberOfExams)
@@ -42,6 +43,8 @@ public class DashboardServiceImpl implements DashboardService {
                 .examAttempted(numberOfExamAttempts)
                 .userInBranchAvg(userInBranchAvg)
                 .userInBranchHighest(userInBranchHighest)
+                .questionTypeStats(questionTypeStats)
+                .questionTypeStatsWrong(questionTypeStatsWrong)
                 .build();
     }
 }

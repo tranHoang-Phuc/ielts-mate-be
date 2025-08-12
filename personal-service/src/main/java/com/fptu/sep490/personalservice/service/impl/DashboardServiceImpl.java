@@ -5,9 +5,7 @@ import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.repository.client.ListeningClient;
 import com.fptu.sep490.personalservice.repository.client.ReadingClient;
 import com.fptu.sep490.personalservice.service.DashboardService;
-import com.fptu.sep490.personalservice.viewmodel.response.CreatorDefaultDashboard;
-import com.fptu.sep490.personalservice.viewmodel.response.DataStats;
-import com.fptu.sep490.personalservice.viewmodel.response.UserBranchScore;
+import com.fptu.sep490.personalservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +42,10 @@ public class DashboardServiceImpl implements DashboardService {
         // Count attempted tasks and exams
         Set<String> usedColorsInAvgReading = new HashSet<>();
         Set<String> usedColorsInAvgListening = new HashSet<>();
-
+        Set<String> usedColorsInQuestionTypeReading = new HashSet<>();
+        Set<String> usedColorsInQuestionTypeListening = new HashSet<>();
+        Set<String> usedColorsInQuestionTypeReadingWrong = new HashSet<>();
+        Set<String> usedColorsInQuestionTypeListeningWrong = new HashSet<>();
         return CreatorDefaultDashboard.builder()
                 .numberOfReadingTasks(readingStatsData.numberOfTasks())
                 .numberOfListeningTasks(listeningStatsData.numberOfTasks())
@@ -62,6 +63,30 @@ public class DashboardServiceImpl implements DashboardService {
                                 .branchScore(p.branchScore())
                                 .numberOfUsers(p.numberOfUsers())
                                 .color(helper.getRandomColor(usedColorsInAvgListening))
+                                .build()).toList())
+                .questionTypeStatsReading(readingStatsData.questionTypeStats().stream()
+                        .map(d -> QuestionTypeStats.builder()
+                                .questionType(d.questionType())
+                                .correctCount(d.correctCount())
+                                .color(helper.getRandomColor(usedColorsInQuestionTypeReading))
+                                .build()).toList())
+                .questionTypeStatsListening(listeningStatsData.questionTypeStats().stream()
+                        .map(d -> QuestionTypeStats.builder()
+                                .questionType(d.questionType())
+                                .correctCount(d.correctCount())
+                                .color(helper.getRandomColor(usedColorsInQuestionTypeListening))
+                                .build()).toList())
+                .questionTypeStatsReadingWrong(readingStatsData.questionTypeStatsWrong().stream()
+                        .map(d -> QuestionTypeStatsWrong.builder()
+                                .wrongCount(d.wrongCount())
+                                .questionType(d .questionType())
+                                .color(helper.getRandomColor(usedColorsInQuestionTypeReadingWrong))
+                                .build()).toList())
+                .questionTypeStatsListeningWrong(listeningStatsData.questionTypeStatsWrong().stream()
+                        .map(d -> QuestionTypeStatsWrong.builder()
+                                .wrongCount(d.wrongCount())
+                                .questionType(d.questionType())
+                                .color(helper.getRandomColor(usedColorsInQuestionTypeListeningWrong))
                                 .build()).toList())
                 .build();
     }
