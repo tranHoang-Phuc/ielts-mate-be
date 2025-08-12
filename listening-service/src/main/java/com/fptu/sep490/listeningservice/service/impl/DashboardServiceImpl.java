@@ -1,17 +1,20 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
+import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStats;
 import com.fptu.sep490.listeningservice.model.ReportQuestionTypeStatsWrong;
 import com.fptu.sep490.listeningservice.model.UserInBranch;
 import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.service.DashboardService;
 import com.fptu.sep490.listeningservice.viewmodel.response.DataStats;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,6 +28,7 @@ public class DashboardServiceImpl implements DashboardService {
     AttemptRepository attemptRepository;
     ExamAttemptRepository examAttemptRepository;
     ReportDataRepository reportDataRepository;
+    Helper helper;
     @Override
     public DataStats getDataStats() {
         int numberOfTasks = listeningTaskRepository.getNumberOfTasks();
@@ -45,5 +49,15 @@ public class DashboardServiceImpl implements DashboardService {
                 .questionTypeStats(questionTypeStats)
                 .questionTypeStatsWrong(questionTypeStatsWrong)
                 .build();
+    }
+
+    @Override
+    public List<ReportQuestionTypeStats> getQuestionTypeStats(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        return reportDataRepository.countCorrectByQuestionType(fromDate, toDate);
+    }
+
+    @Override
+    public List<ReportQuestionTypeStatsWrong> getQuestionTypeStatsWrong(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        return reportDataRepository.countWrongByQuestionType(fromDate, toDate);
     }
 }

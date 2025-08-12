@@ -15,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -89,6 +91,82 @@ public class DashboardServiceImpl implements DashboardService {
                                 .color(helper.getRandomColor(usedColorsInQuestionTypeListeningWrong))
                                 .build()).toList())
                 .build();
+    }
+
+    @Override
+    public List<QuestionTypeStats> getQuestionTypeStatsReading(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        Set<String> usedColors = new HashSet<>();
+        ResponseEntity<BaseResponse<List<ReportQuestionTypeStats>>> response = readingClient.getQuestionTypeStatsReading(
+                fromDate, toDate,"Bearer " + accessToken);
+        var body = response.getBody();
+        if (body == null || !response.getStatusCode().is2xxSuccessful()) {
+            return List.of();
+        }
+        return body.data().stream().map(
+                d -> QuestionTypeStats.builder()
+                        .questionType(d.questionType())
+                        .correctCount(d.correctCount())
+                        .color(helper.getRandomColor(usedColors))
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public List<QuestionTypeStatsWrong> getQuestionTypeStatsReadingWrong(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        Set<String> usedColors = new HashSet<>();
+        ResponseEntity<BaseResponse<List<ReportQuestionTypeStatsWrong>>> response = readingClient.getQuestionTypeStatsReadingWrong(
+                fromDate, toDate, "Bearer " + accessToken);
+        var body = response.getBody();
+        if (body == null || !response.getStatusCode().is2xxSuccessful()) {
+            return List.of();
+        }
+        return body.data().stream().map(
+                d -> QuestionTypeStatsWrong.builder()
+                        .questionType(d.questionType())
+                        .wrongCount(d.wrongCount())
+                        .color(helper.getRandomColor(usedColors))
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public List<QuestionTypeStats> getQuestionTypeStatsListening(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        Set<String> usedColors = new HashSet<>();
+        ResponseEntity<BaseResponse<List<ReportQuestionTypeStats>>> response = listeningClient.getQuestionTypeStatsListening(
+                fromDate, toDate, "Bearer " + accessToken);
+        var body = response.getBody();
+        if (body == null || !response.getStatusCode().is2xxSuccessful()) {
+            return List.of();
+        }
+        return body.data().stream().map(
+                d -> QuestionTypeStats.builder()
+                        .questionType(d.questionType())
+                        .correctCount(d.correctCount())
+                        .color(helper.getRandomColor(usedColors))
+                        .build()
+        ).toList();
+    }
+
+    @Override
+    public List<QuestionTypeStatsWrong> getQuestionTypeStatsListeningWrong(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        Set<String> usedColors = new HashSet<>();
+        ResponseEntity<BaseResponse<List<ReportQuestionTypeStats>>> response = listeningClient.getQuestionTypeStatsListening(
+                fromDate, toDate, "Bearer " + accessToken);
+        var body = response.getBody();
+        if (body == null || !response.getStatusCode().is2xxSuccessful()) {
+            return List.of();
+        }
+        return body.data().stream().map(
+                d -> QuestionTypeStatsWrong.builder()
+                        .questionType(d.questionType())
+                        .wrongCount(d.correctCount())
+                        .color(helper.getRandomColor(usedColors))
+                        .build()
+        ).toList();
     }
 
     @Async("statsExecutor")
