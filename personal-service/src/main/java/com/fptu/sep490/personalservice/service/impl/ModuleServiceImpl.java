@@ -504,8 +504,23 @@ public class ModuleServiceImpl implements ModuleService {
             );
         }
         // now not share with usser, that is email
+        ResponseEntity<BaseResponse<UserAccessInfo>> user = null;
         for (String email : shareModuleRequest.users()) {
-            ResponseEntity<BaseResponse<UserAccessInfo>> user = authClient.getUserInfoByEmail(email, "Bearer " + accessToken);
+            try {
+                user = authClient.getUserInfoByEmail(email, "Bearer " + accessToken);
+                if (user == null) {
+                    throw new AppException(
+                            Constants.ErrorCodeMessage.NOT_FOUND,
+                            Constants.ErrorCode.NOT_FOUND,
+                            HttpStatus.NOT_FOUND.value()
+                    );
+                }
+            }catch (Exception e){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.NOT_FOUND,
+                        Constants.ErrorCode.NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                );            }
             var body = user.getBody();
             String sharedUserId = body.data().id();
             if (sharedUserId.equals(userId)) {
