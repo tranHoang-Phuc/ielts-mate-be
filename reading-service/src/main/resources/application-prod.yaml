@@ -50,6 +50,7 @@ keycloak:
 kafka:
   topic:
     streak: streak-topic
+    topic-master: topic-master
 
 eureka:
   client:

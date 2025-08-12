@@ -66,6 +66,7 @@ topic:
   upload-audio: upload-audio-topic
   update-listening-audio: update-listening-audio-topic
   send-notification: send-notification-topic
+  topic-master: topic-master
 
 cloudinary:
   cloud-name: ${CLOUDINARY_NAME}

@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="change .env">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-prod.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/application-prod.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/application-prod.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755007108579</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="change .env">
+      <option name="closed" value="true" />
+      <created>1755007478463</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1755007478463</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
