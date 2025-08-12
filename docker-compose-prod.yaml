@@ -182,6 +182,7 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+      - PERSONAL_SERVICE=${PERSONAL_SERVICE}
     depends_on:
       - kafka
       - redis
@@ -280,6 +281,7 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+      - PERSONAL_SERVICE=${PERSONAL_SERVICE}
     depends_on:
       - kafka
       - redis

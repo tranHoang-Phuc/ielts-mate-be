@@ -76,3 +76,6 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVICE}
+
+service:
+  personal-service:${PERSONAL_SERVICE}
