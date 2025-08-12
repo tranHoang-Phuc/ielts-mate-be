@@ -71,7 +71,7 @@ reminder:
 service:
   reading-service: ${READING_SERVICE}
   listening-service: ${LISTENING_SERVICE}
-  identity-service: ${PERSONAL_SERVICE}
+  identity-service: ${IDENTITY_SERVICE}
 
 eureka:
   client:
