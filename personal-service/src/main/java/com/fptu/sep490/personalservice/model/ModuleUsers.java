@@ -66,6 +66,8 @@ public class ModuleUsers {
     @OneToMany(mappedBy = "moduleUsers", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FlashCardProgress> flashcardProgressList = new ArrayList<>();
 
+    @Column(name = "attempts")
+    private Integer attempts = 0; // Number of attempts made by the user on the module
 
     @PrePersist
     @PreUpdate

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
@@ -32,13 +34,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.servlet.http.HttpServletRequest;
@@ -60,6 +60,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ReadingExamRepository readingExamRepository;
     AttemptRepository attemptRepository;
     ReadingPassageRepository readingPassageRepository;
+    ReportDataRepository reportDataRepository;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
     @NonFinal
@@ -96,7 +97,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
             });
         }
 
-
+        List<ReportData> reportData = new ArrayList<>();
 
         // Convert user answers for mapping questions and answers
         Map<UUID, List<String>> userAnswers = answers.answers().stream()
@@ -133,6 +134,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 SubmittedAttemptResponse.ResultSet result = checkMultipleChoiceQuestion(question, userSelectedAnswers);
                 points += result.isCorrect() ? question.getPoint() : 0;
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                                .questionType(question.getQuestionType())
+                                .questionId(question.getQuestionId())
+                                .isCorrect(points > 0)
+                        .build());
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
@@ -147,6 +153,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     points += question.getPoint();
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
             if (question.getQuestionType() == QuestionType.MATCHING) {
@@ -162,6 +173,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     points += question.getPoint();
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
             if( question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
@@ -176,6 +192,11 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
+                reportData.add(ReportData.builder()
+                        .questionType(question.getQuestionType())
+                        .questionId(question.getQuestionId())
+                        .isCorrect(points > 0)
+                        .build());
             }
 
 
@@ -183,6 +204,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         examAttempt.setTotalPoint(points);
 
         examAttempt = examAttemptRepository.save(examAttempt);
+        reportDataRepository.saveAll(reportData);
         return SubmittedAttemptResponse.builder()
                 .duration(examAttempt.getDuration().longValue())
                 .resultSets(resultSets)
@@ -452,5 +474,37 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         overviewProgress.setNumberOfExamsInTimeFrame(numberOfExamsInTimeFrame);
         overviewProgress.setNumberOfTasksInTimeFrame(numberOfTasksInTimeFrame);
         return overviewProgress;
+    }
+
+    @Override
+    public List<LineChartData> getBandChart(LineChartReq body, String token) {
+        List<ExamAttempt> exams = examAttemptRepository.findByUserAndDateRange(helper.getUserIdFromToken(token),
+                body.getStartDate() != null ? body.getStartDate().atStartOfDay() : null,
+                body.getEndDate() != null ? body.getEndDate().atTime(LocalTime.MAX) : null);
+
+        if (exams == null || exams.isEmpty()) {
+            return Collections.emptyList(); // Trả về danh sách rỗng
+        }
+
+        LocalDate startDate = exams.getFirst().getCreatedAt().toLocalDate();
+        // 2. Grouping + averaging
+        Map<LocalDate, Double> avgByPeriod = exams.stream()
+                .collect(Collectors.groupingBy(
+                        exam -> DateTimeUtils.normalize(
+                                exam.getCreatedAt().toLocalDate(),
+                                body.getTimeFrame(),
+                                startDate),
+                        TreeMap::new,
+                        Collectors.averagingDouble(e -> e.getTotalPoint().doubleValue())
+                ));
+
+        // 3. Chuyển thành LineChartData và sort
+        return avgByPeriod.entrySet().stream()
+                .map(e -> LineChartData.builder()
+                        .date(e.getKey())
+                        .value(e.getValue())
+                        .build())
+                .sorted(Comparator.comparing(LineChartData::getDate))
+                .collect(Collectors.toList());
     }
 }

@@ -83,6 +83,7 @@ kafka:
     streak: streak-topic
     send-notification: send-notification-topic
     reminder: reminder-topic
+    topic-master: topic-master
 
 reminder:
   cron: 0 * * * * *
@@ -90,3 +91,9 @@ reminder:
 service:
   reading-service: http://localhost:9000/reading
   listening-service: http://localhost:8071/listening
+  identity-service : http://localhost:8090/identity
+
+openai:
+  api:
+    key: AIza
+

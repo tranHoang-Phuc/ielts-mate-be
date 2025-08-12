@@ -17,4 +17,7 @@ public interface AttemptRepository extends JpaRepository<Attempt, UUID> {
 
     @Query("SELECT a FROM Attempt a WHERE a.createdBy = :userId AND a.totalPoints IS NOT NULL")
     List<Attempt> findAllByUserId(String userId);
+
+    @Query(value = "select count(*) from attempts a where a.finished_at != null", nativeQuery = true)
+    int getNumberOfAttempts();
 }

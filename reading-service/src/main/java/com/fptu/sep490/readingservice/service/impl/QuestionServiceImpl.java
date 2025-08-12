@@ -7,6 +7,7 @@ import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.model.Choice;
+import com.fptu.sep490.readingservice.model.DragItem;
 import com.fptu.sep490.readingservice.model.Question;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionCategory;
@@ -817,7 +818,7 @@ public class QuestionServiceImpl implements QuestionService {
                     .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.INVALID_REQUEST,
                             Constants.ErrorCode.INVALID_REQUEST, HttpStatus.BAD_REQUEST.value()));
             boolean isBelongToItem = question.getDragItem().getDragItemId().equals(UUID.fromString(informationRequest.dragItemId()))
-                    || question.getDragItem().getParent().getDragItemId().equals(UUID.fromString(informationRequest.dragItemId()));
+                    || question.getDragItem().getParent() != null? question.getDragItem().getParent().getDragItemId().equals(UUID.fromString(informationRequest.dragItemId())): false;
             newVersion = Question.builder()
                     .questionOrder(question.getQuestionOrder())
                     .point(informationRequest.point())
@@ -912,8 +913,16 @@ public class QuestionServiceImpl implements QuestionService {
         }
         questionGroup.getQuestions().remove(question);
         question.setQuestionGroup(null);
-        question.setIsDeleted(false);
+        question.setIsDeleted(true);
         question.setIsCurrent(false);
+        if(question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+            DragItem dragItem = question.getDragItem();
+            dragItem.setQuestion(null);
+            question.setDragItem(null);
+            dragItemRepository.save(dragItem);
+        }
+        question.setUpdatedAt(LocalDateTime.now());
+        question.setUpdatedBy(userId);
         questionRepository.save(question);
         questionGroup.setUpdatedBy(userId);
         questionGroupRepository.save(questionGroup);

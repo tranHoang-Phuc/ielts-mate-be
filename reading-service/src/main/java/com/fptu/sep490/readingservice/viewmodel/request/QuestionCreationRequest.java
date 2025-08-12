@@ -41,7 +41,9 @@ public record QuestionCreationRequest(
         @JsonProperty("zone_index")
         Integer zoneIndex,
         @JsonProperty("drag_item_id")
-        String dragItemId
+        String dragItemId,
+        @JsonProperty("drag_item_content")
+        String dragItemContent
 ) {
     public record ChoiceRequest(
             @JsonProperty("label")

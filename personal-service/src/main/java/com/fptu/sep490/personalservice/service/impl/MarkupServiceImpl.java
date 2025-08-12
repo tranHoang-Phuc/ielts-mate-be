@@ -1,5 +1,6 @@
 package com.fptu.sep490.personalservice.service.impl;
 
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.personalservice.constants.Constants;
@@ -15,6 +16,7 @@ import com.fptu.sep490.personalservice.repository.specification.MarkupSpecificat
 import com.fptu.sep490.personalservice.service.MarkupService;
 import com.fptu.sep490.personalservice.viewmodel.request.MarkupCreationRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.MarkUpResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.MarkedUpResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -52,6 +54,7 @@ public class MarkupServiceImpl implements MarkupService {
                 .taskType(safeEnumFromOrdinal(TaskType.values(), markup.taskType()))
                 .practiceType(safeEnumFromOrdinal(PracticeType.values(), markup.practiceType()))
                 .accountId(accountId)
+                .taskId(markup.taskId())
                 .build();
         markupRepository.save(save);
     }
@@ -115,6 +118,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else if (item.getPracticeType().equals(PracticeType.EXAM) && item.getTaskType().equals(TaskType.READING)) {
                 return MarkUpResponse.builder()
@@ -123,6 +127,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else if(item.getPracticeType().equals(PracticeType.TASK) && item.getTaskType().equals(TaskType.LISTENING)) {
                 return MarkUpResponse.builder()
@@ -131,6 +136,7 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             } else {
                 return MarkUpResponse.builder()
@@ -139,11 +145,80 @@ public class MarkupServiceImpl implements MarkupService {
                         .markupType(item.getMarkupType().ordinal())
                         .taskType(item.getTaskType().ordinal())
                         .practiceType(item.getPracticeType().ordinal())
+                        .taskId(item.getTaskId())
                         .build();
             }
         }).toList();
         return new PageImpl<>(response, pageable, pageResult.getTotalElements());
     }
+
+    @Override
+    public MarkedUpResponse getMarkedUpData(String type, HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        if(userId == null) {
+            userId = helper.getUserIdFromToken();
+        }
+        switch (type) {
+            case DataMarkup.READING_TASK:
+                List<Markup> readingTaskMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.READING.ordinal(),
+                        PracticeType.TASK.ordinal()
+                );
+                Map<UUID, Integer> markUpMappingType = readingTaskMarkups.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(markUpMappingType)
+                        .build();
+            case DataMarkup.READING_EXAM:
+                List<Markup> readingExamMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.READING.ordinal(),
+                        PracticeType.EXAM.ordinal()
+                );
+                Map<UUID, Integer> markUpExamMappingType = readingExamMarkups.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(markUpExamMappingType)
+                        .build();
+            case DataMarkup.LISTENING_EXAM:
+                List<Markup> listeningExam = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.LISTENING.ordinal(),
+                        PracticeType.EXAM.ordinal()
+                );
+                Map<UUID, Integer> listeningExamMapping = listeningExam.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(listeningExamMapping)
+                        .build();
+            case DataMarkup.LISTENING_TASK:
+                List<Markup> listeningTask = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(
+                        UUID.fromString(userId),
+                        TaskType.LISTENING.ordinal(),
+                        PracticeType.TASK.ordinal()
+                );
+                Map<UUID, Integer> listeningTaskMapping = listeningTask.stream()
+                        .collect(Collectors.toMap(
+                                Markup::getTaskId,
+                                markup -> markup.getMarkupType().ordinal()
+                        ));
+                return MarkedUpResponse.builder()
+                        .markedUpIdsMapping(listeningTaskMapping)
+                        .build();
+        }
+        return null;
+    }
+
     @Async("markupExecutor")
     public CompletableFuture<Map<UUID, String>> fetchReadingTitlesAsync(String accessToken, List<UUID> taskId) {
         ResponseEntity<BaseResponse<List<TaskTitle>>> response = readingClient

@@ -6,6 +6,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.personalservice.service.MarkupService;
 import com.fptu.sep490.personalservice.viewmodel.request.MarkupCreationRequest;
 import com.fptu.sep490.personalservice.viewmodel.response.MarkUpResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.MarkedUpResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -100,6 +101,16 @@ public class MarkupController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(body);
+    }
+
+    @GetMapping("/internal/marked-up/{type}")
+    public ResponseEntity<BaseResponse<MarkedUpResponse>> getMarkedUpData(@PathVariable("type") String type, HttpServletRequest request) {
+        MarkedUpResponse markedUpResponse = markupService.getMarkedUpData(type, request);
+        BaseResponse<MarkedUpResponse> response = BaseResponse.<MarkedUpResponse>builder()
+                .data(markedUpResponse)
+                .message("Marked up data retrieved successfully")
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     private List<Integer> parseCommaSeparatedIntegers(String input) {

@@ -1,6 +1,9 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
+import com.fptu.sep490.commonlibrary.constants.CookieConstants;
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ListeningExam;
@@ -8,6 +11,7 @@ import com.fptu.sep490.listeningservice.model.ListeningTask;
 import com.fptu.sep490.listeningservice.model.enumeration.ExamStatus;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
 import com.fptu.sep490.listeningservice.repository.*;
+import com.fptu.sep490.listeningservice.repository.client.MarkupClient;
 import com.fptu.sep490.listeningservice.service.ExamService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
@@ -26,6 +30,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -42,7 +47,7 @@ public class ExamServiceImpl implements ExamService {
     QuestionRepository questionRepository;
     ChoiceRepository choiceRepository;
     ListeningExamRepository listeningExamRepository;
-
+    MarkupClient markupClient;
 
     Helper helper;
 
@@ -193,7 +198,9 @@ public class ExamServiceImpl implements ExamService {
                 listeningExam.getIsCurrent(),
                 listeningExam.getVersion(),
                 listeningExam.getIsOriginal(),
-                listeningExam.getIsDeleted()
+                listeningExam.getIsDeleted(),
+                null,
+                null
         );
         return response;
     }
@@ -274,7 +281,9 @@ public class ExamServiceImpl implements ExamService {
                 currentExam.getIsCurrent(),
                 currentExam.getVersion(),
                 currentExam.getIsOriginal(),
-                currentExam.getIsDeleted()
+                currentExam.getIsDeleted(),
+                null,
+                null
         );
         return response;
     }
@@ -507,7 +516,9 @@ public class ExamServiceImpl implements ExamService {
                 newExam.getIsCurrent(),
                 newExam.getVersion(),
                 newExam.getIsOriginal(),
-                newExam.getIsDeleted()
+                newExam.getIsDeleted(),
+                null,
+                null
         );
 
     }
@@ -534,7 +545,6 @@ public class ExamServiceImpl implements ExamService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ListeningExam> exams = listeningExamRepository.searchCurrentExamsByCreator(userId, keyword, pageable);
-
         return exams.map(this::mapToExamResponse);
     }
 
@@ -565,9 +575,20 @@ public class ExamServiceImpl implements ExamService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
         Page<ListeningExam> exams = listeningExamRepository.searchCurrentExamsActivated(userId, keyword, pageable);
+        Map<UUID, Integer> taskIdsMarkup;
+        String accessToken = CookieUtils.getCookieValue(httpServletRequest, CookieConstants.ACCESS_TOKEN);
+        if(accessToken != null) {
+            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.LISTENING_EXAM);
+            if(response.getStatusCode() == HttpStatus.OK) {
+                var body = response.getBody();
+                if (body != null) {
+                    taskIdsMarkup = body.data().markedUpIdsMapping();
+                    return exams.map(e -> mapToExamResponse(e, taskIdsMarkup));
 
+                }
+            }
+        }
         return exams.map(this::mapToExamResponse);
-
     }
 
     @Override
@@ -600,6 +621,71 @@ public class ExamServiceImpl implements ExamService {
         }
         return null;
     }
+    private ExamResponse mapToExamResponse(ListeningExam exam, Map<UUID, Integer> markedUpIdsMapping) {
+
+        ListeningTask currentPart1 = findCurrentOrChildCurrentTask(exam.getPart1());
+        ListeningTask currentPart2 = findCurrentOrChildCurrentTask(exam.getPart2());
+        ListeningTask currentPart3 = findCurrentOrChildCurrentTask(exam.getPart3());
+        ListeningTask currentPart4 = findCurrentOrChildCurrentTask(exam.getPart4());
+        return new ExamResponse(
+                exam.getListeningExamId(),
+                exam.getExamName(),
+                exam.getExamDescription(),
+                exam.getUrlSlug(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart1().getTaskId())
+                        .ieltsType(currentPart1.getIeltsType().ordinal())
+                        .partNumber(currentPart1.getPartNumber().ordinal())
+                        .instruction(currentPart1.getInstruction())
+                        .title(currentPart1.getTitle())
+                        .audioFileId(currentPart1.getAudioFileId())
+                        .transcription(currentPart1.getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart2().getTaskId())
+                        .ieltsType(currentPart2.getIeltsType().ordinal())
+                        .partNumber(currentPart2.getPartNumber().ordinal())
+                        .instruction(currentPart2.getInstruction())
+                        .title(currentPart2.getTitle())
+                        .audioFileId(currentPart2.getAudioFileId())
+                        .transcription(currentPart2.getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart3().getTaskId())
+                        .ieltsType(currentPart3.getIeltsType().ordinal())
+                        .partNumber(currentPart3.getPartNumber().ordinal())
+                        .instruction(currentPart3.getInstruction())
+                        .title(currentPart3.getTitle())
+                        .audioFileId(currentPart3.getAudioFileId())
+                        .transcription(currentPart3.getTranscription())
+                        .build(),
+
+                ListeningTaskResponse.builder()
+                        .taskId(exam.getPart4().getTaskId())
+                        .ieltsType(currentPart4.getIeltsType().ordinal())
+                        .partNumber(currentPart4.getPartNumber().ordinal())
+                        .instruction(currentPart4.getInstruction())
+                        .title(currentPart4.getTitle())
+                        .audioFileId(currentPart4.getAudioFileId())
+                        .transcription(currentPart4.getTranscription())
+                        .build(),
+
+                exam.getCreatedBy(),
+                exam.getCreatedAt(),
+                exam.getUpdatedBy(),
+                exam.getUpdatedAt(),
+                exam.getIsCurrent(),
+                exam.getVersion(),
+                exam.getIsOriginal(),
+                exam.getIsDeleted(),
+                markedUpIdsMapping.get(exam.getListeningExamId()) != null,
+                markedUpIdsMapping.get(exam.getListeningExamId())
+        );
+    }
+
     private ExamResponse mapToExamResponse(ListeningExam exam) {
 
         ListeningTask currentPart1 = findCurrentOrChildCurrentTask(exam.getPart1());
@@ -659,7 +745,9 @@ public class ExamServiceImpl implements ExamService {
                 exam.getIsCurrent(),
                 exam.getVersion(),
                 exam.getIsOriginal(),
-                exam.getIsDeleted()
+                exam.getIsDeleted(),
+                null,
+                null
         );
     }
 

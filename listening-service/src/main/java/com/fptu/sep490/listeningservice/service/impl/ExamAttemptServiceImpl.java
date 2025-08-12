@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
@@ -31,7 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -270,6 +274,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 SubmittedExamAttemptResponse.ResultSet result = checkMultipleChoiceQuestion(question, userSelectedAnswers);
                 points += result.isCorrect() ? question.getPoint() : 0;
                 resultSets.add(result);
+
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedExamAttemptResponse.ResultSet result = SubmittedExamAttemptResponse.ResultSet.builder()
@@ -430,6 +435,38 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         overviewProgress.setNumberOfExamsInTimeFrame(numberOfExamsInTimeFrame);
         overviewProgress.setNumberOfTasksInTimeFrame(numberOfTasksInTimeFrame);
         return overviewProgress;
+    }
+
+    @Override
+    public List<LineChartData> getBandChart(LineChartReq body, String token) {
+        List<ExamAttempt> exams = examAttemptRepository.findByUserAndDateRange(helper.getUserIdFromToken(token),
+                body.getStartDate() != null ? body.getStartDate().atStartOfDay() : null,
+                body.getEndDate() != null ? body.getEndDate().atTime(LocalTime.MAX) : null);
+
+        if (exams == null || exams.isEmpty()) {
+            return Collections.emptyList(); // Trả về danh sách rỗng
+        }
+
+        LocalDate startDate = exams.getFirst().getCreatedAt().toLocalDate();
+        // 2. Grouping + averaging
+        Map<LocalDate, Double> avgByPeriod = exams.stream()
+                .collect(Collectors.groupingBy(
+                        exam -> DateTimeUtils.normalize(
+                                exam.getCreatedAt().toLocalDate(),
+                                body.getTimeFrame(),
+                                startDate),
+                        TreeMap::new,
+                        Collectors.averagingDouble(e -> e.getTotalPoint().doubleValue())
+                ));
+
+        // 3. Chuyển thành LineChartData và sort
+        return avgByPeriod.entrySet().stream()
+                .map(e -> LineChartData.builder()
+                        .date(e.getKey())
+                        .value(e.getValue())
+                        .build())
+                .sorted(Comparator.comparing(LineChartData::getDate))
+                .collect(Collectors.toList());
     }
 
 }

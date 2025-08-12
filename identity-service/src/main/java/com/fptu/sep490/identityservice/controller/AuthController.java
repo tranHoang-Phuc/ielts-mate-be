@@ -179,6 +179,27 @@ public class AuthController {
                 .data(userAccessInfo)
                 .build());
     }
+    @GetMapping("/get-user-info-by-email")
+    @Operation(
+            summary = "Get user info by email",
+            description = "Retrieve user information based on the provided email address"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User information retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserAccessInfo.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<BaseResponse<UserAccessInfo>> getUserInfoByEmail(
+            @RequestParam String email,
+            HttpServletRequest request
+    ) throws Exception {
+        String accessToken = extractAccessToken(request);
+        UserAccessInfo userAccessInfo = authService.getUserAccessInfoByEmail(email, accessToken);
+        return ResponseEntity.ok(BaseResponse.<UserAccessInfo>builder()
+                .data(userAccessInfo)
+                .build());
+    }
+
 
     @PostMapping("/verify-email/send-otp")
     @Operation(

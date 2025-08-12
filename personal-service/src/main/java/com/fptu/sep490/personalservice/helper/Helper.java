@@ -24,6 +24,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class Helper {
     KeyCloakTokenClient keyCloakTokenClient;
     KeyCloakUserClient keyCloakUserClient;
     RedisService redisService;
+    Random random;
 
     @Value("${keycloak.realm}")
     @NonFinal
@@ -91,6 +95,10 @@ public class Helper {
         return CookieUtils.getCookieValue(request, "Authorization");
     }
 
+    public String getUserIdFromToken() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     public String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
         if (token == null || token.isEmpty()) {
@@ -124,4 +132,15 @@ public class Helper {
         }
     }
 
+    public String getRandomColor(Set<String> usedColors) {
+        List<String> available = Constants.Color.COLOR_LIST.stream()
+                .filter(c -> !usedColors.contains(c))
+                .toList();
+
+        // Chọn ngẫu nhiên
+        String color = available.get(random.nextInt(available.size()));
+        usedColors.add(color);
+        return color;
+
+    }
 }

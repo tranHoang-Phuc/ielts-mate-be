@@ -1,0 +1,62 @@
+package com.fptu.sep490.readingservice.service.impl;
+
+import com.fptu.sep490.readingservice.model.ReportQuestionTypeStats;
+import com.fptu.sep490.readingservice.model.ReportQuestionTypeStatsWrong;
+import com.fptu.sep490.readingservice.model.UserInBranch;
+import com.fptu.sep490.readingservice.repository.*;
+import com.fptu.sep490.readingservice.service.DashboardService;
+import com.fptu.sep490.readingservice.viewmodel.response.DataStats;
+import com.fptu.sep490.readingservice.viewmodel.response.QuestionTypeStats;
+import jakarta.transaction.Transactional;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Service
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
+public class DashboardServiceImpl implements DashboardService {
+    ReadingPassageRepository readingPassageRepository;
+    ReadingExamRepository readingExamRepository;
+    AttemptRepository attemptRepository;
+    ExamAttemptRepository examAttemptRepository;
+    ReportDataRepository reportDataRepository;
+    @Override
+    @Transactional
+    public DataStats getDataStats() {
+        int numberOfExams = readingExamRepository.getNumberOfExams();
+        int numberOfTasks = readingPassageRepository.getNumberOfPassages();
+        int numberOfAttempts = attemptRepository.getNumberOfAttempts();
+        int numberOfExamAttempts = examAttemptRepository.getNumberOfExamAttempts();
+        List<UserInBranch> userInBranchAvg = readingExamRepository.getNumberOfUsersInBranchAvg();
+        List<UserInBranch> userInBranchHighest = readingExamRepository.getNumberOfUsersInBranchHighest();
+        List<ReportQuestionTypeStats> questionTypeStats = reportDataRepository.countCorrectByQuestionType(null, null);
+        List<ReportQuestionTypeStatsWrong> questionTypeStatsWrong = reportDataRepository.countWrongByQuestionType(null, null);
+        return DataStats.builder()
+                .numberOfTasks(numberOfTasks)
+                .numberOfExams(numberOfExams)
+                .taskAttempted(numberOfAttempts)
+                .examAttempted(numberOfExamAttempts)
+                .userInBranchAvg(userInBranchAvg)
+                .userInBranchHighest(userInBranchHighest)
+                .questionTypeStats(questionTypeStats)
+                .questionTypeStatsWrong(questionTypeStatsWrong)
+                .build();
+    }
+
+    @Override
+    public List<ReportQuestionTypeStats> getQuestionTypeStats(LocalDate fromDate, LocalDate toDate) {
+        return reportDataRepository.countCorrectByQuestionType(fromDate, toDate);
+    }
+
+    @Override
+    public List<ReportQuestionTypeStatsWrong> getQuestionTypeStatsWrong(LocalDate fromDate, LocalDate toDate) {
+        return reportDataRepository.countWrongByQuestionType(fromDate, toDate);
+    }
+}

@@ -1,10 +1,15 @@
 package com.fptu.sep490.readingservice.service.impl;
 
+import com.fptu.sep490.commonlibrary.constants.CookieConstants;
+import com.fptu.sep490.commonlibrary.constants.DataMarkup;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
+import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
+import com.fptu.sep490.readingservice.repository.client.MarkupClient;
 import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,10 +28,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.time.LocalDateTime;
 
 @Service
@@ -37,9 +39,11 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
     Helper helper;
     ReadingPassageRepository readingPassageRepository;
     ReadingExamRepository readingExamRepository;
+    MarkupClient markupClient;
     @Override
     public ReadingExamResponse createReadingExam(ReadingExamCreationRequest readingExamCreationRequest, HttpServletRequest request) throws Exception {
         String userId = helper.getUserIdFromToken(request);
+
 
         if (readingExamCreationRequest == null) {
             throw new IllegalArgumentException("Reading exam creation request cannot be null");
@@ -59,7 +63,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart1.get().getPartNumber() != PartNumber.PART_1){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart1(readingPassagePart1.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart2().isEmpty()){
@@ -70,7 +82,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart2.get().getPartNumber() != PartNumber.PART_2){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart2(readingPassagePart2.get());
         }
         if(!readingExamCreationRequest.readingPassageIdPart3().isEmpty()){
@@ -81,7 +101,15 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
-                );            }
+                );
+            }
+            if(readingPassagePart3.get().getPartNumber() != PartNumber.PART_3){
+                throw new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_INVALID_PART,
+                        Constants.ErrorCode.PASSAGE_INVALID_PART,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
             readingExam.setPart3(readingPassagePart3.get());
         }
         readingExam.setCreatedBy(userId);
@@ -106,7 +134,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
                         readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
                         readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
-                )
+                ),
+                null,
+                null
         );
 
 
@@ -203,7 +233,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         newReadingExam.getPart3() != null ? newReadingExam.getPart3().getPassageId().toString() : null,
                         newReadingExam.getPart3() != null ? newReadingExam.getPart3().getTitle() : null,
                         newReadingExam.getPart3() != null ? newReadingExam.getPart3().getContent() : null
-                )
+                ),
+                null,
+                null
         );
         return response;
     }
@@ -278,7 +310,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getPassageId().toString() : null,
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getTitle() : null,
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getContent() : null
-                )
+                ),
+                null,
+                null
         );
         return response;
 
@@ -323,7 +357,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getPassageId().toString() : null,
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getTitle() : null,
                         finalReadingExam.getPart3() != null ? finalReadingExam.getPart3().getContent() : null
-                )
+                ),
+                null,
+                null
         );
         return response;
     }
@@ -378,7 +414,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                                 readingExam.getPart3() != null ? readingExam.getPart3().getPassageId().toString() : null,
                                 readingExam.getPart3() != null ? readingExam.getPart3().getTitle() : null,
                                 readingExam.getPart3() != null ? readingExam.getPart3().getContent() : null
-                        )
+                        ),
+                        null,
+                        null
                 ))
                 .toList();
 
@@ -448,7 +486,9 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                             exam.getUrlSlug(),
                             toPassageResponse(part1, exam.getPart1().getPassageId().toString()),
                             toPassageResponse(part2, exam.getPart2().getPassageId().toString()),
-                            toPassageResponse(part3, exam.getPart3().getPassageId().toString())
+                            toPassageResponse(part3, exam.getPart3().getPassageId().toString()),
+                            null,
+                            null
                     );
                 })
                 .toList();
@@ -542,10 +582,39 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                             exam.getUrlSlug(),
                             toPassageResponse(part1, exam.getPart1().getPassageId().toString()),
                             toPassageResponse(part2, exam.getPart2().getPassageId().toString()),
-                            toPassageResponse(part3, exam.getPart3().getPassageId().toString())
+                            toPassageResponse(part3, exam.getPart3().getPassageId().toString()),
+                            null,
+                            null
                     );
                 })
                 .toList();
+        Map<UUID, Integer> examIdsMarkUp;
+        String accessToken = CookieUtils.getCookieValue(httpServletRequest, CookieConstants.ACCESS_TOKEN);
+        if(accessToken != null) {
+            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.READING_EXAM);
+            if(response.getStatusCode() == HttpStatus.OK) {
+                var body = response.getBody();
+                if (body != null) {
+                    examIdsMarkUp = body.data().markedUpIdsMapping();
+                    readingExamResponses = readingExamResponses.stream()
+                            .map(e ->
+                                    ReadingExamResponse.builder()
+                                            .readingExamId(e.readingExamId())
+                                            .readingExamName(e.readingExamName())
+                                            .readingExamDescription(e.readingExamDescription())
+                                            .urlSlug(e.urlSlug())
+                                            .readingPassageIdPart1(e.readingPassageIdPart1())
+                                            .readingPassageIdPart2(e.readingPassageIdPart2())
+                                            .readingPassageIdPart3(e.readingPassageIdPart3())
+                                            .isMarkedUp(examIdsMarkUp.get(UUID.fromString(e.readingExamId()))!= null)
+                                            .markupTypes(examIdsMarkUp.get(UUID.fromString(e.readingExamId())))
+                                            .build())
+                            .toList();
+                    return new PageImpl<>(readingExamResponses, pageable, readingExamPage.getTotalElements());
+                }
+            }
+        }
+
 
         return new PageImpl<>(readingExamResponses, pageable, readingExamPage.getTotalElements());
     }

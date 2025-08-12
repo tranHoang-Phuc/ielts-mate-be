@@ -24,6 +24,8 @@ public record ModuleProgressResponse(
         Double progress, // percentage of module completed
         @JsonProperty("learning_status")
         LearningStatus learningStatus, // 0: not started, 1: in progress, 2: completed
+        @JsonProperty("attempts")
+        Integer attempts, // number of attempts user has made on the module
         @JsonProperty("last_index_read")
         Integer lastIndexRead, // this is index that user last read in module, then when user open it, it will show the last read
         @JsonProperty("flashcard_progresses")
