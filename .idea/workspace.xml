@@ -4,26 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add a data report table">
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ReportQuestionTypeStats.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ReportQuestionTypeStatsWrong.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ReportDataRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/QuestionTypeStats.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/QuestionTypeStatsWrong.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/ReportQuestionTypeStats.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/ReportQuestionTypeStatsWrong.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/ReportQuestionTypeStats.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/model/ReportQuestionTypeStatsWrong.java" afterDir="false" />
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix: add markup">
+      <change afterPath="$PROJECT_DIR$/common-library/src/main/java/com/fptu/sep490/commonlibrary/constants/AIModel.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/GeminiProperties.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/repository/client/GeminiClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/strategy/AiApiStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/strategy/GeminiApiStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/strategy/OpenAIStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/request/GeminiRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/AIResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/GeminiResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/DataStats.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/CreatorDefaultDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/CreatorDefaultDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/DataStats.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReportDataRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReportDataRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/DashboardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/DashboardServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/DataStats.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/DataStats.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,8 +25,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Interface" />
         <option value="Record" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -98,7 +90,7 @@
     "Spring Boot.IdentityServiceApplication.executor": "Run",
     "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.PersonalServiceApplication.executor": "Run",
-    "Spring Boot.ReadingServiceApplication.executor": "Run",
+    "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
     "node.js.detected.package.eslint": "true",
@@ -121,6 +113,8 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.fptu.sep490.event" />
+      <recent name="com.fptu.sep490.readingservice.viewmodel.response" />
       <recent name="com.fptu.sep490.listeningservice.model" />
       <recent name="com.fptu.sep490.readingservice.model" />
       <recent name="com.fptu.sep490.personalservice.model" />
@@ -140,10 +134,7 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
-              <option value="ApiGatewayApplication" />
-              <option value="DiscoveryServiceApplication" />
               <option value="FileServiceApplication" />
-              <option value="IdentityServiceApplication" />
               <option value="NotificationServiceApplication" />
             </set>
           </value>
@@ -350,7 +341,7 @@
       <workItem from="1754811804358" duration="3920000" />
       <workItem from="1754816248842" duration="9069000" />
       <workItem from="1754897752477" duration="142000" />
-      <workItem from="1754949046671" duration="8933000" />
+      <workItem from="1754949046671" duration="27378000" />
     </task>
     <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
@@ -392,7 +383,39 @@
       <option name="project" value="LOCAL" />
       <updated>1754952105362</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="feature: add report dashboard">
+      <option name="closed" value="true" />
+      <created>1754965728223</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1754965728223</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feature: add report dashboard filter">
+      <option name="closed" value="true" />
+      <created>1754969085568</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1754969085568</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feature: sync topic master">
+      <option name="closed" value="true" />
+      <created>1754974870436</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1754974870436</updated>
+    </task>
+    <task id="LOCAL-00009" summary="fix: add markup">
+      <option name="closed" value="true" />
+      <created>1754983856092</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1754983856092</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -403,7 +426,11 @@
     <MESSAGE value="feature: markup" />
     <MESSAGE value="fix: 403" />
     <MESSAGE value="feature: add a data report table" />
-    <option name="LAST_COMMIT_MESSAGE" value="feature: add a data report table" />
+    <MESSAGE value="feature: add report dashboard" />
+    <MESSAGE value="feature: add report dashboard filter" />
+    <MESSAGE value="feature: sync topic master" />
+    <MESSAGE value="fix: add markup" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: add markup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -419,18 +446,23 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java</url>
-          <line>151</line>
+          <line>152</line>
           <option name="timeStamp" value="7" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImpl.java</url>
-          <line>190</line>
+          <line>191</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/DashboardController.java</url>
+          <line>43</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImpl.java</url>
-          <line>80</line>
-          <option name="timeStamp" value="14" />
+          <line>102</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

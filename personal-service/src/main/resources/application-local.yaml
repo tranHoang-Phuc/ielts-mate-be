@@ -97,3 +97,9 @@ openai:
   api:
     key: AIza
 
+gemini:
+  api:
+    key: AIzaSyAkB9Bl96S6dne2u4NJACU05t1wuVwaspI
+    url: https://generativelanguage.googleapis.com
+
+
