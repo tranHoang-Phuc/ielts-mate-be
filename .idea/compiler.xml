@@ -20,10 +20,13 @@
     <bytecodeTargetLevel>
       <module name="api-gateway" target="21" />
       <module name="common-library" target="21" />
+      <module name="discovery-service" target="21" />
       <module name="file-service" target="21" />
       <module name="identity-service" target="21" />
       <module name="ielts-mate-be" target="21" />
+      <module name="listening-service" target="21" />
       <module name="notification-service" target="21" />
+      <module name="personal-service" target="21" />
       <module name="reading-service" target="21" />
       <module name="sample" target="21" />
     </bytecodeTargetLevel>
