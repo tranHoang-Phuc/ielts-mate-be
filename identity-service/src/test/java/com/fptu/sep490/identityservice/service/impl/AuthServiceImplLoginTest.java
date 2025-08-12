@@ -1,21 +1,13 @@
 package com.fptu.sep490.identityservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.NotFoundException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.IntrospectResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
-import com.fptu.sep490.identityservice.constants.Constants;
-import com.fptu.sep490.identityservice.exception.ErrorNormalizer;
 import com.fptu.sep490.identityservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.identityservice.repository.client.KeyCloakUserClient;
-import com.fptu.sep490.identityservice.viewmodel.LoginRequest;
 import com.fptu.sep490.identityservice.viewmodel.UserAccessInfo;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationParam;
-import com.fptu.sep490.identityservice.viewmodel.UserCreationRequest;
-import feign.FeignException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,21 +15,13 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static net.bytebuddy.matcher.ElementMatchers.any;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
