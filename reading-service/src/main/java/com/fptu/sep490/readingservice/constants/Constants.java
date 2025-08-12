@@ -67,8 +67,5 @@ public class Constants {
         public static final String CANT_UPDATE_TEST_TO_ANOTHER = "100028";
         public static final String EXAM_ATTEMPT_NOT_SUBMIT = "100029";
         public static final String PASSAGE_INVALID_PART = "100030";
-
-
-
     }
 }

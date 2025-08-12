@@ -3,10 +3,13 @@ package com.fptu.sep490.listeningservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.constants.DataMarkup;
+import com.fptu.sep490.commonlibrary.constants.Operation;
+import com.fptu.sep490.commonlibrary.constants.TopicType;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
+import com.fptu.sep490.event.TopicMasterRequest;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
@@ -36,6 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
@@ -66,6 +70,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     KeyCloakUserClient keyCloakUserClient;
     KeyCloakTokenClient keyCloakTokenClient;
     MarkupClient markupClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${topic.upload-audio}")
     @NonFinal
@@ -83,6 +88,10 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     @Value("${keycloak.client-secret}")
     @NonFinal
     String clientSecret;
+
+    @Value("${topic.topic-master}")
+    @NonFinal
+    String topicMasterTopic;
 
     @Override
     @Transactional
@@ -129,7 +138,13 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         ListeningTask saved = listeningTaskRepository.save(listeningTask);
 
         fileService.uploadAsync("listening-tasks", audio, saved.getTaskId(), UUID.fromString(userId));
-
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.LISTENING_TYPE)
+                .operation(Operation.CREATE)
+                .taskId(saved.getTaskId())
+                .title(saved.getTitle())
+                .build();
+        kafkaTemplate.send(topicMasterTopic, topicMaterRequest);
         return ListeningTaskResponse.builder()
                 .taskId(saved.getTaskId())
                 .audioFileId(saved.getAudioFileId())
@@ -222,7 +237,13 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         listeningTaskRepository.saveAll(allVersion);
         listeningTaskRepository.save(newVersion);
         listeningTaskRepository.save(task);
-
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.LISTENING_TYPE)
+                .operation(Operation.UPDATE)
+                .taskId(task.getTaskId())
+                .title(newVersion.getTitle())
+                .build();
+        kafkaTemplate.send(topicMasterTopic, topicMaterRequest);
         return ListeningTaskResponse.builder()
                 .taskId(task.getTaskId())
                 .ieltsType(newVersion.getIeltsType().ordinal())
@@ -253,7 +274,13 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         tasks.forEach(task -> {
             task.setIsDeleted(true);
         });
-
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.LISTENING_TYPE)
+                .operation(Operation.DELETE)
+                .taskId(origin.getTaskId())
+                .title(origin.getTitle())
+                .build();
+        kafkaTemplate.send(topicMasterTopic, topicMaterRequest);
         listeningTaskRepository.saveAll(tasks);
     }
 

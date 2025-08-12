@@ -3,11 +3,14 @@ package com.fptu.sep490.readingservice.service.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.constants.DataMarkup;
+import com.fptu.sep490.commonlibrary.constants.Operation;
+import com.fptu.sep490.commonlibrary.constants.TopicType;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
+import com.fptu.sep490.event.TopicMasterRequest;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
@@ -35,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +66,7 @@ public class PassageServiceImpl implements PassageService {
     DragItemRepository dragItemRepository;
     RedisService redisService;
     MarkupClient markupClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
     private final Helper helper;
 
 
@@ -76,6 +81,10 @@ public class PassageServiceImpl implements PassageService {
     @Value("${keycloak.client-secret}")
     @NonFinal
     String clientSecret;
+
+    @Value("${kafka.topic.topic-master}")
+    @NonFinal
+    String topicMaster;
 
 
     @Override
@@ -105,6 +114,13 @@ public class PassageServiceImpl implements PassageService {
         ReadingPassage saved = readingPassageRepository.save(readingPassage);
         UserProfileResponse createdUserProfileResponse = getUserProfileById(userId);
         UserProfileResponse updatedUserProfileResponse = getUserProfileById(saved.getUpdatedBy());
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.READING_TYPE)
+                .operation(Operation.CREATE)
+                .taskId(saved.getPassageId())
+                .title(saved.getTitle())
+                .build();
+        kafkaTemplate.send(topicMaster, topicMaterRequest);
         return PassageCreationResponse.builder()
                 .passageId(saved.getPassageId().toString())
                 .ieltsType(saved.getIeltsType().ordinal())
@@ -323,6 +339,14 @@ public class PassageServiceImpl implements PassageService {
                 .email(updatedProfile.email())
                 .build();
 
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.READING_TYPE)
+                .operation(Operation.UPDATE)
+                .taskId(saved.getPassageId())
+                .title(saved.getTitle())
+                .build();
+        kafkaTemplate.send(topicMaster, topicMaterRequest);
+
         return PassageDetailResponse.builder()
                 .passageId(updated.getPassageId().toString())
                 .title(saved.getTitle())
@@ -526,6 +550,13 @@ public class PassageServiceImpl implements PassageService {
                 ));
         existingPassage.setIsDeleted(true);
         readingPassageRepository.save(existingPassage);
+        TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
+                .type(TopicType.READING_TYPE)
+                .operation(Operation.DELETE)
+                .taskId(existingPassage.getPassageId())
+                .title(existingPassage.getTitle())
+                .build();
+        kafkaTemplate.send(topicMaster, topicMaterRequest);
         log.info("Passage with ID {} has been deleted successfully", passageId);
     }
 

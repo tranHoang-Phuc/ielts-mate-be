@@ -75,3 +75,4 @@ service:
 kafka:
   topic:
     streak: streak-topic
+    topic-master: topic-master
