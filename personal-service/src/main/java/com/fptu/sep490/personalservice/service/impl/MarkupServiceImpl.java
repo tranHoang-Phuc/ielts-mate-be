@@ -54,6 +54,7 @@ public class MarkupServiceImpl implements MarkupService {
                 .taskType(safeEnumFromOrdinal(TaskType.values(), markup.taskType()))
                 .practiceType(safeEnumFromOrdinal(PracticeType.values(), markup.practiceType()))
                 .accountId(accountId)
+                .taskId(markup.taskId())
                 .build();
         markupRepository.save(save);
     }
