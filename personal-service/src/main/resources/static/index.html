@@ -86,20 +86,6 @@
                 }
             });
 
-            // Private queue for message history
-            stompClient.subscribe("/user/queue/messages", function(message) {
-                try {
-                    const payload = JSON.parse(message.body);
-                    if (Array.isArray(payload)) {
-                        payload.forEach(msg => {
-                            logGroup(`<b>${msg.sender}:</b> ${msg.content || ''}`);
-                        });
-                    }
-                } catch(e) {
-                    console.error("History parse error", e, message.body);
-                }
-            });
-
             stompClient.send("/app/chat.addUser", {}, JSON.stringify({
                 sender: document.getElementById("username").value || "anonymous",
                 senderId: senderId,
@@ -129,6 +115,10 @@
         currentGroupId = document.getElementById("groupIdInput").value.trim();
         if (!currentGroupId) { alert("Enter groupId"); return; }
 
+        // Clear old messages
+        document.getElementById("groupBox").innerHTML = "";
+
+        // Subscribe to group chat
         stompClient.subscribe("/topic/group." + currentGroupId, function(message) {
             try {
                 const payload = JSON.parse(message.body);
@@ -138,6 +128,22 @@
             }
         });
 
+        // Subscribe to history for this group
+        stompClient.subscribe("/queue/messages." + currentGroupId, function(message) {
+            try {
+                const payload = JSON.parse(message.body);
+                console.log("📜 Group history received:", payload);
+                if (Array.isArray(payload)) {
+                    payload.forEach(msg => {
+                        logGroup(`<b>${msg.sender}:</b> ${msg.content || ''}`);
+                    });
+                }
+            } catch(e) {
+                console.error("History parse error", e, message.body);
+            }
+        });
+
+        // Notify server join
         stompClient.send("/app/chat.joinGroup", {}, JSON.stringify({
             sender: document.getElementById("username").value || "anonymous",
             senderId: senderId,

@@ -6,6 +6,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.model.TopicMaster;
+import com.fptu.sep490.personalservice.model.enumeration.LangGuage;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
 import com.fptu.sep490.personalservice.repository.TopicMaterRepository;
 import com.fptu.sep490.personalservice.repository.client.ListeningClient;
@@ -111,4 +112,71 @@ public class AIServiceImpl implements AIService {
 
         return prompt.toString();
     }
+    /**
+     * Gọi AI để định nghĩa một từ vựng kèm context.
+     *
+     * @param word     Từ cần định nghĩa
+     * @param context  Ngữ cảnh (có thể null hoặc rỗng)
+     * @param language Ngôn ngữ muốn nhận kết quả (ENGLISH hoặc VIETNAMESE)
+     * @return Nghĩa của từ theo ngôn ngữ yêu cầu
+     */
+    public String getVocabularyDefinition(String word, String context, LangGuage language) {
+        try {
+            // Tạo prompt dựa trên ngôn ngữ
+            String prompt = createVocabularyDefinitionPrompt(word, context, language);
+            log.info("Generated vocabulary prompt for word '{}' with language {}: {}", word, language, prompt);
+
+            // Chọn AI strategy (ví dụ Gemini)
+            AiApiStrategy strategy = aiStrategyFactory.getStrategy(AIModel.Gemini.FLASH2_5);
+            log.info("Using AI strategy: {}", strategy.getClass().getSimpleName());
+
+            // Gọi AI model
+            AIResponse aiResponse = strategy.callModel(prompt, AIModel.Gemini.FLASH2_5);
+
+            // Lấy nội dung nghĩa
+            if (aiResponse != null && aiResponse.getContent() != null && !aiResponse.getContent().isBlank()) {
+                return aiResponse.getContent().trim();
+            } else {
+                throw new AppException(
+                        "AI_MODEL_EMPTY_RESPONSE",
+                        "AI model returned empty response for vocabulary definition",
+                        HttpStatus.INTERNAL_SERVER_ERROR.value()
+                );
+            }
+        } catch (Exception e) {
+            log.error("Error getting vocabulary definition for word '{}': {}", word, e.getMessage(), e);
+            throw new RuntimeException("Failed to get vocabulary definition: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Tạo prompt cho AI để định nghĩa từ vựng theo ngôn ngữ yêu cầu
+     */
+    private String createVocabularyDefinitionPrompt(String word, String context, LangGuage language) {
+        StringBuilder prompt = new StringBuilder();
+
+        // Chọn hướng dẫn theo ngôn ngữ
+        if (language == LangGuage.VIETNAMESE) {
+            prompt.append("You are an advanced English-Vietnamese dictionary.\n");
+            prompt.append("Your task is to provide a short, clear, and accurate definition in Vietnamese.\n\n");
+        } else {
+            prompt.append("You are an advanced English-English dictionary.\n");
+            prompt.append("Your task is to provide a short, clear, and accurate definition in English.\n\n");
+        }
+
+        prompt.append("=== WORD ===\n").append(word).append("\n");
+        if (context != null && !context.isBlank()) {
+            prompt.append("=== CONTEXT ===\n").append(context).append("\n");
+        }
+
+        prompt.append("\n=== OUTPUT REQUIREMENTS ===\n");
+        if (language == LangGuage.VIETNAMESE) {
+            prompt.append("Only return the Vietnamese meaning of the word. No extra explanation, no English.\n");
+        } else if (language == LangGuage.ENGLISH) {
+            prompt.append("Only return the English meaning of the word. No translation, no extra explanation.\n");
+        }
+
+        return prompt.toString();
+    }
+
 }
