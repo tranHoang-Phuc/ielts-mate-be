@@ -2,6 +2,7 @@ package com.fptu.sep490.personalservice.controller;
 
 import com.fptu.sep490.personalservice.model.ChatGroup;
 import com.fptu.sep490.personalservice.model.Message;
+import com.fptu.sep490.personalservice.model.enumeration.MessageType;
 import com.fptu.sep490.personalservice.repository.ChatGroupRepository;
 import com.fptu.sep490.personalservice.repository.MessageRepository;
 import com.fptu.sep490.personalservice.viewmodel.request.ChatMessage;
@@ -11,12 +12,19 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/chat")
+
 public class ChatController {
 
     private final MessageRepository messageRepository;
@@ -24,6 +32,26 @@ public class ChatController {
     private final ChatGroupRepository chatGroupRepository;
 
 
+
+    @GetMapping("/history/{groupId}")
+    @ResponseBody
+    public List<ChatMessage> getChatHistory(@PathVariable String groupId) throws Exception {
+
+        ChatGroup group = chatGroupRepository.findById(groupId)
+                .orElseThrow(() -> new Exception("Group not found: " + groupId));
+
+        List<Message> messages = messageRepository.findByGroupIdOrderByCreatedAtAsc(group);
+
+        List<ChatMessage> chatMessages = messages.stream()
+                .map(m -> ChatMessage.builder()
+                        .senderId(m.getSenderId())
+                        .sender(m.getSenderName())
+                        .content(m.getContent())
+                        .groupId(group.getId())
+                        .build())
+                .toList();
+        return chatMessages;
+    }
     /**
      * Gửi tin nhắn public (chat tổng)
      */
@@ -100,7 +128,7 @@ public class ChatController {
                 .map(m -> ChatMessage.builder()
                         .senderId(m.getSenderId())
                         .sender(m.getSenderName())
-                        .Content(m.getContent())
+                        .content(m.getContent())
                         .groupId(group.getId())
                         .build())
                 .toList();

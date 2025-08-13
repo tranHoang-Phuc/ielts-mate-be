@@ -31,6 +31,7 @@ public class VocabularyServiceImpl  implements VocabularyService {
     ConfigRepository configRepository;
     VocabularyRepository vocabularyRepository;
     Helper helper;
+    AIServiceImpl aiServiceImpl;
 
 
     @Override
@@ -51,26 +52,27 @@ public class VocabularyServiceImpl  implements VocabularyService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), userId);
-        if (existingVocabulary != null) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
-                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
-                    HttpStatus.CONFLICT.value()
-            );
-        }
+//        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), userId);
+//        if (existingVocabulary != null) {
+//            throw new AppException(
+//                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
+//                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
+//                    HttpStatus.CONFLICT.value()
+//            );
+//        }
         Vocabulary newVocabulary = new Vocabulary();
         newVocabulary.setWord(vocabularyRequest.word());
         newVocabulary.setContext(vocabularyRequest.context());
         newVocabulary.setIsPublic(vocabularyRequest.isPublic());
         newVocabulary.setCreatedBy(userId);
 
+
         // Auto-fill meaning using AI API if not provided
         String meaning = vocabularyRequest.meaning();
         if (meaning == null || meaning.isBlank()) {
             // Replace with your actual AI API call
-            meaning ="";
-//            meaning = aiApiService.getMeaning(newVocabulary.getWord(), newVocabulary.getContext());
+
+            meaning = aiServiceImpl.getVocabularyDefinition(vocabularyRequest.word(), vocabularyRequest.context(), vocabularyRequest.language());
         }
         newVocabulary.setMeaning(meaning);
 
