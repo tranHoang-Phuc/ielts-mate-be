@@ -5,15 +5,12 @@ import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
-import com.fptu.sep490.readingservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
-import com.fptu.sep490.readingservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fptu.sep490.readingservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.readingservice.viewmodel.response.SubmittedAttemptResponse;
 
 import java.util.List;
 
@@ -36,4 +33,6 @@ public interface ExamAttemptService {
     OverviewProgress getOverViewProgress(OverviewProgressReq body, String token);
 
     List<LineChartData> getBandChart(LineChartReq body, String token);
+
+    List<ExamAttemptAI> getAttemptResultHistory(HttpServletRequest request);
 }
