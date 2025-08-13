@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ChatMessage {
 
-    private String Content; // The content of the message
+    private String content; // The content of the message
     private String sender; // The sender of the message, e.g., "user" or "assistant"
     private String senderId; // The ID of the sender, which can be a user ID or assistant ID
     private String groupId; // NEW

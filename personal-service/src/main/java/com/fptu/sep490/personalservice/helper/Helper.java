@@ -1,6 +1,8 @@
 package com.fptu.sep490.personalservice.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
@@ -9,8 +11,10 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.repository.client.KeyCloakTokenClient;
 import com.fptu.sep490.personalservice.repository.client.KeyCloakUserClient;
+import com.fptu.sep490.personalservice.service.impl.AIServiceImpl;
 import com.fptu.sep490.personalservice.viewmodel.response.UserInformationResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.UserProfileResponse;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +29,19 @@ import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+
+import java.time.Duration;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Map;
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -50,6 +64,7 @@ public class Helper {
     String clientSecret;
 
 
+
     public UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
         String clientToken = getCachedClientToken();
         UserProfileResponse cachedProfile = getFromCache(userId);
@@ -65,6 +80,7 @@ public class Helper {
         redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
         return profileResponse;
     }
+
     private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
         String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
         UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
@@ -143,4 +159,6 @@ public class Helper {
         return color;
 
     }
+
+
 }
