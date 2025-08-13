@@ -96,6 +96,8 @@ service:
 openai:
   api:
     key: AIza
+    url: https://api.openai.com
+    model: gpt-3.5-turbo
 
 gemini:
   api:
