@@ -55,9 +55,6 @@ public class AttemptServiceImpl implements AttemptService {
     AnswerAttemptRepository answerAttemptRepository;
 
     ObjectMapper objectMapper;
-    KeyCloakTokenClient keyCloakTokenClient;
-    KeyCloakUserClient keyCloakUserClient;
-    RedisService redisService;
     Helper helper;
 
     @Value("${keycloak.realm}")
