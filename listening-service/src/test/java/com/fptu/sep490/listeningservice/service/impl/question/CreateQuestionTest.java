@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.service.impl.question;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
@@ -59,9 +60,14 @@ public class CreateQuestionTest {
     @Mock
     private HttpServletRequest httpRequest;
 
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     private final String USER_ID = "creatortest123@gmail.com";
     private UUID GROUP_ID;
     private QuestionGroup GROUP;
+    private UserInformationResponse makeUserInfo(String id) {
+        return new UserInformationResponse(id, "Creator", "Test", id);
+    }
 
     private void assertAppEx(AppException ex,
                              String bizCode,
@@ -81,8 +87,8 @@ public class CreateQuestionTest {
 
         lenient().when(helper.getUserIdFromToken(httpRequest)).thenReturn(USER_ID);
         // Nếu 2 lớp này là record/final, ta mock bằng mockito-inline (test scope).
-        UserInformationResponse userInfo = mock(UserInformationResponse.class);
-        lenient().when(helper.getUserInformationResponse(anyString())).thenReturn(userInfo);
+        lenient().when(helper.getUserInformationResponse(anyString()))
+                .thenAnswer(inv -> makeUserInfo(inv.getArgument(0)));
 
         lenient().when(questionGroupRepository.findById(GROUP_ID)).thenReturn(Optional.of(GROUP));
 
@@ -519,5 +525,15 @@ public class CreateQuestionTest {
 
         verify(questionRepository).saveAndFlush(any(Question.class));
         verify(dragItemRepository).save(any(DragItem.class));
+//        String json = null;
+//        String json2 = null;
+//        try {
+//            json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(List.of(req));
+//            json2 = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(out);
+//        } catch (JsonProcessingException e) {
+//            throw new RuntimeException(e);
+//        }
+//        System.out.println(json);
+//        System.out.println(json2);
     }
 }
