@@ -137,7 +137,7 @@ public class ExamServiceImpl implements ExamService {
                 .createdBy(userId)
                 .build();
 
-        listeningExamRepository.save(listeningExam);
+        ListeningExam savedExam = listeningExamRepository.save(listeningExam);
 
 
         ListeningTask part1Current = findCurrentOrChildCurrentTask(part1);
@@ -146,10 +146,10 @@ public class ExamServiceImpl implements ExamService {
         ListeningTask part3Current = findCurrentOrChildCurrentTask(part3);
         ListeningTask part4Current = findCurrentOrChildCurrentTask(part4);
         ExamResponse response = new ExamResponse(
-                listeningExam.getListeningExamId(),
-                listeningExam.getExamName(),
-                listeningExam.getExamDescription(),
-                listeningExam.getUrlSlug(),
+                savedExam.getListeningExamId(),
+                savedExam.getExamName(),
+                savedExam.getExamDescription(),
+                savedExam.getUrlSlug(),
 
                 ListeningTaskResponse.builder()
                         .taskId(part1.getTaskId())
@@ -191,14 +191,14 @@ public class ExamServiceImpl implements ExamService {
                         .transcription(part4Current.getTranscription())
                         .build(),
 
-                listeningExam.getCreatedBy(),
-                listeningExam.getCreatedAt(),
-                listeningExam.getUpdatedBy(),
-                listeningExam.getUpdatedAt(),
-                listeningExam.getIsCurrent(),
-                listeningExam.getVersion(),
-                listeningExam.getIsOriginal(),
-                listeningExam.getIsDeleted(),
+                savedExam.getCreatedBy(),
+                savedExam.getCreatedAt(),
+                savedExam.getUpdatedBy(),
+                savedExam.getUpdatedAt(),
+                savedExam.getIsCurrent(),
+                savedExam.getVersion(),
+                savedExam.getIsOriginal(),
+                savedExam.getIsDeleted(),
                 null,
                 null
         );
@@ -461,62 +461,62 @@ public class ExamServiceImpl implements ExamService {
 
         listeningExamRepository.save(listeningExam);
         listeningExamRepository.save(currentExam);
-        listeningExamRepository.save(newExam);
+        ListeningExam newSave = listeningExamRepository.save(newExam);
 
         return new ExamResponse(
-                newExam.getListeningExamId(),
-                newExam.getExamName(),
-                newExam.getExamDescription(),
-                newExam.getUrlSlug(),
+                newSave.getListeningExamId(),
+                newSave.getExamName(),
+                newSave.getExamDescription(),
+                newSave.getUrlSlug(),
 
                 ListeningTaskResponse.builder()
-                        .taskId(newExam.getPart1().getTaskId())
-                        .ieltsType(newExam.getPart1().getIeltsType().ordinal())
-                        .partNumber(newExam.getPart1().getPartNumber().ordinal())
-                        .instruction(newExam.getPart1().getInstruction())
-                        .title(newExam.getPart1().getTitle())
-                        .audioFileId(newExam.getPart1().getAudioFileId())
-                        .transcription(newExam.getPart1().getTranscription())
+                        .taskId(newSave.getPart1().getTaskId())
+                        .ieltsType(newSave.getPart1().getIeltsType().ordinal())
+                        .partNumber(newSave.getPart1().getPartNumber().ordinal())
+                        .instruction(newSave.getPart1().getInstruction())
+                        .title(newSave.getPart1().getTitle())
+                        .audioFileId(newSave.getPart1().getAudioFileId())
+                        .transcription(newSave.getPart1().getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
-                        .taskId(newExam.getPart2().getTaskId())
-                        .ieltsType(newExam.getPart2().getIeltsType().ordinal())
-                        .partNumber(newExam.getPart2().getPartNumber().ordinal())
-                        .instruction(newExam.getPart2().getInstruction())
-                        .title(newExam.getPart2().getTitle())
-                        .audioFileId(newExam.getPart2().getAudioFileId())
-                        .transcription(newExam.getPart2().getTranscription())
+                        .taskId(newSave.getPart2().getTaskId())
+                        .ieltsType(newSave.getPart2().getIeltsType().ordinal())
+                        .partNumber(newSave.getPart2().getPartNumber().ordinal())
+                        .instruction(newSave.getPart2().getInstruction())
+                        .title(newSave.getPart2().getTitle())
+                        .audioFileId(newSave.getPart2().getAudioFileId())
+                        .transcription(newSave.getPart2().getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
-                        .taskId(newExam.getPart3().getTaskId())
-                        .ieltsType(newExam.getPart3().getIeltsType().ordinal())
-                        .partNumber(newExam.getPart3().getPartNumber().ordinal())
-                        .instruction(newExam.getPart3().getInstruction())
-                        .title(newExam.getPart3().getTitle())
-                        .audioFileId(newExam.getPart3().getAudioFileId())
-                        .transcription(newExam.getPart3().getTranscription())
+                        .taskId(newSave.getPart3().getTaskId())
+                        .ieltsType(newSave.getPart3().getIeltsType().ordinal())
+                        .partNumber(newSave.getPart3().getPartNumber().ordinal())
+                        .instruction(newSave.getPart3().getInstruction())
+                        .title(newSave.getPart3().getTitle())
+                        .audioFileId(newSave.getPart3().getAudioFileId())
+                        .transcription(newSave.getPart3().getTranscription())
                         .build(),
 
                 ListeningTaskResponse.builder()
-                        .taskId(newExam.getPart4().getTaskId())
-                        .ieltsType(newExam.getPart4().getIeltsType().ordinal())
-                        .partNumber(newExam.getPart4().getPartNumber().ordinal())
-                        .instruction(newExam.getPart4().getInstruction())
-                        .title(newExam.getPart4().getTitle())
-                        .audioFileId(newExam.getPart4().getAudioFileId())
-                        .transcription(newExam.getPart4().getTranscription())
+                        .taskId(newSave.getPart4().getTaskId())
+                        .ieltsType(newSave.getPart4().getIeltsType().ordinal())
+                        .partNumber(newSave.getPart4().getPartNumber().ordinal())
+                        .instruction(newSave.getPart4().getInstruction())
+                        .title(newSave.getPart4().getTitle())
+                        .audioFileId(newSave.getPart4().getAudioFileId())
+                        .transcription(newSave.getPart4().getTranscription())
                         .build(),
 
-                newExam.getCreatedBy(),
-                newExam.getCreatedAt(),
-                newExam.getUpdatedBy(),
-                newExam.getUpdatedAt(),
-                newExam.getIsCurrent(),
-                newExam.getVersion(),
-                newExam.getIsOriginal(),
-                newExam.getIsDeleted(),
+                newSave.getCreatedBy(),
+                newSave.getCreatedAt(),
+                newSave.getUpdatedBy(),
+                newSave.getUpdatedAt(),
+                newSave.getIsCurrent(),
+                newSave.getVersion(),
+                newSave.getIsOriginal(),
+                newSave.getIsDeleted(),
                 null,
                 null
         );
@@ -610,7 +610,7 @@ public class ExamServiceImpl implements ExamService {
     }
 
 
-    private ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
+    public ListeningExam findCurrentOrChildCurrentExam(ListeningExam listeningExam) {
         if (listeningExam.getIsCurrent() && !listeningExam.getIsDeleted()) {
             return listeningExam;
         }
@@ -621,7 +621,7 @@ public class ExamServiceImpl implements ExamService {
         }
         return null;
     }
-    private ExamResponse mapToExamResponse(ListeningExam exam, Map<UUID, Integer> markedUpIdsMapping) {
+    public ExamResponse mapToExamResponse(ListeningExam exam, Map<UUID, Integer> markedUpIdsMapping) {
 
         ListeningTask currentPart1 = findCurrentOrChildCurrentTask(exam.getPart1());
         ListeningTask currentPart2 = findCurrentOrChildCurrentTask(exam.getPart2());
