@@ -62,10 +62,6 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     ReadingPassageRepository readingPassageRepository;
     ReportDataRepository reportDataRepository;
 
-    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
-    @NonFinal
-    String issuerUri;
-
     @Override
     public SubmittedAttemptResponse submittedExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
 
@@ -506,5 +502,10 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         .build())
                 .sorted(Comparator.comparing(LineChartData::getDate))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ExamAttemptAI> getAttemptResultHistory(HttpServletRequest request) {
+        return List.of();
     }
 }

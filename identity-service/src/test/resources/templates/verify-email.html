@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verify Email</title>
+    <style>
+        body {
+            background-color: #f6f6f6;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            background-color: #ffffff;
+            margin: 50px auto;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin: 10px 0;
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+
+        p {
+            color: #444;
+            font-size: 15px;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
+
+        .otp-box {
+            display: inline-block;
+            background-color: #f4f1f8;
+            padding: 12px 20px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .footer-note {
+            color: #555;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .footer-box {
+            background-color: #f4f1f8;
+            padding: 15px;
+            font-size: 13px;
+            border-radius: 8px;
+            margin-top: 25px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Please verify your email <span class="emoji">🔒</span></h1>
+    <p>To complete your registration, please use the following one-time password (OTP):</p>
+
+    <div class="otp-box" th:text="${otp}"></div>
+
+    <p class="footer-note">
+        You're receiving this email because you have an account in our service.
+        If you are not sure why you're receiving this, please contact us by replying to this email.
+    </p>
+    <div class="footer-box">
+        Email specialists use our intuitive tool to design emails for desktop and mobile,
+        and let our smart algorithm generate HTML for use in their ESPs.
+    </div>
+</div>
+
+</body>
+</html>

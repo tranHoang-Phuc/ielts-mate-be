@@ -665,52 +665,6 @@ public class AttemptServiceImpl implements AttemptService {
         return resultSet;
     }
 
-    private Map<UUID, QuestionAttempt> getCorrectAnswer(List<Question> questions) {
-        Map<UUID, QuestionAttempt> correctAnswers = new HashMap<>();
-        for (Question q : questions) {
-
-            QuestionAttempt questionAttempt = QuestionAttempt.builder()
-                    .questionType(q.getQuestionType().ordinal())
-                    .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
-                    .build();
-
-            switch (q.getQuestionType()) {
-                case MULTIPLE_CHOICE -> {
-                    List<String> correctIdStrings = choiceRepository.findCorrectChoiceByQuestion(q).stream()
-                            .map(Choice::getChoiceId)
-                            .map(UUID::toString)
-                            .collect(Collectors.toList());
-                    questionAttempt.setCorrectAnswer(correctIdStrings);
-                    correctAnswers.put(q.getQuestionId(), questionAttempt);
-                }
-
-                case FILL_IN_THE_BLANKS -> {
-                    questionAttempt.setCorrectAnswer(Collections.singletonList(q.getCorrectAnswer()));
-                    correctAnswers.put(q.getQuestionId(), questionAttempt);
-                }
-
-                case MATCHING -> {
-                    String correctAnswerForMatching = q.getCorrectAnswerForMatching();
-                    questionAttempt.setCorrectAnswer(Collections.singletonList(correctAnswerForMatching));
-                    correctAnswers.put(q.getQuestionId(), questionAttempt);
-                }
-
-                case DRAG_AND_DROP -> {
-                    DragItem dragItems = dragItemRepository.findByQuestion(q).orElseThrow(() -> new AppException(
-                            Constants.ErrorCodeMessage.DRAG_ITEM_NOT_FOUND,
-                            Constants.ErrorCode.DRAG_ITEM_NOT_FOUND,
-                            HttpStatus.NOT_FOUND.value()
-                    ));
-
-                    questionAttempt.setCorrectAnswer(Collections.singletonList(dragItems.getDragItemId().toString()));
-                    correctAnswers.put(q.getQuestionId(), questionAttempt);
-                }
-            }
-
-        }
-        return correctAnswers;
-    }
-
 
     private String getUserIdFromToken(HttpServletRequest request) {
         String token = CookieUtils.getCookieValue(request, "Authorization");
@@ -724,47 +678,4 @@ public class AttemptServiceImpl implements AttemptService {
                     HttpStatus.UNAUTHORIZED.value());
         }
     }
-
-    private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
-        String clientToken = getCachedClientToken();
-        UserProfileResponse cachedProfile = getFromCache(userId);
-        if (cachedProfile != null) {
-            return cachedProfile;
-        }
-        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
-
-        if (profileResponse == null) {
-            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
-                    HttpStatus.UNAUTHORIZED.value());
-        }
-        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
-        return profileResponse;
-    }
-
-    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
-        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
-        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
-        return cachedProfile;
-    }
-
-    private String getCachedClientToken() throws JsonProcessingException {
-        final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
-
-        String cachedToken = redisService.getValue(cacheKey, String.class);
-        if (cachedToken != null) {
-            return cachedToken;
-        }
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("grant_type", "client_credentials");
-        form.add("client_id", clientId);
-        form.add("client_secret", clientSecret);
-        form.add("scope", "openid");
-
-        KeyCloakTokenResponse tokenResponse = keyCloakTokenClient.requestToken(form, realm);
-        String newToken = tokenResponse.accessToken();
-        var expiresIn = tokenResponse.expiresIn();
-        redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
-        return newToken;
-    }
-
 }

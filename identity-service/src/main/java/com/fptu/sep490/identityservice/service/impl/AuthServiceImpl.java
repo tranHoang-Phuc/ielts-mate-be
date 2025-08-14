@@ -582,18 +582,13 @@ public class AuthServiceImpl implements AuthService {
                     Constants.ErrorCode.INVALID_VERIFIED_TOKEN);
         }
     }
-    private String generateAndStoreOtp(String email) {
+    private String generateAndStoreOtp(String email) throws JsonProcessingException {
         String otp = generateOTP();
 
         String redisKey = "otp:" + email;
-        try {
+
             redisService.saveValue(redisKey, otp, Duration.ofMinutes(10));
-        } catch (JsonProcessingException e) {
-            throw new InternalServerErrorException(
-                    Constants.ErrorCode.REDIS_ERROR,
-                    Constants.ErrorCodeMessage.REDIS_ERROR
-            );
-        }
+
         return otp;
     }
 
@@ -644,11 +639,11 @@ public class AuthServiceImpl implements AuthService {
         }
         return otp.toString();
     }
-    private String generateEmailVerifyToken(String userId, String email, String action, String purpose) {
+
+    private String generateEmailVerifyToken(String userId, String email, String action, String purpose) throws JsonProcessingException {
         Key key = Keys.hmacShaKeyFor(emailVerifySecret.getBytes(StandardCharsets.UTF_8));
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(emailVerifyTokenExpireTime);
-
         String token = Jwts.builder()
                 .setSubject(userId)
                 .claim("username", email)
@@ -661,12 +656,7 @@ public class AuthServiceImpl implements AuthService {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
         String redisKey = getVerifyTokenKey(email, action);
-        try {
-            redisService.saveValue(redisKey, token, Duration.ofSeconds(emailVerifyTokenExpireTime));
-        } catch (JsonProcessingException e) {
-            throw new InternalServerErrorException(Constants.ErrorCode.REDIS_ERROR,
-                    Constants.ErrorCodeMessage.REDIS_ERROR);
-        }
+        redisService.saveValue(redisKey, token, Duration.ofSeconds(emailVerifyTokenExpireTime));
         return token;
     }
 
@@ -705,6 +695,4 @@ public class AuthServiceImpl implements AuthService {
         redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
         return newToken;
     }
-
-
 }

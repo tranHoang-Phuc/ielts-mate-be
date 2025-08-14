@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: listening-service
+  profiles:
+    active: local

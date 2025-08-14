@@ -246,6 +246,8 @@ services:
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
       - IDENTITY_SERVICE=${IDENTITY_SERVICE}
+      - GEMINI_URL=${GEMINI_URL}
+      - GEMINI_KEY=${GEMINI_KEY}
     depends_on:
       - kafka
       - redis

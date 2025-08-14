@@ -76,46 +76,6 @@ public class ChoiceServiceImpl implements ChoiceService {
         }
     }
 
-    private UserProfileResponse getUserProfileById(String userId) throws JsonProcessingException {
-        String clientToken = getCachedClientToken();
-        UserProfileResponse cachedProfile = getFromCache(userId);
-        if (cachedProfile != null) {
-            return cachedProfile;
-        }
-        UserProfileResponse profileResponse = keyCloakUserClient.getUserById(realm, "Bearer " + clientToken, userId);
-
-        if (profileResponse == null) {
-            throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
-                    HttpStatus.UNAUTHORIZED.value());
-        }
-        redisService.saveValue(Constants.RedisKey.USER_PROFILE + userId, profileResponse, Duration.ofDays(1));
-        return profileResponse;
-    }
-    private UserProfileResponse getFromCache(String userId) throws JsonProcessingException {
-        String cacheKey = Constants.RedisKey.USER_PROFILE + userId;
-        UserProfileResponse cachedProfile = redisService.getValue(cacheKey, UserProfileResponse.class);
-        return cachedProfile;
-    }
-
-    private String getCachedClientToken() throws JsonProcessingException {
-        final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
-
-        String cachedToken = redisService.getValue(cacheKey, String.class);
-        if (cachedToken != null) {
-            return cachedToken;
-        }
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
-        form.add("grant_type", "client_credentials");
-        form.add("client_id", clientId);
-        form.add("client_secret", clientSecret);
-        form.add("scope", "openid");
-
-        KeyCloakTokenResponse tokenResponse = keyCloakTokenClient.requestToken(form, realm);
-        String newToken = tokenResponse.accessToken();
-        var expiresIn = tokenResponse.expiresIn();
-        redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
-        return newToken;
-    }
 
     @Override
     public List<QuestionCreationResponse.ChoiceResponse> getAllChoicesOfQuestion(String questionId) {
@@ -242,13 +202,6 @@ public class ChoiceServiceImpl implements ChoiceService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        if (choice.isCorrect() == null) {
-            throw new AppException(
-                    Constants.ErrorCodeMessage.INVALID_REQUEST,
-                    Constants.ErrorCode.INVALID_REQUEST,
-                    HttpStatus.BAD_REQUEST.value()
-            );
-        }
 
         Choice newVersion = Choice.builder()
                 .choiceId(existingChoice.getChoiceId())
@@ -330,21 +283,4 @@ public class ChoiceServiceImpl implements ChoiceService {
         questionRepository.save(question);
     }
 
-    private void reOrderChoices(List<Choice> choices, int newOrder, Choice targetChoice) {
-        choices.sort(Comparator.comparingInt(Choice::getChoiceOrder));
-        choices.removeIf(c -> c.getChoiceId().equals(targetChoice.getChoiceId()));
-        int insertIndex = newOrder - 1;
-        if (insertIndex < 0) {
-            insertIndex = 0;
-        }
-        if (insertIndex > choices.size()) {
-            insertIndex = choices.size();
-        }
-        choices.add(insertIndex, targetChoice);
-        for (int i = 0; i < choices.size(); i++) {
-            Choice c = choices.get(i);
-            c.setChoiceOrder(i + 1);
-        }
-        choiceRepository.saveAll(choices);
-    }
 }

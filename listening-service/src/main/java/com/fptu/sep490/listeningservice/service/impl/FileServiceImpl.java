@@ -42,16 +42,21 @@ public class FileServiceImpl implements FileService {
     @NonFinal
     String sseEventTopic;
 
+	// For testability: provide an overridable seam for the Cloudinary upload
+	protected Map<?, ?> doUpload(String folderName, MultipartFile multipart) throws IOException {
+		return cloudinary.uploader()
+				.upload(multipart.getBytes(), ObjectUtils.asMap(
+						"folder", folderName,
+						"resource_type", "auto"
+				));
+	}
+
     @Override
     @Async("uploadExecutor")
     public void uploadAsync(String folderName, MultipartFile multipart, UUID taskId, UUID clientId) throws IOException {
-        Map<?, ?> result;
+		Map<?, ?> result;
         try {
-             result = cloudinary.uploader()
-                    .upload(multipart.getBytes(), ObjectUtils.asMap(
-                            "folder", folderName,
-                            "resource_type", "auto"
-                    ));
+			 result = doUpload(folderName, multipart);
         } catch (Exception e) {
             SseEvent event = SseEvent.builder()
                     .clientId(clientId)

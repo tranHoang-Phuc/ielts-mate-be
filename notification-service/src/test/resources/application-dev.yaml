@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: ${SPRING_APP_NAME:notification-service}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:notification-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+server:
+  port: ${SERVER_PORT:8082}
+  servlet:
+    context-path: ${SERVER_CONTEXT_PATH:/notification}
+
+notification:
+  email:
+    brevo-url: ${BREVO_URL:https://api.brevo.com}
+    brevo-apikey: ${BREVO_API_KEY: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}
+
+springdoc:
+  paths-to-match: /**
+  packages-to-scan: com.fptu.sep490.identityservice.controller
+  swagger-ui:
+    path: /swagger-ui
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${SWAGGER_CLIENT_ID:swagger-ui}
+  oauth-flow:
+    authorization-url: ${SWAGGER_AUTH_URL:http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth}
+    token-url: ${SWAGGER_TOKEN_URL:http://identity.sep.local/realms/SEP490/protocol/openid-connect/token}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+kafka:
+  topic:
+    user-verification: ${KAFKA_USER_VERIFICATION_TOPIC:user-verification-topic}
