@@ -22,10 +22,9 @@ import com.fptu.sep490.listeningservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -39,7 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class CreateQuestionTest {
 
     @InjectMocks
@@ -81,6 +79,7 @@ public class CreateQuestionTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         GROUP_ID = UUID.randomUUID();
         GROUP = new QuestionGroup();
         GROUP.setGroupId(GROUP_ID);

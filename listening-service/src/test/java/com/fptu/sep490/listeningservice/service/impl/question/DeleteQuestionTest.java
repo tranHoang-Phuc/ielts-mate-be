@@ -1,13 +1,11 @@
 package com.fptu.sep490.listeningservice.service.impl.question;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.Question;
 import com.fptu.sep490.listeningservice.model.QuestionGroup;
-import com.fptu.sep490.listeningservice.model.enumeration.QuestionCategory;
 import com.fptu.sep490.listeningservice.model.enumeration.QuestionType;
 import com.fptu.sep490.listeningservice.repository.QuestionGroupRepository;
 import com.fptu.sep490.listeningservice.repository.QuestionRepository;
@@ -15,11 +13,10 @@ import com.fptu.sep490.listeningservice.service.impl.QuestionServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -32,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class DeleteQuestionTest {
     @InjectMocks
     private QuestionServiceImpl service;
@@ -86,6 +82,7 @@ public class DeleteQuestionTest {
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         GROUP = new QuestionGroup();
         GROUP.setGroupId(UUID.fromString(GROUP_ID));
 

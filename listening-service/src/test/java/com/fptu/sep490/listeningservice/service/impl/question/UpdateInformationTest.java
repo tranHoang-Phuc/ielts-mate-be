@@ -21,9 +21,7 @@ import com.fptu.sep490.listeningservice.viewmodel.response.UserProfileResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -34,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 public class UpdateInformationTest {
 
     @InjectMocks
@@ -101,6 +98,7 @@ public class UpdateInformationTest {
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
+        MockitoAnnotations.openMocks(this);
         GROUP = new QuestionGroup();
         GROUP.setGroupId(UUID.fromString(GROUP_ID));
 
