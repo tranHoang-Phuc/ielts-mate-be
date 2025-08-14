@@ -507,4 +507,9 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .sorted(Comparator.comparing(LineChartData::getDate))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<ExamAttemptAI> getAttemptResultHistory(HttpServletRequest request) {
+        return List.of();
+    }
 }
