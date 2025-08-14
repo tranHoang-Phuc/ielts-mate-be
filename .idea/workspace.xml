@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test" />
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test">
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/QuestionServiceImplTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notification-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/notification-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImplTest.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -137,15 +145,32 @@
     "JUnit.PassageServiceImplTest.fromReadingPassage_success_buildsAttemptStructure.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getActivePassages_marksUpDataWhenCookiePresent_andSuccess.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getActivePassages_noCookie_orNoBody_returnsBaseList.executor": "Coverage",
+    "JUnit.PassageServiceImplTest.getCachedClientToken_cachedAndFetchFlow.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getPassageById_profileJsonError_internalServer.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getPassages_noLatestVersion_keepsOriginalFields.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getPassages_updatesWithLatestVersion.executor": "Coverage",
     "JUnit.PassageServiceImplTest.getTaskTitle_returnsMappedList.executor": "Coverage",
+    "JUnit.PassageServiceImplTest.getUserIdFromToken_securityContextThrows_unauthorized.executor": "Coverage",
+    "JUnit.PassageServiceImplTest.getUserIdFromToken_success_usesSecurityContext.executor": "Coverage",
+    "JUnit.PassageServiceImplTest.getUserProfileById_cacheHit_andMissUnauthorized.executor": "Coverage",
     "JUnit.PassageServiceImplTest.updatePassage_instructionNotNull_invalid.executor": "Coverage",
     "JUnit.PassageServiceImplTest.updatePassage_invalidStatusOrdinal_throws.executor": "Coverage",
     "JUnit.PassageServiceImplTest.updatePassage_profileJsonError_internalServer.executor": "Coverage",
     "JUnit.PassageServiceImplTest.updatePassage_success.executor": "Coverage",
     "JUnit.PassageServiceImplTest.updatePassage_testStatusChangeConflict_throws.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.createQuestions_dragAndDrop_success.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.createQuestions_multipleChoice_success.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateInformation_drag_invalidDragId_throws.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateInformation_multipleChoice_success_withPreviousVersions.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateOrder_invalidOrder_throws.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateOrder_invalidTarget_throws.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateOrder_success_reordersAndUpdatesUsers.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateQuestion_dragAndDrop_success.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateQuestion_fillInTheBlanks_success.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateQuestion_invalidType_throws.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateQuestion_matching_success.executor": "Coverage",
+    "JUnit.QuestionServiceImplTest.updateQuestion_multipleChoice_success.executor": "Coverage",
     "JUnit.SseServiceImplTest.executor": "Coverage",
     "JUnit.SseServiceImplTest.subscribe_addsEmitter_and_onCompletionRemoves.executor": "Coverage",
     "JUnit.TopicMasterServiceImplTest.executor": "Run",
@@ -226,23 +251,23 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.AIServiceImplTest">
-    <configuration name="AIServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="personal-service" />
+  <component name="RunManager" selected="JUnit.QuestionServiceImplTest">
+    <configuration name="QuestionServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="reading-service" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="com.fptu.sep490.personalservice.service.impl.*" />
+          <option name="PATTERN" value="com.fptu.sep490.readingservice.service.impl.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="PACKAGE_NAME" value="com.fptu.sep490.personalservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.personalservice.service.impl.AIServiceImplTest" />
+      <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.QuestionServiceImplTest" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PassageServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="QuestionServiceImplTest.updateInformation_drag_invalidDragId_throws" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="reading-service" />
       <extension name="coverage">
         <pattern>
@@ -251,29 +276,14 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
-      <option name="TEST_OBJECT" value="class" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="PassageServiceImplTest.fromExamAttemptHistory_success_mapsAll" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="reading-service" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.fptu.sep490.readingservice.service.impl.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
-      <option name="METHOD_NAME" value="fromExamAttemptHistory_success_mapsAll" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.QuestionServiceImplTest" />
+      <option name="METHOD_NAME" value="updateInformation_drag_invalidDragId_throws" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PassageServiceImplTest.fromReadingPassage_groupNoChoices_throwsChoiceNotFound" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="QuestionServiceImplTest.updateInformation_multipleChoice_success_withPreviousVersions" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="reading-service" />
       <extension name="coverage">
         <pattern>
@@ -282,14 +292,14 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
-      <option name="METHOD_NAME" value="fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.QuestionServiceImplTest" />
+      <option name="METHOD_NAME" value="updateInformation_multipleChoice_success_withPreviousVersions" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PassageServiceImplTest.getTaskTitle_returnsMappedList" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="QuestionServiceImplTest.updateOrder_invalidOrder_throws" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="reading-service" />
       <extension name="coverage">
         <pattern>
@@ -298,8 +308,24 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
-      <option name="METHOD_NAME" value="getTaskTitle_returnsMappedList" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.QuestionServiceImplTest" />
+      <option name="METHOD_NAME" value="updateOrder_invalidOrder_throws" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QuestionServiceImplTest.updateOrder_invalidTarget_throws" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="reading-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.fptu.sep490.readingservice.service.impl.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.QuestionServiceImplTest" />
+      <option name="METHOD_NAME" value="updateOrder_invalidTarget_throws" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -370,11 +396,11 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="JUnit.PassageServiceImplTest" />
-      <item itemvalue="JUnit.PassageServiceImplTest.fromExamAttemptHistory_success_mapsAll" />
-      <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
-      <item itemvalue="JUnit.PassageServiceImplTest.getTaskTitle_returnsMappedList" />
-      <item itemvalue="JUnit.AIServiceImplTest" />
+      <item itemvalue="JUnit.QuestionServiceImplTest" />
+      <item itemvalue="JUnit.QuestionServiceImplTest.updateInformation_drag_invalidDragId_throws" />
+      <item itemvalue="JUnit.QuestionServiceImplTest.updateInformation_multipleChoice_success_withPreviousVersions" />
+      <item itemvalue="JUnit.QuestionServiceImplTest.updateOrder_invalidOrder_throws" />
+      <item itemvalue="JUnit.QuestionServiceImplTest.updateOrder_invalidTarget_throws" />
       <item itemvalue="Spring Boot.ApiGatewayApplication" />
       <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
       <item itemvalue="Spring Boot.FileServiceApplication" />
@@ -386,11 +412,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.AIServiceImplTest" />
-        <item itemvalue="JUnit.PassageServiceImplTest" />
-        <item itemvalue="JUnit.PassageServiceImplTest.getTaskTitle_returnsMappedList" />
-        <item itemvalue="JUnit.PassageServiceImplTest.fromExamAttemptHistory_success_mapsAll" />
-        <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
+        <item itemvalue="JUnit.QuestionServiceImplTest" />
+        <item itemvalue="JUnit.QuestionServiceImplTest.updateInformation_drag_invalidDragId_throws" />
+        <item itemvalue="JUnit.QuestionServiceImplTest.updateInformation_multipleChoice_success_withPreviousVersions" />
+        <item itemvalue="JUnit.QuestionServiceImplTest.updateOrder_invalidOrder_throws" />
+        <item itemvalue="JUnit.QuestionServiceImplTest.updateOrder_invalidTarget_throws" />
       </list>
     </recent_temporary>
   </component>
@@ -422,7 +448,7 @@
       <workItem from="1755053589402" duration="22468000" />
       <workItem from="1755098096302" duration="2033000" />
       <workItem from="1755125730593" duration="1996000" />
-      <workItem from="1755129771790" duration="13379000" />
+      <workItem from="1755129771790" duration="17847000" />
     </task>
     <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
@@ -568,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755145646551</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="feature: add unit test">
+      <option name="closed" value="true" />
+      <created>1755145914614</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1755145914614</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -620,11 +654,6 @@
           <line>21</line>
           <option name="timeStamp" value="40" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImplTest.java</url>
-          <line>893</line>
-          <option name="timeStamp" value="47" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplTest.java</url>
           <line>864</line>
@@ -636,12 +665,12 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImplTest.java</url>
-          <line>892</line>
-          <properties class="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" method="getTaskTitle_returnsMappedList">
+          <line>1035</line>
+          <properties class="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" method="getUserProfileById_cacheHit_andMissUnauthorized">
             <option name="EMULATED" value="true" />
             <option name="WATCH_EXIT" value="false" />
           </properties>
-          <option name="timeStamp" value="46" />
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -722,6 +751,12 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$AuthServiceImplTest_resetPassword_userNotFound_throwsNotFound.ic" NAME="AuthServiceImplTest.resetPassword_userNotFound_throwsNotFound Coverage Results" MODIFIED="1755075135895" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getCachedClientToken_cachedAndFetchFlow.ic" NAME="PassageServiceImplTest.getCachedClientToken_cachedAndFetchFlow Coverage Results" MODIFIED="1755146726468" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_createQuestions_multipleChoice_success.ic" NAME="QuestionServiceImplTest.createQuestions_multipleChoice_success Coverage Results" MODIFIED="1755147367467" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$AIServiceImplTest.ic" NAME="AIServiceImplTest Coverage Results" MODIFIED="1755144636603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.personalservice.service.impl.*</FILTER>
     </SUITE>
@@ -752,17 +787,26 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$AuthServiceImplTest_getEmailFromToken_decodeError_throwsBadRequest.ic" NAME="AuthServiceImplTest.getEmailFromToken_decodeError_throwsBadRequest Coverage Results" MODIFIED="1755077659644" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateOrder_invalidOrder_throws.ic" NAME="QuestionServiceImplTest.updateOrder_invalidOrder_throws Coverage Results" MODIFIED="1755149824500" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ChoiceServiceImplTest_updateChoice_isCorrectNull_throws.ic" NAME="ChoiceServiceImplTest.updateChoice_isCorrectNull_throws Coverage Results" MODIFIED="1755134517744" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateOrder_success_reordersAndUpdatesUsers.ic" NAME="QuestionServiceImplTest.updateOrder_success_reordersAndUpdatesUsers Coverage Results" MODIFIED="1755149462650" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ListeningTaskServiceImplTest.ic" NAME="ListeningTaskServiceImplTest Coverage Results" MODIFIED="1755098857387" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest.ic" NAME="PassageServiceImplTest Coverage Results" MODIFIED="1755144164455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest.ic" NAME="PassageServiceImplTest Coverage Results" MODIFIED="1755146255962" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$FileServiceImplTest_uploadAsync_success_sendsAudioUploadEvent.ic" NAME="FileServiceImplTest.uploadAsync_success_sendsAudioUploadEvent Coverage Results" MODIFIED="1755084055244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest.ic" NAME="QuestionServiceImplTest Coverage Results" MODIFIED="1755150410409" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$GroupControllerTest.ic" NAME="GroupControllerTest Coverage Results" MODIFIED="1755079494884" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.controller.*</FILTER>
@@ -773,6 +817,9 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$SseServiceImplTest.ic" NAME="SseServiceImplTest Coverage Results" MODIFIED="1755125779750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.notificationservice.service.impl.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_createQuestions_dragAndDrop_success.ic" NAME="QuestionServiceImplTest.createQuestions_dragAndDrop_success Coverage Results" MODIFIED="1755147165583" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$DashboardServiceImplTest.ic" NAME="DashboardServiceImplTest Coverage Results" MODIFIED="1755134839356" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
@@ -781,6 +828,12 @@
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ForgotPasswordRateLimiterImplTest.ic" NAME="ForgotPasswordRateLimiterImplTest Coverage Results" MODIFIED="1755077991543" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateQuestion_fillInTheBlanks_success.ic" NAME="QuestionServiceImplTest.updateQuestion_fillInTheBlanks_success Coverage Results" MODIFIED="1755148269466" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateQuestion_invalidType_throws.ic" NAME="QuestionServiceImplTest.updateQuestion_invalidType_throws Coverage Results" MODIFIED="1755147806435" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ListeningTaskServiceImplTest_fromListeningTask_success_mapsGroupsQuestionsChoicesAndDragItems.ic" NAME="ListeningTaskServiceImplTest.fromListeningTask_success_mapsGroupsQuestionsChoicesAndDragItems Coverage Results" MODIFIED="1755098142119" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
@@ -798,6 +851,9 @@
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_updatePassage_profileJsonError_internalServer.ic" NAME="PassageServiceImplTest.updatePassage_profileJsonError_internalServer Coverage Results" MODIFIED="1755142191601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateQuestion_multipleChoice_success.ic" NAME="QuestionServiceImplTest.updateQuestion_multipleChoice_success Coverage Results" MODIFIED="1755147964133" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$AuthServiceImplTest_updateUserProfile_keycloakReturnsNotNoContent_throwsInternalServerError.ic" NAME="AuthServiceImplTest.updateUserProfile_keycloakReturnsNotNoContent_throwsInternalServerError Coverage Results" MODIFIED="1755076545019" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -820,6 +876,9 @@
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ConfigServiceImplTest.ic" NAME="ConfigServiceImplTest Coverage Results" MODIFIED="1755127191820" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.personalservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateQuestion_matching_success.ic" NAME="QuestionServiceImplTest.updateQuestion_matching_success Coverage Results" MODIFIED="1755148279380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$ListeningTaskServiceImplTest_getTaskTitle_emptyInput_returnsEmptyList.ic" NAME="ListeningTaskServiceImplTest.getTaskTitle_emptyInput_returnsEmptyList Coverage Results" MODIFIED="1755098558633" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
@@ -848,13 +907,25 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_deletePassage_notFound_throws.ic" NAME="PassageServiceImplTest.deletePassage_notFound_throws Coverage Results" MODIFIED="1755142878075" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getUserProfileById_cacheHit_andMissUnauthorized.ic" NAME="PassageServiceImplTest.getUserProfileById_cacheHit_andMissUnauthorized Coverage Results" MODIFIED="1755146440532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$AuthServiceImplTest_getUserAccessInfoByEmail_success.ic" NAME="AuthServiceImplTest.getUserAccessInfoByEmail_success Coverage Results" MODIFIED="1755074678391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateQuestion_dragAndDrop_success.ic" NAME="QuestionServiceImplTest.updateQuestion_dragAndDrop_success Coverage Results" MODIFIED="1755148290148" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateOrder_invalidTarget_throws.ic" NAME="QuestionServiceImplTest.updateOrder_invalidTarget_throws Coverage Results" MODIFIED="1755149680009" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getPassages_noLatestVersion_keepsOriginalFields.ic" NAME="PassageServiceImplTest.getPassages_noLatestVersion_keepsOriginalFields Coverage Results" MODIFIED="1755139870229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getTaskTitle_returnsMappedList.ic" NAME="PassageServiceImplTest.getTaskTitle_returnsMappedList Coverage Results" MODIFIED="1755144135278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$QuestionServiceImplTest_updateInformation_drag_invalidDragId_throws.ic" NAME="QuestionServiceImplTest.updateInformation_drag_invalidDragId_throws Coverage Results" MODIFIED="1755150260473" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
   </component>

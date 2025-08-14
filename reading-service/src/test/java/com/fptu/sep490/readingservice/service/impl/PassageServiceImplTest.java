@@ -43,6 +43,12 @@ import org.springframework.http.ResponseEntity;
 import jakarta.servlet.http.Cookie;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.viewmodel.response.ExamAttemptGetDetail;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -122,7 +128,7 @@ class PassageServiceImplTest {
         KeyCloakTokenResponse tokenResp = mock(KeyCloakTokenResponse.class);
         when(tokenResp.accessToken()).thenReturn("token");
         when(tokenResp.expiresIn()).thenReturn(3600);
-        when(keyCloakTokenClient.requestToken(any(), anyString())).thenReturn(tokenResp);
+        when(keyCloakTokenClient.requestToken(any(), any())).thenReturn(tokenResp);
 
         // fallback if bypass is not used (shouldn't be called, but safe)
         when(keyCloakUserClient.getUserById(any(), any(), eq(userId))).thenReturn(profile);
@@ -622,7 +628,7 @@ class PassageServiceImplTest {
         KeyCloakTokenResponse tokenResp = mock(KeyCloakTokenResponse.class);
         when(tokenResp.accessToken()).thenReturn("tok");
         when(tokenResp.expiresIn()).thenReturn(3600);
-        when(keyCloakTokenClient.requestToken(any(), anyString())).thenReturn(tokenResp);
+        when(keyCloakTokenClient.requestToken(any(), any())).thenReturn(tokenResp);
         // Force JSON error when fetching user profile from cache path
         when(redisService.getValue(anyString(), eq(UserProfileResponse.class)))
                 .thenThrow(new JsonProcessingException("boom"){});
@@ -906,6 +912,150 @@ class PassageServiceImplTest {
         assertEquals("T1", result.get(0).title());
         assertEquals(id2, result.get(1).taskId());
         assertEquals("T2", result.get(1).title());
+    }
+
+    @Test
+    void getUserIdFromToken_success_usesSecurityContext() {
+        // Prepare request with Authorization cookie
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getCookies()).thenReturn(new Cookie[]{new Cookie("Authorization", "token")});
+
+        // Mock SecurityContextHolder
+        SecurityContext sc = mock(SecurityContext.class);
+        Authentication auth = mock(Authentication.class);
+        when(auth.getName()).thenReturn("user-123");
+        when(sc.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(sc);
+
+        // Invoke via reflection to test private method
+        try {
+            Method m = PassageServiceImpl.class.getDeclaredMethod("getUserIdFromToken", HttpServletRequest.class);
+            m.setAccessible(true);
+            Object userId = m.invoke(service, req);
+            assertEquals("user-123", userId);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            fail(e);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void getUserIdFromToken_noAuthCookie_returnsNull() {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getCookies()).thenReturn(null);
+        try {
+            Method m = PassageServiceImpl.class.getDeclaredMethod("getUserIdFromToken", HttpServletRequest.class);
+            m.setAccessible(true);
+            Object userId = m.invoke(service, req);
+            assertNull(userId);
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+
+    @Test
+    void getUserIdFromToken_securityContextThrows_unauthorized() {
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getCookies()).thenReturn(new Cookie[]{new Cookie("Authorization", "token")});
+        SecurityContext sc = mock(SecurityContext.class);
+        when(sc.getAuthentication()).thenThrow(new RuntimeException("boom"));
+        SecurityContextHolder.setContext(sc);
+        try {
+            Method m = PassageServiceImpl.class.getDeclaredMethod("getUserIdFromToken", HttpServletRequest.class);
+            m.setAccessible(true);
+            assertThrows(AppException.class, () -> {
+                try {
+                    m.invoke(service, req);
+                } catch (InvocationTargetException ite) {
+                    throw (RuntimeException) ite.getTargetException();
+                }
+            });
+        } catch (NoSuchMethodException e) {
+            fail(e);
+        } finally {
+            SecurityContextHolder.clearContext();
+        }
+    }
+
+    @Test
+    void safeEnumFromOrdinal_validAndInvalid() {
+        try {
+            Method m = PassageServiceImpl.class.getDeclaredMethod("safeEnumFromOrdinal", Enum[].class, int.class);
+            m.setAccessible(true);
+            // valid
+            Object val = m.invoke(service, Status.values(), Status.DRAFT.ordinal());
+            assertEquals(Status.DRAFT, val);
+            // invalid low
+            assertThrows(AppException.class, () -> {
+                try {
+                    m.invoke(service, Status.values(), -1);
+                } catch (InvocationTargetException ite) {
+                    throw (RuntimeException) ite.getTargetException();
+                }
+            });
+            // invalid high
+            assertThrows(AppException.class, () -> {
+                try {
+                    m.invoke(service, Status.values(), 999);
+                } catch (InvocationTargetException ite) {
+                    throw (RuntimeException) ite.getTargetException();
+                }
+            });
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            fail(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void getCachedClientToken_cachedAndFetchFlow() throws Exception {
+        // Access private method via reflection
+        Method m = PassageServiceImpl.class.getDeclaredMethod("getCachedClientToken");
+        m.setAccessible(true);
+
+        // Case 1: token in cache
+        when(redisService.getValue(anyString(), eq(String.class))).thenReturn("cached");
+        Object token1 = m.invoke(service);
+        assertEquals("cached", token1);
+
+        // Case 2: not cached -> fetch via keycloak client and save
+        when(redisService.getValue(anyString(), eq(String.class))).thenReturn(null);
+        KeyCloakTokenResponse tokenResp = mock(KeyCloakTokenResponse.class);
+        when(tokenResp.accessToken()).thenReturn("newtok");
+        when(tokenResp.expiresIn()).thenReturn(1200);
+        when(keyCloakTokenClient.requestToken(any(), any())).thenReturn(tokenResp);
+
+        Object token2 = m.invoke(service);
+        assertEquals("newtok", token2);
+        verify(redisService, atLeastOnce()).saveValue(anyString(), anyString(), any(Duration.class));
+    }
+
+    @Test
+    void getUserProfileById_cacheHit_andMissUnauthorized() throws Exception {
+        // Access private via reflection
+        Method m = PassageServiceImpl.class.getDeclaredMethod("getUserProfileById", String.class);
+        m.setAccessible(true);
+
+        // Cache hit
+        UserProfileResponse profile = new UserProfileResponse("id","u","e","F","L");
+        // getUserProfileById always calls getCachedClientToken first, so ensure token is cached to avoid NPE
+        when(redisService.getValue(anyString(), eq(String.class))).thenReturn("cached-token");
+        when(redisService.getValue(anyString(), eq(UserProfileResponse.class))).thenReturn(profile);
+        Object p = m.invoke(service, "id");
+        assertEquals(profile, p);
+
+        // Cache miss -> client returns null -> Unauthorized AppException
+        when(redisService.getValue(anyString(), eq(UserProfileResponse.class))).thenReturn(null);
+        when(keyCloakUserClient.getUserById(any(), anyString(), anyString())).thenReturn(null);
+        assertThrows(AppException.class, () -> {
+            try {
+                m.invoke(service, "id2");
+            } catch (InvocationTargetException ite) {
+                throw (RuntimeException) ite.getTargetException();
+            }
+        });
     }
 }
 
