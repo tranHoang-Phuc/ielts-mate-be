@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>AI Chat (IELTS Practice)</title>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+  <style>
+    body { font-family: Arial; margin: 16px; }
+    #chatBox { border: 1px solid #ccc; padding: 8px; height: 300px; overflow-y:auto; margin-bottom:8px; }
+    input, button { padding:6px; margin-right:6px; }
+    .user { color: blue; }
+    .ai { color: green; }
+  </style>
+</head>
+<body>
+<h2>AI Chat — IELTS Practice</h2>
+
+<div>
+  <label>Your Name:</label>
+  <input id="username" placeholder="Enter your name"/>
+  <button id="connectBtn">Connect</button>
+</div>
+
+<hr/>
+<div id="chatBox"></div>
+<input id="chatInput" placeholder="Type your question..."/>
+<button id="sendBtn">Send</button>
+<script>
+  const WS_URL = "http://localhost:8072/personal/ws";
+  let stompClient = null;
+  let connected = false;
+  let sessionId = null;
+  let lastPongTime = Date.now();
+  let heartbeatInterval;
+
+  function logMessage(sender, content, cssClass) {
+      const box = document.getElementById("chatBox");
+      box.innerHTML += `<div class="${cssClass}"><b>${sender}:</b> ${content}</div>`;
+      box.scrollTop = box.scrollHeight;
+  }
+
+  document.getElementById("connectBtn").addEventListener("click", connect);
+  document.getElementById("sendBtn").addEventListener("click", sendChat);
+
+  function connect() {
+      if (connected) { alert("Already connected"); return; }
+      const sock = new SockJS(WS_URL);
+      stompClient = Stomp.over(sock);
+      stompClient.debug = null;
+
+      // Bật heartbeat 2 chiều (ms)
+      stompClient.heartbeat.outgoing = 20000; // gửi ping mỗi 20s
+      stompClient.heartbeat.incoming = 20000; // kỳ vọng nhận pong mỗi 20s
+
+      stompClient.connect({}, function(frame) {
+          connected = true;
+          console.log("Connected: " + frame);
+
+          // Lấy sessionId từ header
+          sessionId = /\/([^\/]+)$/.exec(sock._transport.url)[1];
+          console.log("Session ID:", sessionId);
+
+          // Lắng nghe AI messages
+          stompClient.subscribe("/topic/ai." + sessionId, function(message) {
+              try {
+                  const payload = JSON.parse(message.body);
+                  const sender = payload.sender || (payload.senderRole === "ASSISTANT" ? "AI" : "User");
+                  const content = payload.content || "[No content]";
+                  logMessage(sender, content, "ai");
+                  console.log("📩 AI message received:", payload);
+              } catch(e) {
+                  console.error("Error parsing AI message", e, message.body);
+                  logMessage("AI", message.body, "ai");
+              }
+          });
+
+          // Bắt đầu kiểm tra ping/pong
+          lastPongTime = Date.now();
+          heartbeatInterval = setInterval(checkConnection, 30000);
+
+          alert("Connected to AI Chat");
+      }, function(error) {
+          console.error("STOMP error", error);
+          alert("Connect error, see console.");
+      });
+
+      // Sự kiện khi server trả pong
+      sock.onheartbeat = function() {
+          lastPongTime = Date.now();
+      };
+  }
+
+  function checkConnection() {
+      const now = Date.now();
+      if (now - lastPongTime > 40000) { // quá 40s không pong
+          console.warn("⚠ No heartbeat from server. Closing connection...");
+          clearInterval(heartbeatInterval);
+          if (stompClient) stompClient.disconnect();
+          connected = false;
+          alert("Connection lost. Session cleared.");
+          // TODO: gọi API clear session AI ở đây nếu cần
+      }
+  }
+
+  function sendChat() {
+      if (!connected) { alert("Connect first"); return; }
+      const content = document.getElementById("chatInput").value.trim();
+      if (!content) return;
+      const username = document.getElementById("username").value || "anonymous";
+
+      logMessage(username, content, "user");
+
+      stompClient.send("/app/chat.ai", {}, JSON.stringify({
+          sender: username,
+          content: content
+      }));
+
+      document.getElementById("chatInput").value = "";
+  }
+</script>
+
+
+</body>
+</html>

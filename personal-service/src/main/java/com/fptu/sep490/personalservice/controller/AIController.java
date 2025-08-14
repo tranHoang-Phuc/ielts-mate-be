@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
@@ -57,6 +59,45 @@ public class AIController {
                 .build();
         return ResponseEntity.ok(response);
     }
+    @PostMapping("/ielts/send")
+    @Operation(summary = "Send a message in IELTS Chat", description = "Send a message and get AI response for IELTS learning")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<AIResponse>> sendIeltsMessage(
+            @RequestBody String message
+    ) {
+        AIResponse data = aiService.chat(message, null);
+        BaseResponse<AIResponse> response = BaseResponse.<AIResponse>builder()
+                .data(data)
+                .message("AI response received successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/ielts/history")
+    @Operation(summary = "Get IELTS Chat history", description = "Retrieve the current chat history for a given session")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<AIService.ChatMessage>>> getIeltsHistory(
+    ) {
+        List<AIService.ChatMessage> history = aiService.getHistory();
+        BaseResponse<List<AIService.ChatMessage>> response = BaseResponse.<List<AIService.ChatMessage>>builder()
+                .data(history)
+                .message("Chat history retrieved successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/ielts/clear")
+    @Operation(summary = "Clear IELTS Chat history", description = "Clear the chat history for a given session")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> clearIeltsHistory(
+    ) {
+        aiService.clearSession();
+        BaseResponse<Void> response = BaseResponse.<Void>builder()
+                .message("Chat history cleared successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
 
 
 

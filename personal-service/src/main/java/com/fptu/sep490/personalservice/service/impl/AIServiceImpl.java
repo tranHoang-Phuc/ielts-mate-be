@@ -14,8 +14,10 @@ import com.fptu.sep490.personalservice.repository.client.ReadingClient;
 import com.fptu.sep490.personalservice.service.AIService;
 import com.fptu.sep490.personalservice.strategy.AIStrategyFactory;
 import com.fptu.sep490.personalservice.strategy.AiApiStrategy;
+import com.fptu.sep490.personalservice.strategy.GeminiApiStrategy;
 import com.fptu.sep490.personalservice.viewmodel.response.AIResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,8 +26,11 @@ import org.apache.kafka.common.internals.Topic;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +45,19 @@ public class AIServiceImpl implements AIService {
     ObjectMapper objectMapper;
     ReadingClient readingClient;
     ListeningClient listeningClient;
+    private final GeminiApiStrategy geminiApiStrategy;
+    HttpSession httpSession;
 
+    private final Map<String, List<ChatMessage>> chatHistories = new ConcurrentHashMap<>();
+
+    private static final String SYSTEM_CONTEXT =
+            "You are an AI IELTS tutor. Always respond in a helpful, educational, and IELTS-focused way. " +
+                    "If the user asks for more details, provide a longer and more comprehensive answer as needed."+
+                    "If the user does not explicitly request a long answer, respond concisely in 3-4 sentences suitable for chat messages. " ;
+
+    private String getSessionId() {
+        return httpSession.getId();
+    }
     public AIResponse callAIForSuggesting(HttpServletRequest request) {
         try {
             String userId = helper.getUserIdFromToken();
@@ -84,6 +101,58 @@ public class AIServiceImpl implements AIService {
             log.error("Unexpected error in callAIForSuggesting: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to call AI model: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public AIResponse chat( String userMessage, String sessionId) {
+        sessionId = sessionId == null ? getSessionId() : sessionId;
+        List<ChatMessage> history = chatHistories.computeIfAbsent(sessionId, k -> new ArrayList<>());
+
+        // Nếu là tin nhắn đầu tiên, thêm system context
+        if (history.isEmpty()) {
+            history.add(new ChatMessage("system", SYSTEM_CONTEXT));
+        }
+
+        // Thêm tin nhắn của user
+        history.add(new ChatMessage("user", userMessage));
+
+        // Gộp lịch sử thành 1 prompt
+        String prompt = buildPromptFromHistory(history);
+
+        // Gọi Gemini API
+        AIResponse response = geminiApiStrategy.callModel(prompt, null);
+
+        if (response.isSuccess()) {
+            history.add(new ChatMessage("assistant", response.getContent()));
+        }
+
+        return response;
+    }
+
+    @Override
+    public void clearSession() {
+        chatHistories.remove(getSessionId());
+    }
+
+    @Override
+    public List<ChatMessage> getHistory() {
+        return chatHistories.getOrDefault(getSessionId(), List.of());
+    }
+
+
+
+    @Override
+    public void clearSession(String sessionId) {
+        chatHistories.remove(sessionId);
+
+    }
+
+    private String buildPromptFromHistory(List<ChatMessage> history) {
+        StringBuilder sb = new StringBuilder();
+        for (ChatMessage msg : history) {
+            sb.append(msg.role()).append(": ").append(msg.content()).append("\n");
+        }
+        return sb.toString().trim();
     }
 
     private String createStructuredPrompt(String targetConfig, String systemTopic, String practiceResult) {
