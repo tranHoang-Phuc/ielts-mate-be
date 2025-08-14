@@ -5,8 +5,11 @@ import com.fptu.sep490.personalservice.model.Message;
 import com.fptu.sep490.personalservice.model.enumeration.MessageType;
 import com.fptu.sep490.personalservice.repository.ChatGroupRepository;
 import com.fptu.sep490.personalservice.repository.MessageRepository;
+import com.fptu.sep490.personalservice.service.AIService;
 import com.fptu.sep490.personalservice.viewmodel.request.ChatMessage;
+import com.fptu.sep490.personalservice.viewmodel.response.AIResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -31,8 +34,34 @@ public class ChatController {
     private final SimpMessageSendingOperations messagingTemplate;
     private final ChatGroupRepository chatGroupRepository;
 
+    private final AIService chatService;
 
+    @MessageMapping("chat.ai")
+    public void chatWithAI(@Payload ChatMessage chatMessage,
+                           SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
 
+        // Gọi AI Service để trả lời
+        AIResponse aiResponse = chatService.chat(chatMessage.getContent(), sessionId);
+
+        // Gửi phản hồi lại cho client
+        ChatMessage aiMessage = ChatMessage.builder()
+                .sender("IELTS AI Tutor")
+                .content(aiResponse.getContent())
+                .messageType(MessageType.CHAT)
+                .build();
+
+        messagingTemplate.convertAndSend("/topic/ai." + sessionId, aiMessage);
+    }
+
+    /**
+     * Khi cần kết thúc chat AI thì clear session
+     */
+    @MessageMapping("chat.ai.clear")
+    public void clearAISession(SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        chatService.clearSession(sessionId);
+    }
     @GetMapping("/history/{groupId}")
     @ResponseBody
     public List<ChatMessage> getChatHistory(@PathVariable String groupId) throws Exception {

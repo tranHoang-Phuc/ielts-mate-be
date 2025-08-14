@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.config;
 
 import com.fptu.sep490.personalservice.model.enumeration.MessageType;
+import com.fptu.sep490.personalservice.service.AIService;
 import com.fptu.sep490.personalservice.viewmodel.request.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Slf4j
 public class WebSocketEventListener {
     private final SimpMessageSendingOperations messageTemplate;
-
+    private final AIService aiService;
 
 
 
@@ -36,5 +37,14 @@ public class WebSocketEventListener {
         } else {
             log.warn("User disconnected without a username");
         }
+    }
+    @EventListener
+    public void handleSessionDisconnect(SessionDisconnectEvent event) {
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = accessor.getSessionId();
+        System.out.println("Session disconnected: " + sessionId);
+
+        // Clear AI session tương ứng
+        aiService.clearSession(sessionId);
     }
 }
