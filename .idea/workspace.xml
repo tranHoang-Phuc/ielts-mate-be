@@ -4,43 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test">
-      <change afterPath="$PROJECT_DIR$/discovery-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/discovery-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application-dev.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/logback-spring.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/email-verified.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/forgot-password.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/verify-email.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application-dev.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/logback-spring.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/static/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/static/testAIchat.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/templates/reminder.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/application.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/db/changelog/db.changelog-master.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/logback-spring.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/messages/messages.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/PersonalServiceApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/PersonalServiceApplicationTests.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -458,7 +422,7 @@
       <workItem from="1755053589402" duration="22468000" />
       <workItem from="1755098096302" duration="2033000" />
       <workItem from="1755125730593" duration="1996000" />
-      <workItem from="1755129771790" duration="13065000" />
+      <workItem from="1755129771790" duration="13379000" />
     </task>
     <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
@@ -596,7 +560,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755144246526</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="feature: add unit test">
+      <option name="closed" value="true" />
+      <created>1755145646551</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1755145646551</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
