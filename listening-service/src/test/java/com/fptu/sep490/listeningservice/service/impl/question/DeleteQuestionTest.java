@@ -47,7 +47,7 @@ public class DeleteQuestionTest {
     // ====== ID CỐ ĐỊNH (UUID v4) ======
     private static final String USER_ID           = "creatortest123@gmail.com";
     private static final String GROUP_ID         = "0f5c3b8a-2d44-4e1f-8b2a-5a6c7d8e9f10";
-    private static final String OTHER_QUESTION_ID   = "9c2a1d3e-5b67-4c89-8def-0123456789ab";
+    private static final String OTHER_GROUP_ID   = "9c2a1d3e-5b67-4c89-8def-0123456789ab";
     private static final String MISSING_GROUP_ID = "7b6a5c4d-3e2f-4a1b-9c0d-b1a2c3d4e5f6";
 
     private static final String QUESTION_ID      = "123e4567-e89b-42d3-a456-426614174000";
@@ -118,12 +118,12 @@ public class DeleteQuestionTest {
                 "Question group not found");
 
          // DEBUG JSON (request)
-         try {
-             var reqJson = mapper.createObjectNode()
-                     .put("question_id", QUESTION_ID)
-                     .put("group_id", MISSING_GROUP_ID);
-             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
-         } catch (JsonProcessingException ignored) {}
+//         try {
+//             var reqJson = mapper.createObjectNode()
+//                     .put("question_id", QUESTION_ID)
+//                     .put("group_id", MISSING_GROUP_ID);
+//             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
+//         } catch (JsonProcessingException ignored) {}
     }
 
     @Test
@@ -139,23 +139,29 @@ public class DeleteQuestionTest {
                 HttpStatus.NOT_FOUND.value(),
                 "Question not found");
 
-         // DEBUG JSON (request)
-         try {
-             var reqJson = mapper.createObjectNode()
-                     .put("question_id", MISSING_QUESTION_ID)
-                     .put("group_id", GROUP_ID);
-             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
-         } catch (JsonProcessingException ignored) {}
+//         // DEBUG JSON (request)
+//         try {
+//             var reqJson = mapper.createObjectNode()
+//                     .put("question_id", MISSING_QUESTION_ID)
+//                     .put("group_id", GROUP_ID);
+//             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
+//         } catch (JsonProcessingException ignored) {}
     }
 
     @Test
     void questionNotBelongToGroup_shouldThrow() {
-        // groupId trong path là GROUP, nhưng question thuộc OTHER_GROUP
-        var question = makeQuestion(UUID.fromString(OTHER_QUESTION_ID), GROUP, "creator");
-        when(questionRepository.findById(question.getQuestionId()))
+        QuestionGroup OTHER_GROUP = new QuestionGroup();
+        OTHER_GROUP.setGroupId(UUID.fromString(OTHER_GROUP_ID));
+
+        // Question phải có id = QUESTION_ID (để khớp với tham số truyền vào service)
+        Question question = new Question();
+        question.setQuestionId(UUID.fromString(QUESTION_ID));
+        question.setQuestionGroup(OTHER_GROUP); // khác GROUP
+
+        when(questionRepository.findById(UUID.fromString(QUESTION_ID)))
                 .thenReturn(Optional.of(question));
 
-        var ex = assertThrows(AppException.class,
+        AppException ex = assertThrows(AppException.class,
                 () -> service.deleteQuestion(QUESTION_ID, GROUP_ID, httpRequest));
 
         assertAppEx(ex,
@@ -163,13 +169,17 @@ public class DeleteQuestionTest {
                 HttpStatus.BAD_REQUEST.value(),
                 "Question does not belong to this group");
 
-         // DEBUG JSON (request)
-         try {
-             var reqJson = mapper.createObjectNode()
-                     .put("question_id", QUESTION_ID)
-                     .put("group_id", GROUP_ID);
-             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
-         } catch (JsonProcessingException ignored) {}
+        // Không được phép gọi save khi fail ở bước belong-to-group check
+        verify(questionRepository, never()).save(any(Question.class));
+        verify(questionGroupRepository, never()).save(any(QuestionGroup.class));
+
+//        // DEBUG JSON (request)
+//        try {
+//            var reqJson = mapper.createObjectNode()
+//                    .put("question_id", QUESTION_ID)
+//                    .put("group_id", GROUP_ID);
+//            System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
+//        } catch (JsonProcessingException ignored) {}
     }
     // ---------- Success ----------
 
@@ -194,12 +204,12 @@ public class DeleteQuestionTest {
         QuestionGroup savedG = gCap.getValue();
         assertThat(savedG.getUpdatedBy()).isEqualTo(USER_ID);
 
-         // DEBUG JSON (request & final state)
-         try {
-             var reqJson = mapper.createObjectNode()
-                     .put("question_id", QUESTION_ID)
-                     .put("group_id", GROUP_ID);
-             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
-         } catch (JsonProcessingException ignored) {}
+//         // DEBUG JSON (request & final state)
+//         try {
+//             var reqJson = mapper.createObjectNode()
+//                     .put("question_id", QUESTION_ID)
+//                     .put("group_id", GROUP_ID);
+//             System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(reqJson));
+//         } catch (JsonProcessingException ignored) {}
     }
 }
