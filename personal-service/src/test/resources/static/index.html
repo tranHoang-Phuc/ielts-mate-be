@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat (Public + Group) - Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial; margin: 16px; }
+        .box { border: 1px solid #ccc; padding: 8px; height: 180px; overflow:auto; margin-bottom:8px; }
+        input, button { padding:6px; margin-right:6px; }
+        .small { font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+<h2>WebSocket Chat — Public + Group (test)</h2>
+
+<div>
+    <label>Username</label>
+    <input id="username" placeholder="your name"/>
+    <button id="connectBtn">Connect</button>
+    <span class="small">SenderId will be random per tab</span>
+</div>
+
+<hr />
+
+<h3>Public Chat</h3>
+<div id="publicBox" class="box"></div>
+<input id="publicInput" placeholder="Public message"/>
+<button id="sendPublicBtn">Send Public</button>
+
+<hr />
+
+<h3>Group Chat</h3>
+<label>Group ID</label>
+<input id="groupIdInput" value="238g4158-a289-4bd2-b3d4-c35dj97df05c"/>
+<button id="joinGroupBtn">Join Group</button>
+<div id="groupBox" class="box"></div>
+<input id="groupInput" placeholder="Group message"/>
+<button id="sendGroupBtn">Send Group</button>
+
+<hr/>
+<div class="small">WS URL in code can be /ws or /api/v1/personal/ws — change if needed.</div>
+
+<script>
+    const WS_URL = "http://localhost:8072/personal/ws";
+
+    let stompClient = null;
+    let connected = false;
+    const senderId = Math.random().toString(36).substr(2,9);
+    let currentGroupId = null;
+
+    function logPublic(text) {
+        const box = document.getElementById("publicBox");
+        box.innerHTML += text + "<br/>";
+        box.scrollTop = box.scrollHeight;
+    }
+    function logGroup(text) {
+        const box = document.getElementById("groupBox");
+        box.innerHTML += text + "<br/>";
+        box.scrollTop = box.scrollHeight;
+    }
+
+    document.getElementById("connectBtn").addEventListener("click", connect);
+    document.getElementById("sendPublicBtn").addEventListener("click", sendPublic);
+    document.getElementById("joinGroupBtn").addEventListener("click", joinGroup);
+    document.getElementById("sendGroupBtn").addEventListener("click", sendGroup);
+
+    function connect() {
+        if (connected) { alert("Already connected"); return; }
+        const sock = new SockJS(WS_URL);
+        stompClient = Stomp.over(sock);
+        stompClient.debug = function(msg) { console.debug("STOMP:", msg); };
+
+        stompClient.connect({}, function(frame) {
+            connected = true;
+            console.info("Connected: " + frame);
+            alert("WebSocket connected");
+
+            stompClient.subscribe("/topic/public", function(message) {
+                try {
+                    const payload = JSON.parse(message.body);
+                    logPublic(`<b>${payload.sender}:</b> ${payload.content || ''}`);
+                } catch(e) {
+                    logPublic("Public: " + message.body);
+                }
+            });
+
+            stompClient.send("/app/chat.addUser", {}, JSON.stringify({
+                sender: document.getElementById("username").value || "anonymous",
+                senderId: senderId,
+                messageType: "JOIN"
+            }));
+        }, function(error) {
+            console.error("STOMP error", error);
+            alert("Connect error (see console).");
+        });
+    }
+
+    function sendPublic() {
+        if (!connected) { alert("Connect first"); return; }
+        const content = document.getElementById("publicInput").value;
+        if (!content) return;
+        stompClient.send("/app/chat.sendPublic", {}, JSON.stringify({
+            sender: document.getElementById("username").value || "anonymous",
+            senderId: senderId,
+            content: content,
+            messageType: "CHAT"
+        }));
+        document.getElementById("publicInput").value = "";
+    }
+
+    function joinGroup() {
+        if (!connected) { alert("Connect first"); return; }
+        currentGroupId = document.getElementById("groupIdInput").value.trim();
+        if (!currentGroupId) { alert("Enter groupId"); return; }
+
+        // Clear old messages
+        document.getElementById("groupBox").innerHTML = "";
+
+        // Subscribe to group chat
+        stompClient.subscribe("/topic/group." + currentGroupId, function(message) {
+            try {
+                const payload = JSON.parse(message.body);
+                logGroup(`<b>${payload.sender}:</b> ${payload.content || ''}`);
+            } catch(e) {
+                logGroup("Group: " + message.body);
+            }
+        });
+
+        // Subscribe to history for this group
+        stompClient.subscribe("/queue/messages." + currentGroupId, function(message) {
+            try {
+                const payload = JSON.parse(message.body);
+                console.log("📜 Group history received:", payload);
+                if (Array.isArray(payload)) {
+                    payload.forEach(msg => {
+                        logGroup(`<b>${msg.sender}:</b> ${msg.content || ''}`);
+                    });
+                }
+            } catch(e) {
+                console.error("History parse error", e, message.body);
+            }
+        });
+
+        // Notify server join
+        stompClient.send("/app/chat.joinGroup", {}, JSON.stringify({
+            sender: document.getElementById("username").value || "anonymous",
+            senderId: senderId,
+            groupId: currentGroupId,
+            messageType: "JOIN"
+        }));
+
+        // Request chat history from server
+        stompClient.send("/app/chat.getMessages", {}, JSON.stringify({
+            sender: document.getElementById("username").value || "anonymous",
+            senderId: senderId,
+            groupId: currentGroupId
+        }));
+
+        alert("Joined group " + currentGroupId);
+    }
+
+    function sendGroup() {
+        if (!connected) { alert("Connect first"); return; }
+        if (!currentGroupId) { alert("Join a group first"); return; }
+        const content = document.getElementById("groupInput").value;
+        if (!content) return;
+        stompClient.send("/app/chat.sendGroup", {}, JSON.stringify({
+            sender: document.getElementById("username").value || "anonymous",
+            senderId: senderId,
+            groupId: currentGroupId,
+            content: content,
+            messageType: "CHAT"
+        }));
+        document.getElementById("groupInput").value = "";
+    }
+</script>
+</body>
+</html>

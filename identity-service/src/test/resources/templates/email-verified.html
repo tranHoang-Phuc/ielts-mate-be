@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Email Verified Successfully</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F0F2F5;
+            font-family: 'Inter', sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #0066CC;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header img {
+            max-width: 100px;
+            margin-bottom: 16px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #FFF;
+        }
+        .content {
+            padding: 30px 20px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        .content p {
+            margin: 16px 0;
+        }
+        .button {
+            display: inline-block;
+            margin: 24px 0;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #0066CC 0%, #004A99 100%);
+            color: #FFF !important;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .button:hover {
+            background: linear-gradient(135deg, #004A99 0%, #0066CC 100%);
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: #888;
+            background-color: #FAFBFC;
+        }
+        .footer a {
+            color: #0066CC;
+            text-decoration: none;
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 20px; }
+            .content { padding: 20px 15px; }
+            .button { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <!-- <img src="https://yourdomain.com/assets/logo-white.png" alt="{{appName}} Logo"> -->
+        <h1>Email Verified!</h1>
+    </div>
+    <div class="content">
+        <p>Hi <strong th:text="${fullName}"></strong>,</p>
+        <p>Great news—your email address <strong th:text="${email}"></strong> has been successfully verified. You’re all set to explore everything <strong>Ielts Mate</strong> has to offer.</p>
+        <p style="text-align:center;">
+            <a href="https://ielts-mate-fe.vercel.app" class="button">Go to Ielts Mate</a>
+        </p>
+        <p>If you have any questions or didn’t request this, just reply to this email or visit our <a href="https://ielts-mate-fe.vercel.app">Help Center</a>.</p>
+        <p>Thanks for being with us,<br><strong>The Ielts Mate Team</strong></p>
+    </div>
+
+</div>
+</body>
+</html>

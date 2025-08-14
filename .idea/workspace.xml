@@ -5,27 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test">
-      <change afterPath="$PROJECT_DIR$/listening-service/src/test/java/com/fptu/sep490/listeningservice/helper/HelperTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/test/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/java/com/fptu/sep490/notificationservice/service/impl/EmailServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notification-service/src/test/java/com/fptu/sep490/notificationservice/service/impl/SseServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/ConfigServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/DashboardServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/MarkupServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/TopicMasterServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/DashboardServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImplTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/test/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/discovery-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/discovery-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/file-service/src/test/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application-dev.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/logback-spring.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/email-verified.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/forgot-password.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/identity-service/src/test/resources/templates/verify-email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/test/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application-dev.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/logback-spring.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/test/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/messages/messages.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/static/index.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/static/testAIchat.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/test/resources/templates/reminder.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/application.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/db/changelog/db.changelog-master.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/logback-spring.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/test/resources/messages/messages.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/identity-service/src/test/java/com/fptu/sep490/identityservice/service/impl/AuthServiceImplTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/request/ChoiceCreation.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/request/ChoiceCreation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/request/UpdatedChoiceRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/request/UpdatedChoiceRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/PersonalServiceApplicationTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/PersonalServiceApplicationTests.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,6 +186,8 @@
     "JUnit.SseServiceImplTest.subscribe_addsEmitter_and_onCompletionRemoves.executor": "Coverage",
     "JUnit.TopicMasterServiceImplTest.executor": "Run",
     "JUnit.VerifyEmailRateLimiterImplTest.executor": "Coverage",
+    "Maven.common-library [clean].executor": "Run",
+    "Maven.common-library [install].executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
@@ -187,6 +203,7 @@
     "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/reading-service/src/test",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -206,6 +223,13 @@
     <option name="notificationShown" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\reading-service\src\test" />
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\discovery-service\src\test" />
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\file-service\src\test" />
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\identity-service\src\test" />
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\listening-service\src\test" />
+    </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="com.fptu.sep490.event" />
       <recent name="com.fptu.sep490.readingservice.viewmodel.response" />
@@ -238,7 +262,22 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.PassageServiceImplTest">
+  <component name="RunManager" selected="JUnit.AIServiceImplTest">
+    <configuration name="AIServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="personal-service" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.fptu.sep490.personalservice.service.impl.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.fptu.sep490.personalservice.service.impl" />
+      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.personalservice.service.impl.AIServiceImplTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="PassageServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="reading-service" />
       <extension name="coverage">
@@ -281,22 +320,6 @@
       <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
       <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
       <option name="METHOD_NAME" value="fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="PassageServiceImplTest.fromReadingPassage_success_buildsAttemptStructure" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="reading-service" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.fptu.sep490.readingservice.service.impl.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.fptu.sep490.readingservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.readingservice.service.impl.PassageServiceImplTest" />
-      <option name="METHOD_NAME" value="fromReadingPassage_success_buildsAttemptStructure" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -386,8 +409,8 @@
       <item itemvalue="JUnit.PassageServiceImplTest" />
       <item itemvalue="JUnit.PassageServiceImplTest.fromExamAttemptHistory_success_mapsAll" />
       <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
-      <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_success_buildsAttemptStructure" />
       <item itemvalue="JUnit.PassageServiceImplTest.getTaskTitle_returnsMappedList" />
+      <item itemvalue="JUnit.AIServiceImplTest" />
       <item itemvalue="Spring Boot.ApiGatewayApplication" />
       <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
       <item itemvalue="Spring Boot.FileServiceApplication" />
@@ -399,11 +422,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.AIServiceImplTest" />
         <item itemvalue="JUnit.PassageServiceImplTest" />
         <item itemvalue="JUnit.PassageServiceImplTest.getTaskTitle_returnsMappedList" />
         <item itemvalue="JUnit.PassageServiceImplTest.fromExamAttemptHistory_success_mapsAll" />
         <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_groupNoChoices_throwsChoiceNotFound" />
-        <item itemvalue="JUnit.PassageServiceImplTest.fromReadingPassage_success_buildsAttemptStructure" />
       </list>
     </recent_temporary>
   </component>
@@ -435,7 +458,7 @@
       <workItem from="1755053589402" duration="22468000" />
       <workItem from="1755098096302" duration="2033000" />
       <workItem from="1755125730593" duration="1996000" />
-      <workItem from="1755129771790" duration="11650000" />
+      <workItem from="1755129771790" duration="13065000" />
     </task>
     <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into local&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
@@ -557,7 +580,23 @@
       <option name="project" value="LOCAL" />
       <updated>1755084125737</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="feature: add unit test">
+      <option name="closed" value="true" />
+      <created>1755144209688</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1755144209688</updated>
+    </task>
+    <task id="LOCAL-00017" summary="feature: add unit test">
+      <option name="closed" value="true" />
+      <created>1755144246526</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1755144246526</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -711,7 +750,7 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$AuthServiceImplTest_resetPassword_userNotFound_throwsNotFound.ic" NAME="AuthServiceImplTest.resetPassword_userNotFound_throwsNotFound Coverage Results" MODIFIED="1755075135895" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/ielts_mate_be$AIServiceImplTest.ic" NAME="AIServiceImplTest Coverage Results" MODIFIED="1755126263953" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/ielts_mate_be$AIServiceImplTest.ic" NAME="AIServiceImplTest Coverage Results" MODIFIED="1755144636603" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.personalservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_updatePassage_instructionNotNull_invalid.ic" NAME="PassageServiceImplTest.updatePassage_instructionNotNull_invalid Coverage Results" MODIFIED="1755141403411" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -747,7 +786,7 @@
     <SUITE FILE_PATH="coverage/ielts_mate_be$ListeningTaskServiceImplTest.ic" NAME="ListeningTaskServiceImplTest Coverage Results" MODIFIED="1755098857387" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.listeningservice.service.impl.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest.ic" NAME="PassageServiceImplTest Coverage Results" MODIFIED="1755142633661" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest.ic" NAME="PassageServiceImplTest Coverage Results" MODIFIED="1755144164455" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$FileServiceImplTest_uploadAsync_success_sendsAudioUploadEvent.ic" NAME="FileServiceImplTest.uploadAsync_success_sendsAudioUploadEvent Coverage Results" MODIFIED="1755084055244" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
@@ -841,6 +880,9 @@
       <FILTER>com.fptu.sep490.identityservice.service.impl.*</FILTER>
     </SUITE>
     <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getPassages_noLatestVersion_keepsOriginalFields.ic" NAME="PassageServiceImplTest.getPassages_noLatestVersion_keepsOriginalFields Coverage Results" MODIFIED="1755139870229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
+    </SUITE>
+    <SUITE FILE_PATH="coverage/ielts_mate_be$PassageServiceImplTest_getTaskTitle_returnsMappedList.ic" NAME="PassageServiceImplTest.getTaskTitle_returnsMappedList Coverage Results" MODIFIED="1755144135278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
       <FILTER>com.fptu.sep490.readingservice.service.impl.*</FILTER>
     </SUITE>
   </component>

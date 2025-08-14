@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: notification-service
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+server:
+  port: 8082
+  servlet:
+    context-path: /notification
+
+notification:
+  email:
+    brevo-url: https://api.brevo.com
+    brevo-apikey: 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
+
+springdoc:
+  paths-to-match: /**
+  packages-to-scan: com.fptu.sep490.notificationservice.controller
+  swagger-ui:
+    path: /swagger-ui
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: swagger-ui
+  oauth-flow:
+    authorization-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/auth
+    token-url: http://identity.sep.local/realms/SEP490/protocol/openid-connect/token
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+kafka:
+  topic:
+    user-verification: user-verification-topic
+    send-notification: send-notification-topic
+    reminder: reminder-topic
+

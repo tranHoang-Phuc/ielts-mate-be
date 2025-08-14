@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: discovery-service
+server:
+  port: 8761
+eureka:
+  instance:
+    hostname: eureka-server
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    renewal-percent-threshold: 0.85

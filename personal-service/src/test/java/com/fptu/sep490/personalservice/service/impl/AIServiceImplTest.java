@@ -27,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import com.fptu.sep490.personalservice.strategy.GeminiApiStrategy;
+import jakarta.servlet.http.HttpSession;
+
 class AIServiceImplTest {
 
 	@Mock
@@ -44,6 +47,12 @@ class AIServiceImplTest {
 	@Mock
 	ListeningClient listeningClient;
 
+	@Mock
+	GeminiApiStrategy geminiApiStrategy;
+
+	@Mock
+	HttpSession httpSession;
+
 	AIServiceImpl service;
 
 	@BeforeEach
@@ -56,7 +65,9 @@ class AIServiceImplTest {
 				helper,
 				objectMapper,
 				readingClient,
-				listeningClient
+				listeningClient,
+				geminiApiStrategy,
+				httpSession
 		);
 	}
 
