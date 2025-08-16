@@ -24,9 +24,9 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://ep-divine-sea-ae825s09-pooler.c-2.us-east-2.aws.neon.tech:5432/reading_service?sslmode=require&prepareThreshold=0
-    username: neondb_owner
-    password: npg_K1PwUA0ySILJ
+    url: jdbc:postgresql://52.91.12.100:5432/reading_service-local
+    username: phucth
+    password: 123afd4a_sfd
     hikari:
       data-source-properties:
         prepareThreshold: 0

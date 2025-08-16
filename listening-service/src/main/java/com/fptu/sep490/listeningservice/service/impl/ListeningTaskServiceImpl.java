@@ -12,6 +12,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.event.TopicMasterRequest;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
+
 import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.enumeration.IeltsType;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
@@ -719,7 +720,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
                 if (group.getListeningTask().getPartNumber().ordinal()==partNumber) {
                     List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses = new ArrayList<>();
-                    if (group.getDragItems()!=null && !group.getDragItems().isEmpty()) { //if group has type drag and drop
+                    if (group.getDragItems()!=null && !group.getDragItems().isEmpty()) {
                         List<UUID> dragItemIds = history.getGroupMapItems().getOrDefault(group.getGroupId(), Collections.emptyList());
                         List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
                         for (DragItem dragItem : dragItems) {
