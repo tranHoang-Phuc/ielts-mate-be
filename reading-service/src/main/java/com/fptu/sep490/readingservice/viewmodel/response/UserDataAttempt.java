@@ -20,7 +20,10 @@ public record UserDataAttempt(
         ReadingPassageGetAllResponse attemptResponse,
 
         @JsonProperty("answers")
-        List<AnswerChoice> answers
+        List<AnswerChoice> answers,
+
+        @JsonProperty("total_points")
+        Integer totalPoints
 
 ) {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)

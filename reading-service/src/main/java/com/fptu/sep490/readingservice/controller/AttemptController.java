@@ -149,6 +149,24 @@ public class AttemptController {
                 .body(body);
     }
 
+    @GetMapping("/result/{attempt-id}")
+    @Operation(
+            summary = "Retrieve the result of an attempt",
+            description = "Get the result of a specific attempt by its ID, including user data and answers."
+    )
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserDataAttempt>> result(
+            @PathVariable("attempt-id") UUID attemptId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        UserDataAttempt data = attemptService.viewResult(attemptId, request);
+        BaseResponse<UserDataAttempt> response = BaseResponse.<UserDataAttempt>builder()
+                .data(data)
+                .message("Retrieve data successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     private List<Integer> parseCommaSeparatedIntegers(String input) {
         if (input == null || input.trim().isEmpty()) {
             return null;
