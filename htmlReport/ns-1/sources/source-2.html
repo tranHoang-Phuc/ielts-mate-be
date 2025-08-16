@@ -1,0 +1,438 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ConfigServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.fptu.sep490.personalservice.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ConfigServiceImpl (com.fptu.sep490.personalservice.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ConfigServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/41)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/170)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.fptu.sep490.personalservice.service.impl;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.core.JsonProcessingException;
+&nbsp;import com.fasterxml.jackson.databind.JsonMappingException;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fptu.sep490.commonlibrary.exceptions.AppException;
+&nbsp;import com.fptu.sep490.event.SseEvent;
+&nbsp;import com.fptu.sep490.event.StreakEvent;
+&nbsp;import com.fptu.sep490.personalservice.constants.Constants;
+&nbsp;import com.fptu.sep490.personalservice.helper.Helper;
+&nbsp;import com.fptu.sep490.personalservice.helper.UtcConverter;
+&nbsp;import com.fptu.sep490.personalservice.model.ReminderConfig;
+&nbsp;import com.fptu.sep490.personalservice.model.UserConfig;
+&nbsp;import com.fptu.sep490.personalservice.model.enumeration.RecurrenceType;
+&nbsp;import com.fptu.sep490.personalservice.model.json.StreakConfig;
+&nbsp;import com.fptu.sep490.personalservice.model.json.TargetConfig;
+&nbsp;import com.fptu.sep490.personalservice.repository.ConfigRepository;
+&nbsp;import com.fptu.sep490.personalservice.repository.ReminderConfigRepository;
+&nbsp;import com.fptu.sep490.personalservice.service.ConfigService;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigCreationRequest;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.request.ReminderConfigUpdateRequest;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.ReminderConfigResponse;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.StreakConfigResponse;
+&nbsp;import lombok.AccessLevel;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.experimental.FieldDefaults;
+&nbsp;import lombok.experimental.NonFinal;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.kafka.core.KafkaTemplate;
+&nbsp;import org.springframework.messaging.support.MessageBuilder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;
+&nbsp;import java.time.*;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;import java.util.concurrent.ThreadLocalRandom;
+&nbsp;
+&nbsp;import static com.fptu.sep490.personalservice.helper.UtcConverter.convertToUtc;
+&nbsp;
+&nbsp;
+&nbsp;@Service
+&nbsp;@FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class ConfigServiceImpl implements ConfigService {
+&nbsp;    ConfigRepository configRepository;
+&nbsp;    ObjectMapper objectMapper;
+&nbsp;    KafkaTemplate&lt;String, Object&gt; kafkaTemplate;
+&nbsp;    ReminderConfigRepository reminderConfigRepository;
+&nbsp;
+&nbsp;    Helper helper;
+&nbsp;    @Value(&quot;${kafka.topic.send-notification}&quot;)
+&nbsp;    @NonFinal
+&nbsp;    String notificationTopic;
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public StreakConfig getOrAddStreakConfig(StreakEvent streakEvent) throws JsonProcessingException {
+<b class="nc">&nbsp;        LocalDate today = LocalDate.now();</b>
+<b class="nc">&nbsp;        var streakConfig = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId())</b>
+<b class="nc">&nbsp;                .orElseGet(() -&gt; {</b>
+<b class="nc">&nbsp;                    StreakConfig config = StreakConfig.builder()</b>
+<b class="nc">&nbsp;                            .startDate(today)</b>
+<b class="nc">&nbsp;                            .lastUpdated(today)</b>
+<b class="nc">&nbsp;                            .currentStreak(1)</b>
+<b class="nc">&nbsp;                            .build();</b>
+&nbsp;
+&nbsp;                    try {
+<b class="nc">&nbsp;                        UserConfig userConfig = UserConfig.builder()</b>
+<b class="nc">&nbsp;                                .configName(Constants.Config.TARGET_CONFIG)</b>
+<b class="nc">&nbsp;                                .accountId(streakEvent.accountId())</b>
+<b class="nc">&nbsp;                                .description(&quot;Study Streak&quot;)</b>
+<b class="nc">&nbsp;                                .value(objectMapper.writeValueAsString(config))</b>
+<b class="nc">&nbsp;                                .build();</b>
+<b class="nc">&nbsp;                        configRepository.save(userConfig);</b>
+&nbsp;
+&nbsp;                    } catch (JsonProcessingException e) {
+<b class="nc">&nbsp;                        throw new AppException(Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,</b>
+<b class="nc">&nbsp;                                Constants.ErrorCode.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());</b>
+&nbsp;                    }
+&nbsp;                    try {
+<b class="nc">&nbsp;                        return objectMapper.writeValueAsString(config);</b>
+&nbsp;                    } catch (JsonProcessingException e) {
+<b class="nc">&nbsp;                        throw new AppException(Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,</b>
+<b class="nc">&nbsp;                                Constants.ErrorCode.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());</b>
+&nbsp;                    }
+&nbsp;                });
+&nbsp;
+<b class="nc">&nbsp;        StreakConfig config = objectMapper.convertValue(streakConfig, StreakConfig.class);</b>
+&nbsp;
+&nbsp;        // nếu  lastUpdated là 1 ngày ngay trước ngày hôm nay thì check ntnt
+<b class="nc">&nbsp;        if (!config.getLastUpdated().isEqual(today)) {</b>
+<b class="nc">&nbsp;            LocalDate last = config.getLastUpdated();</b>
+<b class="nc">&nbsp;            if (last.isEqual(today.minusDays(1))) {</b>
+<b class="nc">&nbsp;                config.setCurrentStreak(config.getCurrentStreak() + 1);</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                config.setCurrentStreak(1);</b>
+<b class="nc">&nbsp;                config.setLastUpdated(today);</b>
+<b class="nc">&nbsp;                config.setLastUpdated(today);</b>
+&nbsp;            }
+&nbsp;        }
+<b class="nc">&nbsp;        UserConfig userConfig = configRepository.findByConfigNameAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId());</b>
+<b class="nc">&nbsp;        userConfig.setValue(objectMapper.writeValueAsString(config));</b>
+<b class="nc">&nbsp;        configRepository.save(userConfig);</b>
+<b class="nc">&nbsp;        if (config.getCurrentStreak() == Constants.Streak.TPL_3 ||</b>
+<b class="nc">&nbsp;                config.getCurrentStreak() == Constants.Streak.TPL_10 ||</b>
+<b class="nc">&nbsp;                config.getCurrentStreak() == Constants.Streak.TPL_30 ||</b>
+<b class="nc">&nbsp;                config.getCurrentStreak() == Constants.Streak.TPL_90) {</b>
+<b class="nc">&nbsp;            SseEvent sseEvent = SseEvent.builder()</b>
+<b class="nc">&nbsp;                    .clientId(streakEvent.accountId())</b>
+<b class="nc">&nbsp;                    .status(&quot;streak&quot;)</b>
+<b class="nc">&nbsp;                    .message(buildMessage(config.getCurrentStreak()))</b>
+<b class="nc">&nbsp;                    .build();</b>
+<b class="nc">&nbsp;            kafkaTemplate.send(notificationTopic, sseEvent);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return config;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public StreakConfigResponse getStreak(HttpServletRequest request) {
+<b class="nc">&nbsp;        String userId = helper.getUserIdFromToken(request);</b>
+&nbsp;
+&nbsp;        // Lấy dữ liệu config từ DB (kiểu String JSON)
+<b class="nc">&nbsp;        String streakConfigJson = configRepository</b>
+<b class="nc">&nbsp;                .getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, UUID.fromString(userId))</b>
+<b class="nc">&nbsp;                .orElse(null);</b>
+&nbsp;
+&nbsp;        // Nếu không có config -&gt; trả default
+<b class="nc">&nbsp;        if (streakConfigJson == null) {</b>
+<b class="nc">&nbsp;            return StreakConfigResponse.builder()</b>
+<b class="nc">&nbsp;                    .currentStreak(0)</b>
+<b class="nc">&nbsp;                    .lastUpdated(LocalDate.now())</b>
+<b class="nc">&nbsp;                    .startDate(LocalDate.now())</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        try {
+&nbsp;            // Parse JSON thành object
+<b class="nc">&nbsp;            StreakConfig config = objectMapper.readValue(streakConfigJson, StreakConfig.class);</b>
+&nbsp;
+<b class="nc">&nbsp;            return StreakConfigResponse.builder()</b>
+<b class="nc">&nbsp;                    .currentStreak(config.getCurrentStreak())</b>
+<b class="nc">&nbsp;                    .lastUpdated(config.getLastUpdated())</b>
+<b class="nc">&nbsp;                    .startDate(config.getStartDate())</b>
+<b class="nc">&nbsp;                    .build();</b>
+&nbsp;
+&nbsp;        } catch (JsonProcessingException e) {
+&nbsp;            // Nếu dữ liệu JSON trong DB bị lỗi format
+<b class="nc">&nbsp;            throw new AppException(</b>
+<b class="nc">&nbsp;                    Constants.ErrorCodeMessage.INTERNAL_SERVER_ERROR,</b>
+<b class="nc">&nbsp;                    Constants.ErrorCode.INTERNAL_SERVER_ERROR,</b>
+<b class="nc">&nbsp;                    HttpStatus.INTERNAL_SERVER_ERROR.value()</b>
+&nbsp;            );
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ReminderConfigResponse getReminder(HttpServletRequest request) {
+<b class="nc">&nbsp;        UUID userId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="nc">&nbsp;        ReminderConfig reminderConfig = (ReminderConfig) reminderConfigRepository.findByAccountId(userId);</b>
+<b class="nc">&nbsp;        if (reminderConfig == null) return null;</b>
+<b class="nc">&nbsp;        return ReminderConfigResponse.builder()</b>
+<b class="nc">&nbsp;                .configId(reminderConfig.getConfigId())</b>
+<b class="nc">&nbsp;                .email(reminderConfig.getEmail())</b>
+<b class="nc">&nbsp;                .reminderDate(reminderConfig.getReminderDate())</b>
+<b class="nc">&nbsp;                .reminderTime(reminderConfig.getReminderTime())</b>
+<b class="nc">&nbsp;                .enabled(reminderConfig.isEnabled())</b>
+<b class="nc">&nbsp;                .recurrence(reminderConfig.getRecurrence().ordinal())</b>
+<b class="nc">&nbsp;                .zone(reminderConfig.getTimeZone())</b>
+<b class="nc">&nbsp;                .message(reminderConfig.getMessage())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ReminderConfigResponse registerReminder(ReminderConfigCreationRequest reminderConfigCreationRequest, HttpServletRequest request) {
+<b class="nc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="nc">&nbsp;        UtcConverter.UtcResult result = convertToUtc(reminderConfigCreationRequest.timeZone(),</b>
+<b class="nc">&nbsp;                reminderConfigCreationRequest.reminderDate(), reminderConfigCreationRequest.reminderTime());</b>
+&nbsp;
+<b class="nc">&nbsp;        if (reminderConfigRepository.existsByAccountId(accountId)) {</b>
+<b class="nc">&nbsp;            throw new AppException(Constants.ErrorCodeMessage.REMINDER_CONFIGURED,</b>
+<b class="nc">&nbsp;                    Constants.ErrorCode.REMINDER_CONFIGURED, HttpStatus.CONFLICT.value());</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        ReminderConfig config = ReminderConfig.builder()</b>
+<b class="nc">&nbsp;                .email(reminderConfigCreationRequest.email())</b>
+<b class="nc">&nbsp;                .accountId(accountId)</b>
+<b class="nc">&nbsp;                .message(reminderConfigCreationRequest.message())</b>
+<b class="nc">&nbsp;                .reminderDate(result.getUtcDates())</b>
+<b class="nc">&nbsp;                .reminderTime(result.getUtcTime())</b>
+<b class="nc">&nbsp;                .recurrence(safeEnumFromOrdinal(RecurrenceType.values(), reminderConfigCreationRequest.recurrence()))</b>
+<b class="nc">&nbsp;                .timeZone(reminderConfigCreationRequest.timeZone())</b>
+<b class="nc">&nbsp;                .enabled(reminderConfigCreationRequest.enable())</b>
+<b class="nc">&nbsp;                .build();</b>
+<b class="nc">&nbsp;        config = reminderConfigRepository.save(config);</b>
+<b class="nc">&nbsp;        return ReminderConfigResponse.builder()</b>
+<b class="nc">&nbsp;                .configId(config.getConfigId())</b>
+<b class="nc">&nbsp;                .email(config.getEmail())</b>
+<b class="nc">&nbsp;                .reminderDate(config.getReminderDate())</b>
+<b class="nc">&nbsp;                .reminderTime(config.getReminderTime())</b>
+<b class="nc">&nbsp;                .enabled(config.isEnabled())</b>
+<b class="nc">&nbsp;                .zone(config.getTimeZone())</b>
+<b class="nc">&nbsp;                .recurrence(config.getRecurrence().ordinal())</b>
+<b class="nc">&nbsp;                .message(config.getMessage())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public ReminderConfigResponse updateReminder(ReminderConfigUpdateRequest reminderConfig, HttpServletRequest request) {
+<b class="nc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="nc">&nbsp;        if (!reminderConfigRepository.existsByAccountId(accountId)) {</b>
+<b class="nc">&nbsp;            throw new AppException(Constants.ErrorCodeMessage.REMINDER_NOT_FOUND,</b>
+<b class="nc">&nbsp;                    Constants.ErrorCode.REMINDER_NOT_FOUND, HttpStatus.CONFLICT.value());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        UtcConverter.UtcResult result = convertToUtc(reminderConfig.timeZone(),</b>
+<b class="nc">&nbsp;                reminderConfig.reminderDate(), reminderConfig.reminderTime());</b>
+<b class="nc">&nbsp;        ReminderConfig config = (ReminderConfig) reminderConfigRepository.findByAccountId(accountId);</b>
+<b class="nc">&nbsp;        config.setEmail(reminderConfig.email());</b>
+<b class="nc">&nbsp;        config.setMessage(reminderConfig.message());</b>
+<b class="nc">&nbsp;        config.setReminderDate(result.getUtcDates());</b>
+<b class="nc">&nbsp;        config.setReminderTime(result.getUtcTime());</b>
+<b class="nc">&nbsp;        config.setRecurrence(safeEnumFromOrdinal(RecurrenceType.values(), reminderConfig.recurrence()));</b>
+<b class="nc">&nbsp;        config.setTimeZone(reminderConfig.timeZone());</b>
+<b class="nc">&nbsp;        config.setEnabled(reminderConfig.enable());</b>
+&nbsp;
+<b class="nc">&nbsp;        config = reminderConfigRepository.save(config);</b>
+<b class="nc">&nbsp;        return ReminderConfigResponse.builder()</b>
+<b class="nc">&nbsp;                .configId(config.getConfigId())</b>
+<b class="nc">&nbsp;                .email(config.getEmail())</b>
+<b class="nc">&nbsp;                .reminderDate(config.getReminderDate())</b>
+<b class="nc">&nbsp;                .reminderTime(config.getReminderTime())</b>
+<b class="nc">&nbsp;                .enabled(config.isEnabled())</b>
+<b class="nc">&nbsp;                .recurrence(config.getRecurrence().ordinal())</b>
+<b class="nc">&nbsp;                .zone(config.getTimeZone())</b>
+<b class="nc">&nbsp;                .message(config.getMessage())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TargetConfig getTarget(HttpServletRequest request) throws JsonProcessingException {
+<b class="nc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="nc">&nbsp;        String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)</b>
+<b class="nc">&nbsp;                .orElseGet(()-&gt;null);</b>
+<b class="nc">&nbsp;        if(targetValue == null) return null;</b>
+<b class="nc">&nbsp;        return objectMapper.readValue(targetValue, TargetConfig.class);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TargetConfig addOrUpdate(HttpServletRequest request, TargetConfig targetConfig) throws JsonProcessingException {
+<b class="nc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="nc">&nbsp;        String targetValue = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, accountId)</b>
+<b class="nc">&nbsp;                .orElseGet(() -&gt; null);</b>
+<b class="nc">&nbsp;        String value = objectMapper.writeValueAsString(targetConfig);</b>
+<b class="nc">&nbsp;        if (targetValue == null) {</b>
+&nbsp;
+<b class="nc">&nbsp;            UserConfig config = UserConfig.builder()</b>
+<b class="nc">&nbsp;                    .accountId(accountId)</b>
+<b class="nc">&nbsp;                    .configName(Constants.Config.TARGET_CONFIG)</b>
+<b class="nc">&nbsp;                    .value(value)</b>
+<b class="nc">&nbsp;                    .description(&quot;Target config&quot;)</b>
+<b class="nc">&nbsp;                    .build();</b>
+<b class="nc">&nbsp;            configRepository.save(config);</b>
+<b class="nc">&nbsp;            return targetConfig;</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            UserConfig config = configRepository.findByAccountIdAndConfigName(accountId, Constants.Config.TARGET_CONFIG);</b>
+<b class="nc">&nbsp;            config.setValue(value);</b>
+<b class="nc">&nbsp;            configRepository.save(config);</b>
+<b class="nc">&nbsp;            return targetConfig;</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String buildMessage(int streak) {
+<b class="nc">&nbsp;        int milestone = 0;</b>
+<b class="nc">&nbsp;        if (streak % Constants.Streak.TPL_90 == 0) milestone = Constants.Streak.TPL_90;</b>
+<b class="nc">&nbsp;        else if (streak % Constants.Streak.TPL_30 == 0) milestone = Constants.Streak.TPL_30;</b>
+<b class="nc">&nbsp;        else if (streak % Constants.Streak.TPL_10 == 0) milestone = Constants.Streak.TPL_10;</b>
+<b class="nc">&nbsp;        else if (streak % Constants.Streak.TPL_3 == 0) milestone = Constants.Streak.TPL_3;</b>
+&nbsp;
+<b class="nc">&nbsp;        if (milestone == 0) {</b>
+<b class="nc">&nbsp;            return null;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        String[] tpl;
+<b class="nc">&nbsp;        switch (milestone) {</b>
+&nbsp;            case Constants.Streak.TPL_90:
+<b class="nc">&nbsp;                tpl = Constants.StreakMessage.TPL_90;</b>
+&nbsp;                break;
+&nbsp;            case Constants.Streak.TPL_30:
+<b class="nc">&nbsp;                tpl = Constants.StreakMessage.TPL_30;</b>
+&nbsp;                break;
+&nbsp;            case Constants.Streak.TPL_10:
+<b class="nc">&nbsp;                tpl = Constants.StreakMessage.TPL_10;</b>
+&nbsp;                break;
+&nbsp;            default:
+<b class="nc">&nbsp;                tpl = Constants.StreakMessage.TPL_3;</b>
+&nbsp;                break;
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        int idx = ThreadLocalRandom.current().nextInt(tpl.length);</b>
+<b class="nc">&nbsp;        return String.format(tpl[idx], streak);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private &lt;T extends Enum&lt;T&gt;&gt; T safeEnumFromOrdinal(T[] values, int ordinal) {
+<b class="nc">&nbsp;        if (ordinal &lt; 0 || ordinal &gt;= values.length) {</b>
+<b class="nc">&nbsp;            throw new AppException(</b>
+<b class="nc">&nbsp;                    Constants.ErrorCodeMessage.INVALID_REQUEST,</b>
+<b class="nc">&nbsp;                    Constants.ErrorCode.INVALID_REQUEST,</b>
+<b class="nc">&nbsp;                    HttpStatus.BAD_REQUEST.value()</b>
+&nbsp;            );
+&nbsp;        }
+<b class="nc">&nbsp;        return values[ordinal];</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-14 07:34</div>
+</div>
+</body>
+</html>

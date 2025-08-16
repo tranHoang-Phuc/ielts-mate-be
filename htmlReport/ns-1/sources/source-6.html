@@ -1,0 +1,400 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > MarkupServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.fptu.sep490.personalservice.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: MarkupServiceImpl (com.fptu.sep490.personalservice.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MarkupServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    81%
+  </span>
+  <span class="absValue">
+    (34/42)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (170/170)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.fptu.sep490.personalservice.service.impl;
+&nbsp;
+&nbsp;import com.fptu.sep490.commonlibrary.constants.DataMarkup;
+&nbsp;import com.fptu.sep490.commonlibrary.exceptions.AppException;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+&nbsp;import com.fptu.sep490.personalservice.constants.Constants;
+&nbsp;import com.fptu.sep490.personalservice.helper.Helper;
+&nbsp;import com.fptu.sep490.personalservice.model.Markup;
+&nbsp;import com.fptu.sep490.personalservice.model.enumeration.MarkupType;
+&nbsp;import com.fptu.sep490.personalservice.model.enumeration.PracticeType;
+&nbsp;import com.fptu.sep490.personalservice.model.enumeration.TaskType;
+&nbsp;import com.fptu.sep490.personalservice.repository.MarkupRepository;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ListeningClient;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ReadingClient;
+&nbsp;import com.fptu.sep490.personalservice.repository.specification.MarkupSpecifications;
+&nbsp;import com.fptu.sep490.personalservice.service.MarkupService;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.request.MarkupCreationRequest;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.MarkUpResponse;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.MarkedUpResponse;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import lombok.AccessLevel;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.experimental.FieldDefaults;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageImpl;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.scheduling.annotation.Async;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.*;
+&nbsp;import java.util.concurrent.CompletableFuture;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class MarkupServiceImpl implements MarkupService {
+&nbsp;    MarkupRepository markupRepository;
+&nbsp;    Helper helper;
+&nbsp;    ReadingClient readingClient;
+&nbsp;    ListeningClient listeningClient;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void addMarkup(HttpServletRequest request, MarkupCreationRequest markup) {
+<b class="fc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="fc">&nbsp;        Markup save = Markup.builder()</b>
+<b class="fc">&nbsp;                .markupType(safeEnumFromOrdinal(MarkupType.values(), markup.markUpType()))</b>
+<b class="fc">&nbsp;                .taskType(safeEnumFromOrdinal(TaskType.values(), markup.taskType()))</b>
+<b class="fc">&nbsp;                .practiceType(safeEnumFromOrdinal(PracticeType.values(), markup.practiceType()))</b>
+<b class="fc">&nbsp;                .accountId(accountId)</b>
+<b class="fc">&nbsp;                .taskId(markup.taskId())</b>
+<b class="fc">&nbsp;                .build();</b>
+<b class="fc">&nbsp;        markupRepository.save(save);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public void deleteMarkup(HttpServletRequest request, UUID taskId) {
+<b class="fc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+&nbsp;
+<b class="fc">&nbsp;        var markup = markupRepository.findByAccountIdAndTaskId(accountId, taskId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new AppException(</b>
+<b class="fc">&nbsp;                        Constants.ErrorCodeMessage.MARK_UP_NOT_FOUND,</b>
+<b class="fc">&nbsp;                        Constants.ErrorCode.MARK_UP_NOT_FOUND,</b>
+<b class="fc">&nbsp;                        HttpStatus.NOT_FOUND.value()</b>
+&nbsp;                ));
+<b class="fc">&nbsp;        markupRepository.delete(markup);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public Page&lt;MarkUpResponse&gt; getMarkup(int page, int size, List&lt;Integer&gt; markupTypeList, List&lt;Integer&gt; taskTypeList, List&lt;Integer&gt; practiceTypeList, HttpServletRequest request) {
+<b class="fc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="fc">&nbsp;        Pageable pageable = PageRequest.of(page, size);</b>
+<b class="fc">&nbsp;        UUID accountId = UUID.fromString(helper.getUserIdFromToken(request));</b>
+<b class="fc">&nbsp;        var spec = MarkupSpecifications.byConditions(markupTypeList, taskTypeList, practiceTypeList, accountId);</b>
+<b class="fc">&nbsp;        Page&lt;Markup&gt; pageResult = markupRepository.findAll(spec, pageable);</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageMappingTitle = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageExamMappingTitle = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; listeningTaskMappingTitle = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; listeningExamMappingTitle = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;Markup&gt; markupList = pageResult.getContent();</b>
+<b class="fc">&nbsp;        markupList.forEach(item -&gt; {</b>
+<b class="fc">&nbsp;            if(item.getPracticeType().equals(PracticeType.TASK) &amp;&amp; item.getTaskType().equals(TaskType.READING)) {</b>
+<b class="fc">&nbsp;                passageMappingTitle.put(item.getTaskId(), null);</b>
+<b class="fc">&nbsp;            } else if (item.getPracticeType().equals(PracticeType.EXAM) &amp;&amp; item.getTaskType().equals(TaskType.READING)) {</b>
+<b class="fc">&nbsp;                passageExamMappingTitle.put(item.getTaskId(), null);</b>
+<b class="pc">&nbsp;            } else if (item.getPracticeType().equals(PracticeType.TASK) &amp;&amp; item.getTaskType().equals(TaskType.LISTENING)) {</b>
+<b class="fc">&nbsp;                listeningTaskMappingTitle.put(item.getTaskId(), null);</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                listeningExamMappingTitle.put(item.getTaskId(), null);</b>
+&nbsp;            }
+&nbsp;        });
+&nbsp;
+&nbsp;        // taọ async chạy 2 luồng để call lấy data
+<b class="fc">&nbsp;        var passageTitleFuture = fetchReadingTitlesAsync(accessToken, passageMappingTitle.keySet().stream().toList());</b>
+<b class="fc">&nbsp;        var readingExamFuture = fetchReadingExamTitlesAsync(accessToken, passageExamMappingTitle.keySet().stream().toList());</b>
+<b class="fc">&nbsp;        var listeningTitleFuture = fetchListeningTitlesAsync(accessToken, listeningTaskMappingTitle.keySet().stream().toList());</b>
+<b class="fc">&nbsp;        var listeningExamFuture = fetchListeningExamTitlesAsync(accessToken, listeningExamMappingTitle.keySet().stream().toList());</b>
+&nbsp;        // đợi cả 2 luồng hoàn thành
+<b class="fc">&nbsp;        CompletableFuture.allOf(passageTitleFuture, readingExamFuture, listeningTitleFuture, listeningExamFuture).join();</b>
+<b class="fc">&nbsp;        passageMappingTitle.putAll(passageTitleFuture.join());</b>
+<b class="fc">&nbsp;        passageExamMappingTitle.putAll(readingExamFuture.join());</b>
+<b class="fc">&nbsp;        listeningTaskMappingTitle.putAll(listeningTitleFuture.join());</b>
+<b class="fc">&nbsp;        listeningExamMappingTitle.putAll(listeningExamFuture.join());</b>
+&nbsp;
+<b class="fc">&nbsp;        List&lt;MarkUpResponse&gt; response = markupList.stream().sorted(Comparator.comparing(Markup::getCreatedAt).reversed())</b>
+<b class="fc">&nbsp;                .map(item -&gt; {</b>
+<b class="fc">&nbsp;            if(item.getPracticeType().equals(PracticeType.TASK) &amp;&amp; item.getTaskType().equals(TaskType.READING)) {</b>
+<b class="fc">&nbsp;                return MarkUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markUpId(item.getMarkUpId())</b>
+<b class="fc">&nbsp;                        .taskTitle(passageMappingTitle.get(item.getTaskId()))</b>
+<b class="fc">&nbsp;                        .markupType(item.getMarkupType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskType(item.getTaskType().ordinal())</b>
+<b class="fc">&nbsp;                        .practiceType(item.getPracticeType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskId(item.getTaskId())</b>
+<b class="fc">&nbsp;                        .build();</b>
+<b class="fc">&nbsp;            } else if (item.getPracticeType().equals(PracticeType.EXAM) &amp;&amp; item.getTaskType().equals(TaskType.READING)) {</b>
+<b class="fc">&nbsp;                return MarkUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markUpId(item.getMarkUpId())</b>
+<b class="fc">&nbsp;                        .taskTitle(passageExamMappingTitle.get(item.getTaskId()))</b>
+<b class="fc">&nbsp;                        .markupType(item.getMarkupType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskType(item.getTaskType().ordinal())</b>
+<b class="fc">&nbsp;                        .practiceType(item.getPracticeType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskId(item.getTaskId())</b>
+<b class="fc">&nbsp;                        .build();</b>
+<b class="pc">&nbsp;            } else if(item.getPracticeType().equals(PracticeType.TASK) &amp;&amp; item.getTaskType().equals(TaskType.LISTENING)) {</b>
+<b class="fc">&nbsp;                return MarkUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markUpId(item.getMarkUpId())</b>
+<b class="fc">&nbsp;                        .taskTitle(listeningTaskMappingTitle.get(item.getTaskId()))</b>
+<b class="fc">&nbsp;                        .markupType(item.getMarkupType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskType(item.getTaskType().ordinal())</b>
+<b class="fc">&nbsp;                        .practiceType(item.getPracticeType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskId(item.getTaskId())</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            } else {
+<b class="fc">&nbsp;                return MarkUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markUpId(item.getMarkUpId())</b>
+<b class="fc">&nbsp;                        .taskTitle(listeningExamMappingTitle.get(item.getTaskId()))</b>
+<b class="fc">&nbsp;                        .markupType(item.getMarkupType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskType(item.getTaskType().ordinal())</b>
+<b class="fc">&nbsp;                        .practiceType(item.getPracticeType().ordinal())</b>
+<b class="fc">&nbsp;                        .taskId(item.getTaskId())</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            }
+<b class="fc">&nbsp;        }).toList();</b>
+<b class="fc">&nbsp;        return new PageImpl&lt;&gt;(response, pageable, pageResult.getTotalElements());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public MarkedUpResponse getMarkedUpData(String type, HttpServletRequest request) {
+<b class="fc">&nbsp;        String userId = helper.getUserIdFromToken(request);</b>
+<b class="pc">&nbsp;        if(userId == null) {</b>
+<b class="fc">&nbsp;            userId = helper.getUserIdFromToken();</b>
+&nbsp;        }
+<b class="pc">&nbsp;        switch (type) {</b>
+&nbsp;            case DataMarkup.READING_TASK:
+<b class="fc">&nbsp;                List&lt;Markup&gt; readingTaskMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(</b>
+<b class="fc">&nbsp;                        UUID.fromString(userId),</b>
+<b class="fc">&nbsp;                        TaskType.READING.ordinal(),</b>
+<b class="fc">&nbsp;                        PracticeType.TASK.ordinal()</b>
+&nbsp;                );
+<b class="fc">&nbsp;                Map&lt;UUID, Integer&gt; markUpMappingType = readingTaskMarkups.stream()</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                                Markup::getTaskId,</b>
+<b class="fc">&nbsp;                                markup -&gt; markup.getMarkupType().ordinal()</b>
+&nbsp;                        ));
+<b class="fc">&nbsp;                return MarkedUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markedUpIdsMapping(markUpMappingType)</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            case DataMarkup.READING_EXAM:
+<b class="fc">&nbsp;                List&lt;Markup&gt; readingExamMarkups = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(</b>
+<b class="fc">&nbsp;                        UUID.fromString(userId),</b>
+<b class="fc">&nbsp;                        TaskType.READING.ordinal(),</b>
+<b class="fc">&nbsp;                        PracticeType.EXAM.ordinal()</b>
+&nbsp;                );
+<b class="fc">&nbsp;                Map&lt;UUID, Integer&gt; markUpExamMappingType = readingExamMarkups.stream()</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                                Markup::getTaskId,</b>
+<b class="fc">&nbsp;                                markup -&gt; markup.getMarkupType().ordinal()</b>
+&nbsp;                        ));
+<b class="fc">&nbsp;                return MarkedUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markedUpIdsMapping(markUpExamMappingType)</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            case DataMarkup.LISTENING_EXAM:
+<b class="fc">&nbsp;                List&lt;Markup&gt; listeningExam = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(</b>
+<b class="fc">&nbsp;                        UUID.fromString(userId),</b>
+<b class="fc">&nbsp;                        TaskType.LISTENING.ordinal(),</b>
+<b class="fc">&nbsp;                        PracticeType.EXAM.ordinal()</b>
+&nbsp;                );
+<b class="fc">&nbsp;                Map&lt;UUID, Integer&gt; listeningExamMapping = listeningExam.stream()</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                                Markup::getTaskId,</b>
+<b class="fc">&nbsp;                                markup -&gt; markup.getMarkupType().ordinal()</b>
+&nbsp;                        ));
+<b class="fc">&nbsp;                return MarkedUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markedUpIdsMapping(listeningExamMapping)</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;            case DataMarkup.LISTENING_TASK:
+<b class="fc">&nbsp;                List&lt;Markup&gt; listeningTask = markupRepository.findMarkupByAccountIdAndTaskTypeAndPracticeType(</b>
+<b class="fc">&nbsp;                        UUID.fromString(userId),</b>
+<b class="fc">&nbsp;                        TaskType.LISTENING.ordinal(),</b>
+<b class="fc">&nbsp;                        PracticeType.TASK.ordinal()</b>
+&nbsp;                );
+<b class="fc">&nbsp;                Map&lt;UUID, Integer&gt; listeningTaskMapping = listeningTask.stream()</b>
+<b class="fc">&nbsp;                        .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                                Markup::getTaskId,</b>
+<b class="fc">&nbsp;                                markup -&gt; markup.getMarkupType().ordinal()</b>
+&nbsp;                        ));
+<b class="fc">&nbsp;                return MarkedUpResponse.builder()</b>
+<b class="fc">&nbsp;                        .markedUpIdsMapping(listeningTaskMapping)</b>
+<b class="fc">&nbsp;                        .build();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;markupExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;Map&lt;UUID, String&gt;&gt; fetchReadingTitlesAsync(String accessToken, List&lt;UUID&gt; taskId) {
+<b class="fc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;TaskTitle&gt;&gt;&gt; response = readingClient</b>
+<b class="fc">&nbsp;                .getReadingTitle(taskId, &quot;Bearer &quot; + accessToken);</b>
+<b class="fc">&nbsp;        var body = response.getBody();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageMappingTitle = body.data().stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                        TaskTitle::taskId,</b>
+<b class="fc">&nbsp;                        TaskTitle::title</b>
+&nbsp;                ));
+<b class="fc">&nbsp;        return CompletableFuture.completedFuture(passageMappingTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;markupExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;Map&lt;UUID, String&gt;&gt; fetchReadingExamTitlesAsync(String accessToken, List&lt;UUID&gt; taskId) {
+<b class="fc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;TaskTitle&gt;&gt;&gt; response = readingClient</b>
+<b class="fc">&nbsp;                .getExamTitle(taskId, &quot;Bearer &quot; + accessToken);</b>
+<b class="fc">&nbsp;        var body = response.getBody();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageMappingTitle = body.data().stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                        TaskTitle::taskId,</b>
+<b class="fc">&nbsp;                        TaskTitle::title</b>
+&nbsp;                ));
+<b class="fc">&nbsp;        return CompletableFuture.completedFuture(passageMappingTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;markupExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;Map&lt;UUID, String&gt;&gt; fetchListeningTitlesAsync(String accessToken, List&lt;UUID&gt; taskId) {
+<b class="fc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;TaskTitle&gt;&gt;&gt; response = listeningClient</b>
+<b class="fc">&nbsp;                .getListeningTitle(taskId, &quot;Bearer &quot; + accessToken);</b>
+<b class="fc">&nbsp;        var body = response.getBody();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageMappingTitle = body.data().stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                        TaskTitle::taskId,</b>
+<b class="fc">&nbsp;                        TaskTitle::title</b>
+&nbsp;                ));
+<b class="fc">&nbsp;        return CompletableFuture.completedFuture(passageMappingTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;markupExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;Map&lt;UUID, String&gt;&gt; fetchListeningExamTitlesAsync(String accessToken, List&lt;UUID&gt; taskId) {
+<b class="fc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;TaskTitle&gt;&gt;&gt; response = listeningClient</b>
+<b class="fc">&nbsp;                .getExamTitle(taskId, &quot;Bearer &quot; + accessToken);</b>
+<b class="fc">&nbsp;        var body = response.getBody();</b>
+<b class="fc">&nbsp;        Map&lt;UUID, String&gt; passageMappingTitle = body.data().stream()</b>
+<b class="fc">&nbsp;                .collect(Collectors.toMap(</b>
+<b class="fc">&nbsp;                        TaskTitle::taskId,</b>
+<b class="fc">&nbsp;                        TaskTitle::title</b>
+&nbsp;                ));
+<b class="fc">&nbsp;        return CompletableFuture.completedFuture(passageMappingTitle);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private &lt;T extends Enum&lt;T&gt;&gt; T safeEnumFromOrdinal(T[] values, int ordinal) {
+<b class="pc">&nbsp;        if (ordinal &lt; 0 || ordinal &gt;= values.length) {</b>
+<b class="fc">&nbsp;            throw new AppException(</b>
+<b class="fc">&nbsp;                    Constants.ErrorCodeMessage.INVALID_REQUEST,</b>
+<b class="fc">&nbsp;                    Constants.ErrorCode.INVALID_REQUEST,</b>
+<b class="fc">&nbsp;                    HttpStatus.BAD_REQUEST.value()</b>
+&nbsp;            );
+&nbsp;        }
+<b class="fc">&nbsp;        return values[ordinal];</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-14 07:34</div>
+</div>
+</body>
+</html>

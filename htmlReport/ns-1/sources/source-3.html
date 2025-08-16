@@ -1,0 +1,313 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > DashboardServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.fptu.sep490.personalservice.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: DashboardServiceImpl (com.fptu.sep490.personalservice.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DashboardServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/18)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/24)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/127)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.fptu.sep490.personalservice.service.impl;
+&nbsp;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+&nbsp;import com.fptu.sep490.personalservice.helper.Helper;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ListeningClient;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ReadingClient;
+&nbsp;import com.fptu.sep490.personalservice.service.DashboardService;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.*;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import lombok.AccessLevel;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.experimental.FieldDefaults;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.scheduling.annotation.Async;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.HashSet;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Set;
+&nbsp;import java.util.concurrent.CompletableFuture;
+&nbsp;
+&nbsp;@Service
+&nbsp;@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class DashboardServiceImpl implements DashboardService {
+&nbsp;
+&nbsp;    ReadingClient readingClient;
+&nbsp;    ListeningClient listeningClient;
+&nbsp;    Helper helper;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public CreatorDefaultDashboard getDashboard(HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+&nbsp;
+<b class="nc">&nbsp;        var readingStats = fetchReadingStats(accessToken);</b>
+<b class="nc">&nbsp;        var listeningStats = fetchListeningStats(accessToken);</b>
+<b class="nc">&nbsp;        CompletableFuture.allOf(readingStats, listeningStats);</b>
+<b class="nc">&nbsp;        DataStats readingStatsData = readingStats.join();</b>
+<b class="nc">&nbsp;        DataStats listeningStatsData = listeningStats.join();</b>
+&nbsp;
+&nbsp;        // Count attempted tasks and exams
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInAvgReading = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInAvgListening = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInQuestionTypeReading = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInQuestionTypeListening = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInQuestionTypeReadingWrong = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColorsInQuestionTypeListeningWrong = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        return CreatorDefaultDashboard.builder()</b>
+<b class="nc">&nbsp;                .numberOfReadingTasks(readingStatsData.numberOfTasks())</b>
+<b class="nc">&nbsp;                .numberOfListeningTasks(listeningStatsData.numberOfTasks())</b>
+<b class="nc">&nbsp;                .numberOfReadingExams(readingStatsData.numberOfExams())</b>
+<b class="nc">&nbsp;                .numberOfListeningExams(listeningStatsData.numberOfExams())</b>
+<b class="nc">&nbsp;                .userInAvgBranchScoreReading(readingStatsData.userInBranchAvg().stream()</b>
+<b class="nc">&nbsp;                        .map(p -&gt; UserBranchScore.builder()</b>
+<b class="nc">&nbsp;                                .branchScore(p.branchScore())</b>
+<b class="nc">&nbsp;                                .numberOfUsers(p.numberOfUsers())</b>
+&nbsp;                                // random color for each branch and color does not repeat
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInAvgReading))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .userInAvgBranchScoreListening(listeningStatsData.userInBranchAvg().stream()</b>
+<b class="nc">&nbsp;                        .map(p -&gt; UserBranchScore.builder()</b>
+<b class="nc">&nbsp;                                .branchScore(p.branchScore())</b>
+<b class="nc">&nbsp;                                .numberOfUsers(p.numberOfUsers())</b>
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInAvgListening))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .questionTypeStatsReading(readingStatsData.questionTypeStats().stream()</b>
+<b class="nc">&nbsp;                        .map(d -&gt; QuestionTypeStats.builder()</b>
+<b class="nc">&nbsp;                                .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                                .correctCount(d.correctCount())</b>
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInQuestionTypeReading))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .questionTypeStatsListening(listeningStatsData.questionTypeStats().stream()</b>
+<b class="nc">&nbsp;                        .map(d -&gt; QuestionTypeStats.builder()</b>
+<b class="nc">&nbsp;                                .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                                .correctCount(d.correctCount())</b>
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInQuestionTypeListening))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .questionTypeStatsReadingWrong(readingStatsData.questionTypeStatsWrong().stream()</b>
+<b class="nc">&nbsp;                        .map(d -&gt; QuestionTypeStatsWrong.builder()</b>
+<b class="nc">&nbsp;                                .wrongCount(d.wrongCount())</b>
+<b class="nc">&nbsp;                                .questionType(d .questionType())</b>
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInQuestionTypeReadingWrong))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .questionTypeStatsListeningWrong(listeningStatsData.questionTypeStatsWrong().stream()</b>
+<b class="nc">&nbsp;                        .map(d -&gt; QuestionTypeStatsWrong.builder()</b>
+<b class="nc">&nbsp;                                .wrongCount(d.wrongCount())</b>
+<b class="nc">&nbsp;                                .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                                .color(helper.getRandomColor(usedColorsInQuestionTypeListeningWrong))</b>
+<b class="nc">&nbsp;                                .build()).toList())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;QuestionTypeStats&gt; getQuestionTypeStatsReading(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColors = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;ReportQuestionTypeStats&gt;&gt;&gt; response = readingClient.getQuestionTypeStatsReading(</b>
+<b class="nc">&nbsp;                fromDate, toDate,&quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return List.of();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return body.data().stream().map(</b>
+<b class="nc">&nbsp;                d -&gt; QuestionTypeStats.builder()</b>
+<b class="nc">&nbsp;                        .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                        .correctCount(d.correctCount())</b>
+<b class="nc">&nbsp;                        .color(helper.getRandomColor(usedColors))</b>
+<b class="nc">&nbsp;                        .build()</b>
+<b class="nc">&nbsp;        ).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;QuestionTypeStatsWrong&gt; getQuestionTypeStatsReadingWrong(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColors = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;ReportQuestionTypeStatsWrong&gt;&gt;&gt; response = readingClient.getQuestionTypeStatsReadingWrong(</b>
+<b class="nc">&nbsp;                fromDate, toDate, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return List.of();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return body.data().stream().map(</b>
+<b class="nc">&nbsp;                d -&gt; QuestionTypeStatsWrong.builder()</b>
+<b class="nc">&nbsp;                        .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                        .wrongCount(d.wrongCount())</b>
+<b class="nc">&nbsp;                        .color(helper.getRandomColor(usedColors))</b>
+<b class="nc">&nbsp;                        .build()</b>
+<b class="nc">&nbsp;        ).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;QuestionTypeStats&gt; getQuestionTypeStatsListening(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColors = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;ReportQuestionTypeStats&gt;&gt;&gt; response = listeningClient.getQuestionTypeStatsListening(</b>
+<b class="nc">&nbsp;                fromDate, toDate, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return List.of();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return body.data().stream().map(</b>
+<b class="nc">&nbsp;                d -&gt; QuestionTypeStats.builder()</b>
+<b class="nc">&nbsp;                        .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                        .correctCount(d.correctCount())</b>
+<b class="nc">&nbsp;                        .color(helper.getRandomColor(usedColors))</b>
+<b class="nc">&nbsp;                        .build()</b>
+<b class="nc">&nbsp;        ).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public List&lt;QuestionTypeStatsWrong&gt; getQuestionTypeStatsListeningWrong(LocalDate fromDate, LocalDate toDate, HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        Set&lt;String&gt; usedColors = new HashSet&lt;&gt;();</b>
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;ReportQuestionTypeStats&gt;&gt;&gt; response = listeningClient.getQuestionTypeStatsListening(</b>
+<b class="nc">&nbsp;                fromDate, toDate, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return List.of();</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return body.data().stream().map(</b>
+<b class="nc">&nbsp;                d -&gt; QuestionTypeStatsWrong.builder()</b>
+<b class="nc">&nbsp;                        .questionType(d.questionType())</b>
+<b class="nc">&nbsp;                        .wrongCount(d.correctCount())</b>
+<b class="nc">&nbsp;                        .color(helper.getRandomColor(usedColors))</b>
+<b class="nc">&nbsp;                        .build()</b>
+<b class="nc">&nbsp;        ).toList();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;statsExecutor&quot;)
+&nbsp;    protected CompletableFuture&lt;DataStats&gt; fetchListeningStats(String accessToken) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;DataStats&gt;&gt; response = listeningClient.getListeningStats(&quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return CompletableFuture.completedFuture(DataStats.builder()</b>
+<b class="nc">&nbsp;                            .numberOfExams(0)</b>
+<b class="nc">&nbsp;                            .numberOfTasks(0)</b>
+<b class="nc">&nbsp;                    .build());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body.data());</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;statsExecutor&quot;)
+&nbsp;    protected CompletableFuture&lt;DataStats&gt; fetchReadingStats(String accessToken) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;DataStats&gt;&gt; response = readingClient.getReadingStats(&quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        var body = response.getBody();</b>
+<b class="nc">&nbsp;        if (body == null || !response.getStatusCode().is2xxSuccessful()) {</b>
+<b class="nc">&nbsp;            return CompletableFuture.completedFuture(DataStats.builder()</b>
+<b class="nc">&nbsp;                            .numberOfExams(0)</b>
+<b class="nc">&nbsp;                            .numberOfTasks(0)</b>
+<b class="nc">&nbsp;                    .build());</b>
+&nbsp;        }
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body.data());</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-14 07:34</div>
+</div>
+</body>
+</html>

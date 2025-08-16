@@ -1,0 +1,298 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AIServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.fptu.sep490.personalservice.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: AIServiceImpl (com.fptu.sep490.personalservice.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AIServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/16)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/70)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.fptu.sep490.personalservice.service.impl;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fptu.sep490.commonlibrary.constants.AIModel;
+&nbsp;import com.fptu.sep490.commonlibrary.exceptions.AppException;
+&nbsp;import com.fptu.sep490.personalservice.constants.Constants;
+&nbsp;import com.fptu.sep490.personalservice.helper.Helper;
+&nbsp;import com.fptu.sep490.personalservice.model.TopicMaster;
+&nbsp;import com.fptu.sep490.personalservice.model.enumeration.LangGuage;
+&nbsp;import com.fptu.sep490.personalservice.repository.ConfigRepository;
+&nbsp;import com.fptu.sep490.personalservice.repository.TopicMaterRepository;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ListeningClient;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ReadingClient;
+&nbsp;import com.fptu.sep490.personalservice.service.AIService;
+&nbsp;import com.fptu.sep490.personalservice.strategy.AIStrategyFactory;
+&nbsp;import com.fptu.sep490.personalservice.strategy.AiApiStrategy;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.AIResponse;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import lombok.AccessLevel;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.experimental.FieldDefaults;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.apache.kafka.common.internals.Topic;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+&nbsp;public class AIServiceImpl implements AIService {
+&nbsp;
+&nbsp;    AIStrategyFactory aiStrategyFactory;
+&nbsp;    ConfigRepository configRepository;
+&nbsp;    TopicMaterRepository topicMaterRepository;
+&nbsp;    Helper helper;
+&nbsp;    ObjectMapper objectMapper;
+&nbsp;    ReadingClient readingClient;
+&nbsp;    ListeningClient listeningClient;
+&nbsp;
+&nbsp;    public AIResponse callAIForSuggesting(HttpServletRequest request) {
+&nbsp;        try {
+<b class="nc">&nbsp;            String userId = helper.getUserIdFromToken();</b>
+<b class="nc">&nbsp;            log.info(&quot;Processing AI suggestion request for user: {}&quot;, userId);</b>
+&nbsp;            
+&nbsp;            // Get user&#39;s target configuration
+<b class="nc">&nbsp;            var userTargetConfig = configRepository.getConfigByKeyAndAccountId(</b>
+<b class="nc">&nbsp;                    Constants.Config.TARGET_CONFIG, </b>
+<b class="nc">&nbsp;                    UUID.fromString(userId)</b>
+<b class="nc">&nbsp;            ).orElseThrow(() -&gt; new AppException(</b>
+<b class="nc">&nbsp;                    Constants.ErrorCodeMessage.NEED_TO_CONFIG_TARGET,</b>
+<b class="nc">&nbsp;                    Constants.ErrorCode.NEED_TO_CONFIG_TARGET, </b>
+<b class="nc">&nbsp;                    HttpStatus.BAD_REQUEST.value()</b>
+&nbsp;            ));
+&nbsp;            
+<b class="nc">&nbsp;            log.info(&quot;Retrieved target config for user {}: {}&quot;, userId, userTargetConfig);</b>
+&nbsp;
+&nbsp;            // Get system topic
+<b class="nc">&nbsp;            List&lt;TopicMaster&gt; topicMasters = topicMaterRepository.findAll();</b>
+&nbsp;
+&nbsp;            // Call to set user test perform data
+&nbsp;
+&nbsp;
+&nbsp;            // Create a structured prompt for better AI response
+<b class="nc">&nbsp;            String prompt = createStructuredPrompt(userTargetConfig, objectMapper.writeValueAsString(topicMasters),&quot;&quot;);</b>
+<b class="nc">&nbsp;            log.info(&quot;Generated prompt for user {}: {}&quot;, userId, prompt);</b>
+&nbsp;            
+&nbsp;            // Get AI strategy and call model
+<b class="nc">&nbsp;            AiApiStrategy strategy = aiStrategyFactory.getStrategy(AIModel.Gemini.FLASH2_5);</b>
+<b class="nc">&nbsp;            log.info(&quot;Using AI strategy: {}&quot;, strategy.getClass().getSimpleName());</b>
+&nbsp;            
+<b class="nc">&nbsp;            AIResponse response = strategy.callModel(prompt, AIModel.Gemini.FLASH2_5);</b>
+<b class="nc">&nbsp;            log.info(&quot;AI response received successfully for user: {}&quot;, userId);</b>
+&nbsp;            
+<b class="nc">&nbsp;            return response;</b>
+&nbsp;            
+&nbsp;        } catch (AppException e) {
+<b class="nc">&nbsp;            log.error(&quot;AppException in callAIForSuggesting: {}&quot;, e.getMessage());</b>
+&nbsp;            throw e;
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;Unexpected error in callAIForSuggesting: {}&quot;, e.getMessage(), e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to call AI model: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    private String createStructuredPrompt(String targetConfig, String systemTopic, String practiceResult) {
+<b class="nc">&nbsp;        StringBuilder prompt = new StringBuilder();</b>
+<b class="nc">&nbsp;        prompt.append(&quot;You are an experienced IELTS tutor specializing in personalized learning plans.\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;Your task is to analyze the user&#39;s information and create a customized study suggestion.\n\n&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        prompt.append(&quot;=== USER INFORMATION ===\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;Target Configuration:\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(targetConfig).append(&quot;\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;System Topic (focus areas or current lesson theme):\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(systemTopic).append(&quot;\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;Practice Results:\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(practiceResult).append(&quot;\n\n&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        prompt.append(&quot;=== OUTPUT REQUIREMENTS ===\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;Provide a detailed IELTS study suggestion containing:\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;1. **3-5 specific IELTS topics** the user should focus on (tailored to weaknesses &amp; goals).\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;2. **Recommended study schedule** for the next 7 days (daily breakdown).\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;3. **Specific skills** to improve (e.g., listening for detail, reading skimming).\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;4. **Practice exercises or resources** (include type and source).\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;5. **Motivation tips** (practical, encouraging, and realistic).\n\n&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        prompt.append(&quot;Make the suggestions practical, achievable, and aligned with the user&#39;s current level.\n&quot;);</b>
+<b class="nc">&nbsp;        prompt.append(&quot;Use clear section headings and bullet points for readability.\n&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;        return prompt.toString();</b>
+&nbsp;    }
+&nbsp;    /**
+&nbsp;     * Gọi AI để định nghĩa một từ vựng kèm context.
+&nbsp;     *
+&nbsp;     * @param word     Từ cần định nghĩa
+&nbsp;     * @param context  Ngữ cảnh (có thể null hoặc rỗng)
+&nbsp;     * @param language Ngôn ngữ muốn nhận kết quả (ENGLISH hoặc VIETNAMESE)
+&nbsp;     * @return Nghĩa của từ theo ngôn ngữ yêu cầu
+&nbsp;     */
+&nbsp;    public String getVocabularyDefinition(String word, String context, LangGuage language) {
+&nbsp;        try {
+&nbsp;            // Tạo prompt dựa trên ngôn ngữ
+<b class="nc">&nbsp;            String prompt = createVocabularyDefinitionPrompt(word, context, language);</b>
+<b class="nc">&nbsp;            log.info(&quot;Generated vocabulary prompt for word &#39;{}&#39; with language {}: {}&quot;, word, language, prompt);</b>
+&nbsp;
+&nbsp;            // Chọn AI strategy (ví dụ Gemini)
+<b class="nc">&nbsp;            AiApiStrategy strategy = aiStrategyFactory.getStrategy(AIModel.Gemini.FLASH2_5);</b>
+<b class="nc">&nbsp;            log.info(&quot;Using AI strategy: {}&quot;, strategy.getClass().getSimpleName());</b>
+&nbsp;
+&nbsp;            // Gọi AI model
+<b class="nc">&nbsp;            AIResponse aiResponse = strategy.callModel(prompt, AIModel.Gemini.FLASH2_5);</b>
+&nbsp;
+&nbsp;            // Lấy nội dung nghĩa
+<b class="nc">&nbsp;            if (aiResponse != null &amp;&amp; aiResponse.getContent() != null &amp;&amp; !aiResponse.getContent().isBlank()) {</b>
+<b class="nc">&nbsp;                return aiResponse.getContent().trim();</b>
+&nbsp;            } else {
+<b class="nc">&nbsp;                throw new AppException(</b>
+<b class="nc">&nbsp;                        &quot;AI_MODEL_EMPTY_RESPONSE&quot;,</b>
+<b class="nc">&nbsp;                        &quot;AI model returned empty response for vocabulary definition&quot;,</b>
+<b class="nc">&nbsp;                        HttpStatus.INTERNAL_SERVER_ERROR.value()</b>
+&nbsp;                );
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            log.error(&quot;Error getting vocabulary definition for word &#39;{}&#39;: {}&quot;, word, e.getMessage(), e);</b>
+<b class="nc">&nbsp;            throw new RuntimeException(&quot;Failed to get vocabulary definition: &quot; + e.getMessage(), e);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Tạo prompt cho AI để định nghĩa từ vựng theo ngôn ngữ yêu cầu
+&nbsp;     */
+&nbsp;    private String createVocabularyDefinitionPrompt(String word, String context, LangGuage language) {
+<b class="nc">&nbsp;        StringBuilder prompt = new StringBuilder();</b>
+&nbsp;
+&nbsp;        // Chọn hướng dẫn theo ngôn ngữ
+<b class="nc">&nbsp;        if (language == LangGuage.VIETNAMESE) {</b>
+<b class="nc">&nbsp;            prompt.append(&quot;You are an advanced English-Vietnamese dictionary.\n&quot;);</b>
+<b class="nc">&nbsp;            prompt.append(&quot;Your task is to provide a short, clear, and accurate definition in Vietnamese.\n\n&quot;);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;            prompt.append(&quot;You are an advanced English-English dictionary.\n&quot;);</b>
+<b class="nc">&nbsp;            prompt.append(&quot;Your task is to provide a short, clear, and accurate definition in English.\n\n&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        prompt.append(&quot;=== WORD ===\n&quot;).append(word).append(&quot;\n&quot;);</b>
+<b class="nc">&nbsp;        if (context != null &amp;&amp; !context.isBlank()) {</b>
+<b class="nc">&nbsp;            prompt.append(&quot;=== CONTEXT ===\n&quot;).append(context).append(&quot;\n&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        prompt.append(&quot;\n=== OUTPUT REQUIREMENTS ===\n&quot;);</b>
+<b class="nc">&nbsp;        if (language == LangGuage.VIETNAMESE) {</b>
+<b class="nc">&nbsp;            prompt.append(&quot;Only return the Vietnamese meaning of the word. No extra explanation, no English.\n&quot;);</b>
+<b class="nc">&nbsp;        } else if (language == LangGuage.ENGLISH) {</b>
+<b class="nc">&nbsp;            prompt.append(&quot;Only return the English meaning of the word. No translation, no extra explanation.\n&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="nc">&nbsp;        return prompt.toString();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-14 07:34</div>
+</div>
+</body>
+</html>

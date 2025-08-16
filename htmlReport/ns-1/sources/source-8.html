@@ -1,0 +1,280 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ProgressServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.fptu.sep490.personalservice.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ProgressServiceImpl (com.fptu.sep490.personalservice.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ProgressServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/86)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.fptu.sep490.personalservice.service.impl;
+&nbsp;
+&nbsp;import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
+&nbsp;import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
+&nbsp;import com.fptu.sep490.personalservice.helper.Helper;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ListeningClient;
+&nbsp;import com.fptu.sep490.personalservice.repository.client.ReadingClient;
+&nbsp;import com.fptu.sep490.personalservice.service.ProgressService;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.BandLineChartResponse;
+&nbsp;import com.fptu.sep490.personalservice.viewmodel.response.OverviewProgressResponse;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import lombok.AccessLevel;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.experimental.FieldDefaults;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.scheduling.annotation.Async;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.concurrent.CompletableFuture;
+&nbsp;
+&nbsp;@Service
+&nbsp;@FieldDefaults(level = AccessLevel.PACKAGE, makeFinal = true)
+<b class="nc">&nbsp;@Slf4j</b>
+&nbsp;@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+&nbsp;public class ProgressServiceImpl implements ProgressService {
+&nbsp;    ReadingClient readingClient;
+&nbsp;    ListeningClient listeningClient;
+&nbsp;    Helper helper;
+&nbsp;
+&nbsp;    @Async(&quot;progressExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;OverviewProgress&gt; fetchReadingOverviewProgress(String accessToken, OverviewProgressReq overviewProgressReq) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;OverviewProgress&gt;&gt; response = readingClient.getExamOverview(overviewProgressReq, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        OverviewProgress body = response.getBody().data();</b>
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;progressExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;OverviewProgress&gt; fetchListeningOverviewProgress(String accessToken, OverviewProgressReq overviewProgressReq) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;OverviewProgress&gt;&gt; response = listeningClient.getExamOverview(overviewProgressReq, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        OverviewProgress body = response.getBody().data();</b>
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public OverviewProgressResponse getOverviewProgress(
+&nbsp;            String timeFrame,
+&nbsp;            HttpServletRequest request
+&nbsp;    ) {
+&nbsp;
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        OverviewProgressReq overviewProgressReq = OverviewProgressReq.builder()</b>
+<b class="nc">&nbsp;                .timeFrame(timeFrame)</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+<b class="nc">&nbsp;        CompletableFuture&lt;OverviewProgress&gt; readingOverview = fetchReadingOverviewProgress(accessToken, overviewProgressReq);</b>
+<b class="nc">&nbsp;        CompletableFuture&lt;OverviewProgress&gt; listeningOverview = fetchListeningOverviewProgress(accessToken, overviewProgressReq);</b>
+&nbsp;
+<b class="nc">&nbsp;        CompletableFuture.allOf(readingOverview, listeningOverview).join();</b>
+<b class="nc">&nbsp;        OverviewProgress r = readingOverview.join();</b>
+<b class="nc">&nbsp;        OverviewProgress l = listeningOverview.join();</b>
+&nbsp;
+<b class="nc">&nbsp;        OverviewProgressResponse.ProgressOverview reading = OverviewProgressResponse.ProgressOverview.builder()</b>
+<b class="nc">&nbsp;                .exam(r.getExam())</b>
+<b class="nc">&nbsp;                .task(r.getTask())</b>
+<b class="nc">&nbsp;                .totalExams(r.getTotalExams())</b>
+<b class="nc">&nbsp;                .totalTasks(r.getTotalTasks())</b>
+<b class="nc">&nbsp;                .build();</b>
+<b class="nc">&nbsp;        OverviewProgressResponse.ProgressOverview listening = OverviewProgressResponse.ProgressOverview.builder()</b>
+<b class="nc">&nbsp;                .exam(l.getExam())</b>
+<b class="nc">&nbsp;                .task(l.getTask())</b>
+<b class="nc">&nbsp;                .totalExams(l.getTotalExams())</b>
+<b class="nc">&nbsp;                .totalTasks(l.getTotalTasks())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+<b class="nc">&nbsp;        LocalDateTime endDate = LocalDateTime.now();</b>
+<b class="nc">&nbsp;        LocalDateTime startDate = DateTimeUtils.calculateStartDateFromTimeFrame(overviewProgressReq.getTimeFrame());</b>
+&nbsp;
+<b class="nc">&nbsp;        Double readingBand = r.getAverageBandInTimeFrame();   // Có thể null</b>
+<b class="nc">&nbsp;        Double listeningBand = l.getAverageBandInTimeFrame(); // Có thể null</b>
+<b class="nc">&nbsp;        double sum = 0.0;</b>
+<b class="nc">&nbsp;        int count = 0;</b>
+<b class="nc">&nbsp;        if (readingBand != null) {</b>
+<b class="nc">&nbsp;            sum += readingBand;</b>
+<b class="nc">&nbsp;            count++;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        if (listeningBand != null) {</b>
+<b class="nc">&nbsp;            sum += listeningBand;</b>
+<b class="nc">&nbsp;            count++;</b>
+&nbsp;        }
+<b class="nc">&nbsp;        Double averageOverallBand = (count &gt; 0) ? sum / count : null;</b>
+<b class="nc">&nbsp;        OverviewProgressResponse.BandStats bandStats = OverviewProgressResponse.BandStats.builder()</b>
+<b class="nc">&nbsp;                .startDate(startDate)</b>
+<b class="nc">&nbsp;                .endDate(endDate)</b>
+<b class="nc">&nbsp;                .timeFrame(overviewProgressReq.getTimeFrame())</b>
+<b class="nc">&nbsp;                .averageReadingBand(readingBand)</b>
+<b class="nc">&nbsp;                .averageListeningBand(listeningBand)</b>
+<b class="nc">&nbsp;                .averageOverallBand(averageOverallBand)</b>
+<b class="nc">&nbsp;                .numberOfReadingExams(r.getNumberOfExamsInTimeFrame())</b>
+<b class="nc">&nbsp;                .numberOfListeningExams(l.getNumberOfExamsInTimeFrame())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+<b class="nc">&nbsp;        LocalDateTime lastLearningDate = Optional.ofNullable(r.getLastLearningDate())</b>
+<b class="nc">&nbsp;                .map(rDate -&gt; {</b>
+<b class="nc">&nbsp;                    LocalDateTime lDate = l.getLastLearningDate();</b>
+<b class="nc">&nbsp;                    if (lDate == null) return rDate;</b>
+<b class="nc">&nbsp;                    return rDate.isAfter(lDate) ? rDate : lDate;</b>
+&nbsp;                })
+<b class="nc">&nbsp;                .orElse(l.getLastLearningDate());</b>
+&nbsp;
+<b class="nc">&nbsp;        OverviewProgressResponse response = OverviewProgressResponse.builder()</b>
+<b class="nc">&nbsp;                .reading(reading)</b>
+<b class="nc">&nbsp;                .listening(listening)</b>
+<b class="nc">&nbsp;                .bandStats(bandStats)</b>
+<b class="nc">&nbsp;                .lastLearningDate(lastLearningDate)</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;progressExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;List&lt;LineChartData&gt;&gt; fetchReadingLineChart(String accessToken, LineChartReq lineChartReq) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;LineChartData&gt;&gt;&gt; response = readingClient.getBandChart(lineChartReq, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        List&lt;LineChartData&gt; body = response.getBody().data();</b>
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Async(&quot;progressExecutor&quot;)
+&nbsp;    public CompletableFuture&lt;List&lt;LineChartData&gt;&gt; fetchListeningLineChart(String accessToken, LineChartReq lineChartReq) {
+<b class="nc">&nbsp;        ResponseEntity&lt;BaseResponse&lt;List&lt;LineChartData&gt;&gt;&gt; response = listeningClient.getBandChart(lineChartReq, &quot;Bearer &quot; + accessToken);</b>
+<b class="nc">&nbsp;        List&lt;LineChartData&gt; body = response.getBody().data();</b>
+<b class="nc">&nbsp;        return CompletableFuture.completedFuture(body);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public BandLineChartResponse getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request) {
+<b class="nc">&nbsp;        String accessToken = helper.getAccessToken(request);</b>
+<b class="nc">&nbsp;        LineChartReq lineChartReq = LineChartReq.builder()</b>
+<b class="nc">&nbsp;                .timeFrame(timeFrame)</b>
+<b class="nc">&nbsp;                .startDate(startDate)</b>
+<b class="nc">&nbsp;                .endDate(endDate)</b>
+<b class="nc">&nbsp;                .build();</b>
+<b class="nc">&nbsp;        CompletableFuture&lt;List&lt;LineChartData&gt;&gt; readingLineChart = fetchReadingLineChart(accessToken, lineChartReq);</b>
+<b class="nc">&nbsp;        CompletableFuture&lt;List&lt;LineChartData&gt;&gt; listeningLineChart = fetchListeningLineChart(accessToken, lineChartReq);</b>
+<b class="nc">&nbsp;        CompletableFuture.allOf(readingLineChart, listeningLineChart).join();</b>
+<b class="nc">&nbsp;        List&lt;LineChartData&gt; readingData = readingLineChart.join();</b>
+<b class="nc">&nbsp;        List&lt;LineChartData&gt; listeningData = listeningLineChart.join();</b>
+&nbsp;
+<b class="nc">&nbsp;        BandLineChartResponse response = BandLineChartResponse.builder()</b>
+<b class="nc">&nbsp;                .readingData(readingData)</b>
+<b class="nc">&nbsp;                .listeningData(listeningData)</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;
+<b class="nc">&nbsp;        return response;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-14 07:34</div>
+</div>
+</body>
+</html>
