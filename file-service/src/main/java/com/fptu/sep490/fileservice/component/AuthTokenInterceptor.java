@@ -24,7 +24,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 @RequiredArgsConstructor
 public class AuthTokenInterceptor implements HandlerInterceptor {
 
-    ObjectProvider<KeyCloakTokenClient> keyCloakTokenClient;
+    KeyCloakTokenClient keyCloakTokenClient;
     @Value("${keycloak.realm}")
     @NonFinal
     String realm;
@@ -52,7 +52,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         form.add("client_secret", clientSecret);
         form.add("refresh_token", refreshToken);
         try {
-            KeyCloakTokenResponse keyCloakTokenResponse = keyCloakTokenClient.getObject().requestToken(form, realm);
+            KeyCloakTokenResponse keyCloakTokenResponse = keyCloakTokenClient.requestToken(form, realm);
             CookieUtils.setTokenCookies(response, keyCloakTokenResponse);
         } catch (Exception ex) {
             throw new AccessDeniedException(Constants.ErrorCode.UNAUTHORIZED, Constants.ErrorCodeMessage.UNAUTHORIZED);
@@ -65,7 +65,7 @@ public class AuthTokenInterceptor implements HandlerInterceptor {
         form.add("client_id", clientId);
         form.add("client_secret", clientSecret);
         form.add("token", accessToken);
-        var response = keyCloakTokenClient.getObject().introspect(realm, form);
+        var response = keyCloakTokenClient.introspect(realm, form);
         return response.isActive();
     }
 }
