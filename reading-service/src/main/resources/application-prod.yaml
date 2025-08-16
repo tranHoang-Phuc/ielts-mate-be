@@ -29,6 +29,10 @@ spring:
     hikari:
       data-source-properties:
         prepareThreshold: 0
+    maximum-pool-size: 10
+    minimum-idle: 2
+    idle-timeout: 30000
+    max-lifetime: 1800000
 server:
   port: 9000
   servlet:
