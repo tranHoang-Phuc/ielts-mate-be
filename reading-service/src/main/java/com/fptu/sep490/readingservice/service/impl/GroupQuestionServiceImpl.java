@@ -137,7 +137,7 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
 
 
-    private QuestionGroup getLatestCurrentGroup(QuestionGroup group) {
+    public QuestionGroup getLatestCurrentGroup(QuestionGroup group) {
         QuestionGroup current = group;
 
         while (current.getChildren() != null && !current.getChildren().isEmpty()) {
