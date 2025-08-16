@@ -1,9 +1,10 @@
 package com.fptu.sep490.personalservice.viewmodel.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
 import java.util.List;
-
+@Builder
 public record ModuleProgressRequest(
         @JsonProperty("time_spent")
         Long timeSpent, // in seconds

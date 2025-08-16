@@ -218,6 +218,24 @@ public class AuthController {
                 .message("OTP sent successfully")
                 .build());
     }
+    //API to send normal email
+    @PostMapping("/send-email")
+    @Operation(
+            summary = "Send email",
+            description = "Send a normal email to the user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Email sent successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content)
+    })
+    public ResponseEntity<?> sendEmail(@Valid @RequestBody SendEmailRequest sendEmailRequest)
+            throws Exception {
+        authService.sendEmail(sendEmailRequest);
+        return ResponseEntity.ok(BaseResponse.<Void>builder()
+                .data(null)
+                .message("Email sent successfully")
+                .build());
+    }
 
     @PostMapping("/verify-email/verify")
     @Operation(

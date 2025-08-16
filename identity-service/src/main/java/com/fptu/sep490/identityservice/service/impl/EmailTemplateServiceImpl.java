@@ -40,5 +40,14 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         return templateEngine.process("email-verified", context);
     }
 
+    @Override
+    public String buildCustomEmail(String email, String fullName, String moduleName) {
+        Context context = new Context();
+        context.setVariable("email", email);
+        context.setVariable("fullName", fullName);
+        context.setVariable("moduleName", moduleName);
+        return templateEngine.process("share-modules", context);
+    }
+
 
 }
