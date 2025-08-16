@@ -651,7 +651,7 @@ public class AttemptServiceImpl implements AttemptService {
 
         AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
 
-        ReadingPassage listeningTask = readingPassageRepository.findById(questionVersion.getTaskId())
+        ReadingPassage listeningTask = readingPassageRepository.findById(questionVersion.getReadingPassageId())
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND,
