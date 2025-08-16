@@ -27,7 +27,7 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
 
     @Query("""
         SELECT p FROM ReadingPassage p 
-        WHERE (p.passageId = :passageId OR p.parent.passageId = :passageId )AND p.isCurrent = true
+        WHERE (p.passageId = :passageId OR p.parent.passageId = :passageId ) AND p.isCurrent = true
     """)
     Optional<ReadingPassage> findCurrentVersionById(UUID passageId);
 

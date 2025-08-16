@@ -120,7 +120,7 @@ public class ExamAttemptController {
                 .body(response);
     }
 
-    @PutMapping("/save/{attempt-id}")
+    @PostMapping("/save/{attempt-id}")
     @Operation(
             summary = "Submit exam attempt answers",
             description = "Submit the answers for an exam attempt identified by its ID, marking it as completed."
