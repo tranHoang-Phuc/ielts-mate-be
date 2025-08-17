@@ -42,4 +42,5 @@ public interface AuthService {
     UserCreationProfile updateUserProfile(String accessToken, @Valid UserUpdateRequest userUpdateRequest) throws JsonProcessingException;
 
 
+    void sendEmail(SendEmailRequest sendEmailRequest) throws Exception;
 }
