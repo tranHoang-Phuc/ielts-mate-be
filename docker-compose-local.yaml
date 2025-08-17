@@ -22,7 +22,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://52.91.12.100:5432/keycloak-local
+      KC_DB_URL: jdbc:postgresql://52.91.12.100:5432/keycloak
       KC_DB_USERNAME: phucth
       KC_DB_PASSWORD: 123afd4a_sfd
       KC_HTTP_PORT: 80

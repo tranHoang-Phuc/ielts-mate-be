@@ -31,12 +31,16 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://52.91.12.100:5432/personal-service-local
+    url: jdbc:postgresql://52.91.12.100:5432/personal-service
     username: phucth
     password: 123afd4a_sfd
     hikari:
       data-source-properties:
         prepareThreshold: 0
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      max-lifetime: 1800000
 
 
   jackson:
