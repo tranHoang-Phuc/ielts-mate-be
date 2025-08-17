@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: view result reading attempt">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/main/resources/application-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/application-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/application-prod.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common-library/src/main/java/com/fptu/sep490/commonlibrary/viewmodel/response/KeyCloakTokenResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/common-library/src/main/java/com/fptu/sep490/commonlibrary/viewmodel/response/KeyCloakTokenResponse.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -259,6 +256,7 @@
       <updated>1755010637617</updated>
       <workItem from="1755268530511" duration="66000" />
       <workItem from="1755354984841" duration="824000" />
+      <workItem from="1755435856061" duration="87000" />
     </task>
     <task id="LOCAL-00007" summary="feature: view result reading attempt">
       <option name="closed" value="true" />

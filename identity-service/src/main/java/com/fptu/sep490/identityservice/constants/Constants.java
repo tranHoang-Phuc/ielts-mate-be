@@ -70,7 +70,10 @@ public class Constants {
         public static final String WRONG_PASSWORD = "00029";
 
         public static final String WRONG_OLD_PASSWORD = "00030";
+    }
 
-
+    public final class Roles {
+        public static final String USER = "USER";
+        public static final String CREATOR = "CREATOR";
     }
 }

@@ -118,6 +118,8 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED,
                     Constants.ErrorCode.EMAIL_NOT_VERIFIED, HttpStatus.UNAUTHORIZED.value());
         }
+        var userRoles = keyCloakUserClient.getUserRoleMappings(realm, "Bearer " + clientToken, userAccessInfos.getFirst().id()).realmMappings();
+        var isCreator = userRoles.stream().map(RoleMappingResponse::name).toList().contains(Constants.Roles.CREATOR);
         try {
             MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
             form.add("grant_type", "password");
@@ -126,7 +128,18 @@ public class AuthServiceImpl implements AuthService {
             form.add("username", username);
             form.add("password", password);
             form.add("scope", "openid");
-            return keyCloakTokenClient.requestToken(form, realm);
+            var responseToken =  keyCloakTokenClient.requestToken(form, realm);
+            return KeyCloakTokenResponse.builder()
+                    .accessToken(responseToken.accessToken())
+                    .expiresIn(responseToken.expiresIn())
+                    .refreshToken(responseToken.refreshToken())
+                    .refreshToken(responseToken.refreshToken())
+                    .tokenType(responseToken.tokenType())
+                    .notBeforePolicy(responseToken.notBeforePolicy())
+                    .sessionState(responseToken.sessionState())
+                    .scope(responseToken.scope())
+                    .isCreator(isCreator)
+                    .build();
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
@@ -500,8 +513,7 @@ public class AuthServiceImpl implements AuthService {
         var defaultRoles = keyCloakUserClient.getDefaultRole(realm, "Bearer " + clientToken);
         var userRoles = keyCloakUserClient.getUserRoleMappings(realm, "Bearer " + clientToken, userAccessInfo.id());
         defaultRoles.addAll(userRoles.realmMappings());
-
-       var response = UserProfileMappingRoles.builder()
+        var response = UserProfileMappingRoles.builder()
                 .id(userAccessInfo.id())
                 .email(userAccessInfo.email())
                 .firstName(userAccessInfo.firstName())

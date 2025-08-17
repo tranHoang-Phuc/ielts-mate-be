@@ -22,6 +22,8 @@ public record KeyCloakTokenResponse(
         @JsonProperty("session_state")
         String sessionState,
         @JsonProperty("scope")
-        String scope
+        String scope,
+        @JsonProperty("is_creator")
+        boolean isCreator
 ) {
 }
