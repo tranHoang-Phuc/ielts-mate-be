@@ -119,7 +119,6 @@ public class AttemptController {
             @RequestParam(value = "ieltsType", required = false) String ieltsType,
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "partNumber", required = false) String partNumber,
-            @RequestParam(value = "questionCategory", required = false) String questionCategory,
             @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(value = "title", required = false) String title,
@@ -147,6 +146,24 @@ public class AttemptController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(body);
+    }
+
+    @GetMapping("/result/{attempt-id}")
+    @Operation(
+            summary = "Retrieve the result of an attempt",
+            description = "Get the result of a specific attempt by its ID, including user data and answers."
+    )
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<UserDataAttempt>> result(
+            @PathVariable("attempt-id") UUID attemptId,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        UserDataAttempt data = attemptService.viewResult(attemptId, request);
+        BaseResponse<UserDataAttempt> response = BaseResponse.<UserDataAttempt>builder()
+                .data(data)
+                .message("Retrieve data successfully")
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     private List<Integer> parseCommaSeparatedIntegers(String input) {

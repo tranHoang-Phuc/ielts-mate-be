@@ -37,6 +37,10 @@ public class ExamAttemptSpecifications {
             }
 //            predicates.add(cb.isFalse(root.get("isDeleted")));
 //            predicates.add(cb.isTrue(root.get("isOriginal")));
+
+            // Add condition for history != null -> submitted exam attempts
+            predicates.add(cb.isNotNull(root.get("history")));
+
             final String finalSortField = sortBy != null ? sortBy : "updatedAt";
             final String finalSortDirection = sortDirection != null ? sortDirection : "desc";
 

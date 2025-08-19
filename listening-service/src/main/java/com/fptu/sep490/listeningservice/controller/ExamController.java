@@ -1,5 +1,6 @@
 package com.fptu.sep490.listeningservice.controller;
 
+import com.fptu.sep490.commonlibrary.constants.PageableConstant;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
@@ -64,7 +65,7 @@ public class ExamController {
         ExamResponse response = examService.createExam(request, httpServletRequest);
         BaseResponse<ExamResponse> baseResponse = BaseResponse.<ExamResponse>builder()
                 .data(response)
-                .message("Question group created successfully")
+                .message("Listening Exam created successfully")
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -169,13 +170,13 @@ public class ExamController {
     })
     public ResponseEntity<BaseResponse<List<ExamResponse>>> getAllExamsForCreator(
             HttpServletRequest httpServletRequest,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection,
             @RequestParam(required = false) String keyword
     ) throws Exception {
-        Page<ExamResponse> response = examService.getAllExamsForCreator(httpServletRequest, page, size, sortBy, sortDirection, keyword);
+        Page<ExamResponse> response = examService.getAllExamsForCreator(httpServletRequest, page-1, size, sortBy, sortDirection, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(response.getNumber() + 1)
@@ -209,13 +210,13 @@ public class ExamController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = AppException.class)))
     })
     public ResponseEntity<BaseResponse<List<ExamResponse>>> getActiveExams(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = PageableConstant.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(defaultValue = PageableConstant.DEFAULT_PAGE_SIZE) int size,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String sortDirection,
             @RequestParam(required = false) String keyword,
             HttpServletRequest httpServletRequest) throws Exception {
-        Page<ExamResponse> response = examService.getActiveExams(page, size, sortBy, sortDirection, httpServletRequest, keyword);
+        Page<ExamResponse> response = examService.getActiveExams(page-1, size, sortBy, sortDirection, httpServletRequest, keyword);
 
         Pagination pagination = Pagination.builder()
                 .currentPage(response.getNumber() + 1)

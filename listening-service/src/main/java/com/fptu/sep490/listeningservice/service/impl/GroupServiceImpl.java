@@ -105,8 +105,8 @@ public class GroupServiceImpl implements GroupService {
 
         if (!group.getListeningTask().getTaskId().equals(listeningTask.getTaskId())) {
             throw new AppException(
-                    Constants.ErrorCodeMessage.INVALID_REQUEST,
-                    Constants.ErrorCode.INVALID_REQUEST,
+                    Constants.ErrorCodeMessage.TASK_NOT_MATCH_GROUP,
+                    Constants.ErrorCode.TASK_NOT_MATCH_GROUP,
                     HttpStatus.BAD_REQUEST.value()
             );
         }

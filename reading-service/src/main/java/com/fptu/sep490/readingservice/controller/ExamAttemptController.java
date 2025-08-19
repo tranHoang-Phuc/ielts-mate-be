@@ -35,7 +35,7 @@ public class ExamAttemptController {
 
     ExamAttemptService examAttemptService;
 
-    @PutMapping("/save/{attempt-id}")
+    @PostMapping("/save/{attempt-id}")
     @Operation(
             summary = "Save exam attempt answers",
             description = "Save the current state of an exam attempt by its ID, including the user's answers."

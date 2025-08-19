@@ -37,20 +37,20 @@ public class ChoiceServiceImpl implements ChoiceService {
         if (userId == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
-                    Constants.ErrorCodeMessage.UNAUTHORIZED,
+                    Constants.ErrorCode.UNAUTHORIZED,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (question.getIsDeleted()){
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
@@ -109,26 +109,26 @@ public class ChoiceServiceImpl implements ChoiceService {
         Choice existingChoice = choiceRepository.findById(UUID.fromString(choiceId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCode.CHOICE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (question.getIsDeleted()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
         if( !existingChoice.getQuestion().getQuestionId().equals(question.getQuestionId())) {
             throw new AppException(
                     Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                    Constants.ErrorCode.CHOICE_NOT_FOUND,
                     HttpStatus.NOT_FOUND.value()
             );
         }
@@ -193,26 +193,26 @@ public class ChoiceServiceImpl implements ChoiceService {
         Choice choice = choiceRepository.findById(UUID.fromString(choiceId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCode.CHOICE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (question.getIsDeleted() || choice.getIsDeleted()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
         if (!choice.getQuestion().getQuestionId().equals(question.getQuestionId())) {
             throw new AppException(
                     Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                    Constants.ErrorCode.CHOICE_NOT_FOUND,
                     HttpStatus.NOT_FOUND.value()
             );
         }
@@ -233,13 +233,13 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (question.getIsDeleted()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
@@ -265,26 +265,26 @@ public class ChoiceServiceImpl implements ChoiceService {
         Choice choice = choiceRepository.findById(UUID.fromString(choiceId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCode.CHOICE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (question.getIsDeleted() || choice.getIsDeleted()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
-                    Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                    Constants.ErrorCode.QUESTION_NOT_FOUND,
                     HttpStatus.BAD_REQUEST.value()
             );
         }
         if (!choice.getQuestion().getQuestionId().equals(question.getQuestionId())) {
             throw new AppException(
                     Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                    Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                    Constants.ErrorCode.CHOICE_NOT_FOUND,
                     HttpStatus.NOT_FOUND.value()
             );
         }
@@ -316,13 +316,13 @@ public class ChoiceServiceImpl implements ChoiceService {
         Choice choice1 = choiceRepository.findById(UUID.fromString(choiceId1))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCode.CHOICE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         Choice choice2 = choiceRepository.findById(UUID.fromString(choiceId2))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
-                        Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
+                        Constants.ErrorCode.CHOICE_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
         if (choice1.getIsDeleted() || choice2.getIsDeleted()) {

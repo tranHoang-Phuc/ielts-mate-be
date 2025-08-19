@@ -176,7 +176,6 @@ public class ModuleServiceImpl implements ModuleService {
                             .filter(mu -> mu.getUserId().equals(UserId))
                             .findFirst()
                             .orElse(null);
-
                     Long timeSpent = moduleUser != null ? moduleUser.getTimeSpent() : null;
                     Double progress = moduleUser != null ? moduleUser.getProgress() : null;
                     LearningStatus learningStatus = moduleUser != null ? moduleUser.getLearningStatus() :null;

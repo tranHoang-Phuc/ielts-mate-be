@@ -622,6 +622,141 @@ public class AttemptServiceImpl implements AttemptService {
 
     }
 
+    @Override
+    public UserDataAttempt viewResult(UUID attemptId, HttpServletRequest request) throws JsonProcessingException {
+        Attempt attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+        String userId = helper.getUserIdFromToken(request);
+        if (!attempt.getCreatedBy().equals(userId)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.FORBIDDEN,
+                    Constants.ErrorCode.FORBIDDEN,
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        if (attempt.getStatus() != Status.FINISHED) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.ATTEMPT_NOT_FINISHED,
+                    Constants.ErrorCode.ATTEMPT_NOT_FINISHED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        String rawJson = attempt.getVersion();
+
+        JsonNode decodedNode = objectMapper.readTree(rawJson);
+
+        AttemptVersion questionVersion = objectMapper.treeToValue(decodedNode, AttemptVersion.class);
+
+        ReadingPassage listeningTask = readingPassageRepository.findById(questionVersion.getReadingPassageId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
+                        Constants.ErrorCode.PASSAGE_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        Map<UUID, List<QuestionVersion>> groupMappingQuestion = questionVersion.getGroupMappingQuestion();
+        Map<UUID, List<UUID>> groupMappingDragItem = questionVersion.getGroupMappingDragItem();
+
+        Map<QuestionGroup, List<Question>> groupQuestions = new HashMap<>();
+        Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
+        Map<UUID, List<Choice>> questionChoice = new HashMap<>();
+        groupMappingQuestion.forEach((key, value) ->{
+            var group = questionGroupRepository.findById(key).get();
+            List<Question> questions = new ArrayList<>();
+            value.forEach(q -> {
+                var question = questionRepository.findById(q.getQuestionId()).get();
+                if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                    List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
+                    questionChoice.put(question.getQuestionId(), choices);
+                }
+                questions.add(question);
+            });
+            groupQuestions.put(group, questions);
+
+            List<DragItem> dragItems = dragItemRepository.findAllById(groupMappingDragItem.get(group.getGroupId()));
+            groupDragItems.put(key, dragItems);
+        });
+
+        List<ReadingPassageGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
+        groupQuestions.forEach((key, value) ->{
+
+            ReadingPassageGetAllResponse.QuestionGroupResponse groupResponse = ReadingPassageGetAllResponse
+                    .QuestionGroupResponse.builder()
+                    .groupId(key.getGroupId())
+                    .sectionOrder(key.getSectionOrder())
+                    .sectionLabel(key.getSectionLabel())
+                    .instruction(key.getInstruction())
+                    .questions(value.stream().map(q ->
+                                    ReadingPassageGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                            .questionId(q.getQuestionId())
+                                            .questionOrder(q.getQuestionOrder())
+                                            .questionType(q.getQuestionType().ordinal())
+                                            .point(q.getPoint())
+                                            .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                            .instructionForMatching(q.getInstructionForMatching())
+                                            .zoneIndex(q.getZoneIndex())
+                                            .correctAnswer(q.getCorrectAnswer() == null ? null : q.getCorrectAnswer())
+                                            .correctAnswerForMatching(q.getCorrectAnswerForMatching() == null ? null : q.getCorrectAnswerForMatching())
+                                            .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId())
+                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
+                                                    questionChoice.get(q.getQuestionId()).stream()
+                                                            .map(c -> ReadingPassageGetAllResponse.QuestionGroupResponse
+                                                                    .QuestionResponse.ChoiceResponse.builder()
+                                                                    .choiceId(c.getChoiceId())
+                                                                    .label(c.getLabel())
+                                                                    .choiceOrder(c.getChoiceOrder())
+                                                                    .content(c.getContent())
+                                                                    .isCorrect(c.isCorrect())
+                                                                    .build()).sorted(Comparator.comparing(ReadingPassageGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder)).toList() : null)
+                                            .build()
+                            )
+                            .sorted(Comparator.comparing(ReadingPassageGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
+                            ReadingPassageGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
+                                    .dragItemId(i.getDragItemId())
+                                    .content(i.getContent())
+                                    .build()
+                    ).toList())
+                    .build();
+            questionGroups.add(groupResponse);
+        });
+        ReadingPassageGetAllResponse attemptResponse = ReadingPassageGetAllResponse.builder()
+                .passageId(listeningTask.getPassageId())
+                .ieltsType(listeningTask.getIeltsType().ordinal())
+                .partNumber(listeningTask.getPartNumber().ordinal())
+                .instruction(listeningTask.getInstruction())
+                .title(listeningTask.getTitle())
+                .content(listeningTask.getContentWithHighlightKeyword())
+                .questionGroups(questionGroups.stream().sorted(
+                        Comparator.comparing(ReadingPassageGetAllResponse.QuestionGroupResponse::sectionOrder)
+                ).toList())
+                .build();
+        List<AnswerAttempt> answerAttempts = answerAttemptRepository.findByAttempt(attempt);
+        List<UserDataAttempt.AnswerChoice> answerChoices = new ArrayList<>();
+        for (AnswerAttempt answerAttempt : answerAttempts) {
+            UserDataAttempt.AnswerChoice answerChoice = UserDataAttempt.AnswerChoice.builder()
+                    .questionId(answerAttempt.getQuestion() != null ? answerAttempt.getQuestion().getQuestionId() : null)
+                    .dragItemId(answerAttempt.getDragItemId() != null ? answerAttempt.getDragItemId() : null)
+                    .filledTextAnswer(answerAttempt.getDataFilled() != null ? answerAttempt.getDataFilled() : null)
+                    .matchedTextAnswer(answerAttempt.getDataMatched() != null ? answerAttempt.getDataMatched() : null)
+                    .choiceIds(answerAttempt.getChoices() != null ? answerAttempt.getChoices() : Collections.emptyList())
+                    .build();
+            answerChoices.add(answerChoice);
+        }
+        return UserDataAttempt.builder()
+                .attemptId(attempt.getAttemptId())
+                .answers(answerChoices)
+                .totalPoints(attempt.getTotalPoints())
+                .duration(attempt.getDuration())
+                .attemptResponse(attemptResponse)
+                .build();
+    }
+
     private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
         List<Choice> correctAnswers;
         List<String> userAnswers = choiceRepository.getChoicesByIds(answer.choices());

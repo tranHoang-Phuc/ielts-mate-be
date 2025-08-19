@@ -250,6 +250,30 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public void sendEmail(SendEmailRequest sendEmailRequest) throws Exception {
+        String clientToken = getCachedClientToken();
+        List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, sendEmailRequest.email());
+        if (userAccessInfos.isEmpty()) {
+            throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, Constants.ErrorCode.USER_NOT_FOUND);
+        }
+        UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
+        String userId = userAccessInfo.id();
+        RecipientUser recipientUser = RecipientUser.builder()
+                .email(sendEmailRequest.email())
+                .firstName(userAccessInfo.firstName())
+                .lastName(userAccessInfo.lastName())
+                .userId(userId)
+                .build();
+        String htmlContent = emailTemplateService.buildCustomEmail(sendEmailRequest.email(), userAccessInfo.firstName()+" "+userAccessInfo.lastName(),sendEmailRequest.content());
+        EmailSendingRequest<VerificationRequest> emailSendingRequest = EmailSendingRequest.<VerificationRequest>builder()
+                .recipientUser(recipientUser)
+                .htmlContent(htmlContent).subject("Shared flashcard")
+                .data(VerificationRequest.builder().build())
+                .build();
+        kafkaTemplate.send(userVerificationTopic, emailSendingRequest);
+    }
+
+    @Override
     public UserAccessInfo getUserAccessInfo(String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
         String clientToken = getCachedClientToken();

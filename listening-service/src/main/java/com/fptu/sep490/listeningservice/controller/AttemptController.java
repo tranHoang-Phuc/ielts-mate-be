@@ -121,7 +121,6 @@ public class AttemptController {
             @RequestParam(value = "ieltsType", required = false) String ieltsType,
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "partNumber", required = false) String partNumber,
-            @RequestParam(value = "questionCategory", required = false) String questionCategory,
             @RequestParam(value = "sortBy", required = false, defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "sortDirection", required = false, defaultValue = "desc") String sortDirection,
             @RequestParam(value = "title", required = false) String title,

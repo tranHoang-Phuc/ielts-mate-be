@@ -52,14 +52,14 @@ public class VocabularyServiceImpl  implements VocabularyService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-//        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndCreatedBy(vocabularyRequest.word(), userId);
-//        if (existingVocabulary != null) {
-//            throw new AppException(
-//                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
-//                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
-//                    HttpStatus.CONFLICT.value()
-//            );
-//        }
+        Vocabulary existingVocabulary = vocabularyRepository.findByWordAndContextAndCreatedBy(vocabularyRequest.word(), vocabularyRequest.context(), userId);
+        if (existingVocabulary != null) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.VOCABULARY_ALREADY_EXISTS,
+                    Constants.ErrorCode.VOCABULARY_ALREADY_EXISTS,
+                    HttpStatus.CONFLICT.value()
+            );
+        }
         Vocabulary newVocabulary = new Vocabulary();
         newVocabulary.setWord(vocabularyRequest.word());
         newVocabulary.setContext(vocabularyRequest.context());
