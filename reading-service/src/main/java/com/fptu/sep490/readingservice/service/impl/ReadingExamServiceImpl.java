@@ -28,6 +28,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 
@@ -52,7 +53,26 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam readingExam = new ReadingExam();
         readingExam.setExamName(readingExamCreationRequest.readingExamName());
         readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        readingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
+        // validate URL slug, check this url already exists
+        String urlSlug = (readingExamCreationRequest.urlSlug() != null
+                && !readingExamCreationRequest.urlSlug().isEmpty())
+                ? readingExamCreationRequest.urlSlug()
+                : readingExamCreationRequest.readingExamName()
+                .toLowerCase()
+                .replaceAll("\\s+", "-")
+                + "-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
+        if (readingExamRepository.getByUrlSlug(urlSlug).isPresent()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        readingExam.setUrlSlug(urlSlug);
+
+        readingExam.setUrlSlug(urlSlug);
         readingExam.setCreatedBy(userId);
         readingExam.setIsOriginal(true);
 

@@ -150,7 +150,7 @@ class GroupServiceImplTest {
                 groupService.deleteGroup(listeningTaskId, groupId, httpServletRequest)
         );
 
-        assertEquals(Constants.ErrorCode.INVALID_REQUEST, ex.getBusinessErrorCode());
+        assertEquals(Constants.ErrorCode.TASK_NOT_MATCH_GROUP, ex.getBusinessErrorCode());
         assertEquals(HttpStatus.BAD_REQUEST.value(), ex.getHttpStatusCode());
     }
 
