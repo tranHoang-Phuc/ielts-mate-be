@@ -51,8 +51,8 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         }
         //create new ReadingExamObject
         ReadingExam readingExam = new ReadingExam();
-        readingExam.setExamName(readingExamCreationRequest.readingExamName());
-        readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
+        readingExam.setExamName(readingExamCreationRequest.readingExamName().trim());
+        readingExam.setExamDescription(readingExamCreationRequest.readingExamDescription().trim());
         // validate URL slug, check this url already exists
         String urlSlug = (readingExamCreationRequest.urlSlug() != null
                 && !readingExamCreationRequest.urlSlug().isEmpty())
@@ -140,6 +140,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 readingExam.getExamName(),
                 readingExam.getExamDescription(),
                 readingExam.getUrlSlug(),
+                readingExam.getStatus(),
                 new ReadingExamResponse.ReadingPassageResponse(
                         readingExam.getPart1().getPassageId().toString(),
                         readingExam.getPart1().getTitle(),
@@ -239,6 +240,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 newReadingExam.getExamName(),
                 newReadingExam.getExamDescription(),
                 newReadingExam.getUrlSlug(),
+                readingExam.getStatus(),
                 new ReadingExamResponse.ReadingPassageResponse(
                         newReadingExam.getPart1().getPassageId().toString(),
                         newReadingExam.getPart1().getTitle(),
@@ -316,6 +318,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 finalReadingExam.getExamName(),
                 finalReadingExam.getExamDescription(),
                 finalReadingExam.getUrlSlug(),
+                readingExam.getStatus(),
                 new ReadingExamResponse.ReadingPassageResponse(
                         finalReadingExam.getPart1().getPassageId().toString(),
                         finalReadingExam.getPart1().getTitle(),
@@ -363,6 +366,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 finalReadingExam.getExamName(),
                 finalReadingExam.getExamDescription(),
                 finalReadingExam.getUrlSlug(),
+                finalReadingExam.getStatus(),
                 new ReadingExamResponse.ReadingPassageResponse(
                         finalReadingExam.getPart1().getPassageId().toString(),
                         finalReadingExam.getPart1().getTitle(),
@@ -420,6 +424,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         readingExam.getExamName(),
                         readingExam.getExamDescription(),
                         readingExam.getUrlSlug(),
+                        readingExam.getStatus(),
                         new ReadingExamResponse.ReadingPassageResponse(
                                 readingExam.getPart1().getPassageId().toString(),
                                 readingExam.getPart1().getTitle(),
@@ -504,6 +509,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                             exam.getExamName(),
                             exam.getExamDescription(),
                             exam.getUrlSlug(),
+                            exam.getStatus(),
                             toPassageResponse(part1, exam.getPart1().getPassageId().toString()),
                             toPassageResponse(part2, exam.getPart2().getPassageId().toString()),
                             toPassageResponse(part3, exam.getPart3().getPassageId().toString()),
@@ -600,6 +606,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                             exam.getExamName(),
                             exam.getExamDescription(),
                             exam.getUrlSlug(),
+                            exam.getStatus(),
                             toPassageResponse(part1, exam.getPart1().getPassageId().toString()),
                             toPassageResponse(part2, exam.getPart2().getPassageId().toString()),
                             toPassageResponse(part3, exam.getPart3().getPassageId().toString()),
