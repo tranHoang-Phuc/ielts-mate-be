@@ -65,7 +65,7 @@ public class ExamController {
         ExamResponse response = examService.createExam(request, httpServletRequest);
         BaseResponse<ExamResponse> baseResponse = BaseResponse.<ExamResponse>builder()
                 .data(response)
-                .message("Question group created successfully")
+                .message("Listening Exam created successfully")
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .contentType(MediaType.APPLICATION_JSON)

@@ -200,4 +200,13 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
             END
         """, nativeQuery = true)
     List<UserInBranch> getNumberOfUsersInBranchHighest();
+
+
+    @Query("""
+        SELECT r FROM ReadingExam r
+        WHERE r.isDeleted = false
+          AND r.isCurrent = true
+          AND r.urlSlug = :urlSlug
+    """)
+    Optional<ReadingExam> getByUrlSlug(@Param("urlSlug") String s);
 }

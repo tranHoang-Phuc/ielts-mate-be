@@ -37,4 +37,17 @@ public interface VocabularyRepository extends CrudRepository<Vocabulary, UUID> {
             @Param("keyword") String keyword,
             @Param("userId") String userId
     );
+
+    @Query("""
+        SELECT v FROM Vocabulary v
+        WHERE v.isDeleted = false
+          AND LOWER(v.word) LIKE LOWER(:keyword)
+          AND LOWER(v.context) LIKE LOWER(:context)
+          AND v.createdBy = :userId
+    """)
+    Vocabulary findByWordAndContextAndCreatedBy(
+            @Param("keyword") String keyword,
+            @Param("context") String context,
+            @Param("userId") String userId
+    );
 }
