@@ -32,6 +32,7 @@ public class Constants {
         public static final String EXAM_ATTEMPT_NOT_SUBMIT = "EXAM_ATTEMPT_NOT_SUBMIT";
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
+        public static final String EXISTED_SLUG = "EXISTED_SLUG";
     }
 
     public final class RedisKey {
@@ -76,5 +77,6 @@ public class Constants {
 
         public static final String INTERNAL_SERVER_ERROR = "400999";
 
+        public static final String EXISTED_SLUG = "400028";
     }
 }

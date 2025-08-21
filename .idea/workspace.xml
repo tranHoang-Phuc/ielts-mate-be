@@ -5,14 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix: db">
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/SlugGenResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/SlugStatusResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/SlugGenResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/SlugStatusResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-service/src/test/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/identity-service/src/test/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/identity-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/test/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/test/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/test/resources/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/test/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/test/resources/application.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/resources/application.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/test/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/test/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingExamRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ReadingExamService.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ReadingExamService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ReadingExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ReadingExamServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,6 +36,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="Record" />
       </list>
     </option>
   </component>
@@ -72,17 +86,17 @@
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Debug",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.ApiGatewayApplication.executor": "Run",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
     "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Run",
     "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
     "Spring Boot.PersonalServiceApplication.executor": "Run",
     "Spring Boot.ReadingServiceApplication.executor": "Run",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/reading-service/src/test/resources",
+    "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
@@ -105,11 +119,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\listening-service\src\main\java\com\fptu\sep490\listeningservice\viewmodel\response" />
       <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\reading-service\src\test\resources" />
       <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\personal-service\src\test\resources" />
       <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\notification-service\src\test\resources" />
       <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\listening-service\src\test\resources" />
-      <recent name="D:\FPT\Semester 9\SEP490\gcp\ielts-mate-be\identity-service\src\test\resources" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -130,7 +144,6 @@
               <option value="ListeningServiceApplication" />
               <option value="NotificationServiceApplication" />
               <option value="PersonalServiceApplication" />
-              <option value="ReadingServiceApplication" />
             </set>
           </value>
         </entry>
@@ -305,6 +318,7 @@
       <workItem from="1755354608737" duration="39000" />
       <workItem from="1755470186225" duration="2303000" />
       <workItem from="1755499699763" duration="577000" />
+      <workItem from="1755781575634" duration="3779000" />
     </task>
     <task id="LOCAL-00007" summary="feature: view result reading attempt">
       <option name="closed" value="true" />

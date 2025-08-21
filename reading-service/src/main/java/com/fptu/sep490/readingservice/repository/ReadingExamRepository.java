@@ -209,4 +209,6 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
           AND r.urlSlug = :urlSlug
     """)
     Optional<ReadingExam> getByUrlSlug(@Param("urlSlug") String s);
+
+    boolean existsByUrlSlug(String urlSlug);
 }

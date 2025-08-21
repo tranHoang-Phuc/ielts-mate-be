@@ -7,9 +7,12 @@ import com.fptu.sep490.readingservice.service.ReadingExamService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugGenResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugStatusResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -240,6 +243,27 @@ public class ReadingExamController {
                 .body(baseResponse);
     }
 
+    @GetMapping("/check/{slug}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<SlugStatusResponse>> checkSlug(@PathVariable("slug")String urlSlug) {
+        SlugStatusResponse data = readingExamService.checkUrlSlug(urlSlug);
+        BaseResponse<SlugStatusResponse> response = BaseResponse.<SlugStatusResponse>builder()
+                .data(data)
+                .message("Url slug valid")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/gen/slug/{exam-name}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<SlugGenResponse>> genSlug(@PathVariable("exam-name") String examName) {
+        SlugGenResponse data = readingExamService.genUrlSlug(examName);
+        BaseResponse<SlugGenResponse> response = BaseResponse.<SlugGenResponse>builder()
+                .data(data)
+                .message("Generate url slug successfully")
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("")
     @PreAuthorize("hasAnyRole('CREATOR', 'USER')")
