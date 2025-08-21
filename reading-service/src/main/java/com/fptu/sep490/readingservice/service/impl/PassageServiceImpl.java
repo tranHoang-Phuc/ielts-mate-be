@@ -253,7 +253,7 @@ public class PassageServiceImpl implements PassageService {
             }
         }
 
-        if (request.content() != null) {
+        if (request.content() == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST,
@@ -269,7 +269,7 @@ public class PassageServiceImpl implements PassageService {
             );
         }
 
-        if (request.instruction() != null) {
+        if (request.instruction() == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
                     Constants.ErrorCode.INVALID_REQUEST,

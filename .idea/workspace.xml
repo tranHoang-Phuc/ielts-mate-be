@@ -5,27 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix: db">
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/SlugGenResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/SlugStatusResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/SlugGenResponse.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/viewmodel/response/SlugStatusResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ReadingExamController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingExamRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ReadingExamService.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ReadingExamService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ReadingExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ReadingExamServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/application-local.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingPassageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingPassageRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +76,7 @@
     "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.NotificationServiceApplication.executor": "Run",
     "Spring Boot.PersonalServiceApplication.executor": "Run",
-    "Spring Boot.ReadingServiceApplication.executor": "Run",
+    "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response",
@@ -141,7 +124,6 @@
           <value>
             <set>
               <option value="FileServiceApplication" />
-              <option value="ListeningServiceApplication" />
               <option value="NotificationServiceApplication" />
               <option value="PersonalServiceApplication" />
             </set>
@@ -229,10 +211,10 @@
       <item itemvalue="JUnit.AuthServiceImplTest" />
       <item itemvalue="Spring Boot.ApiGatewayApplication" />
       <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
-      <item itemvalue="Spring Boot.IdentityServiceApplication" />
-      <item itemvalue="Spring Boot.NotificationServiceApplication" />
       <item itemvalue="Spring Boot.FileServiceApplication" />
+      <item itemvalue="Spring Boot.IdentityServiceApplication" />
       <item itemvalue="Spring Boot.ListeningServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
       <item itemvalue="Spring Boot.PersonalServiceApplication" />
       <item itemvalue="Spring Boot.ReadingServiceApplication" />
     </list>
@@ -365,5 +347,26 @@
     <MESSAGE value="feature: view result reading attempt" />
     <MESSAGE value="fix: db" />
     <option name="LAST_COMMIT_MESSAGE" value="fix: db" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
+          <line>198</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
+          <line>213</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
+          <line>255</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
