@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/compiler.xml&#10;#&#9;.idea/workspace.xml&#10;#&#9;identity-service/src/main/resources/messages/messages.properties">
+    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix: time zone, gen url slug, check slug">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/strategy/GeminiApiStrategy.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/strategy/GeminiApiStrategy.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -267,11 +266,12 @@
       <option name="presentableId" value="Default" />
       <updated>1755010637617</updated>
       <workItem from="1755268530511" duration="66000" />
-      <workItem from="1755354984841" duration="824000" />
-      <workItem from="1755435856061" duration="1843000" />
-      <workItem from="1755500634156" duration="45000" />
-      <workItem from="1755525222949" duration="5374000" />
-      <workItem from="1755749840916" duration="1231000" />
+      <workItem from="1755319156035" duration="3182000" />
+      <workItem from="1755332302895" duration="2856000" />
+      <workItem from="1755354608737" duration="39000" />
+      <workItem from="1755470186225" duration="2303000" />
+      <workItem from="1755499699763" duration="577000" />
+      <workItem from="1755781575634" duration="4240000" />
     </task>
     <task id="LOCAL-00007" summary="feature: view result reading attempt">
       <option name="closed" value="true" />
@@ -289,7 +289,39 @@
       <option name="project" value="LOCAL" />
       <updated>1755436616878</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="fix: db">
+      <option name="closed" value="true" />
+      <created>1755440915970</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1755440915970</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fix: db">
+      <option name="closed" value="true" />
+      <created>1755510074203</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1755510074203</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix: time zone, gen url slug, check slug">
+      <option name="closed" value="true" />
+      <created>1755785422253</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1755785422253</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix: time zone, gen url slug, check slug">
+      <option name="closed" value="true" />
+      <created>1755785472121</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1755785472121</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -300,7 +332,8 @@
     <MESSAGE value="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/compiler.xml&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="change .env" />
     <MESSAGE value="feature: view result reading attempt" />
-    <MESSAGE value="fix: check creator" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: check creator" />
+    <MESSAGE value="fix: db" />
+    <MESSAGE value="fix: time zone, gen url slug, check slug" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: time zone, gen url slug, check slug" />
   </component>
 </project>
