@@ -182,10 +182,10 @@
       <item itemvalue="JUnit.AuthServiceImplTest" />
       <item itemvalue="Spring Boot.ApiGatewayApplication" />
       <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
-      <item itemvalue="Spring Boot.IdentityServiceApplication" />
-      <item itemvalue="Spring Boot.NotificationServiceApplication" />
       <item itemvalue="Spring Boot.FileServiceApplication" />
+      <item itemvalue="Spring Boot.IdentityServiceApplication" />
       <item itemvalue="Spring Boot.ListeningServiceApplication" />
+      <item itemvalue="Spring Boot.NotificationServiceApplication" />
       <item itemvalue="Spring Boot.PersonalServiceApplication" />
       <item itemvalue="Spring Boot.ReadingServiceApplication" />
     </list>
