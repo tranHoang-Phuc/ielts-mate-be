@@ -187,6 +187,9 @@ services:
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
       - PERSONAL_SERVICE=${PERSONAL_SERVICE}
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JACKSON_TIME_ZONE=Asia/Ho_Chi_Minh
     depends_on:
       - kafka
       - redis
@@ -289,6 +292,9 @@ services:
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
       - PERSONAL_SERVICE=${PERSONAL_SERVICE}
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_JDBC_TIME_ZONE=UTC
+      - SPRING_JACKSON_TIME_ZONE=Asia/Ho_Chi_Minh
     depends_on:
       - kafka
       - redis
