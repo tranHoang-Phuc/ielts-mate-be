@@ -51,7 +51,6 @@ public class GeminiApiStrategy implements AiApiStrategy {
     private static final long BASE_RETRY_DELAY_MS = 1000; // Base delay: 1 second
     private static final long MAX_RETRY_DELAY_MS = 10000; // Max delay: 10 seconds
 
-    // Dependencies
     GeminiProperties geminiProperties;
     GeminiClient geminiClient;
     ObjectMapper objectMapper;
