@@ -4,11 +4,10 @@ package com.fptu.sep490.listeningservice.model;
 import com.fptu.sep490.listeningservice.model.enumeration.ExamStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,14 +59,12 @@ public class ListeningExam {
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_by", length = 100)
     private String updatedBy;
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     @Column(name = "is_current")
@@ -97,4 +94,19 @@ public class ListeningExam {
             fetch = FetchType.LAZY
     )
     private List<ExamAttempt> examAttempts = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        }
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+    }
 }

@@ -32,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -80,6 +81,8 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         readingExam.setUrlSlug(urlSlug);
         readingExam.setCreatedBy(userId);
         readingExam.setIsOriginal(true);
+        readingExam.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        readingExam.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
 
         if(!readingExamCreationRequest.readingPassageIdPart1().isEmpty()){
             Optional<ReadingPassage> readingPassagePart1 = readingPassageRepository.findById(UUID.fromString(readingExamCreationRequest.readingPassageIdPart1()));
@@ -203,6 +206,8 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setVersion(currentReadingExam.getVersion()+1);
         newReadingExam.setStatus(readingExamCreationRequest.status());
+        newReadingExam.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        newReadingExam.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         newReadingExam.setParent(readingExam);
 
         if (readingExamCreationRequest.readingPassageIdPart1() != null && !readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {
@@ -363,7 +368,6 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         finalReadingExam.setIsDeleted(true);
         readingExam.setIsDeleted(true);
         readingExam.setUpdatedBy(userId);
-        readingExam.setUpdatedAt(LocalDateTime.now());
         readingExamRepository.save(readingExam);
         readingExamRepository.save(finalReadingExam);
         ReadingExamResponse response = new ReadingExamResponse(

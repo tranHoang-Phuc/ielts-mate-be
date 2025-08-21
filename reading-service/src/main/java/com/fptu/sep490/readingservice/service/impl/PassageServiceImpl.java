@@ -47,6 +47,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -110,6 +111,7 @@ public class PassageServiceImpl implements PassageService {
                 .isDeleted(false)
                 .createdBy(userId)
                 .updatedBy(userId)
+                .createdAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                 .build();
         ReadingPassage saved = readingPassageRepository.save(readingPassage);
         UserProfileResponse createdUserProfileResponse = getUserProfileById(userId);
@@ -303,6 +305,7 @@ public class PassageServiceImpl implements PassageService {
                 .isDeleted(false)
                 .isOriginal(false)
                 .parent(entity)
+                .updatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                 .build();
 
 

@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -155,6 +157,8 @@ public class ExamServiceImpl implements ExamService {
                 .part4(part4)
                 .createdBy(userId)
                 .updatedBy(userId)
+                .createdAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
+                .updatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                 .build();
 
         ListeningExam savedExam = listeningExamRepository.save(listeningExam);
@@ -478,6 +482,8 @@ public class ExamServiceImpl implements ExamService {
         newExam.setVersion(currentExam.getVersion()+1);
         newExam.setParent(listeningExam);
         newExam.setIsOriginal(false);
+        newExam.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        newExam.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
 
         listeningExamRepository.save(listeningExam);
         listeningExamRepository.save(currentExam);

@@ -50,6 +50,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -134,6 +136,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .updatedBy(userId)
                 .isDeleted(false)
                 .version(1)
+                .createdAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
+                .updatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")))
                 .build();
 
         ListeningTask saved = listeningTaskRepository.save(listeningTask);
@@ -227,6 +231,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         newVersion.setVersion(version + 1);
         newVersion.setParent(task);
         newVersion.setIsOriginal(false);
+        newVersion.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
+        newVersion.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         listeningTaskRepository.saveAll(allVersion);
         newVersion = listeningTaskRepository.save(newVersion);
         listeningTaskRepository.save(task);
