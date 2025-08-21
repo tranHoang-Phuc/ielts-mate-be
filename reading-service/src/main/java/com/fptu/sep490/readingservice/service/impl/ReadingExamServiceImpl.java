@@ -203,7 +203,6 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setVersion(currentReadingExam.getVersion()+1);
         newReadingExam.setStatus(readingExamCreationRequest.status());
-        newReadingExam.setUpdatedAt(LocalDateTime.now());
         newReadingExam.setParent(readingExam);
 
         if (readingExamCreationRequest.readingPassageIdPart1() != null && !readingExamCreationRequest.readingPassageIdPart1().isEmpty()) {

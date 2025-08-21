@@ -307,7 +307,6 @@ public class PassageServiceImpl implements PassageService {
 
 
         entity.setIsCurrent(false);
-        entity.setUpdatedAt(LocalDateTime.now());
         entity.setUpdatedBy(userId);
         entity.setPassageStatus(request.passageStatus() == null ? entity.getPassageStatus() : safeEnumFromOrdinal(Status.values(), request.passageStatus()));
         ReadingPassage updated = readingPassageRepository.save(entity);

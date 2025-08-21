@@ -4,146 +4,38 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="fix: db">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingPassageRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ReadingPassageRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
-    </list>
+    <list default="true" id="be4871b8-539d-4dae-89e9-e7264f93888f" name="Changes" comment="fix: update passage" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="local" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;tranHoang-Phuc&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/tranHoang-Phuc/ielts-mate-be.git&quot;,
-    &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
-  }
-}</component>
-  <component name="KubernetesApiPersistence">{}</component>
-  <component name="KubernetesApiProvider">{
-  &quot;isMigrated&quot;: true
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 5
-}</component>
-  <component name="ProjectId" id="31BlCQHyRO2sLMGWJk0JjMhcIzr" />
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
-  <component name="ProjectViewState">
-    <option name="hideEmptyMiddlePackages" value="true" />
-    <option name="showLibraryContents" value="true" />
-  </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JUnit.AuthServiceImplTest.executor": "Run",
-    "Maven.ielts-mate-be [clean].executor": "Run",
-    "Maven.reading-service [clean].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
-    "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Run",
-    "Spring Boot.ListeningServiceApplication.executor": "Run",
-    "Spring Boot.NotificationServiceApplication.executor": "Run",
-    "Spring Boot.PersonalServiceApplication.executor": "Run",
-    "Spring Boot.ReadingServiceApplication.executor": "Debug",
-    "git-widget-placeholder": "local",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "run.configurations.included.in.services": "true",
-    "settings.editor.selected.configurable": "preferences.lookFeel",
-    "vue.rearranger.settings.migration": "true"
-  },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
-    ]
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;git-widget-placeholder&quot;: &quot;prod&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
   }
 }</component>
-  <component name="ReactorSettings">
-    <option name="notificationShown" value="true" />
-  </component>
-  <component name="RunDashboard">
-    <option name="configurationTypes">
-      <set>
-        <option value="KtorApplicationConfigurationType" />
-        <option value="MicronautRunConfigurationType" />
-        <option value="QuarkusRunConfigurationType" />
-        <option value="SpringBootApplicationConfigurationType" />
-      </set>
-    </option>
-    <option name="hiddenConfigurations">
-      <map>
-        <entry key="SpringBootApplicationConfigurationType">
-          <value>
-            <set>
-              <option value="FileServiceApplication" />
-              <option value="NotificationServiceApplication" />
-              <option value="PersonalServiceApplication" />
-            </set>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="RunManager" selected="JUnit.AuthServiceImplTest">
-    <configuration name="AuthServiceImplTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="identity-service" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.fptu.sep490.identityservice.service.impl.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.fptu.sep490.identityservice.service.impl" />
-      <option name="MAIN_CLASS_NAME" value="com.fptu.sep490.identityservice.service.impl.AuthServiceImplTest" />
-      <option name="TEST_OBJECT" value="class" />
+  <component name="RunManager" selected="Spring Boot.FileServiceApplication">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="ielts-mate-be" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="api-gateway" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="DiscoveryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="discovery-service" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="fptu.sep490.registryservice.DiscoveryServiceApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="ielts-mate-be" />
+      <option name="filePath" />
+      <method v="2" />
     </configuration>
     <configuration name="FileServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="file-service" />
@@ -152,23 +44,9 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="IdentityServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="identity-service" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.identityservice.IdentityServiceApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="ListeningServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="listening-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.listeningservice.ListeningServiceApplication" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="NotificationServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
-      <module name="notification-service" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.notificationservice.NotificationServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -187,200 +65,21 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <list>
-      <item itemvalue="JUnit.AuthServiceImplTest" />
-      <item itemvalue="Spring Boot.ApiGatewayApplication" />
-      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
-      <item itemvalue="Spring Boot.FileServiceApplication" />
-      <item itemvalue="Spring Boot.IdentityServiceApplication" />
-      <item itemvalue="Spring Boot.ListeningServiceApplication" />
-      <item itemvalue="Spring Boot.NotificationServiceApplication" />
-      <item itemvalue="Spring Boot.PersonalServiceApplication" />
-      <item itemvalue="Spring Boot.ReadingServiceApplication" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="JUnit.AuthServiceImplTest" />
-        <item itemvalue="JUnit.AuthServiceImplTest" />
-        <item itemvalue="JUnit.AuthServiceImplTest" />
-        <item itemvalue="JUnit.AuthServiceImplTest" />
-        <item itemvalue="JUnit.AuthServiceImplTest" />
-      </list>
-    </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
-      </set>
-    </attachedChunks>
-  </component>
-  <component name="StructureViewState">
-    <option name="selectedTab" value="Logical" />
   </component>
   <component name="TaskManager">
-    <task id="LOCAL-00001" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/compiler.xml&#10;#&#9;.idea/workspace.xml">
+    <task id="LOCAL-00001" summary="fix: update passage">
       <option name="closed" value="true" />
-      <created>1755005296595</created>
+      <created>1755791451128</created>
       <option name="number" value="00001" />
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
-      <updated>1755005296595</updated>
+      <updated>1755791451128</updated>
     </task>
-    <task id="LOCAL-00002" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/compiler.xml&#10;#&#9;.idea/workspace.xml">
-      <option name="closed" value="true" />
-      <created>1755005856211</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1755005856211</updated>
-    </task>
-    <task id="LOCAL-00003" summary="change .env">
-      <option name="closed" value="true" />
-      <created>1755006446581</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1755006446581</updated>
-    </task>
-    <task id="LOCAL-00004" summary="change .env">
-      <option name="closed" value="true" />
-      <created>1755007108579</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1755007108579</updated>
-    </task>
-    <task id="LOCAL-00005" summary="change .env">
-      <option name="closed" value="true" />
-      <created>1755007478463</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1755007478463</updated>
-    </task>
-    <task id="LOCAL-00006" summary="change .env">
-      <option name="closed" value="true" />
-      <created>1755007899499</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1755007899499</updated>
-    </task>
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test" />
-      <created>1755010637617</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1755010637617</updated>
-      <workItem from="1755268530511" duration="66000" />
-      <workItem from="1755319156035" duration="3182000" />
-      <workItem from="1755332302895" duration="2856000" />
-      <workItem from="1755354608737" duration="39000" />
-      <workItem from="1755470186225" duration="2303000" />
-      <workItem from="1755499699763" duration="577000" />
-      <workItem from="1755781575634" duration="4240000" />
-      <workItem from="1755790521716" duration="59000" />
-      <workItem from="1755790651896" duration="458000" />
-    </task>
-    <task id="LOCAL-00007" summary="feature: view result reading attempt">
-      <option name="closed" value="true" />
-      <created>1755355046261</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1755355046261</updated>
-    </task>
-    <task id="LOCAL-00008" summary="fix: check creator">
-      <option name="closed" value="true" />
-      <created>1755436616878</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1755436616878</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fix: db">
-      <option name="closed" value="true" />
-      <created>1755440915970</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1755440915970</updated>
-    </task>
-    <task id="LOCAL-00010" summary="fix: db">
-      <option name="closed" value="true" />
-      <created>1755510074203</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1755510074203</updated>
-    </task>
-    <task id="LOCAL-00011" summary="fix: time zone, gen url slug, check slug">
-      <option name="closed" value="true" />
-      <created>1755785422253</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1755785422253</updated>
-    </task>
-    <task id="LOCAL-00012" summary="fix: time zone, gen url slug, check slug">
-      <option name="closed" value="true" />
-      <created>1755785472121</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1755785472121</updated>
-    </task>
-    <task id="LOCAL-00013" summary="fix: zone">
-      <option name="closed" value="true" />
-      <created>1755790554420</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1755790554420</updated>
-    </task>
-    <task id="LOCAL-00014" summary="fix: zone">
-      <option name="closed" value="true" />
-      <created>1755790703167</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1755790703167</updated>
-    </task>
-    <option name="localTasksCounter" value="15" />
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="3" />
-  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix" />
-    <MESSAGE value="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/compiler.xml&#10;#&#9;.idea/workspace.xml" />
-    <MESSAGE value="change .env" />
-    <MESSAGE value="feature: view result reading attempt" />
-    <MESSAGE value="fix: db" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: db" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
-          <line>198</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
-          <line>213</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
-          <line>255</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="fix: update passage" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: update passage" />
   </component>
 </project>
