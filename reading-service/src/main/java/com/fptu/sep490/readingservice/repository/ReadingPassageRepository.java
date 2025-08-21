@@ -26,9 +26,14 @@ public interface ReadingPassageRepository extends JpaRepository<ReadingPassage, 
     Optional<ReadingPassage> findCurrentVersionByParent(ReadingPassage parent);
 
     @Query("""
-        SELECT p FROM ReadingPassage p 
-        WHERE (p.passageId = :passageId OR p.parent.passageId = :passageId ) AND p.isCurrent = true
-    """)
+    SELECT p FROM ReadingPassage p
+    WHERE (p.passageId = :passageId OR p.parent.passageId = :passageId)
+      AND p.version = (
+          SELECT MAX(p2.version) 
+          FROM ReadingPassage p2
+          WHERE (p2.passageId = :passageId OR p2.parent.passageId = :passageId)
+      )
+""")
     Optional<ReadingPassage> findCurrentVersionById(UUID passageId);
 
     @Query("""
