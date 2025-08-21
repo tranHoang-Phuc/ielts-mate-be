@@ -138,6 +138,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
             readingExam.setPart3(readingPassagePart3.get());
         }
         readingExam.setCreatedBy(userId);
+        readingExam.setUpdatedBy(userId);
         readingExamRepository.save(readingExam);
         // Create and return the response object
         ReadingExamResponse response = new ReadingExamResponse(
