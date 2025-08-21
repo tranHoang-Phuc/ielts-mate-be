@@ -2,6 +2,8 @@ package com.fptu.sep490.listeningservice.service;
 
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.SlugGenResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.SlugStatusResponse;
 import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -24,4 +26,8 @@ public interface ExamService {
     Page<ExamResponse> getActiveExams(int page, int size, String sortBy, String sortDirection, HttpServletRequest httpServletRequest, String keyword) throws Exception;
 
     List<TaskTitle> getExamTitle(List<UUID> ids);
+
+    SlugStatusResponse checkUrlSlug(String urlSlug);
+
+    SlugGenResponse genUrlSlug(String examName);
 }

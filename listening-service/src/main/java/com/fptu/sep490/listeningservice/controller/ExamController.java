@@ -7,9 +7,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.Pagination;
 import com.fptu.sep490.listeningservice.service.ExamService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
 import com.fptu.sep490.listeningservice.viewmodel.request.QuestionGroupCreationRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.QuestionGroupResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -249,6 +247,28 @@ public class ExamController {
         List<TaskTitle> data = examService.getExamTitle(ids);
         BaseResponse<List<TaskTitle>> response = BaseResponse.<List<TaskTitle>>builder()
                 .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check/{slug}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<SlugStatusResponse>> checkSlug(@PathVariable("slug")String urlSlug) {
+        SlugStatusResponse data = examService.checkUrlSlug(urlSlug);
+        BaseResponse<SlugStatusResponse> response = BaseResponse.<SlugStatusResponse>builder()
+                .data(data)
+                .message("Url slug valid")
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/gen/slug/{exam-name}")
+    @PreAuthorize("hasRole('CREATOR')")
+    public ResponseEntity<BaseResponse<SlugGenResponse>> genSlug(@PathVariable("exam-name") String examName) {
+        SlugGenResponse data = examService.genUrlSlug(examName);
+        BaseResponse<SlugGenResponse> response = BaseResponse.<SlugGenResponse>builder()
+                .data(data)
+                .message("Generate url slug successfully")
                 .build();
         return ResponseEntity.ok(response);
     }

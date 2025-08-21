@@ -2,6 +2,8 @@ package com.fptu.sep490.readingservice.service;
 
 import com.fptu.sep490.readingservice.viewmodel.request.ReadingExamCreationRequest;
 import com.fptu.sep490.readingservice.viewmodel.response.ReadingExamResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugGenResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugStatusResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
@@ -25,4 +27,8 @@ public interface ReadingExamService {
     List<TaskTitle> getTaskTitle(List<UUID> ids);
 
     Page<ReadingExamResponse> getAllActiveReadingExams(HttpServletRequest httpServletRequest, int page, int size, String sortBy, String sortDirection, String keyword) throws Exception;
+
+    SlugStatusResponse checkUrlSlug(String urlSlug);
+
+    SlugGenResponse genUrlSlug(String examName);
 }

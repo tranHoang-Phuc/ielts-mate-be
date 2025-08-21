@@ -10,6 +10,8 @@ import com.fptu.sep490.readingservice.model.ReadingExam;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.repository.client.MarkupClient;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugGenResponse;
+import com.fptu.sep490.readingservice.viewmodel.response.SlugStatusResponse;
 import com.fptu.sep490.readingservice.viewmodel.response.TaskTitle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,9 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
@@ -133,6 +138,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
             readingExam.setPart3(readingPassagePart3.get());
         }
         readingExam.setCreatedBy(userId);
+        readingExam.setUpdatedBy(userId);
         readingExamRepository.save(readingExam);
         // Create and return the response object
         ReadingExamResponse response = new ReadingExamResponse(
@@ -644,6 +650,44 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
 
 
         return new PageImpl<>(readingExamResponses, pageable, readingExamPage.getTotalElements());
+    }
+
+    @Override
+    public SlugStatusResponse checkUrlSlug(String urlSlug) {
+        boolean isValidSlug = !readingExamRepository.existsByUrlSlug(urlSlug);
+
+        if(!isValidSlug) {
+            throw new AppException(Constants.ErrorCodeMessage.EXISTED_SLUG,
+                    Constants.ErrorCode.EXISTED_SLUG, HttpStatus.BAD_REQUEST.value());
+        }
+
+        return SlugStatusResponse.builder()
+                .isValid(isValidSlug)
+                .build();
+    }
+
+    @Override
+    public SlugGenResponse genUrlSlug(String examName) {
+        String slug = examName == null ? "" : examName.trim().toLowerCase(Locale.ROOT);
+
+        slug = Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        slug = slug.replace('đ', 'd').replace('Đ', 'd');
+
+        slug = slug.replaceAll("[^a-z0-9\\s-]", " ");
+        slug = slug.trim().replaceAll("\\s+", "-");
+        slug = slug.replaceAll("^-+|-+$", "");
+        if (slug.isEmpty()) slug = "exam";
+
+        String utcStamp = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+                .withZone(ZoneOffset.UTC)
+                .format(Instant.now());
+
+        String urlSlug = slug + "-" + utcStamp;
+
+        return SlugGenResponse.builder()
+                .urlSlug(urlSlug)
+                .build();
     }
 
 

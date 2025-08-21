@@ -1,4 +1,6 @@
 spring:
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
   application:
     name: reading-service
   security:
@@ -18,6 +20,8 @@ spring:
         show_sql: true
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: Asia/Ho_Chi_Minh
     hibernate:
       ddl-auto: update
 

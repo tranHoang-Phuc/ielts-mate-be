@@ -2,6 +2,7 @@ package com.fptu.sep490.listeningservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.constants.DataMarkup;
+import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.listeningservice.constants.Constants;
@@ -14,9 +15,7 @@ import com.fptu.sep490.listeningservice.repository.*;
 import com.fptu.sep490.listeningservice.repository.client.MarkupClient;
 import com.fptu.sep490.listeningservice.service.ExamService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.ExamResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ListeningTaskResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.TaskTitle;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -55,6 +59,21 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamResponse createExam(ExamRequest request, HttpServletRequest httpServletRequest) throws Exception {
         String userId = helper.getUserIdFromToken(httpServletRequest);
+        String incoming = request.urlSlug();
+        String urlSlug;
+
+        if (incoming == null || incoming.isBlank()) {
+            urlSlug = genUrlSlug(request.examName()).urlSlug();
+        } else if (checkUrlSlug(incoming).isValid()) {
+            urlSlug = incoming;
+        } else {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXISTED_SLUG,
+                    Constants.ErrorCode.EXISTED_SLUG,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
         if (userId == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
@@ -124,7 +143,7 @@ public class ExamServiceImpl implements ExamService {
         ListeningExam listeningExam = ListeningExam.builder()
                 .examName(request.examName())
                 .examDescription(request.examDescription())
-                .urlSlug(request.urlSlug())
+                .urlSlug(urlSlug)
                 .isCurrent(true)
                 .isDeleted(false)
                 .isOriginal(true)
@@ -135,6 +154,7 @@ public class ExamServiceImpl implements ExamService {
                 .part3(part3)
                 .part4(part4)
                 .createdBy(userId)
+                .updatedBy(userId)
                 .build();
 
         ListeningExam savedExam = listeningExamRepository.save(listeningExam);
@@ -595,6 +615,44 @@ public class ExamServiceImpl implements ExamService {
     public List<TaskTitle> getExamTitle(List<UUID> ids) {
         List<ListeningExam> exams = listeningExamRepository.findAllById(ids);
         return exams.stream().map(e -> TaskTitle.builder().taskId(e.getListeningExamId()).title(e.getExamName()).build()).toList();
+    }
+
+    @Override
+    public SlugStatusResponse checkUrlSlug(String urlSlug) {
+        boolean isValidSlug = !listeningExamRepository.existsByUrlSlug(urlSlug);
+
+        if(!isValidSlug) {
+            throw new AppException(Constants.ErrorCodeMessage.EXISTED_SLUG,
+                    Constants.ErrorCode.EXISTED_SLUG, HttpStatus.BAD_REQUEST.value());
+        }
+
+        return SlugStatusResponse.builder()
+                .isValid(isValidSlug)
+                .build();
+    }
+
+    @Override
+    public SlugGenResponse genUrlSlug(String examName) {
+        String slug = examName == null ? "" : examName.trim().toLowerCase(Locale.ROOT);
+
+        slug = Normalizer.normalize(slug, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        slug = slug.replace('đ', 'd').replace('Đ', 'd');
+
+        slug = slug.replaceAll("[^a-z0-9\\s-]", " ");
+        slug = slug.trim().replaceAll("\\s+", "-");
+        slug = slug.replaceAll("^-+|-+$", "");
+        if (slug.isEmpty()) slug = "exam";
+
+        String utcStamp = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'")
+                .withZone(ZoneOffset.UTC)
+                .format(Instant.now());
+
+        String urlSlug = slug + "-" + utcStamp;
+
+        return SlugGenResponse.builder()
+                .urlSlug(urlSlug)
+                .build();
     }
 
     private ListeningTask findCurrentOrChildCurrentTask(ListeningTask listeningTask) {
