@@ -2,6 +2,7 @@ package com.fptu.sep490.listeningservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.constants.CookieConstants;
 import com.fptu.sep490.commonlibrary.constants.DataMarkup;
+import com.fptu.sep490.commonlibrary.constants.ErrorCodeMessage;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.listeningservice.constants.Constants;
@@ -58,6 +59,21 @@ public class ExamServiceImpl implements ExamService {
     @Override
     public ExamResponse createExam(ExamRequest request, HttpServletRequest httpServletRequest) throws Exception {
         String userId = helper.getUserIdFromToken(httpServletRequest);
+        String incoming = request.urlSlug();
+        String urlSlug;
+
+        if (incoming == null || incoming.isBlank()) {
+            urlSlug = genUrlSlug(request.examName()).urlSlug();
+        } else if (checkUrlSlug(incoming).isValid()) {
+            urlSlug = incoming;
+        } else {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXISTED_SLUG,
+                    Constants.ErrorCode.EXISTED_SLUG,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
         if (userId == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.UNAUTHORIZED,
@@ -127,7 +143,7 @@ public class ExamServiceImpl implements ExamService {
         ListeningExam listeningExam = ListeningExam.builder()
                 .examName(request.examName())
                 .examDescription(request.examDescription())
-                .urlSlug(request.urlSlug())
+                .urlSlug(urlSlug)
                 .isCurrent(true)
                 .isDeleted(false)
                 .isOriginal(true)
@@ -138,6 +154,7 @@ public class ExamServiceImpl implements ExamService {
                 .part3(part3)
                 .part4(part4)
                 .createdBy(userId)
+                .updatedBy(userId)
                 .build();
 
         ListeningExam savedExam = listeningExamRepository.save(listeningExam);
