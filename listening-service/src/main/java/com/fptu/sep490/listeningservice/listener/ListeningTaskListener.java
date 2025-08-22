@@ -78,11 +78,8 @@ public class ListeningTaskListener {
 
         if (transcriptRequest.getStatusCode() == HttpStatus.OK) {
             var transcriptId = transcriptRequest.getBody().id();
-            var transcriptResponse = assemblyAIClient.getTranscript(transcriptId, assemblyAIApiKey);
 
-            if(transcriptRequest.getStatusCode() == HttpStatus.OK) {
-                String transcript = transcriptResponse.getBody().text();
-
+                String transcript = waitForTranscript(assemblyAIClient, transcriptId, 5);
                 List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(audioFileUpload.getTaskId());
                 for (ListeningTask listeningTask : allVersions) {
                     listeningTask.setTranscription(transcript);
@@ -91,11 +88,7 @@ public class ListeningTaskListener {
 
                 listeningTaskRepository.saveAll(allVersions);
                 log.info("Generated Transcript for task ID: {} with transcript Id {}", audioFileUpload.getTaskId(), transcriptId);
-            } else {
-                log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR));
-                throw new AppException(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR,
-                        Constants.ErrorCode.GET_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
-            }
+
 
         } else {
             log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR));
@@ -106,4 +99,23 @@ public class ListeningTaskListener {
 
     }
 
+
+    public String waitForTranscript(AssemblyAIClient client, UUID id, int maxSeconds) {
+        int slept = 0;
+        int stepMs = 3000;
+        while (slept <= maxSeconds * 1000) {
+            var resp = client.getTranscript(id, assemblyAIApiKey);
+            var body = resp.getBody();
+            if (body == null) throw new RuntimeException("Empty body from AssemblyAI");
+            var status = body.status(); // queued | processing | completed | error
+            if ("completed".equalsIgnoreCase(status)) return body.text();
+            if ("error".equalsIgnoreCase(status)) {
+                throw new AppException(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR,
+                        Constants.ErrorCode.GET_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+            try { Thread.sleep(stepMs); } catch (InterruptedException ignored) {}
+            slept += stepMs;
+        }
+        throw new RuntimeException("Timeout waiting transcript: " + id);
+    }
 }
