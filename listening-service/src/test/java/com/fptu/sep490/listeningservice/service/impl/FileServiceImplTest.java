@@ -67,7 +67,7 @@ public class FileServiceImplTest {
 		Map<String, Object> uploadResult = new HashMap<>();
 		RuntimeException toThrow;
 		TestFileServiceImpl(KafkaTemplate<String, Object> kafka) {
-			super(null, kafka, null);
+			super(null, kafka);
 		}
 		@Override
 		protected Map<?, ?> doUpload(String folderName, MultipartFile multipart) {
