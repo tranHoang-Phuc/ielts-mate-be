@@ -65,6 +65,7 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
         
         transcriptStatus.setStatus(status);
         transcriptStatus.setTranscriptText(webhookRequest.text());
+        log.info("Transcript text {}",webhookRequest.text() );
         transcriptStatus.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         
         if ("completed".equalsIgnoreCase(status)) {
