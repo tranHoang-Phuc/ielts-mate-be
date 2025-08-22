@@ -1,12 +1,13 @@
 package com.fptu.sep490.listeningservice.viewmodel.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ExamResponse(
         @JsonProperty("listening_exam_id")
         UUID listeningExamId,
