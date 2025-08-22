@@ -7,8 +7,10 @@ import com.fptu.sep490.listeningservice.model.ListeningTask;
 import com.fptu.sep490.listeningservice.model.TranscriptStatus;
 import com.fptu.sep490.listeningservice.repository.ListeningTaskRepository;
 import com.fptu.sep490.listeningservice.repository.TranscriptStatusRepository;
+import com.fptu.sep490.listeningservice.repository.client.AssemblyAIClient;
 import com.fptu.sep490.listeningservice.service.TranscriptWebhookService;
 import com.fptu.sep490.listeningservice.viewmodel.request.AssemblyAIWebhookRequest;
+import com.fptu.sep490.listeningservice.viewmodel.response.TranscriptResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
@@ -38,10 +40,15 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
     TranscriptStatusRepository transcriptStatusRepository;
     KafkaTemplate<String, Object> kafkaTemplate;
     RedisTemplate<String, Object> redisTemplate;
+    AssemblyAIClient assemblyAIClient;
     
     @Value("${topic.send-notification}")
     @NonFinal
     String sendNotificationTopic;
+    
+    @Value("${assembly-ai.api-key}")
+    @NonFinal
+    String assemblyAIApiKey;
     
     private static final String TRANSCRIPT_CACHE_PREFIX = "transcript:";
     private static final Duration CACHE_TTL = Duration.ofHours(24);
@@ -82,8 +89,69 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
     
     private void handleCompletedTranscript(AssemblyAIWebhookRequest webhookRequest, TranscriptStatus transcriptStatus) {
         UUID taskId = transcriptStatus.getTaskId();
+        UUID transcriptId = webhookRequest.getTranscriptId();
+        
+        try {
+            log.info("Fetching complete transcript data from AssemblyAI for transcript ID: {}", transcriptId);
+            
+            // Use OpenFeign client to get the complete transcript
+            var response = assemblyAIClient.getTranscript(transcriptId, assemblyAIApiKey);
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                TranscriptResponse transcriptData = response.getBody();
+                
+                log.info("Successfully retrieved transcript data from AssemblyAI. Status: {}, Text length: {}", 
+                        transcriptData.status(), 
+                        transcriptData.text() != null ? transcriptData.text().length() : 0);
+                
+                // Use the data from AssemblyAI API response
+                String transcriptText = transcriptData.text();
+                Double confidence = transcriptData.confidence();
+                Double audioDuration = transcriptData.audioDuration();
+                
+                // Update transcript status with complete data
+                transcriptStatus.setTranscriptText(transcriptText);
+                transcriptStatus.setConfidence(confidence);
+                transcriptStatus.setAudioDuration(audioDuration);
+                
+                // Update all versions of the listening task
+                List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(taskId);
+                for (ListeningTask listeningTask : allVersions) {
+                    listeningTask.setTranscription(transcriptText);
+                }
+                listeningTaskRepository.saveAll(allVersions);
+                
+                // Send success notification
+                sendNotification(transcriptStatus.getCreatedBy(), "success", 
+                        "Your audio transcription has been completed successfully.");
+                
+                log.info("Successfully processed completed transcript for task ID: {} with {} characters", 
+                        taskId, transcriptText != null ? transcriptText.length() : 0);
+                
+            } else {
+                log.error("Failed to fetch transcript from AssemblyAI. Status: {}, Body: {}", 
+                        response.getStatusCode(), response.getBody());
+                
+                // Fallback to webhook data if API call fails
+                handleCompletedTranscriptFallback(webhookRequest, transcriptStatus, taskId);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error fetching transcript from AssemblyAI for transcript ID: {}", transcriptId, e);
+            
+            // Fallback to webhook data if API call fails
+            handleCompletedTranscriptFallback(webhookRequest, transcriptStatus, taskId);
+        }
+    }
+    
+    private void handleCompletedTranscriptFallback(AssemblyAIWebhookRequest webhookRequest, 
+                                                   TranscriptStatus transcriptStatus, 
+                                                   UUID taskId) {
+        log.warn("Using fallback method with webhook data for transcript ID: {}", webhookRequest.getTranscriptId());
+        
         String transcriptText = webhookRequest.text();
         
+        // Update transcript status with webhook data
         transcriptStatus.setTranscriptText(transcriptText);
         transcriptStatus.setConfidence(webhookRequest.confidence());
         transcriptStatus.setAudioDuration(webhookRequest.audioDuration());
@@ -99,7 +167,7 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
         sendNotification(transcriptStatus.getCreatedBy(), "success", 
                 "Your audio transcription has been completed successfully.");
         
-        log.info("Successfully processed completed transcript for task ID: {}", taskId);
+        log.info("Successfully processed completed transcript using fallback for task ID: {}", taskId);
     }
     
     private void handleErrorTranscript(AssemblyAIWebhookRequest webhookRequest, TranscriptStatus transcriptStatus) {
