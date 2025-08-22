@@ -65,37 +65,37 @@ public class ListeningTaskListener {
 
     @KafkaListener(topics = "${topic.gen-transcript}", groupId = "${spring.kafka.consumer.group-id}")
     public void handleGenerateTranscript(AudioFileUpload audioFileUpload) {
-        String publicUrl = audioFileUpload.getPublicUrl();
-
-        GenTranscriptRequest requestBody = GenTranscriptRequest.builder()
-                .audioUrl(publicUrl)
-                .languageCode(Constants.AssemblyAI.LANGUAGE_CODE_EN)
-                .speakerLabels(Constants.AssemblyAI.SPEAKER_LABELS)
-                .build();
-
-        // send transcriptRequest
-        var transcriptRequest = assemblyAIClient.createGenTranscriptRequest(requestBody, assemblyAIApiKey);
-
-        if (transcriptRequest.getStatusCode() == HttpStatus.OK) {
-            var transcriptId = transcriptRequest.getBody().id();
-
-                String transcript = waitForTranscript(assemblyAIClient, transcriptId, 5);
-                List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(audioFileUpload.getTaskId());
-                for (ListeningTask listeningTask : allVersions) {
-                    listeningTask.setTranscription(transcript);
-                    log.info("transcript data: {}", transcript);
-                }
-
-                listeningTaskRepository.saveAll(allVersions);
-                log.info("Generated Transcript for task ID: {} with transcript Id {}", audioFileUpload.getTaskId(), transcriptId);
-
-
-        } else {
-            log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR));
-
-            throw new AppException(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR,
-                    Constants.ErrorCode.CREATE_GEN_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
+//        String publicUrl = audioFileUpload.getPublicUrl();
+//
+//        GenTranscriptRequest requestBody = GenTranscriptRequest.builder()
+//                .audioUrl(publicUrl)
+//                .languageCode(Constants.AssemblyAI.LANGUAGE_CODE_EN)
+//                .speakerLabels(Constants.AssemblyAI.SPEAKER_LABELS)
+//                .build();
+//
+//        // send transcriptRequest
+//        var transcriptRequest = assemblyAIClient.createGenTranscriptRequest(requestBody, assemblyAIApiKey);
+//
+//        if (transcriptRequest.getStatusCode() == HttpStatus.OK) {
+//            var transcriptId = transcriptRequest.getBody().id();
+//
+//                String transcript = waitForTranscript(assemblyAIClient, transcriptId, 5);
+//                List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(audioFileUpload.getTaskId());
+//                for (ListeningTask listeningTask : allVersions) {
+//                    listeningTask.setTranscription(transcript);
+//                    log.info("transcript data: {}", transcript);
+//                }
+//
+//                listeningTaskRepository.saveAll(allVersions);
+//                log.info("Generated Transcript for task ID: {} with transcript Id {}", audioFileUpload.getTaskId(), transcriptId);
+//
+//
+//        } else {
+//            log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR));
+//
+//            throw new AppException(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR,
+//                    Constants.ErrorCode.CREATE_GEN_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+//        }
 
     }
 
