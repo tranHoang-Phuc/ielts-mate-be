@@ -1,6 +1,6 @@
 package com.fptu.sep490.listeningservice.viewmodel.response;
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record TranscriptResponse(
         @JsonProperty("id")
         UUID id,
@@ -38,16 +39,22 @@ public record TranscriptResponse(
         Double audioDuration,
 
         @JsonProperty("punctuate")
-        boolean punctuate,
+        Boolean punctuate,
 
         @JsonProperty("format_text")
-        boolean formatText,
+        Boolean formatText,
 
         @JsonProperty("dual_channel")
-        boolean dualChannel,
+        Boolean dualChannel,
 
         @JsonProperty("speaker_labels")
-        boolean speakerLabels,
+        Boolean speakerLabels,
+
+        @JsonProperty("words")
+        List<WordResponse> words,
+
+        @JsonProperty("utterances")
+        List<UtteranceResponse> utterances,
 
         @JsonProperty("topics")
         List<String> topics,
@@ -62,6 +69,57 @@ public record TranscriptResponse(
         Integer projectId,
 
         @JsonProperty("token_id")
-        Integer tokenId
-) {}
+        Integer tokenId,
+
+        // Additional fields that might be present
+        @JsonProperty("error")
+        String error,
+
+        @JsonProperty("webhook_url")
+        String webhookUrl,
+
+        @JsonProperty("webhook_status_code")
+        Integer webhookStatusCode
+) {
+    @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record WordResponse(
+            @JsonProperty("text")
+            String text,
+
+            @JsonProperty("start")
+            Integer start,
+
+            @JsonProperty("end")
+            Integer end,
+
+            @JsonProperty("confidence")
+            Double confidence,
+
+            @JsonProperty("speaker")
+            String speaker
+    ) {}
+
+    @Builder
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record UtteranceResponse(
+            @JsonProperty("speaker")
+            String speaker,
+
+            @JsonProperty("text")
+            String text,
+
+            @JsonProperty("confidence")
+            Double confidence,
+
+            @JsonProperty("start")
+            Integer start,
+
+            @JsonProperty("end")
+            Integer end,
+
+            @JsonProperty("words")
+            List<WordResponse> words
+    ) {}
+}
 
