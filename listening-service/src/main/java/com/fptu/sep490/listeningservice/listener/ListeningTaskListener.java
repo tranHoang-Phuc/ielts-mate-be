@@ -1,11 +1,14 @@
 package com.fptu.sep490.listeningservice.listener;
 
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.event.AudioFileUpload;
 import com.fptu.sep490.event.SseEvent;
 import com.fptu.sep490.event.UpdateTaskEvent;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.model.ListeningTask;
 import com.fptu.sep490.listeningservice.repository.ListeningTaskRepository;
+import com.fptu.sep490.listeningservice.repository.client.AssemblyAIClient;
+import com.fptu.sep490.listeningservice.viewmodel.request.GenTranscriptRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,6 +20,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -26,10 +30,17 @@ import java.util.UUID;
 public class ListeningTaskListener {
     ListeningTaskRepository listeningTaskRepository;
     KafkaTemplate<String, Object> kafkaTemplate;
+    AssemblyAIClient assemblyAIClient;
 
     @Value("${topic.send-notification}")
     @NonFinal
     String sendNotificationTopic;
+
+    @Value("${assembly-ai.api-key}")
+    @NonFinal
+    String assemblyAIApiKey;
+
+
 
     @KafkaListener(topics = "${topic.update-listening-audio}", groupId = "${spring.kafka.consumer.group-id}")
     public void handleUpdateListeningAudio(UpdateTaskEvent message) {
@@ -50,4 +61,43 @@ public class ListeningTaskListener {
                 .build();
         kafkaTemplate.send(sendNotificationTopic, sseEvent);
     }
+
+    @KafkaListener(topics = "${topic.gen-transcript}", groupId = "${spring.kafka.consumer.group-id}")
+    public void handleGenerateTranscript(AudioFileUpload audioFileUpload) {
+        String publicUrl = audioFileUpload.getPublicUrl();
+
+        GenTranscriptRequest requestBody = GenTranscriptRequest.builder()
+                .audioUrl(publicUrl)
+                .languageCode(Constants.AssemblyAI.LANGUAGE_CODE_EN)
+                .speakerLabels(Constants.AssemblyAI.SPEAKER_LABELS)
+                .build();
+
+        // send transcriptRequest
+        var transcriptRequest = assemblyAIClient.createGenTranscriptRequest(requestBody, assemblyAIApiKey);
+
+        if (transcriptRequest.getStatusCode() == HttpStatus.OK) {
+            var transcriptId = transcriptRequest.getBody().id();
+            var transcriptResponse = assemblyAIClient.getTranscript(transcriptId, assemblyAIApiKey);
+
+            if(transcriptRequest.getStatusCode() == HttpStatus.OK) {
+                String transcript = transcriptResponse.getBody().text();
+
+                List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(audioFileUpload.getTaskId());
+                for (ListeningTask listeningTask : allVersions) {
+                    listeningTask.setTranscription(transcript);
+                }
+
+                listeningTaskRepository.saveAll(allVersions);
+            } else {
+                throw new AppException(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR,
+                        Constants.ErrorCode.GET_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            }
+
+        } else {
+            throw new AppException(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR,
+                    Constants.ErrorCode.CREATE_GEN_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
+    }
+
 }
