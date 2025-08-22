@@ -49,7 +49,7 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
     @Override
     @Transactional
     public void processTranscriptWebhook(AssemblyAIWebhookRequest webhookRequest) {
-        UUID transcriptId = webhookRequest.transcriptId();
+        UUID transcriptId = webhookRequest.getTranscriptId(); // Use the helper method
         String status = webhookRequest.status();
         
         log.info("Processing webhook for transcript ID: {} with status: {}", transcriptId, status);
@@ -65,7 +65,7 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
         
         transcriptStatus.setStatus(status);
         transcriptStatus.setTranscriptText(webhookRequest.text());
-        log.info("Transcript text {}",webhookRequest.text() );
+        log.info("Transcript text {}",webhookRequest.text());
         transcriptStatus.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         
         if ("completed".equalsIgnoreCase(status)) {
@@ -110,7 +110,7 @@ public class TranscriptWebhookServiceImpl implements TranscriptWebhookService {
                 "There was an error processing your audio transcription: " + webhookRequest.error());
         
         log.error("Transcript processing failed for ID: {} with error: {}", 
-                webhookRequest.transcriptId(), webhookRequest.error());
+                webhookRequest.getTranscriptId(), webhookRequest.error());
     }
     
     private void updateTranscriptCache(UUID transcriptId, AssemblyAIWebhookRequest webhookRequest) {
