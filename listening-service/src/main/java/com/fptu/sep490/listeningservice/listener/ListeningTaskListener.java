@@ -1,6 +1,7 @@
 package com.fptu.sep490.listeningservice.listener;
 
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
+import com.fptu.sep490.commonlibrary.utils.MessagesUtils;
 import com.fptu.sep490.event.AudioFileUpload;
 import com.fptu.sep490.event.SseEvent;
 import com.fptu.sep490.event.UpdateTaskEvent;
@@ -88,12 +89,16 @@ public class ListeningTaskListener {
                 }
 
                 listeningTaskRepository.saveAll(allVersions);
+                log.info("Generated Transcript for task ID: {}", audioFileUpload.getTaskId());
             } else {
+                log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR));
                 throw new AppException(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR,
                         Constants.ErrorCode.GET_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
             }
 
         } else {
+            log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR));
+
             throw new AppException(Constants.ErrorCodeMessage.CREATE_GEN_TRANSCRIPT_ERROR,
                     Constants.ErrorCode.CREATE_GEN_TRANSCRIPT_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
