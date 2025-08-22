@@ -2,7 +2,7 @@ package com.fptu.sep490.identityservice.constants;
 
 public class Constants {
     public final class Duration{
-        public static final Long PROFILE = 10L * 60;
+        public static final Long PROFILE = 10L * 60 * 24;
     }
 
     public final class ErrorCodeMessage {

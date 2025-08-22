@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="be4871b8-539d-4dae-89e9-e7264f93888f" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="be4871b8-539d-4dae-89e9-e7264f93888f" name="Changes" comment="fix: change nginx config" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -66,7 +63,9 @@
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "prod",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "D:/FPT/Semester 9/SEP490/gcp/ielts-mate-be/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response",
     "node.js.detected.package.eslint": "true",
@@ -97,6 +96,20 @@
       <module name="ielts-mate-be" />
       <option name="filePath" />
       <method v="2" />
+    </configuration>
+    <configuration name="ApiGatewayApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="api-gateway" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.apigateway.ApiGatewayApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="DiscoveryServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="discovery-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="fptu.sep490.registryservice.DiscoveryServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
     </configuration>
     <configuration name="FileServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="file-service" />
@@ -142,6 +155,8 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Spring Boot.ApiGatewayApplication" />
+      <item itemvalue="Spring Boot.DiscoveryServiceApplication" />
       <item itemvalue="Spring Boot.FileServiceApplication" />
       <item itemvalue="Spring Boot.IdentityServiceApplication" />
       <item itemvalue="Spring Boot.ListeningServiceApplication" />
@@ -211,7 +226,7 @@
       <updated>1755007899499</updated>
     </task>
     <task active="true" id="Default" summary="Default task">
-      <changelist id="1cd302bc-8380-431d-a63c-09878f90e8ce" name="Changes" comment="feature: add unit test" />
+      <changelist id="be4871b8-539d-4dae-89e9-e7264f93888f" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
       <created>1755010637617</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -224,6 +239,7 @@
       <workItem from="1755499699763" duration="577000" />
       <workItem from="1755781575634" duration="3779000" />
       <workItem from="1755848360756" duration="70000" />
+      <workItem from="1755848469954" duration="299000" />
     </task>
     <task id="LOCAL-00007" summary="feature: view result reading attempt">
       <option name="closed" value="true" />
@@ -257,7 +273,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755510074203</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="fix: change nginx config">
+      <option name="closed" value="true" />
+      <created>1755848739604</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1755848739604</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +290,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fix: update passage" />
     <MESSAGE value="fix: update passage timezone" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: update passage timezone" />
+    <MESSAGE value="fix: change nginx config" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: change nginx config" />
   </component>
 </project>

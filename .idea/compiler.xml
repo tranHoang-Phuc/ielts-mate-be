@@ -21,8 +21,8 @@
         <module name="listening-service" />
         <module name="reading-service" />
         <module name="common-library" />
-        <module name="identity-service" />
         <module name="file-service" />
+        <module name="identity-service" />
         <module name="notification-service" />
       </profile>
     </annotationProcessing>
