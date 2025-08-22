@@ -389,15 +389,15 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         lastestVersion.forEach((key, value) -> {
             if(value.getParent() != null) {
                 try {
-                    var createdByProfile = getUserProfileById(value.getCreatedBy());
+                    var createdByProfile = getUserProfileById(value.getParent().getCreatedBy());
                     var updatedByProfile = getUserProfileById(value.getUpdatedBy());
                     ListeningTaskGetResponse data = ListeningTaskGetResponse.builder()
                             .taskId(value.getParent().getTaskId())
-                            .title(value.getParent().getTitle())
+                            .title(value.getTitle())
                             .ieltsType(value.getIeltsType().ordinal())
                             .partNumber(value.getPartNumber().ordinal())
                             .status(value.getStatus().ordinal())
-                            .createdAt(value.getCreatedAt().toString())
+                            .createdAt(value.getParent().getCreatedAt().toString())
                             .updatedAt(value.getUpdatedAt().toString())
                             .createdBy(UserInformationResponse.builder()
                                     .userId(createdByProfile.id())
