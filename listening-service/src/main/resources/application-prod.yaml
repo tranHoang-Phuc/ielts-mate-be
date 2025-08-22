@@ -75,11 +75,17 @@ topic:
   update-listening-audio: update-listening-audio-topic
   send-notification: send-notification-topic
   topic-master: topic-master
+  gen-transcript: gen-transcript
+
 
 cloudinary:
   cloud-name: ${CLOUDINARY_NAME}
   api-key: ${CLOUDINARY_KEY}
   api-secret: ${CLOUDINARY_SECRET}
+
+assembly-ai:
+  api-key: ${ASSEMBLY_AI_API_KEY}
+  url: ${ASSEMBLY_AI_URL}
 
 eureka:
   client:

@@ -45,7 +45,6 @@ public class FileListener {
                 .fileId(file.getFileId())
                 .taskId(audioFileUpload.getTaskId())
                 .build();
-
         kafkaTemplate.send(updateListeningAudioTopic, event);
     }
 }

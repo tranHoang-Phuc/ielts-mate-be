@@ -202,7 +202,24 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         ReadingExam newReadingExam = new ReadingExam();
         newReadingExam.setExamName(readingExamCreationRequest.readingExamName());
         newReadingExam.setExamDescription(readingExamCreationRequest.readingExamDescription());
-        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
+        String urlSlug = (readingExamCreationRequest.urlSlug() != null
+                && !readingExamCreationRequest.urlSlug().isEmpty())
+                ? readingExamCreationRequest.urlSlug()
+                : readingExamCreationRequest.readingExamName()
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-")
+                + "-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"));
+
+        if (readingExamRepository.getByUrlSlug(urlSlug).isPresent()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.INVALID_INPUT,
+                    Constants.ErrorCode.INVALID_INPUT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        readingExam.setUrlSlug(urlSlug);
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setVersion(currentReadingExam.getVersion()+1);
         newReadingExam.setStatus(readingExamCreationRequest.status());

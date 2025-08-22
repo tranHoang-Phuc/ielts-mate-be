@@ -31,8 +31,10 @@ import java.util.UUID;
 public class FileServiceImpl implements FileService {
     Cloudinary cloudinary;
     KafkaTemplate<String, Object> kafkaTemplate;
-    ListeningTaskRepository listeningTaskRepository;
 
+    @Value("${topic.gen-transcript}")
+    @NonFinal
+    String genTranscriptTopic;
 
     @Value("${topic.upload-audio}")
     @NonFinal
@@ -89,9 +91,8 @@ public class FileServiceImpl implements FileService {
                 .folderName(folderName)
                 .bytes(bytes)
                 .build();
-
+        kafkaTemplate.send(genTranscriptTopic, audioFileUpload);
         kafkaTemplate.send(uploadAudioTopic, audioFileUpload);
-
     }
 }
 

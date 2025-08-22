@@ -33,6 +33,8 @@ public class Constants {
 
         public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
         public static final String EXISTED_SLUG = "EXISTED_SLUG";
+        public static final String GET_TRANSCRIPT_ERROR = "GET_TRANSCRIPT_ERROR";
+        public static final String CREATE_GEN_TRANSCRIPT_ERROR = "CREATE_GEN_TRANSCRIPT_ERROR";
     }
 
     public final class RedisKey {
@@ -78,5 +80,13 @@ public class Constants {
         public static final String INTERNAL_SERVER_ERROR = "400999";
 
         public static final String EXISTED_SLUG = "400028";
+        public static final String GET_TRANSCRIPT_ERROR = "400029";
+        public static final String CREATE_GEN_TRANSCRIPT_ERROR = "400030";
+
+    }
+
+    public final class AssemblyAI {
+        public static final String LANGUAGE_CODE_EN = "en";
+        public static final boolean SPEAKER_LABELS = true;
     }
 }
