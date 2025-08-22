@@ -42,7 +42,7 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
     SELECT le FROM ListeningExam le
     WHERE le.isDeleted = false
     AND le.isCurrent = true
-    AND le.status = 0
+    AND le.status = 1
     AND (
         :keyword IS NULL OR :keyword = '' OR
         LOWER(le.examName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR

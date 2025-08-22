@@ -703,8 +703,7 @@ public class ExamServiceImpl implements ExamService {
                         .partNumber(currentPart1.getPartNumber().ordinal())
                         .instruction(currentPart1.getInstruction())
                         .title(currentPart1.getTitle())
-                        .audioFileId(currentPart1.getAudioFileId())
-                        .transcription(currentPart1.getTranscription())
+
                         .build(),
 
                 ListeningTaskResponse.builder()
@@ -713,8 +712,7 @@ public class ExamServiceImpl implements ExamService {
                         .partNumber(currentPart2.getPartNumber().ordinal())
                         .instruction(currentPart2.getInstruction())
                         .title(currentPart2.getTitle())
-                        .audioFileId(currentPart2.getAudioFileId())
-                        .transcription(currentPart2.getTranscription())
+
                         .build(),
 
                 ListeningTaskResponse.builder()
@@ -723,8 +721,7 @@ public class ExamServiceImpl implements ExamService {
                         .partNumber(currentPart3.getPartNumber().ordinal())
                         .instruction(currentPart3.getInstruction())
                         .title(currentPart3.getTitle())
-                        .audioFileId(currentPart3.getAudioFileId())
-                        .transcription(currentPart3.getTranscription())
+
                         .build(),
 
                 ListeningTaskResponse.builder()
@@ -733,8 +730,7 @@ public class ExamServiceImpl implements ExamService {
                         .partNumber(currentPart4.getPartNumber().ordinal())
                         .instruction(currentPart4.getInstruction())
                         .title(currentPart4.getTitle())
-                        .audioFileId(currentPart4.getAudioFileId())
-                        .transcription(currentPart4.getTranscription())
+
                         .build(),
 
                 exam.getCreatedBy(),
