@@ -327,7 +327,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         examAttempt = examAttemptRepository.save(examAttempt);
         return SubmittedExamAttemptResponse.builder()
                 .duration(examAttempt.getDuration().longValue())
-                .resultSets(resultSets)
+                .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedExamAttemptResponse.ResultSet::getQuestionIndex)).toList())
                 .build();
 
     }

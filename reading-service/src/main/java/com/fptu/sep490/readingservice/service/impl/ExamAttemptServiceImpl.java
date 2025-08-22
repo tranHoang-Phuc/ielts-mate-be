@@ -203,7 +203,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         reportDataRepository.saveAll(reportData);
         return SubmittedAttemptResponse.builder()
                 .duration(examAttempt.getDuration().longValue())
-                .resultSets(resultSets)
+                .resultSets(resultSets.stream().sorted(Comparator.comparing(SubmittedAttemptResponse.ResultSet::getQuestionIndex)).toList())
                 .build();
 
     }
