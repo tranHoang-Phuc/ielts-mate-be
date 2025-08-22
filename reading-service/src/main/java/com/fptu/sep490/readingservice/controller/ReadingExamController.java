@@ -77,6 +77,34 @@ public class ReadingExamController {
                 .status(HttpStatus.CREATED)
                 .body(body);
     }
+    //check url slug
+    @PostMapping("/check-slug")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Check URL slug",
+            description = "Check if a URL slug is valid or already exists."
+    )
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "URL slug to check",
+            required = true,
+            content = @Content(schema = @Schema(implementation = String.class))
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "URL slug is valid"),
+            @ApiResponse(responseCode = "400", description = "Invalid URL slug format"),
+            @ApiResponse(responseCode = "403", description = "Access denied"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<BaseResponse<SlugStatusResponse>> checkUrlSlug(
+            @RequestParam("urlSlug") String urlSlug
+    ) {
+        SlugStatusResponse data = readingExamService.checkUrlSlug(urlSlug);
+        BaseResponse<SlugStatusResponse> response = BaseResponse.<SlugStatusResponse>builder()
+                .data(data)
+                .message("Url slug valid")
+                .build();
+        return ResponseEntity.ok(response);
+    }
 
     @PutMapping("/{readingExamId}")
     @PreAuthorize("hasRole('CREATOR')")
