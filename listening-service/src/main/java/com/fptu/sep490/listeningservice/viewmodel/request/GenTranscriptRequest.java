@@ -10,6 +10,8 @@ public record GenTranscriptRequest(
         @JsonProperty("language_code")
         String languageCode,
         @JsonProperty("speaker_labels")
-        boolean speakerLabels
+        boolean speakerLabels,
+        @JsonProperty("webhook_url")
+        String webhookUrl
 ) {
 }

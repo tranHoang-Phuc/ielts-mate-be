@@ -28,6 +28,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/webjars/**",
+            "/webhooks/**"
 
 
     };
