@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix build: auto gen transcript">
+    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: add log auto gen">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java" afterDir="false" />
     </list>
@@ -273,7 +273,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755874077706</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="fix: add log auto gen">
+      <option name="closed" value="true" />
+      <created>1755874737339</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1755874737339</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -285,6 +293,7 @@
     <MESSAGE value="fix: change nginx config" />
     <MESSAGE value="feature: auto gen transcript" />
     <MESSAGE value="fix build: auto gen transcript" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix build: auto gen transcript" />
+    <MESSAGE value="fix: add log auto gen" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: add log auto gen" />
   </component>
 </project>

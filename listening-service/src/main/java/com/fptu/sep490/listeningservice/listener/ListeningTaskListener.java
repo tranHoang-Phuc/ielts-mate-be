@@ -86,10 +86,11 @@ public class ListeningTaskListener {
                 List<ListeningTask> allVersions = listeningTaskRepository.findAllVersion(audioFileUpload.getTaskId());
                 for (ListeningTask listeningTask : allVersions) {
                     listeningTask.setTranscription(transcript);
+                    log.info("transcript data: {}", transcript);
                 }
 
                 listeningTaskRepository.saveAll(allVersions);
-                log.info("Generated Transcript for task ID: {}", audioFileUpload.getTaskId());
+                log.info("Generated Transcript for task ID: {} with transcript Id {}", audioFileUpload.getTaskId(), transcriptId);
             } else {
                 log.error(MessagesUtils.getMessage(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR));
                 throw new AppException(Constants.ErrorCodeMessage.GET_TRANSCRIPT_ERROR,
