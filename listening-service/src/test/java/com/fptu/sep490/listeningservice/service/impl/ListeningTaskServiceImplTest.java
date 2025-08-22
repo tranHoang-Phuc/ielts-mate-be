@@ -480,7 +480,7 @@ public class ListeningTaskServiceImplTest {
 		assertEquals(PartNumber.PART_1.ordinal(), res.partNumber());
 		assertEquals("title", res.title());
 		assertEquals("instr", res.instruction());
-		verify(fileService).uploadAsync(eq("listening-tasks"), same(mf), eq(taskId), eq(UUID.fromString(userId)));
+		verify(fileService).uploadAsync(eq("listening-tasks"), same(mf), eq(taskId), eq(UUID.fromString(userId)), false);
 		verify(kafkaTemplate).send(eq("topic.master"), any());
 	}
 
@@ -536,7 +536,7 @@ public class ListeningTaskServiceImplTest {
 		assertEquals("new-title", res.title());
 		assertEquals(PartNumber.PART_3.ordinal(), res.partNumber());
 		assertEquals(IeltsType.ACADEMIC.ordinal(), res.ieltsType());
-		verify(fileService).uploadAsync(eq("listening-tasks"), same(newAudio), any(UUID.class), eq(UUID.fromString(userId)));
+		verify(fileService).uploadAsync(eq("listening-tasks"), same(newAudio), any(UUID.class), eq(UUID.fromString(userId)),false);
 		verify(kafkaTemplate).send(eq("topic.master"), any());
 	}
 
@@ -581,7 +581,7 @@ public class ListeningTaskServiceImplTest {
 		assertEquals(original.getPartNumber().ordinal(), res.partNumber());
 		assertEquals(original.getTitle(), res.title());
 		assertEquals(original.getInstruction(), res.instruction());
-		verify(fileService, never()).uploadAsync(any(), any(), any(), any());
+		verify(fileService, never()).uploadAsync(any(), any(), any(), any(),anyBoolean());
 		verify(kafkaTemplate).send(eq("topic.master"), any());
 	}
 

@@ -67,7 +67,7 @@ public class FileServiceImplTest {
 		Map<String, Object> uploadResult = new HashMap<>();
 		RuntimeException toThrow;
 		TestFileServiceImpl(KafkaTemplate<String, Object> kafka) {
-			super(null, kafka, null);
+			super(null, kafka);
 		}
 		@Override
 		protected Map<?, ?> doUpload(String folderName, MultipartFile multipart) {
@@ -93,7 +93,7 @@ public class FileServiceImplTest {
 		UUID taskId = UUID.randomUUID();
 		UUID clientId = UUID.randomUUID();
 
-		assertDoesNotThrow(() -> service.uploadAsync("folder", multipart, taskId, clientId));
+		assertDoesNotThrow(() -> service.uploadAsync("folder", multipart, taskId, clientId,false));
 
 		assertEquals("topic1", kafka.topic);
 		assertTrue(kafka.payload instanceof AudioFileUpload);
@@ -120,7 +120,7 @@ public class FileServiceImplTest {
 		UUID taskId = UUID.randomUUID();
 		UUID clientId = UUID.randomUUID();
 
-		AppException ex = assertThrows(AppException.class, () -> service.uploadAsync("folder", multipart, taskId, clientId));
+		AppException ex = assertThrows(AppException.class, () -> service.uploadAsync("folder", multipart, taskId, clientId,false));
 		assertEquals(com.fptu.sep490.listeningservice.constants.Constants.ErrorCode.ERROR_WHEN_UPLOAD, ex.getBusinessErrorCode());
 		assertEquals("topic2", kafka.topic);
 		assertTrue(kafka.payload instanceof SseEvent);

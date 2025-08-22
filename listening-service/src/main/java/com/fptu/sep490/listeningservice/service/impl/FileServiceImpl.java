@@ -55,7 +55,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Async("uploadExecutor")
-    public void uploadAsync(String folderName, MultipartFile multipart, UUID taskId, UUID clientId) throws IOException {
+    public void uploadAsync(String folderName, MultipartFile multipart, UUID taskId, UUID clientId, boolean isAuto) throws IOException {
 		Map<?, ?> result;
         try {
 			 result = doUpload(folderName, multipart);

@@ -142,7 +142,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
         ListeningTask saved = listeningTaskRepository.save(listeningTask);
 
-        fileService.uploadAsync("listening-tasks", audio, saved.getTaskId(), UUID.fromString(userId));
+        fileService.uploadAsync("listening-tasks", audio, saved.getTaskId(), UUID.fromString(userId), request.isAutomaticTranscription());
         TopicMasterRequest topicMaterRequest = TopicMasterRequest.builder()
                 .type(TopicType.LISTENING_TYPE)
                 .operation(Operation.CREATE)
@@ -241,7 +241,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         newVersion= listeningTaskRepository.save(newVersion);
         listeningTaskRepository.save(task);
         if(!Objects.isNull(audioFile)) {
-            fileService.uploadAsync("listening-tasks", audioFile, newVersion.getTaskId(), UUID.fromString(userId));
+            fileService.uploadAsync("listening-tasks", audioFile, newVersion.getTaskId(), UUID.fromString(userId), false);
         } else {
             newVersion.setAudioFileId(task.getAudioFileId());
         }
