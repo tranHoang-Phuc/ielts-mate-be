@@ -60,7 +60,7 @@ public class ConfigServiceImpl implements ConfigService {
     @Override
     public StreakConfig getOrAddStreakConfig(StreakEvent streakEvent) throws JsonProcessingException {
         LocalDate today = LocalDate.now();
-        var streakConfig = configRepository.getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId())
+        var streakConfig = configRepository.getConfigByKeyAndAccountId(Constants.Config.STREAK_CONFIG, streakEvent.accountId())
                 .orElseGet(() -> {
                     StreakConfig config = StreakConfig.builder()
                             .startDate(today)
@@ -70,7 +70,7 @@ public class ConfigServiceImpl implements ConfigService {
 
                     try {
                         UserConfig userConfig = UserConfig.builder()
-                                .configName(Constants.Config.TARGET_CONFIG)
+                                .configName(Constants.Config.STREAK_CONFIG)
                                 .accountId(streakEvent.accountId())
                                 .description("Study Streak")
                                 .value(objectMapper.writeValueAsString(config))
@@ -102,7 +102,7 @@ public class ConfigServiceImpl implements ConfigService {
                 config.setLastUpdated(today);
             }
         }
-        UserConfig userConfig = configRepository.findByConfigNameAndAccountId(Constants.Config.TARGET_CONFIG, streakEvent.accountId());
+        UserConfig userConfig = configRepository.findByConfigNameAndAccountId(Constants.Config.STREAK_CONFIG, streakEvent.accountId());
         userConfig.setValue(objectMapper.writeValueAsString(config));
         configRepository.save(userConfig);
         if (config.getCurrentStreak() == Constants.Streak.TPL_3 ||
@@ -126,7 +126,7 @@ public class ConfigServiceImpl implements ConfigService {
 
         // Lấy dữ liệu config từ DB (kiểu String JSON)
         String streakConfigJson = configRepository
-                .getConfigByKeyAndAccountId(Constants.Config.TARGET_CONFIG, UUID.fromString(userId))
+                .getConfigByKeyAndAccountId(Constants.Config.STREAK_CONFIG, UUID.fromString(userId))
                 .orElse(null);
 
         // Nếu không có config -> trả default
