@@ -6,6 +6,7 @@ import jakarta.annotation.security.PermitAll;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RequestMapping("/sse")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class SseController {
     SseService sseService;
 
@@ -25,10 +27,17 @@ public class SseController {
     )
     @PermitAll
     public SseEmitter stream(@PathVariable("user-id") UUID clientId) {
+        log.info("SSE subscription request received for client: {}", clientId);
         return sseService.subscribe(clientId);
     }
+    
+    @GetMapping("/health")
+    @PermitAll
+    public String health() {
+        return "SSE service is running";
+    }
 
-    @GetMapping("abc")
+    @GetMapping("send")
     @PermitAll
     public void testSendEvent() {
         sseService.sendMessage(UUID.fromString("e2cf7176-42a3-4d32-948b-1714bbe1a0b4"), "aaaa", "b");
