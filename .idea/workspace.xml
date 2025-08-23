@@ -6,7 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/TranscriptResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/TranscriptResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/resources/templates/reminder.html" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/resources/templates/reminder.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,7 +25,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="prod" />
+        <entry key="$PROJECT_DIR$" value="local" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -59,13 +59,30 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "prod",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0"
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.31034482",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="KtorApplicationConfigurationType" />
+        <option value="MicronautRunConfigurationType" />
+        <option value="QuarkusRunConfigurationType" />
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
   <component name="RunManager" selected="Spring Boot.FileServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="ielts-mate-be" />
@@ -149,6 +166,14 @@
       <item itemvalue="Spring Boot.ReadingServiceApplication" />
     </list>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="StructureViewState">
     <option name="selectedTab" value="Logical" />
   </component>
@@ -202,7 +227,7 @@
       <updated>1755007899499</updated>
     </task>
     <task active="true" id="Default" summary="Default task">
-      <changelist id="be4871b8-539d-4dae-89e9-e7264f93888f" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
+      <changelist id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java" />
       <created>1755010637617</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
@@ -216,6 +241,7 @@
       <workItem from="1755781575634" duration="3779000" />
       <workItem from="1755848360756" duration="70000" />
       <workItem from="1755848469954" duration="299000" />
+      <workItem from="1755907514466" duration="631000" />
     </task>
     <task id="LOCAL-00007" summary="feature: view result reading attempt">
       <option name="closed" value="true" />
@@ -337,7 +363,15 @@
       <option name="project" value="LOCAL" />
       <updated>1755885953962</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java">
+      <option name="closed" value="true" />
+      <created>1755887673238</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1755887673238</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
