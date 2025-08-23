@@ -133,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(responseToken.accessToken())
                     .expiresIn(responseToken.expiresIn())
                     .refreshToken(responseToken.refreshToken())
-                    .refreshToken(responseToken.refreshToken())
+                    .refreshExpiresIn(responseToken.refreshExpiresIn())
                     .tokenType(responseToken.tokenType())
                     .notBeforePolicy(responseToken.notBeforePolicy())
                     .sessionState(responseToken.sessionState())
@@ -524,19 +524,34 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserProfileMappingRoles getUserProfile(String accessToken) throws JsonProcessingException {
         String username = getUsernameFromToken(accessToken);
-        UserProfileMappingRoles profileCache = redisService.getValue(Constants.RedisKey.PROFILE + username, UserProfileMappingRoles.class);
-        if(profileCache != null) {
-            return profileCache;
+        String cacheKey = Constants.RedisKey.PROFILE + username;
+        
+        // Try to get from cache with error handling
+        UserProfileMappingRoles profileCache = null;
+        try {
+            profileCache = redisService.getValue(cacheKey, UserProfileMappingRoles.class);
+            if (profileCache != null) {
+                log.debug("Retrieved user profile from cache for username: {}", username);
+                return profileCache;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve user profile from Redis cache for username: {}. Error: {}", username, e.getMessage());
+            // Continue to fetch from Keycloak - Redis failure should not block the request
         }
+        
+        // Fetch from Keycloak if cache miss or cache error
+        log.debug("Fetching user profile from Keycloak for username: {}", username);
         String clientToken = getCachedClientToken();
         List<UserAccessInfo> userAccessInfos = keyCloakUserClient.getUserByEmail(realm, "Bearer " + clientToken, username);
         if (userAccessInfos.isEmpty()) {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND, username);
         }
+        
         UserAccessInfo userAccessInfo = userAccessInfos.getFirst();
         var defaultRoles = keyCloakUserClient.getDefaultRole(realm, "Bearer " + clientToken);
         var userRoles = keyCloakUserClient.getUserRoleMappings(realm, "Bearer " + clientToken, userAccessInfo.id());
         defaultRoles.addAll(userRoles.realmMappings());
+        
         var response = UserProfileMappingRoles.builder()
                 .id(userAccessInfo.id())
                 .email(userAccessInfo.email())
@@ -544,9 +559,18 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(userAccessInfo.lastName())
                 .roles(defaultRoles.stream().map(RoleMappingResponse::name).toList())
                 .build();
-       redisService.saveValue(Constants.RedisKey.PROFILE + username, response);
-       redisService.setTTL(Constants.RedisKey.PROFILE + username, Duration.ofSeconds(Constants.Duration.PROFILE));
-       return response;
+        
+        // Try to save to cache with error handling - don't let cache failure break the response
+        try {
+            redisService.saveValue(cacheKey, response);
+            redisService.setTTL(cacheKey, Duration.ofSeconds(Constants.Duration.PROFILE));
+            log.debug("Saved user profile to cache for username: {}", username);
+        } catch (Exception e) {
+            log.warn("Failed to save user profile to Redis cache for username: {}. Error: {}", username, e.getMessage());
+            // Don't throw exception here - the user profile was successfully fetched from Keycloak
+        }
+        
+        return response;
     }
 
     public boolean isValidCheckedToken(String token, String expectedAction, String expectedPurpose) {
@@ -713,10 +737,20 @@ public class AuthServiceImpl implements AuthService {
     public String getCachedClientToken() throws JsonProcessingException {
         final String cacheKey = Constants.RedisKey.KEY_CLOAK_CLIENT_TOKEN;
 
-        String cachedToken = redisService.getValue(cacheKey, String.class);
-        if (cachedToken != null) {
-            return cachedToken;
+        // Try to get cached token with error handling
+        try {
+            String cachedToken = redisService.getValue(cacheKey, String.class);
+            if (cachedToken != null) {
+                log.debug("Retrieved client token from cache");
+                return cachedToken;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve client token from Redis cache. Error: {}. Fetching new token from Keycloak", e.getMessage());
+            // Continue to fetch new token from Keycloak - Redis failure should not block the request
         }
+        
+        // Fetch new token from Keycloak
+        log.debug("Fetching new client token from Keycloak");
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "client_credentials");
         form.add("client_id", clientId);
@@ -726,9 +760,16 @@ public class AuthServiceImpl implements AuthService {
         KeyCloakTokenResponse tokenResponse = keyCloakTokenClient.requestToken(form, realm);
         String newToken = tokenResponse.accessToken();
         var expiresIn = tokenResponse.expiresIn();
-        log.debug("Saving key={} with TTL={} and value={}", cacheKey, expiresIn, newToken);
-
-        redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
+        
+        // Try to save to cache with error handling - don't let cache failure break the response
+        try {
+            redisService.saveValue(cacheKey, newToken, Duration.ofSeconds(expiresIn));
+            log.debug("Saved client token to cache with TTL={}", expiresIn);
+        } catch (Exception e) {
+            log.warn("Failed to save client token to Redis cache. Error: {}", e.getMessage());
+            // Don't throw exception here - the token was successfully fetched from Keycloak
+        }
+        
         return newToken;
     }
 }
