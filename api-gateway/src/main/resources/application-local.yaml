@@ -20,7 +20,7 @@ spring:
         - id: notification-sse
           uri: http://localhost:8082
           predicates:
-            - Path=/api/v1/notification/sse/stream/**
+            - Path=/api/v1/notification/sse/**
           filters:
             - StripPrefix=2
             - SetResponseHeader=Cache-Control,no-cache

@@ -29,12 +29,44 @@ public class SseServiceImpl implements SseService {
 
     @Override
     public SseEmitter subscribe(UUID clientId) {
-        SseEmitter emitter = new SseEmitter(0L);
+        // Set timeout to 30 minutes (1800000ms) instead of infinite
+        SseEmitter emitter = new SseEmitter(1800000L);
+        
+        // Remove any existing connection for this client
+        SseEmitter existingEmitter = clientEmitters.get(clientId);
+        if (existingEmitter != null) {
+            try {
+                existingEmitter.complete();
+            } catch (Exception e) {
+                log.warn("Error completing existing emitter for client {}: {}", clientId, e.getMessage());
+            }
+        }
+        
         clientEmitters.put(clientId, emitter);
+        log.info("Client {} subscribed to SSE stream", clientId);
 
-        emitter.onCompletion(() -> clientEmitters.remove(clientId));
-        emitter.onTimeout(()    -> clientEmitters.remove(clientId));
-        emitter.onError((e)    -> clientEmitters.remove(clientId));
+        emitter.onCompletion(() -> {
+            clientEmitters.remove(clientId);
+            log.info("SSE connection completed for client {}", clientId);
+        });
+        emitter.onTimeout(() -> {
+            clientEmitters.remove(clientId);
+            log.info("SSE connection timed out for client {}", clientId);
+        });
+        emitter.onError((e) -> {
+            clientEmitters.remove(clientId);
+            log.error("SSE connection error for client {}: {}", clientId, e.getMessage());
+        });
+
+        // Send initial connection confirmation
+        try {
+            emitter.send(SseEmitter.event()
+                .name("connection")
+                .data("{\"message\":\"Connected to SSE stream\",\"status\":\"connected\"}"));
+        } catch (IOException e) {
+            log.error("Failed to send initial SSE message to client {}: {}", clientId, e.getMessage());
+            clientEmitters.remove(clientId);
+        }
 
         return emitter;
     }
@@ -42,16 +74,28 @@ public class SseServiceImpl implements SseService {
     @Override
     public void sendMessage(UUID clientId, String message, String status) {
         SseEmitter emitter = clientEmitters.get(clientId);
+        if (emitter == null) {
+            log.warn("No SSE connection found for client {}", clientId);
+            return;
+        }
+        
         BaseMessageResponse response = BaseMessageResponse.builder()
                 .message(message)
                 .status(status)
                 .build();
         log.info("Sending message to client {}: {}", clientId, response);
-        if (emitter != null) {
+        
+        try {
+            emitter.send(SseEmitter.event()
+                .name("notification")
+                .data(objectMapper.writeValueAsString(response)));
+        } catch (IOException e) {
+            log.error("Failed to send SSE message to client {}: {}", clientId, e.getMessage());
+            clientEmitters.remove(clientId);
             try {
-                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(response)));
-            } catch (IOException e) {
-                clientEmitters.remove(clientId);
+                emitter.completeWithError(e);
+            } catch (Exception completionError) {
+                log.error("Error completing emitter with error for client {}: {}", clientId, completionError.getMessage());
             }
         }
     }

@@ -45,6 +45,13 @@ server {
         # Disable gzip for SSE
         gzip off;
         
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
         # Add CORS headers for SSE
         add_header 'Access-Control-Allow-Origin' '*' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;

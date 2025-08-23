@@ -26,15 +26,13 @@ spring:
         - id : notification-sse
           uri: ${NOTIFICATION_API}
           predicates:
-            - Path=/api/v1/notification/sse/stream/**
+            - Path=/api/v1/notification/sse/**
           filters:
             - StripPrefix=2
             - SetResponseHeader=Cache-Control,no-cache
             - SetResponseHeader=Content-Type,text/event-stream;charset=UTF-8
             - AddResponseHeader=Connection,keep-alive
             - AddResponseHeader=X-Accel-Buffering,no
-            - AddResponseHeader=Access-Control-Allow-Origin,*
-            - AddResponseHeader=Access-Control-Allow-Credentials,true
 
         - id: identity-service
           uri: ${IDENTITY_API}
