@@ -824,8 +824,8 @@ public class PassageServiceImpl implements PassageService {
                                             .instructionForMatching(question.getInstructionForMatching())
                                             .zoneIndex( question.getZoneIndex())
                                             .choices(choiceAttemptResponses)
-                                            .correctAnswer(question.getCorrectAnswer())
-                                            .correctAnswerForMatching( question.getCorrectAnswerForMatching())
+                                            .correctAnswer(question.getQuestionType() != QuestionType.DRAG_AND_DROP ? question.getCorrectAnswer(): question.getDragItem().getDragItemId().toString())
+                                            .correctAnswerForMatching(question.getCorrectAnswerForMatching())
                                             .explanation( question.getExplanation())
                                             .point( question.getPoint())
                                             .build();
