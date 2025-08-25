@@ -692,31 +692,52 @@ public class AttemptServiceImpl implements AttemptService {
                     .sectionOrder(key.getSectionOrder())
                     .sectionLabel(key.getSectionLabel())
                     .instruction(key.getInstruction())
-                    .questions(value.stream().map(q ->
-                                    ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
-                                            .questionId(q.getQuestionId())
-                                            .questionOrder(q.getQuestionOrder())
-                                            .questionType(q.getQuestionType().ordinal())
-                                            .point(q.getPoint())
-                                            .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
-                                            .instructionForMatching(q.getInstructionForMatching())
-                                            .zoneIndex(q.getZoneIndex())
-                                            .correctAnswer(q.getCorrectAnswer() == null ? null : q.getCorrectAnswer())
-                                            .correctAnswerForMatching(q.getCorrectAnswerForMatching() == null ? null : q.getCorrectAnswerForMatching())
-                                            .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId())
-                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
-                                                    questionChoice.get(q.getQuestionId()).stream()
-                                                            .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse
-                                                                    .QuestionResponse.ChoiceResponse.builder()
-                                                                    .choiceId(c.getChoiceId())
-                                                                    .label(c.getLabel())
-                                                                    .choiceOrder(c.getChoiceOrder())
-                                                                    .content(c.getContent())
-                                                                    .isCorrect(c.isCorrect())
-                                                                    .build()).sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder)).toList() : null)
-                                            .build()
-                            )
-                            .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
+                    .questions(value.stream().map(q -> {
+                                String startTime = null;
+                                String endTime = null;
+
+                                try {
+                                    if (q.getExplanation() != null) {
+                                        JsonNode node = objectMapper.readTree(q.getExplanation());
+                                        startTime = node.has("start_time") ? node.get("start_time").asText() : null;
+                                        endTime = node.has("end_time") ? node.get("end_time").asText() : null;
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                return ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
+                                        .questionId(q.getQuestionId())
+                                        .startTime(startTime)
+                                        .endTime(endTime)
+                                        .questionOrder(q.getQuestionOrder())
+                                        .questionType(q.getQuestionType().ordinal())
+                                        .point(q.getPoint())
+                                        .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
+                                        .instructionForMatching(q.getInstructionForMatching())
+                                        .zoneIndex(q.getZoneIndex())
+                                        .correctAnswer(q.getCorrectAnswer() == null ? null : q.getCorrectAnswer())
+                                        .correctAnswerForMatching(q.getCorrectAnswerForMatching() == null ? null : q.getCorrectAnswerForMatching())
+                                        .dragItemId(q.getDragItem() == null ? null : q.getDragItem().getDragItemId())
+                                        .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
+                                                questionChoice.get(q.getQuestionId()).stream()
+                                                        .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse
+                                                                .QuestionResponse.ChoiceResponse.builder()
+                                                                .choiceId(c.getChoiceId())
+                                                                .label(c.getLabel())
+                                                                .choiceOrder(c.getChoiceOrder())
+                                                                .content(c.getContent())
+                                                                .isCorrect(c.isCorrect())
+                                                                .build())
+                                                        .sorted(Comparator.comparing(
+                                                                ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.ChoiceResponse::choiceOrder))
+                                                        .toList()
+                                                : null)
+                                        .build();
+                            })
+                            .sorted(Comparator.comparing(
+                                    ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder))
+                            .toList())
                     .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
                             ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
                                     .dragItemId(i.getDragItemId())
@@ -724,6 +745,7 @@ public class AttemptServiceImpl implements AttemptService {
                                     .build()
                     ).toList())
                     .build();
+
             questionGroups.add(groupResponse);
         });
 
@@ -751,6 +773,7 @@ public class AttemptServiceImpl implements AttemptService {
                     .build();
             answerChoices.add(answerChoice);
         }
+
         return UserDataAttempt.builder()
                 .attemptId(attempt.getAttemptId())
                 .answers(answerChoices)
@@ -759,6 +782,7 @@ public class AttemptServiceImpl implements AttemptService {
                 .attemptResponse(attemptResponse)
                 .build();
     }
+
 
     private SubmittedAttemptResponse.ResultSet scoreMultipleChoiceQuestion(SavedAnswersRequest answer, Question question) {
         List<Choice> correctAnswers;
