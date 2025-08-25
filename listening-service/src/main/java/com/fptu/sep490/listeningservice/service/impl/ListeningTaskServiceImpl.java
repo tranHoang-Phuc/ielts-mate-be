@@ -12,6 +12,9 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.event.TopicMasterRequest;
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+
 
 import com.fptu.sep490.listeningservice.model.*;
 import com.fptu.sep490.listeningservice.model.enumeration.IeltsType;
@@ -722,34 +725,38 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         List<Question> questions = questionRepository.findAllByIdOrderByQuestionOrder(history.getQuestionIds());
 
         List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse> taskResponses = new ArrayList<>();
-        for (ListeningTask task: tasks) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        for (ListeningTask task : tasks) {
             int partNumber = task.getPartNumber().ordinal();
 
             List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse> questionGroupsList = new ArrayList<>();
             for (QuestionGroup group : questionGroups) {
+                if (group.getListeningTask().getPartNumber().ordinal() == partNumber) {
 
-                if (group.getListeningTask().getPartNumber().ordinal()==partNumber) {
+                    // --- drag items ---
                     List<UpdatedQuestionResponse.DragItemResponse> dragItemResponses = new ArrayList<>();
-                    if (group.getDragItems()!=null && !group.getDragItems().isEmpty()) {
+                    if (group.getDragItems() != null && !group.getDragItems().isEmpty()) {
                         List<UUID> dragItemIds = history.getGroupMapItems().getOrDefault(group.getGroupId(), Collections.emptyList());
                         List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
                         for (DragItem dragItem : dragItems) {
-                            UpdatedQuestionResponse.DragItemResponse dragItemResponse =
+                            dragItemResponses.add(
                                     UpdatedQuestionResponse.DragItemResponse.builder()
                                             .dragItemId(dragItem.getDragItemId().toString())
                                             .content(dragItem.getContent())
-                                            .build();
-                            dragItemResponses.add(dragItemResponse);
+                                            .build()
+                            );
                         }
                     }
 
+                    // --- questions ---
                     List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionAttemptResponses = new ArrayList<>();
                     for (Question question : questions) {
                         if (question.getQuestionGroup() != null && question.getQuestionGroup().getGroupId().equals(group.getGroupId())) {
 
+                            // --- choices ---
                             List<ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse> choiceAttemptResponses = new ArrayList<>();
-
-                            if (question.getQuestionType()== QuestionType.MULTIPLE_CHOICE) {
+                            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
                                 for (UUID choiceId : history.getQuestionMapChoices().getOrDefault(question.getQuestionId(), Collections.emptyList())) {
                                     Choice choice = choiceRepository.findById(choiceId)
                                             .orElseThrow(() -> new AppException(
@@ -757,18 +764,37 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                                     Constants.ErrorCode.CHOICE_NOT_FOUND,
                                                     HttpStatus.NOT_FOUND.value()
                                             ));
-                                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse choiceAttemptResponse =
+                                    choiceAttemptResponses.add(
                                             ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
                                                     .choiceId(choice.getChoiceId())
                                                     .label(choice.getLabel())
                                                     .content(choice.getContent())
                                                     .choiceOrder(choice.getChoiceOrder())
                                                     .isCorrect(choice.isCorrect())
-                                                    .build();
-                                    choiceAttemptResponses.add(choiceAttemptResponse);
+                                                    .build()
+                                    );
                                 }
                             }
-                            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionAttemptResponse =
+
+                            // --- parse explanation only if valid JSON with start_time & end_time ---
+                            String startTime = null;
+                            String endTime = null;
+                            String explanation = question.getExplanation();
+                            try {
+                                if (explanation != null && explanation.trim().startsWith("{")) {
+                                    JsonNode node = mapper.readTree(explanation);
+                                    if (node.has("start_time") && node.has("end_time")) {
+                                        startTime = node.get("start_time").asText();
+                                        endTime = node.get("end_time").asText();
+                                        // don’t keep explanation if it’s just JSON
+                                        explanation = null;
+                                    }
+                                }
+                            } catch (Exception ignored) {
+                                // explanation stays as-is
+                            }
+
+                            questionAttemptResponses.add(
                                     ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
                                             .questionId(question.getQuestionId())
                                             .questionOrder(question.getQuestionOrder())
@@ -777,41 +803,43 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                             .instructionForChoice(question.getInstructionForChoice())
                                             .numberOfCorrectAnswers(question.getNumberOfCorrectAnswers())
                                             .instructionForMatching(question.getInstructionForMatching())
-                                            .zoneIndex( question.getZoneIndex())
+                                            .zoneIndex(question.getZoneIndex())
                                             .choices(choiceAttemptResponses)
-                                            .correctAnswer(question.getQuestionType() != QuestionType.DRAG_AND_DROP?question.getCorrectAnswer(): question.getDragItem().getDragItemId().toString())
-                                            .correctAnswerForMatching( question.getCorrectAnswerForMatching())
-                                            .explanation( question.getExplanation())
-                                            .point( question.getPoint())
-                                            .build();
-
-                            questionAttemptResponses.add(questionAttemptResponse);
+                                            .correctAnswer(question.getCorrectAnswer())
+                                            .correctAnswerForMatching(question.getCorrectAnswerForMatching())
+                                            .explanation(explanation) // only set if not JSON
+                                            .point(question.getPoint())
+                                            .startTime(startTime)     // parsed if JSON
+                                            .endTime(endTime)         // parsed if JSON
+                                            .build()
+                            );
                         }
                     }
 
-                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse currentGroup = ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.builder()
-                            .questionGroupId(group.getGroupId())
-                            .sectionOrder(group.getSectionOrder())
-                            .sectionLabel(group.getSectionLabel())
-                            .instruction(group.getInstruction())
-                            .questions(questionAttemptResponses)
-                            .dragItems(dragItemResponses)
-                            .build();
-
-                    questionGroupsList.add(currentGroup);
+                    questionGroupsList.add(
+                            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse.builder()
+                                    .questionGroupId(group.getGroupId())
+                                    .sectionOrder(group.getSectionOrder())
+                                    .sectionLabel(group.getSectionLabel())
+                                    .instruction(group.getInstruction())
+                                    .questions(questionAttemptResponses)
+                                    .dragItems(dragItemResponses)
+                                    .build()
+                    );
                 }
             }
-            ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse listeningTaskResponse = ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.builder()
-                    .taskId(task.getTaskId())
-                    .title(task.getTitle())
-                    .instruction(task.getInstruction())
-                    .audioFileId(task.getAudioFileId())
-                    .ieltsType(task.getIeltsType().ordinal())
-                    .partNumber(task.getPartNumber().ordinal())
-                    .questionGroups(questionGroupsList)
-                    .build();
 
-            taskResponses.add(listeningTaskResponse);
+            taskResponses.add(
+                    ExamAttemptGetDetail.ListeningExamResponse.ListeningTaskResponse.builder()
+                            .taskId(task.getTaskId())
+                            .title(task.getTitle())
+                            .instruction(task.getInstruction())
+                            .audioFileId(task.getAudioFileId())
+                            .ieltsType(task.getIeltsType().ordinal())
+                            .partNumber(task.getPartNumber().ordinal())
+                            .questionGroups(questionGroupsList)
+                            .build()
+            );
         }
 
         return taskResponses;
