@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
-import com.fptu.sep490.commonlibrary.redis.RedisService;
+
 import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.*;
@@ -14,8 +14,7 @@ import com.fptu.sep490.listeningservice.model.enumeration.Status;
 import com.fptu.sep490.listeningservice.model.json.AttemptVersion;
 import com.fptu.sep490.listeningservice.model.json.QuestionVersion;
 import com.fptu.sep490.listeningservice.repository.*;
-import com.fptu.sep490.listeningservice.repository.client.KeyCloakTokenClient;
-import com.fptu.sep490.listeningservice.repository.client.KeyCloakUserClient;
+
 import com.fptu.sep490.listeningservice.model.specification.AttemptSpecification;
 import com.fptu.sep490.listeningservice.service.AttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.SavedAnswersRequest;
@@ -168,11 +167,14 @@ public class AttemptServiceImpl implements AttemptService {
 
             List<Question> questions = currentGroupIdQuestions.get(key.getGroupId());
             Map<UUID, List<Choice>> questionMapChoices = currentGroupIdMapQuestionIdMapCurrentChoice.get(key.getGroupId());
+            
+            final List<Question> finalQuestions = questions != null ? questions : Collections.emptyList();
+            final Map<UUID, List<Choice>> finalQuestionMapChoices = questionMapChoices != null ? questionMapChoices : Collections.emptyMap();
 
             List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionListResponse = new ArrayList<>();
 
-            questions.forEach(question -> {
-                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+            finalQuestions.forEach(question -> {
+                List<Choice> choices = finalQuestionMapChoices.get(question.getQuestionId());
                 AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionResponse = AttemptResponse.
                         QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
                         .questionId(question.getQuestionId())
@@ -184,7 +186,7 @@ public class AttemptServiceImpl implements AttemptService {
                         .instructionForMatching(question.getInstructionForMatching())
                         .zoneIndex(question.getZoneIndex())
                         .choices(
-                                choices.stream().map(c ->
+                                choices != null ? choices.stream().map(c ->
                                                 AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
                                                         .choiceId(c.getChoiceId())
                                                         .label(c.getLabel())
@@ -193,6 +195,7 @@ public class AttemptServiceImpl implements AttemptService {
                                                         .build()
                                         ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.
                                         QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList()
+                                        : Collections.emptyList()
                         )
                         .build();
                 questionListResponse.add(questionResponse);
@@ -345,10 +348,18 @@ public class AttemptServiceImpl implements AttemptService {
         Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
         Map<UUID, List<Choice>> questionChoice = new HashMap<>();
         groupMappingQuestion.forEach((key, value) ->{
-            var group = questionGroupRepository.findById(key).get();
+            var groupOptional = questionGroupRepository.findById(key);
+            if (groupOptional.isEmpty()) {
+                return;
+            }
+            var group = groupOptional.get();
             List<Question> questions = new ArrayList<>();
             value.forEach(q -> {
-                var question = questionRepository.findById(q.getQuestionId()).get();
+                var questionOptional = questionRepository.findById(q.getQuestionId());
+                if (questionOptional.isEmpty()) {
+                    return;
+                }
+                var question = questionOptional.get();
                 if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
                     List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
                     questionChoice.put(question.getQuestionId(), choices);
@@ -357,8 +368,13 @@ public class AttemptServiceImpl implements AttemptService {
             });
             groupQuestions.put(group, questions);
 
-            List<DragItem> dragItems = dragItemRepository.findAllById(groupMappingDragItem.get(group.getGroupId()));
-            groupDragItems.put(key, dragItems);
+            List<UUID> dragItemIds = groupMappingDragItem.get(group.getGroupId());
+            if (dragItemIds != null) {
+                List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
+                groupDragItems.put(key, dragItems);
+            } else {
+                groupDragItems.put(key, Collections.emptyList());
+            }
         });
 
         List<ListeningTaskGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
@@ -379,7 +395,8 @@ public class AttemptServiceImpl implements AttemptService {
                                             .numberOfCorrectAnswers(q.getNumberOfCorrectAnswers())
                                             .instructionForMatching(q.getInstructionForMatching())
                                             .zoneIndex(q.getZoneIndex())
-                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE ?
+                                            .choices(q.getQuestionType() == QuestionType.MULTIPLE_CHOICE && 
+                                                     questionChoice.get(q.getQuestionId()) != null ?
                                                     questionChoice.get(q.getQuestionId()).stream()
                                                             .map(c -> ListeningTaskGetAllResponse.QuestionGroupResponse
                                                                     .QuestionResponse.ChoiceResponse.builder()
@@ -391,12 +408,13 @@ public class AttemptServiceImpl implements AttemptService {
                                             .build()
                             )
                             .sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder)).toList())
-                    .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
+                    .dragItems(groupDragItems.get(key.getGroupId()) != null ? 
+                              groupDragItems.get(key.getGroupId()).stream().map(i ->
                                     ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
                                             .dragItemId(i.getDragItemId())
                                             .content(i.getContent())
                                             .build()
-                            ).toList())
+                            ).toList() : Collections.emptyList())
                     .build();
             questionGroups.add(groupResponse);
         });
@@ -671,10 +689,18 @@ public class AttemptServiceImpl implements AttemptService {
         Map<UUID, List<DragItem>> groupDragItems = new HashMap<>();
         Map<UUID, List<Choice>> questionChoice = new HashMap<>();
         groupMappingQuestion.forEach((key, value) ->{
-            var group = questionGroupRepository.findById(key).get();
+            var groupOptional = questionGroupRepository.findById(key);
+            if (groupOptional.isEmpty()) {
+                return;
+            }
+            var group = groupOptional.get();
             List<Question> questions = new ArrayList<>();
             value.forEach(q -> {
-                var question = questionRepository.findById(q.getQuestionId()).get();
+                var questionOptional = questionRepository.findById(q.getQuestionId());
+                if (questionOptional.isEmpty()) {
+                    return;
+                }
+                var question = questionOptional.get();
                 if(question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
                     List<Choice> choices = choiceRepository.findAllById(q.getChoiceMapping());
                     questionChoice.put(question.getQuestionId(), choices);
@@ -683,8 +709,13 @@ public class AttemptServiceImpl implements AttemptService {
             });
             groupQuestions.put(group, questions);
 
-            List<DragItem> dragItems = dragItemRepository.findAllById(groupMappingDragItem.get(group.getGroupId()));
-            groupDragItems.put(key, dragItems);
+            List<UUID> dragItemIds = groupMappingDragItem.get(group.getGroupId());
+            if (dragItemIds != null) {
+                List<DragItem> dragItems = dragItemRepository.findAllById(dragItemIds);
+                groupDragItems.put(key, dragItems);
+            } else {
+                groupDragItems.put(key, Collections.emptyList());
+            }
         });
 
         List<ListeningTaskGetAllResponse.QuestionGroupResponse> questionGroups = new ArrayList<>();
@@ -742,12 +773,13 @@ public class AttemptServiceImpl implements AttemptService {
                             .sorted(Comparator.comparing(
                                     ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse::questionOrder))
                             .toList())
-                    .dragItems(groupDragItems.get(key.getGroupId()).stream().map(i ->
+                    .dragItems(groupDragItems.get(key.getGroupId()) != null ? 
+                              groupDragItems.get(key.getGroupId()).stream().map(i ->
                             ListeningTaskGetAllResponse.QuestionGroupResponse.DragItemResponse.builder()
                                     .dragItemId(i.getDragItemId())
                                     .content(i.getContent())
                                     .build()
-                    ).toList())
+                    ).toList() : Collections.emptyList())
                     .build();
 
             questionGroups.add(groupResponse);
