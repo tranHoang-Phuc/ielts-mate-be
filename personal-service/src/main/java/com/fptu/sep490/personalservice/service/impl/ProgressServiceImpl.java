@@ -1,6 +1,7 @@
 package com.fptu.sep490.personalservice.service.impl;
 
 import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.utils.IeltsBandConverter;
 import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
@@ -86,17 +87,7 @@ public class ProgressServiceImpl implements ProgressService {
 
         Double readingBand = r.getAverageBandInTimeFrame();   // Có thể null
         Double listeningBand = l.getAverageBandInTimeFrame(); // Có thể null
-        double sum = 0.0;
-        int count = 0;
-        if (readingBand != null) {
-            sum += readingBand;
-            count++;
-        }
-        if (listeningBand != null) {
-            sum += listeningBand;
-            count++;
-        }
-        Double averageOverallBand = (count > 0) ? sum / count : null;
+        Double averageOverallBand = IeltsBandConverter.convertToOverallBand(readingBand, listeningBand);
         OverviewProgressResponse.BandStats bandStats = OverviewProgressResponse.BandStats.builder()
                 .startDate(startDate)
                 .endDate(endDate)
