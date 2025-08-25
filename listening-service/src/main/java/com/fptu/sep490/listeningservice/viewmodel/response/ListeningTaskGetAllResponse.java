@@ -62,6 +62,10 @@ public record ListeningTaskGetAllResponse(
         public record QuestionResponse(
                 @JsonProperty("question_id")
                 UUID questionId,
+                @JsonProperty("start_time")
+                String startTime,
+                @JsonProperty("end_time")
+                String endTime,
                 @JsonProperty("question_order")
                 int questionOrder,
                 @JsonProperty("question_type")

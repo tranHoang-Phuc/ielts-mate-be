@@ -92,6 +92,10 @@ public record ExamAttemptGetDetail(
                 public record QuestionAttemptResponse(
                         @JsonProperty("question_id")
                         UUID questionId,
+                        @JsonProperty("start_time")
+                        String startTime,
+                        @JsonProperty("end_time")
+                        String endTime,
                         @JsonProperty("question_order")
                         Integer questionOrder,
                         @JsonProperty("question_type")
