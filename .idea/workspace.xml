@@ -87,18 +87,6 @@
         <option value="SpringBootApplicationConfigurationType" />
       </set>
     </option>
-    <option name="hiddenConfigurations">
-      <map>
-        <entry key="SpringBootApplicationConfigurationType">
-          <value>
-            <set>
-              <option value="PersonalServiceApplication" />
-              <option value="ReadingServiceApplication" />
-            </set>
-          </value>
-        </entry>
-      </map>
-    </option>
   </component>
   <component name="RunManager" selected="Spring Boot.ReadingServiceApplication">
     <configuration default="true" type="JetRunConfigurationType">
@@ -395,12 +383,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java</url>
-          <line>441</line>
+          <line>459</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java</url>
-          <line>577</line>
+          <line>595</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
