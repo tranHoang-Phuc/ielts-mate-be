@@ -515,13 +515,14 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(answer.dataFilled() != null ? List.of(answer.dataFilled()) : Collections.emptyList())
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .correctAnswer(question.getCorrectAnswer() != null ? List.of(question.getCorrectAnswer()) : Collections.emptyList())
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getCorrectAnswer().equalsIgnoreCase(answer.dataFilled())) {
+                if (question.getCorrectAnswer() != null && answer.dataFilled() != null && 
+                    question.getCorrectAnswer().equalsIgnoreCase(answer.dataFilled())) {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
@@ -534,13 +535,14 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.MATCHING) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(answer.dataMatched() != null ? List.of(answer.dataMatched()) : Collections.emptyList())
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .correctAnswer(question.getCorrectAnswer() != null ? List.of(question.getCorrectAnswer()) : Collections.emptyList())
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
+                if (question.getCorrectAnswer() != null && answer.dataMatched() != null && 
+                    question.getCorrectAnswer().equalsIgnoreCase(answer.dataMatched())) {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
@@ -552,13 +554,15 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(answer.dataFilled()))
+                        .userAnswer(answer.dragItemId() != null ? List.of(answer.dragItemId().toString()) : Collections.emptyList())
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getDragItem().getContent()))
+                        .correctAnswer(question.getDragItem() != null && question.getDragItem().getContent() != null ? 
+                                      List.of(question.getDragItem().getContent()) : Collections.emptyList())
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getDragItem().getDragItemId().equals(answer.dragItemId())) {
+                if (question.getDragItem() != null && question.getDragItem().getDragItemId() != null && 
+                    answer.dragItemId() != null && question.getDragItem().getDragItemId().equals(answer.dragItemId())) {
                     result.setCorrect(true);
                 }
                 resultSets.add(result);
