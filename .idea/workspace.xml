@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,9 +62,10 @@
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
-    "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.ApiGatewayApplication.executor": "Debug",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.FileServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Debug",
     "Spring Boot.ListeningServiceApplication.executor": "Debug",
     "Spring Boot.ReadingServiceApplication.executor": "Run",
     "git-widget-placeholder": "local",
@@ -91,10 +91,9 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
-              <option value="FileServiceApplication" />
-              <option value="ListeningServiceApplication" />
               <option value="NotificationServiceApplication" />
               <option value="PersonalServiceApplication" />
+              <option value="ReadingServiceApplication" />
             </set>
           </value>
         </entry>

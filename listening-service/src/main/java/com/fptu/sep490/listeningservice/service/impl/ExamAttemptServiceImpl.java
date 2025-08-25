@@ -220,6 +220,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         examAttempt.setDuration(answers.duration());
         List<UUID> questionIds = answers.answers().stream()
                 .map(ExamAttemptAnswersRequest.ExamAnswerRequest::questionId)
+                .filter(Objects::nonNull)
                 .toList();
         List<Question> questions = questionRepository.findQuestionsByIds(questionIds);
         Map<UUID, List<UUID>> groupMapDragItem = new HashMap<>();
@@ -243,13 +244,15 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         // Convert user answers for mapping questions and answers
         Map<UUID, List<String>> userAnswers = answers.answers().stream()
+                .filter(answer -> answer.questionId() != null && answer.selectedAnswers() != null)
                 .collect(Collectors.toMap(
                         ExamAttemptAnswersRequest.ExamAnswerRequest::questionId,
-                        ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers
+                        ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers,
+                        (existing, replacement) -> existing // Handle duplicate keys by keeping the first one
                 ));
         Map<UUID, List<UUID>> questionMapChoice = new HashMap<>();
         for (ExamAttemptAnswersRequest.ExamAnswerRequest answer : answers.answers()) {
-            if(!CollectionUtils.isEmpty(answer.choiceIds())) {
+            if(answer.questionId() != null && !CollectionUtils.isEmpty(answer.choiceIds())) {
                 questionMapChoice.put(answer.questionId(), answer.choiceIds());
             }
         }
