@@ -2,8 +2,10 @@ package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fptu.sep490.commonlibrary.enumeration.IeltsScale;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.DateTimeUtils;
+import com.fptu.sep490.commonlibrary.utils.IeltsBandConverter;
 import com.fptu.sep490.commonlibrary.viewmodel.request.LineChartReq;
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
@@ -430,7 +432,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         LocalDateTime startDate = DateTimeUtils.calculateStartDateFromTimeFrame(body.getTimeFrame());
 
 // 3. Duyệt qua các bài thi và cập nhật lastLearningDate
-        double totalScore = 0.0;
+        int totalScore = 0;
         int numberOfExamsInTimeFrame = 0;
         int numberOfTasksInTimeFrame = 0;
         for (ExamAttempt exam : exams) {
@@ -464,13 +466,15 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         }
 
         overviewProgress.setAverageBandInTimeFrame(
-                numberOfExamsInTimeFrame > 0 ? totalScore / numberOfExamsInTimeFrame : null
+                IeltsBandConverter.convertScoreToBand(totalScore, numberOfExamsInTimeFrame, IeltsScale.READING_AC)
         );
 
         overviewProgress.setNumberOfExamsInTimeFrame(numberOfExamsInTimeFrame);
         overviewProgress.setNumberOfTasksInTimeFrame(numberOfTasksInTimeFrame);
         return overviewProgress;
     }
+
+
 
     @Override
     public List<LineChartData> getBandChart(LineChartReq body, String token) {
