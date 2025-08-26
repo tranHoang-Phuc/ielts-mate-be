@@ -32,10 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -502,23 +499,45 @@ public class QuestionServiceImpl implements QuestionService {
             OrderUpdatedQuestionRequest questionCreationRequest,
             HttpServletRequest request
     ) throws JsonProcessingException {
+
         String userId = helper.getUserIdFromToken(request);
         UserProfileResponse userInformation = helper.getUserProfileById(userId);
+
         QuestionGroup questionGroup = questionGroupRepository.findById(UUID.fromString(groupId))
                 .orElseThrow(() -> new AppException(
                         Constants.ErrorCodeMessage.QUESTION_GROUP_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_GROUP_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
-        List<Question> questions = questionRepository
+
+        // Get all questions in the group (original versions)
+        List<Question> allQuestions = questionRepository
                 .findAllByQuestionGroupOrderByQuestionOrderAsc(questionGroup);
-        if (questions.isEmpty()) {
+
+        if (allQuestions.isEmpty()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
                     Constants.ErrorCode.QUESTION_LIST_EMPTY,
                     HttpStatus.NOT_FOUND.value()
             );
         }
+
+        // Get current versions of all questions
+        List<Question> currentVersionQuestions = questionRepository.findAllCurrentVersion(
+                allQuestions.stream().map(Question::getQuestionId).toList()
+        );
+
+        if (currentVersionQuestions.isEmpty()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.QUESTION_LIST_EMPTY,
+                    Constants.ErrorCode.QUESTION_LIST_EMPTY,
+                    HttpStatus.NOT_FOUND.value()
+            );
+        }
+
+        // Sort current versions by their current order
+        currentVersionQuestions.sort(Comparator.comparingInt(Question::getQuestionOrder));
+
         UUID targetQuestionUuid;
         try {
             targetQuestionUuid = UUID.fromString(questionId);
@@ -529,13 +548,17 @@ public class QuestionServiceImpl implements QuestionService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
+
+        // Find target question in current versions
         Question targetQuestion = null;
-        for (Question q : questions) {
-            if (q.getQuestionId().equals(targetQuestionUuid)) {
+        for (Question q : currentVersionQuestions) {
+            if (q.getQuestionId().equals(targetQuestionUuid) ||
+                    (q.getParent() != null && q.getParent().getQuestionId().equals(targetQuestionUuid))) {
                 targetQuestion = q;
                 break;
             }
         }
+
         if (targetQuestion == null) {
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
@@ -543,6 +566,7 @@ public class QuestionServiceImpl implements QuestionService {
                     HttpStatus.NOT_FOUND.value()
             );
         }
+
         int newOrder = questionCreationRequest.order();
         if (newOrder < 1) {
             throw new AppException(
@@ -551,38 +575,91 @@ public class QuestionServiceImpl implements QuestionService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        questions.remove(targetQuestion);
-        int insertIndex = newOrder - 1;
-        if (insertIndex > questions.size()) {
-            insertIndex = questions.size();
-        }
 
-        questions.add(insertIndex, targetQuestion);
+        // Debug logging
+        log.info("Requested new order: {}, Total questions: {}, Target question current order: {}",
+                newOrder, currentVersionQuestions.size(), targetQuestion.getQuestionOrder());
+
+        // Reorder questions: assign newOrder to target and shift others accordingly
         List<Question> toSave = new ArrayList<>();
-        for (int i = 0; i < questions.size(); i++) {
-            Question q = questions.get(i);
-            int recalculatedOrder = i + 1;
-            if (q.getQuestionOrder() != recalculatedOrder) {
-                q.setQuestionOrder(recalculatedOrder);
-                q.setUpdatedBy(userInformation.id());
-                toSave.add(q);
+        Map<UUID, Integer> orderUpdateMap = new HashMap<>(); // baseId -> newOrder
+
+        int oldOrder = targetQuestion.getQuestionOrder();
+
+        log.info("Reordering: Moving question from order {} to order {}", oldOrder, newOrder);
+
+        if (oldOrder != newOrder) {
+            // Update all questions that need to be shifted
+            for (Question q : currentVersionQuestions) {
+                int currentOrder = q.getQuestionOrder();
+                int newQuestionOrder = currentOrder;
+
+                if (q.getQuestionId().equals(targetQuestion.getQuestionId())) {
+                    // This is the target question - assign the new order
+                    newQuestionOrder = newOrder;
+                    log.info("Target question {} gets new order {}", q.getQuestionId(), newOrder);
+                } else {
+                    // Shift other questions based on the movement
+                    if (newOrder > oldOrder) {
+                        // Moving target down: shift questions between oldOrder+1 and newOrder up by 1
+                        if (currentOrder > oldOrder && currentOrder <= newOrder) {
+                            newQuestionOrder = currentOrder - 1;
+                            log.info("Shifting question {} up: {} -> {}", q.getQuestionId(), currentOrder, newQuestionOrder);
+                        }
+                    } else {
+                        // Moving target up: shift questions between newOrder and oldOrder-1 down by 1
+                        if (currentOrder >= newOrder && currentOrder < oldOrder) {
+                            newQuestionOrder = currentOrder + 1;
+                            log.info("Shifting question {} down: {} -> {}", q.getQuestionId(), currentOrder, newQuestionOrder);
+                        }
+                    }
+                }
+
+                // Update if order changed
+                if (currentOrder != newQuestionOrder) {
+                    q.setQuestionOrder(newQuestionOrder);
+                    q.setUpdatedBy(userInformation.id());
+                    toSave.add(q);
+
+                    // Get base ID for updating all versions
+                    UUID baseId = q.getParent() != null ? q.getParent().getQuestionId() : q.getQuestionId();
+                    orderUpdateMap.put(baseId, newQuestionOrder);
+                }
             }
         }
 
-
+        // Save current versions first
         if (!toSave.isEmpty()) {
             questionRepository.saveAll(toSave);
         }
-        UserInformationResponse createdUser = helper.getUserInformationResponse(toSave.getFirst().getCreatedBy().toString());
+
+        // Update order for all versions of each question
+        for (Map.Entry<UUID, Integer> entry : orderUpdateMap.entrySet()) {
+            questionRepository.updateOrderForAllVersions(entry.getKey(), entry.getValue(), userInformation.id());
+        }
+
+        // Reload the target question with categories eagerly fetched to avoid lazy loading exception
+        Question refreshedTarget = questionRepository.findByIdWithCategories(targetQuestion.getQuestionId())
+                .orElseThrow(() -> new AppException(
+                        Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
+                        Constants.ErrorCode.QUESTION_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                ));
+
+        // Extract categories names (now safely loaded)
+        List<String> categoriesNames = refreshedTarget.getCategories().stream()
+                .map(QuestionCategory::name)
+                .toList();
+
+        UserInformationResponse createdUser = helper.getUserInformationResponse(targetQuestion.getCreatedBy().toString());
         UserInformationResponse updatedUser = helper.getUserInformationResponse(userInformation.id());
+
         return UpdatedQuestionResponse.builder()
                 .questionId(targetQuestion.getQuestionId().toString())
                 .questionOrder(targetQuestion.getQuestionOrder())
                 .point(targetQuestion.getPoint())
                 .questionType(targetQuestion.getQuestionType().ordinal())
-                .questionCategories(targetQuestion.getCategories().stream()
-                        .map(QuestionCategory::name)
-                        .toList())
+                .questionCategories(categoriesNames)
                 .explanation(targetQuestion.getExplanation())
                 .questionGroupId(targetQuestion.getQuestionGroup().getGroupId().toString())
                 .numberOfCorrectAnswers(targetQuestion.getNumberOfCorrectAnswers())
@@ -593,7 +670,6 @@ public class QuestionServiceImpl implements QuestionService {
                 .updatedAt(targetQuestion.getUpdatedAt().toString())
                 .build();
     }
-
     @Transactional
     @Override
     public UpdatedQuestionResponse updateInformation(String questionId, String groupId,

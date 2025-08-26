@@ -3,12 +3,17 @@ package com.fptu.sep490.readingservice.repository;
 import com.fptu.sep490.readingservice.model.Question;
 import com.fptu.sep490.readingservice.model.QuestionGroup;
 import com.fptu.sep490.readingservice.model.ReadingPassage;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -90,4 +95,33 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         WHERE ( q.questionId = :questionId  OR q.parent.questionId = :questionId ) AND q.isCurrent = true
     """)
     Question findCurrentQuestion(UUID questionId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select q from Question q where q.questionGroup = :group")
+    List<Question> lockAllByGroup(@Param("group") QuestionGroup group);
+
+    @Query("""
+        select q from Question q
+        where (q.parent is null and q.questionId in :baseIds and q.isCurrent = true)
+           or (q.parent is not null and q.parent.questionId in :baseIds and q.isCurrent = true)
+        """)
+    List<Question> findAllCurrentVersion(@Param("baseIds") Collection<UUID> baseIds);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        update Question q
+           set q.questionOrder = :newOrder,
+               q.updatedBy = :updatedBy
+         where (q.questionId = :baseId or q.parent.questionId = :baseId)
+        """)
+    int updateOrderForAllVersions(@Param("baseId") UUID baseId,
+                                  @Param("newOrder") int newOrder,
+                                  @Param("updatedBy") String updatedBy);
+
+    @Query("""
+        select q from Question q 
+        left join fetch q.categories 
+        where q.questionId = :questionId
+        """)
+    Optional<Question> findByIdWithCategories(@Param("questionId") UUID questionId);
 }

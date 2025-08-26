@@ -7,9 +7,10 @@
     <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="feat: band score">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/QuestionServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/QuestionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,7 +72,7 @@
     "Spring Boot.DiscoveryServiceApplication.executor": "Run",
     "Spring Boot.FileServiceApplication.executor": "Run",
     "Spring Boot.IdentityServiceApplication.executor": "Run",
-    "Spring Boot.ListeningServiceApplication.executor": "Debug",
+    "Spring Boot.ListeningServiceApplication.executor": "Run",
     "Spring Boot.PersonalServiceApplication.executor": "Debug",
     "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
@@ -112,7 +113,6 @@
             <set>
               <option value="NotificationServiceApplication" />
               <option value="PersonalServiceApplication" />
-              <option value="ReadingServiceApplication" />
             </set>
           </value>
         </entry>
