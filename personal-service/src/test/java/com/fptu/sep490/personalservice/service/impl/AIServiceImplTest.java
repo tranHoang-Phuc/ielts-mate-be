@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
 import com.fptu.sep490.personalservice.model.TopicMaster;
+import com.fptu.sep490.personalservice.repository.AISuggestionRepository;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
 import com.fptu.sep490.personalservice.repository.TopicMaterRepository;
 import com.fptu.sep490.personalservice.repository.client.ListeningClient;
@@ -53,6 +54,9 @@ class AIServiceImplTest {
 	@Mock
 	HttpSession httpSession;
 
+	@Mock
+	AISuggestionRepository aiSuggestionRepository;
+
 	AIServiceImpl service;
 
 	@BeforeEach
@@ -67,7 +71,8 @@ class AIServiceImplTest {
 				readingClient,
 				listeningClient,
 				geminiApiStrategy,
-				httpSession
+				httpSession,
+				aiSuggestionRepository
 		);
 	}
 
