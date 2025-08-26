@@ -698,7 +698,7 @@ public class ExamServiceImpl implements ExamService {
         String urlSlug = slug + "-" + utcStamp;
 
         return SlugGenResponse.builder()
-                .urlSlug(urlSlug)
+                .urlSlug(urlSlug.toLowerCase())
                 .build();
     }
 

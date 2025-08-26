@@ -139,7 +139,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 reportData.add(ReportData.builder()
                                 .questionType(question.getQuestionType())
                                 .questionId(question.getQuestionId())
-                                .isCorrect(points > 0)
+                                .isCorrect(result.isCorrect())
                         .build());
             }
             if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
@@ -158,7 +158,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 reportData.add(ReportData.builder()
                         .questionType(question.getQuestionType())
                         .questionId(question.getQuestionId())
-                        .isCorrect(points > 0)
+                        .isCorrect(result.isCorrect())
                         .build());
             }
 
@@ -178,7 +178,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 reportData.add(ReportData.builder()
                         .questionType(question.getQuestionType())
                         .questionId(question.getQuestionId())
-                        .isCorrect(points > 0)
+                        .isCorrect(result.isCorrect())
                         .build());
             }
 
@@ -198,7 +198,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 reportData.add(ReportData.builder()
                         .questionType(question.getQuestionType())
                         .questionId(question.getQuestionId())
-                        .isCorrect(points > 0)
+                        .isCorrect(result.isCorrect())
                         .build());
             }
 
