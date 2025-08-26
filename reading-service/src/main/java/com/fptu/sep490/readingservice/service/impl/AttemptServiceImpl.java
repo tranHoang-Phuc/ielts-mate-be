@@ -557,19 +557,32 @@ public class AttemptServiceImpl implements AttemptService {
             }
             if (question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
                 if (answer.dragItemId() == null) continue;
+
+                // Lấy nội dung đáp án người dùng chọn (an toàn, không .get() trực tiếp)
+                String userContent = dragItemRepository.findById(answer.dragItemId())
+                        .map(DragItem::getContent)
+                        .orElse(null);
+
+                // Xác định đáp án đúng: lấy từ chính câu hỏi, nếu không có thì từ parent
+                DragItem correctItem = resolveCorrectDragItem(question);
+                String correctContent = (correctItem != null ? correctItem.getContent() : null);
+
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
-                        .userAnswer(List.of(dragItemRepository.findById(answer.dragItemId()).get().getContent()))
+                        .userAnswer(userContent != null ? List.of(userContent) : List.of())
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getDragItem().getContent() != null ? question.getDragItem().getContent() : question.getParent().getDragItem().getContent()))
+                        .correctAnswer(correctContent != null ? List.of(correctContent) : List.of())
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if (question.getDragItem().getDragItemId().equals(answer.dragItemId())) {
+
+                boolean isCorrect = (correctItem != null && correctItem.getDragItemId().equals(answer.dragItemId()));
+                if (isCorrect) {
                     result.setCorrect(true);
                 }
+
                 resultSets.add(result);
                 answerAttempt.setDragItemId(answer.dragItemId());
-                answerAttempt.setIsCorrect(result.isCorrect());
+                answerAttempt.setIsCorrect(isCorrect);
             }
             answerAttemptRepository.save(answerAttempt);
         }
@@ -592,7 +605,16 @@ public class AttemptServiceImpl implements AttemptService {
                 .build();
     }
 
-   
+    private DragItem resolveCorrectDragItem(Question q) {
+        if (q == null) return null;
+        if (q.getDragItem() != null) return q.getDragItem();
+        Question parent = q.getParent();
+        if (parent != null) {
+            return parent.getDragItem();
+        }
+        return null;
+    }
+
     @Override
     public Page<UserAttemptResponse> getAttemptByUser(int page, int size, List<Integer> ieltsTypeList, List<Integer> statusList, List<Integer> partNumberList, String sortBy, String sortDirection, String title, UUID passageId, HttpServletRequest request) {
         String userId = helper.getUserIdFromToken(request);

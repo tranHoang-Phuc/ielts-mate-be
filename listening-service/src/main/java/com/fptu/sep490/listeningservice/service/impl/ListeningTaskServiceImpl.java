@@ -1,10 +1,7 @@
 package com.fptu.sep490.listeningservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fptu.sep490.commonlibrary.constants.CookieConstants;
-import com.fptu.sep490.commonlibrary.constants.DataMarkup;
-import com.fptu.sep490.commonlibrary.constants.Operation;
-import com.fptu.sep490.commonlibrary.constants.TopicType;
+import com.fptu.sep490.commonlibrary.constants.*;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
@@ -104,6 +101,15 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
     public ListeningTaskResponse createListeningTask(ListeningTaskCreationRequest request,
                                                      HttpServletRequest httpServletRequest) throws IOException {
         String userId = helper.getUserIdFromToken(httpServletRequest);
+
+        if(!safeEnumFromOrdinal(Status.values(), request.status()).equals(Status.DRAFT)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.CAN_ONLY_CREATE_DRAFT,
+                    Constants.ErrorCode.CAN_ONLY_CREATE_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
         MultipartFile audio = request.audioFile();
         if (audio == null || audio.isEmpty() || !audio.getContentType().startsWith("audio/")) {
             throw new AppException(
@@ -177,6 +183,54 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                         HttpStatus.NOT_FOUND.value()
                 )
         );
+        int totalPoint = 0;
+        ListeningTaskGetAllResponse taskDetail = getTaskById(taskId);
+        var questionGroups = taskDetail.questionGroups();
+
+        for(var group : questionGroups) {
+            for(var question : group.questions()) {
+                totalPoint += question.point();
+            }
+        }
+
+        if(task.getPartNumber().equals(PartNumber.PART_1) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
+                &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_1_POINT_INVALID,
+                    Constants.ErrorCode.PART_1_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        if(task.getPartNumber().equals(PartNumber.PART_2) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
+                &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_2_POINT_INVALID,
+                    Constants.ErrorCode.PART_2_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        if(task.getPartNumber().equals(PartNumber.PART_3) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
+                &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_3_POINT_INVALID,
+                    Constants.ErrorCode.PART_3_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        if(task.getPartNumber().equals(PartNumber.PART_4) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
+                &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_4_POINT_INVALID,
+                    Constants.ErrorCode.PART_4_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
         int version = 0;
         task.setIsCurrent(false);
         List<ListeningTask> allVersion = listeningTaskRepository.findAllVersion(task.getTaskId());

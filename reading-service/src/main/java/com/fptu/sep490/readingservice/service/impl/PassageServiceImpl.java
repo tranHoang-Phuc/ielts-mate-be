@@ -1,10 +1,7 @@
 package com.fptu.sep490.readingservice.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fptu.sep490.commonlibrary.constants.CookieConstants;
-import com.fptu.sep490.commonlibrary.constants.DataMarkup;
-import com.fptu.sep490.commonlibrary.constants.Operation;
-import com.fptu.sep490.commonlibrary.constants.TopicType;
+import com.fptu.sep490.commonlibrary.constants.*;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.exceptions.InternalServerErrorException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
@@ -49,6 +46,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -92,6 +90,15 @@ public class PassageServiceImpl implements PassageService {
     public PassageCreationResponse createPassage(PassageCreationRequest passageCreationRequest,
                                                  HttpServletRequest request) throws JsonProcessingException {
         String userId = getUserIdFromToken(request);
+
+        if(!safeEnumFromOrdinal(Status.values(), passageCreationRequest.passageStatus()).equals(Status.DRAFT)) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.CAN_ONLY_CREATE_DRAFT,
+                    Constants.ErrorCode.CAN_ONLY_CREATE_DRAFT,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
         IeltsType ieltsType = safeEnumFromOrdinal(IeltsType.values(), passageCreationRequest.ieltsType());
         PartNumber partNumber = safeEnumFromOrdinal(PartNumber.values(), passageCreationRequest.partNumber());
         Status passageStatus = safeEnumFromOrdinal(Status.values(), passageCreationRequest.passageStatus());
@@ -202,6 +209,50 @@ public class PassageServiceImpl implements PassageService {
         ReadingPassage entity  = readingPassageRepository.findById(passageId)
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.PASSAGE_NOT_FOUND,
                         Constants.ErrorCode.PASSAGE_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
+
+        PassageDetailResponse detailResponse = getPassageById(passageId);
+        AtomicInteger totalPoint = new AtomicInteger(0);
+
+        var questionGroups = detailResponse.questionGroups();
+
+        questionGroups.forEach(questionGroup -> {
+            var questions = questionGroup.questions();
+            for (var question : questions) {
+                totalPoint.addAndGet(question.point());
+            }
+        });
+
+        int sum = totalPoint.get();
+
+        if(entity.getPartNumber().equals(PartNumber.PART_1) && sum != TotalPoint.PART_1_QUESTION_READING
+                &&( safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_1_POINT_INVALID,
+                    Constants.ErrorCode.PART_1_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        if(entity.getPartNumber().equals(PartNumber.PART_2) && sum != TotalPoint.PART_2_QUESTION_READING
+                && (safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_2_POINT_INVALID,
+                    Constants.ErrorCode.PART_2_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+
+        if(entity.getPartNumber().equals(PartNumber.PART_3) && sum != TotalPoint.PART_3_QUESTION_READING
+                && (safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.TEST)
+                || safeEnumFromOrdinal(Status.values(), request.passageStatus()).equals(Status.PUBLISHED))) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.PART_3_POINT_INVALID,
+                    Constants.ErrorCode.PART_3_POINT_INVALID,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
 
         List<ReadingPassage> allVersions = readingPassageRepository.findAllVersion(entity.getPassageId());
         int currentVersion = 0;
