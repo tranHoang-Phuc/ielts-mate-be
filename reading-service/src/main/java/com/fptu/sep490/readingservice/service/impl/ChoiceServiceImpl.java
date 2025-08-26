@@ -164,7 +164,7 @@ public class ChoiceServiceImpl implements ChoiceService {
             c.setIsDeleted(false);
             if(c.getVersion() > currentVersion) {
                 currentVersion = c.getVersion();
-                c.setIsOriginal(false);
+                c.setIsCurrent(false);
             }
         }
         choiceRepository.saveAll(previousVersions);
