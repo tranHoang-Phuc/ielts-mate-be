@@ -3,6 +3,7 @@ package com.fptu.sep490.personalservice.controller;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.personalservice.service.AIService;
 import com.fptu.sep490.personalservice.viewmodel.response.AIResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.AISuggestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,6 +52,7 @@ public class AIController {
         )
     })
     @PreAuthorize("isAuthenticated()")
+    @ResponseBody
     public ResponseEntity<BaseResponse<AIResponse>> chatWithGemini(HttpServletRequest request) {
         AIResponse data = aiService.callAIForSuggesting(request);
         BaseResponse<AIResponse> response = BaseResponse.<AIResponse>builder()
@@ -59,6 +61,18 @@ public class AIController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/suggestion")
+    @PreAuthorize("isAuthenticated()")
+    @ResponseBody
+    public ResponseEntity<BaseResponse<AISuggestionResponse>> getCurrentSuggestion(HttpServletRequest request) {
+        AISuggestionResponse data = aiService.getCurrentSuggestion(request);
+        BaseResponse<AISuggestionResponse> response = BaseResponse.<AISuggestionResponse>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/ielts/send")
     @Operation(summary = "Send a message in IELTS Chat", description = "Send a message and get AI response for IELTS learning")
     @PreAuthorize("isAuthenticated()")

@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
+import com.fptu.sep490.personalservice.viewmodel.response.AIResultData;
 import com.fptu.sep490.personalservice.viewmodel.response.DataStats;
 import com.fptu.sep490.personalservice.viewmodel.response.ReportQuestionTypeStats;
 import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
@@ -36,6 +37,9 @@ public interface ListeningClient {
     @PostMapping(value = "/exam/attempts/internal/band-chart", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<List<LineChartData>>> getBandChart(@RequestBody LineChartReq lineChartReq,
                                                                    @RequestHeader("Authorization") String token);
+
+    @GetMapping(value = "/exam/attempts/internal/suggest-ai", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(@RequestHeader("Authorization") String token);
 
     @GetMapping(value = "/dashboard/internal/get-quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<DataStats>> getListeningStats(@RequestHeader("Authorization") String token);

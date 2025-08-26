@@ -10,10 +10,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.service.ExamAttemptService;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
-import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedExamAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -154,6 +151,16 @@ public class ExamAttemptController {
     public ResponseEntity<BaseResponse<List<LineChartData>>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody LineChartReq body) throws JsonProcessingException {
         List<LineChartData> data = examAttemptService.getBandChart(body, token);
         BaseResponse<List<LineChartData>> response = BaseResponse.<List<LineChartData>>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/internal/suggest-ai")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(HttpServletRequest request) throws JsonProcessingException {
+        List<AIResultData> data = examAttemptService.getAIResultData(request);
+        BaseResponse<List<AIResultData>> response = BaseResponse.<List<AIResultData>>builder()
                 .data(data)
                 .build();
         return ResponseEntity.ok(response);

@@ -18,6 +18,7 @@ public class Constants {
         //vocabulary
         public static final String VOCABULARY_ALREADY_EXISTS = "VOCABULARY_ALREADY_EXISTS";
         public static final String NEED_TO_CONFIG_TARGET = "NEED_TO_CONFIG_TARGET";
+        public static final String FAILED_TO_GET_PRACTICE_DATA = "FAILED_TO_GET_PRACTICE_DATA";
     }
 
     public final class RedisKey {
@@ -41,6 +42,7 @@ public class Constants {
 
 
         public static final String NEED_TO_CONFIG_TARGET = "500007";
+        public static final String FAILED_TO_GET_PRACTICE_DATA = "500008";
     }
 
     public final class Config {

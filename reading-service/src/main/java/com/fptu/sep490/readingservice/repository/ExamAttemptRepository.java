@@ -37,4 +37,12 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, UUID> 
 
     @Query(value = "select count(*) from exam_attempt et where et.total_point > 0 ", nativeQuery = true)
     int getNumberOfExamAttempts();
+    @Query(value = """
+    SELECT * 
+    FROM exam_attempt e 
+    WHERE e.created_by = :userId 
+      AND e.created_at BETWEEN DATE_TRUNC('month', CURRENT_DATE) 
+                          AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month' - INTERVAL '1 second')
+    """, nativeQuery = true)
+    List<ExamAttempt> findAIDataInCurrentMonth(@Param("userId") String userId);
 }

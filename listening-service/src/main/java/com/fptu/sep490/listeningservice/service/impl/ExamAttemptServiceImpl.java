@@ -497,4 +497,17 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<AIResultData> getAIResultData(HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        List<ExamAttempt> examAttempts = examAttemptRepository.findAIDataInCurrentMonth(userId);
+
+        return examAttempts.stream().map(e-> AIResultData.builder()
+                .totalPoint(e.getTotalPoint())
+                .duration(e.getDuration())
+                .createdAt(e.getCreatedAt())
+                .build()).sorted(Comparator.comparing(AIResultData::createdAt).reversed()).toList();
+
+    }
+
 }

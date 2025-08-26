@@ -151,4 +151,14 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, UUID> 
             END
     """, nativeQuery = true)
     List<UserInBranch> getNumberOfUsersInBranchHighest();
+
+    @Query(value = """
+    SELECT * 
+    FROM exam_attempt e 
+    WHERE e.created_by = :userId 
+      AND e.created_at BETWEEN DATE_TRUNC('month', CURRENT_DATE) 
+                          AND (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month' - INTERVAL '1 second')
+    """, nativeQuery = true)
+    List<ExamAttempt> findAIDataInCurrentMonth(@Param("userId") String userId);
+
 }
