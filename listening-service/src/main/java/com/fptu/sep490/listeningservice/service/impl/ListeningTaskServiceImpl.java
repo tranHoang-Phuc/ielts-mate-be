@@ -805,7 +805,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                             .instructionForMatching(question.getInstructionForMatching())
                                             .zoneIndex(question.getZoneIndex())
                                             .choices(choiceAttemptResponses)
-                                            .correctAnswer(question.getCorrectAnswer())
+                                            .correctAnswer(question.getQuestionType() != QuestionType.DRAG_AND_DROP ? question.getCorrectAnswer() : question.getDragItem().getDragItemId().toString())
                                             .correctAnswerForMatching(question.getCorrectAnswerForMatching())
                                             .explanation(explanation) // only set if not JSON
                                             .point(question.getPoint())
