@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: ai suggestion">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/test/java/com/fptu/sep490/personalservice/service/impl/AIServiceImplTest.java" afterDir="false" />
-    </list>
+    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: update question order" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

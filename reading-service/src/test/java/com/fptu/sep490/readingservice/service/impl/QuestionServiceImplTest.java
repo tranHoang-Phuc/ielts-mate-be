@@ -5,6 +5,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.redis.RedisService;
 import com.fptu.sep490.commonlibrary.viewmodel.response.KeyCloakTokenResponse;
 import com.fptu.sep490.readingservice.constants.Constants;
+import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.repository.*;
@@ -46,7 +47,8 @@ class QuestionServiceImplTest {
     @Mock RedisService redisService;
     @Mock QuestionGroupRepository questionGroupRepository;
     @Mock DragItemRepository dragItemRepository;
-
+    @Mock
+    Helper helper;
     QuestionServiceImpl service;
 
     @BeforeEach
@@ -58,7 +60,8 @@ class QuestionServiceImplTest {
                 keyCloakUserClient,
                 redisService,
                 questionGroupRepository,
-                dragItemRepository
+                dragItemRepository,
+                helper
         );
 
         // No need to set private fields; tests stub Redis to return cached token/profile to bypass Keycloak
