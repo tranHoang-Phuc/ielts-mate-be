@@ -408,5 +408,10 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="com.fptu.sep490.readingservice.model.Question" memberName="parent" />
+      </pinned-members>
+    </pin-to-top-manager>
   </component>
 </project>
