@@ -13,6 +13,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
 import com.fptu.sep490.readingservice.model.*;
+import com.fptu.sep490.readingservice.model.enumeration.IeltsType;
 import com.fptu.sep490.readingservice.model.enumeration.QuestionType;
 import com.fptu.sep490.readingservice.model.json.ExamAttemptHistory;
 import com.fptu.sep490.readingservice.repository.*;
@@ -401,9 +402,15 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .readingPassageIdPart2(passageResponses.get(1))
                 .readingPassageIdPart3(passageResponses.get(2))
                 .build();
+
+        Boolean is_academic = examAttempt.getReadingExam().getPart1().getIeltsType() == IeltsType.ACADEMIC;
         return ExamAttemptGetDetail.builder()
                 .examAttemptId(examAttempt.getExamAttemptId())
-                .estimatedIeltsBand(bandScore(examAttempt.getTotalPoint()))
+                .estimatedIeltsBand(
+                        is_academic
+                                ? bandScoreAcademic(examAttempt.getTotalPoint())
+                                : bandScoreGeneralTraining(examAttempt.getTotalPoint())
+                )
                 .readingExam(readingExamResponse)
                 .duration(examAttempt.getDuration().longValue())
                 .totalQuestion(examAttempt.getTotalPoint())
@@ -413,30 +420,53 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .updatedAt(examAttempt.getUpdatedAt().toString())
                 .answers(history.getUserAnswers())
                 .build();
+
+
     }
-    public Double bandScore(Integer totalPoint) {
+    public Double bandScoreAcademic(Integer totalPoint) {
         if (totalPoint == null) {
             return null;
         }
-        if (totalPoint == 0) return 0.0;
-        else if (totalPoint == 1) return 1.0;
-        else if (totalPoint == 2) return 1.5;
-        else if (totalPoint == 3) return 2.0;
-        else if (totalPoint >= 4 && totalPoint <= 5) return 2.5;
-        else if (totalPoint >= 6 && totalPoint <= 7) return 3.0;
-        else if (totalPoint >= 8 && totalPoint <= 9) return 3.5;
+        if (totalPoint <= 4) return 2.5;
+        else if (totalPoint >= 5 && totalPoint <= 6) return 3.0;
+        else if (totalPoint >= 7 && totalPoint <= 9) return 3.5;
         else if (totalPoint >= 10 && totalPoint <= 12) return 4.0;
         else if (totalPoint >= 13 && totalPoint <= 15) return 4.5;
-        else if (totalPoint >= 16 && totalPoint <= 17) return 5.0;
-        else if (totalPoint >= 18 && totalPoint <= 22) return 5.5;
-        else if (totalPoint >= 23 && totalPoint <= 25) return 6.0;
-        else if (totalPoint >= 26 && totalPoint <= 29) return 6.5;
-        else if (totalPoint >= 30 && totalPoint <= 31) return 7.0;
-        else if (totalPoint >= 32 && totalPoint <= 34) return 7.5;
+        else if (totalPoint >= 16 && totalPoint <= 19) return 5.0;
+        else if (totalPoint >= 20 && totalPoint <= 22) return 5.5;
+        else if (totalPoint >= 23 && totalPoint <= 26) return 6.0;
+        else if (totalPoint >= 27 && totalPoint <= 29) return 6.5;
+        else if (totalPoint >= 30 && totalPoint <= 32) return 7.0;
+        else if (totalPoint >= 33 && totalPoint <= 34) return 7.5;
         else if (totalPoint >= 35 && totalPoint <= 36) return 8.0;
         else if (totalPoint >= 37 && totalPoint <= 38) return 8.5;
         else if (totalPoint >= 39 && totalPoint <= 40) return 9.0;
         else return null; // trường hợp ngoài 0–40
+    }
+
+
+    // max 9.0, min 2.5
+    public Double bandScoreGeneralTraining(Integer totalPoint) {
+        if (totalPoint == null) {
+            return null;
+        }
+        if (totalPoint <= 7) return 2.5;
+        else if (totalPoint >= 8 && totalPoint <= 11) return 3.0;
+        else if (totalPoint >= 12 && totalPoint <= 14) return 3.5;
+        else if (totalPoint >= 15 && totalPoint <= 18) return 4.0;
+        else if (totalPoint >= 19 && totalPoint <= 22) return 4.5;
+        else if (totalPoint >= 23 && totalPoint <= 26) return 5.0;
+        else if (totalPoint >= 27 && totalPoint <= 29) return 5.5;
+        else if (totalPoint >= 30 && totalPoint <= 31) return 6.0;
+        else if (totalPoint >= 32 && totalPoint <= 33) return 6.5;
+        else if (totalPoint >= 34 && totalPoint <= 35) return 7.0;
+        else if (totalPoint >= 36 && totalPoint <= 37) return 7.5;
+        else if (totalPoint == 38) return 8.0;
+        else if (totalPoint == 39) return 8.5;
+        else if (totalPoint == 40) return 9.0;
+        else return null; // trường hợp ngoài 0–40
+
+
     }
 
 
