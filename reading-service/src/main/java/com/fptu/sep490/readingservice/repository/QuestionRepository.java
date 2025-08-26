@@ -84,4 +84,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         ORDER BY q.questionOrder ASC
     """)
     List<Question> findAllByIdOrderByQuestionOrder(@Param("ids") List<UUID> ids);
+
+    @Query("""
+        SELECT q FROM Question q
+        WHERE ( q.questionId = :questionId  OR q.parent.questionId = :questionId ) AND q.isCurrent = true
+    """)
+    Question findCurrentQuestion(UUID questionId);
 }

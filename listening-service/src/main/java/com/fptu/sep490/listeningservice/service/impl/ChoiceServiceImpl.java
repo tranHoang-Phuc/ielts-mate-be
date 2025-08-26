@@ -47,6 +47,8 @@ public class ChoiceServiceImpl implements ChoiceService {
                         Constants.ErrorCode.QUESTION_NOT_FOUND,
                         HttpStatus.NOT_FOUND.value()
                 ));
+        Question currentVersion = questionRepository.findCurrentQuestion(question.getQuestionId());
+
         if (question.getIsDeleted()){
             throw new AppException(
                     Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
@@ -72,7 +74,7 @@ public class ChoiceServiceImpl implements ChoiceService {
             }
         }
         if (choiceRequest.isCorrect()) {
-            if (numberOfCorrectAnswers + 1 > question.getNumberOfCorrectAnswers()) {
+            if (numberOfCorrectAnswers > currentVersion.getNumberOfCorrectAnswers()) {
                 throw new AppException(
                         Constants.ErrorCodeMessage.INVALID_NUMBER_OF_CORRECT_ANSWERS,
                         Constants.ErrorCode.INVALID_NUMBER_OF_CORRECT_ANSWERS,
