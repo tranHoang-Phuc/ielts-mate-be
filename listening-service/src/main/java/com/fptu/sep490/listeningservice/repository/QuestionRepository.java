@@ -3,10 +3,12 @@ package com.fptu.sep490.listeningservice.repository;
 import com.fptu.sep490.listeningservice.model.Question;
 import com.fptu.sep490.listeningservice.model.QuestionGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface QuestionRepository extends JpaRepository<Question, UUID> {
@@ -67,4 +69,22 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
         WHERE ( q.questionId = :questionId  OR q.parent.questionId = :questionId ) AND q.isCurrent = true
     """)
     Question findCurrentQuestion(UUID questionId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        update Question q
+           set q.questionOrder = :newOrder,
+               q.updatedBy = :updatedBy
+         where (q.questionId = :baseId or q.parent.questionId = :baseId)
+        """)
+    int updateOrderForAllVersions(@Param("baseId") UUID baseId,
+                                  @Param("newOrder") int newOrder,
+                                  @Param("updatedBy") String updatedBy);
+
+    @Query("""
+        select q from Question q 
+        left join fetch q.categories 
+        where q.questionId = :questionId
+        """)
+    Optional<Question> findByIdWithCategories(@Param("questionId") UUID questionId);
 }
