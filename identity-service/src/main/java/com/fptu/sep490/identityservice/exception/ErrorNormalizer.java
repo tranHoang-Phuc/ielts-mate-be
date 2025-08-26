@@ -45,6 +45,7 @@ public class ErrorNormalizer {
         String errorDescription = response.errorDescription();
         if (errorDescription != null) {
             String code = errorCodeMap.get(errorDescription);
+            log.error(errorDescription, code);
             if (Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED.equals(code)) {
                 throw new UnauthorizedException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED, Constants.ErrorCode.EMAIL_NOT_VERIFIED);
             }

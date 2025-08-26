@@ -114,6 +114,7 @@ public class AuthServiceImpl implements AuthService {
             throw new NotFoundException(Constants.ErrorCodeMessage.USER_NOT_FOUND,
                     Constants.ErrorCode.USER_NOT_FOUND);
         }
+        log.error("User access info: {}", userAccessInfos.getFirst() != null ? "Khac null" : "null");
         if(!userAccessInfos.getFirst().emailVerified()) {
             throw new AppException(Constants.ErrorCodeMessage.EMAIL_NOT_VERIFIED,
                     Constants.ErrorCode.EMAIL_NOT_VERIFIED, HttpStatus.UNAUTHORIZED.value());
