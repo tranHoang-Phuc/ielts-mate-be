@@ -551,7 +551,8 @@ public class PassageServiceImpl implements PassageService {
         Map<UUID, ReadingPassage> latestVersions = readingPassageRepository
                 .findCurrentVersionsByIds(passageIds)
                 .stream()
-                .collect(Collectors.toMap(ReadingPassage::getPassageId, Function.identity()));
+                .collect(Collectors.toMap(rp -> rp.getParent() == null ? rp.getPassageId() :
+                        rp.getParent().getPassageId(), Function.identity()));
 
         for (ReadingPassage passage : passages) {
             ReadingPassage lastVersion = latestVersions.get(passage.getPassageId());

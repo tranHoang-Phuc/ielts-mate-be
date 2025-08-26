@@ -281,7 +281,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 questions.addAll(questionGroup.getQuestions());
             }
         }
-        if (readingExamCreationRequest.status() == 1){
+        if (readingExamCreationRequest.status() == 1 && currentReadingExam.getStatus() != 1) {
             int totalPoint = questions.stream().mapToInt(Question::getPoint).sum();
             if (totalPoint != 40) {
                 throw new AppException(

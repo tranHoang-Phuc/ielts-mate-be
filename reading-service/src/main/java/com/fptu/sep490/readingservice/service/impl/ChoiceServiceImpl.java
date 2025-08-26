@@ -82,7 +82,7 @@ public class ChoiceServiceImpl implements ChoiceService {
         Question question = questionRepository.findById(UUID.fromString(questionId))
                 .orElseThrow(() -> new AppException(Constants.ErrorCodeMessage.QUESTION_NOT_FOUND,
                         Constants.ErrorCode.QUESTION_NOT_FOUND, HttpStatus.NOT_FOUND.value()));
-        List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedOrderByChoiceOrderAsc(question, false);
+        List<Choice> choices = choiceRepository.findCurrentVersionByQuestionId(UUID.fromString(questionId));
         if (choices.isEmpty()) {
             throw new AppException(Constants.ErrorCodeMessage.CHOICES_LIST_EMPTY,
                     Constants.ErrorCode.CHOICES_LIST_EMPTY, HttpStatus.NOT_FOUND.value());
@@ -95,6 +95,7 @@ public class ChoiceServiceImpl implements ChoiceService {
                         .isCorrect(choice.isCorrect())
                         .label(choice.getLabel())
                         .build())
+                .sorted(Comparator.comparing(QuestionCreationResponse.ChoiceResponse::choiceOrder))
                 .toList();
     }
 
@@ -163,6 +164,7 @@ public class ChoiceServiceImpl implements ChoiceService {
             c.setIsDeleted(false);
             if(c.getVersion() > currentVersion) {
                 currentVersion = c.getVersion();
+                c.setIsOriginal(false);
             }
         }
         choiceRepository.saveAll(previousVersions);
