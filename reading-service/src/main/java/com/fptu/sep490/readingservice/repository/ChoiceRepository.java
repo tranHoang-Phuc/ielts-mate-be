@@ -67,7 +67,7 @@ public interface ChoiceRepository extends JpaRepository<Choice, UUID> {
     @Query("""
         select c from Choice c
             where 
-                (c.choiceId IN (select ch.choiceId from Choice ch where ch.question.questionId = :questionId) and c.isOriginal = true and c.isCurrent = true and c.isDeleted =false)
+                (c.choiceId IN (select ch.choiceId from Choice ch where ch.question.questionId = :questionId)  and c.isCurrent = true and c.isDeleted =false)
                    or 
                 (c.choiceId IN (select ch.choiceId from Choice ch where ch.question.parent.questionId = :questionId)  and c.isCurrent = true and c.isDeleted =false)
                 
