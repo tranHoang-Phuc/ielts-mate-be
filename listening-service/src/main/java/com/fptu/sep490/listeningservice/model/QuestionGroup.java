@@ -84,4 +84,14 @@ public class QuestionGroup {
             fetch = FetchType.LAZY
     )
     private List<DragItem> dragItems = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "questionGroup",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<Question> questions = new ArrayList<>();
+
+
 }
