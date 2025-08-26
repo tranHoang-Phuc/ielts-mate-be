@@ -2,6 +2,7 @@ package com.fptu.sep490.personalservice.service;
 
 import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.personalservice.viewmodel.response.BandLineChartResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.BandScoreResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.OverviewProgressResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -16,4 +17,6 @@ public interface ProgressService {
     );
 
     BandLineChartResponse getBandChart(String timeFrame, LocalDate startDate, LocalDate endDate, HttpServletRequest request);
+
+    BandScoreResponse getBandScore(HttpServletRequest request);
 }

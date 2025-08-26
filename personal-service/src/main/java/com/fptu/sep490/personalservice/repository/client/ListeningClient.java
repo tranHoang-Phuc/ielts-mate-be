@@ -5,10 +5,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.BaseResponse;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
-import com.fptu.sep490.personalservice.viewmodel.response.AIResultData;
-import com.fptu.sep490.personalservice.viewmodel.response.DataStats;
-import com.fptu.sep490.personalservice.viewmodel.response.ReportQuestionTypeStats;
-import com.fptu.sep490.personalservice.viewmodel.response.TaskTitle;
+import com.fptu.sep490.personalservice.viewmodel.response.*;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -59,4 +56,7 @@ public interface ListeningClient {
             @RequestParam("toDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestHeader("Authorization") String accessToken);
+
+    @GetMapping(value = "/exam/attempts/internal/band-score", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<BandScoreData>> getBandScore(@RequestHeader("Authorization") String accessToken);
 }

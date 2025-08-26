@@ -540,4 +540,21 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
     }
 
+    @Override
+    public BandScoreData getBandScore(HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        List<ExamAttempt> examAttempts = examAttemptRepository.findAllByUserId(userId);
+
+        int totalScore = 0;
+
+        for (ExamAttempt exam : examAttempts) {
+            totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
+        }
+
+        Double averageBand = IeltsBandConverter.convertScoreToBand(totalScore, examAttempts.size(), IeltsScale.LISTENING);
+        return BandScoreData.builder()
+                .bandScore(averageBand)
+                .build();
+    }
+
 }

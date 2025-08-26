@@ -165,4 +165,14 @@ public class ExamAttemptController {
                 .build();
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/internal/band-score")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<BandScoreData>> getBandScore(HttpServletRequest request) {
+        BandScoreData data = examAttemptService.getBandScore(request);
+        BaseResponse<BandScoreData> response = BaseResponse.<BandScoreData>builder()
+                .data(data)
+                .build();
+        return ResponseEntity.ok(response);
+    }
 }

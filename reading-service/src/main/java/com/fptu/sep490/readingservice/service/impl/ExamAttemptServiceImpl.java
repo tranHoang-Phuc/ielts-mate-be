@@ -554,4 +554,19 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .build()).sorted(Comparator.comparing(AIResultData::createdAt).reversed()).toList();
 
     }
+
+    @Override
+    public BandScoreData getBandScore(HttpServletRequest request) {
+        String userId = helper.getUserIdFromToken(request);
+        List<ExamAttempt> examAttempts = examAttemptRepository.findAllByUserId(userId);
+        int totalScore = 0;
+
+        for (ExamAttempt exam : examAttempts) {
+            totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
+        }
+        Double bandScore = IeltsBandConverter.convertScoreToBand(totalScore, examAttempts.size(), IeltsScale.READING_AC);
+        return BandScoreData.builder()
+                .bandScore(bandScore)
+                .build();
+    }
 }

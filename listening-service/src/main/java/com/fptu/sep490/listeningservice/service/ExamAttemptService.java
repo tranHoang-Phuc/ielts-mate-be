@@ -34,4 +34,6 @@ public interface ExamAttemptService {
     List<LineChartData> getBandChart(LineChartReq body, String token);
 
     List<AIResultData> getAIResultData(HttpServletRequest request);
+
+    BandScoreData getBandScore(HttpServletRequest request);
 }

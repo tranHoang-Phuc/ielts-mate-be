@@ -54,4 +54,7 @@ public interface ReadingClient {
             @RequestParam("toDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
             @RequestHeader("Authorization") String accessToken);
+
+    @GetMapping(value = "/exam/attempts/internal/band-score", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<BandScoreData>> getBandScore(@RequestHeader("Authorization") String accessToken);
 }
