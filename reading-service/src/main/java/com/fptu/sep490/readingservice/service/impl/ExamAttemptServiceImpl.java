@@ -543,8 +543,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     }
 
     @Override
-    public List<AIResultData> getAIResultData(HttpServletRequest request) {
-        String userId = helper.getUserIdFromToken(request);
+    public List<AIResultData> getAIResultData(HttpServletRequest request, String token) {
+        String userId = helper.getUserIdFromToken(token);
         List<ExamAttempt> examAttempts = examAttemptRepository.findAIDataInCurrentMonth(userId);
 
         return examAttempts.stream().map(e-> AIResultData.builder()
@@ -556,8 +556,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     }
 
     @Override
-    public BandScoreData getBandScore(HttpServletRequest request) {
-        String userId = helper.getUserIdFromToken(request);
+    public BandScoreData getBandScore(HttpServletRequest request, String token) {
+        String userId = helper.getUserIdFromToken(token);
         List<ExamAttempt> examAttempts = examAttemptRepository.findAllByUserId(userId);
         int totalScore = 0;
 

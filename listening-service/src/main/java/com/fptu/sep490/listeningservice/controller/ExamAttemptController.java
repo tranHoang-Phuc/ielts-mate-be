@@ -158,8 +158,8 @@ public class ExamAttemptController {
 
     @GetMapping("/internal/suggest-ai")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(HttpServletRequest request) throws JsonProcessingException {
-        List<AIResultData> data = examAttemptService.getAIResultData(request);
+    public ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(@RequestHeader("Authorization") String token, HttpServletRequest request) throws JsonProcessingException {
+        List<AIResultData> data = examAttemptService.getAIResultData(request, token);
         BaseResponse<List<AIResultData>> response = BaseResponse.<List<AIResultData>>builder()
                 .data(data)
                 .build();
@@ -168,8 +168,8 @@ public class ExamAttemptController {
 
     @GetMapping("/internal/band-score")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<BandScoreData>> getBandScore(HttpServletRequest request) {
-        BandScoreData data = examAttemptService.getBandScore(request);
+    public ResponseEntity<BaseResponse<BandScoreData>> getBandScore( @RequestHeader("Authorization") String token,  HttpServletRequest request) {
+        BandScoreData data = examAttemptService.getBandScore(request,token);
         BaseResponse<BandScoreData> response = BaseResponse.<BandScoreData>builder()
                 .data(data)
                 .build();

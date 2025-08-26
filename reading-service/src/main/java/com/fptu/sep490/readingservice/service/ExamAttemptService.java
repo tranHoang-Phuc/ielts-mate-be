@@ -36,7 +36,7 @@ public interface ExamAttemptService {
 
     List<ExamAttemptAI> getAttemptResultHistory(HttpServletRequest request);
 
-    List<AIResultData> getAIResultData(HttpServletRequest request);
+    List<AIResultData> getAIResultData(HttpServletRequest request, String token);
 
-    BandScoreData getBandScore(HttpServletRequest request);
+    BandScoreData getBandScore(HttpServletRequest request, String token);
 }
