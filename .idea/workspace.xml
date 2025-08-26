@@ -6,13 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="feat: band score">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamAttemptController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamAttemptController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamAttemptService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamAttemptService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/BandScoreResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/response/BandScoreResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ExamAttemptController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/controller/ExamAttemptController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ExamAttemptService.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/ExamAttemptService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,11 +67,11 @@
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Debug",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.ApiGatewayApplication.executor": "Run",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
     "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Debug",
-    "Spring Boot.ListeningServiceApplication.executor": "Run",
+    "Spring Boot.IdentityServiceApplication.executor": "Run",
+    "Spring Boot.ListeningServiceApplication.executor": "Debug",
     "Spring Boot.PersonalServiceApplication.executor": "Debug",
     "Spring Boot.ReadingServiceApplication.executor": "Debug",
     "git-widget-placeholder": "local",
@@ -113,8 +110,9 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
-              <option value="FileServiceApplication" />
               <option value="NotificationServiceApplication" />
+              <option value="PersonalServiceApplication" />
+              <option value="ReadingServiceApplication" />
             </set>
           </value>
         </entry>
@@ -459,6 +457,21 @@
           <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java</url>
           <line>595</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/AIServiceImpl.java</url>
+          <line>183</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java</url>
+          <line>106</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java</url>
+          <line>109</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
