@@ -9,6 +9,8 @@ import com.fptu.sep490.listeningservice.constants.Constants;
 import com.fptu.sep490.listeningservice.helper.Helper;
 import com.fptu.sep490.listeningservice.model.ListeningExam;
 import com.fptu.sep490.listeningservice.model.ListeningTask;
+import com.fptu.sep490.listeningservice.model.Question;
+import com.fptu.sep490.listeningservice.model.QuestionGroup;
 import com.fptu.sep490.listeningservice.model.enumeration.ExamStatus;
 import com.fptu.sep490.listeningservice.model.enumeration.PartNumber;
 import com.fptu.sep490.listeningservice.repository.*;
@@ -34,10 +36,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 
 @Service
@@ -368,12 +367,15 @@ public class ExamServiceImpl implements ExamService {
             );
         }
         currentExam.setIsCurrent(false);
-
+        if(request.status() == 1){
+            currentExam.setStatus(ExamStatus.ACTIVE);
+        }else if (request.status() == 0) {
+            currentExam.setStatus(ExamStatus.INACTIVE);
+        }
         ListeningExam newExam = new ListeningExam();
         newExam.setExamName(request.examName() != null ? request.examName() : currentExam.getExamName());
         newExam.setExamDescription(request.examDescription() != null ? request.examDescription(): currentExam.getExamDescription());
         newExam.setUrlSlug(request.urlSlug() != null ? request.urlSlug(): currentExam.getUrlSlug());
-        newExam.setStatus(currentExam.getStatus());
         if(request.part2Id()!= null){
             ListeningTask part1 = listeningTaskRepository.findById(request.part1Id())
                     .orElseThrow(() -> new AppException(
@@ -473,6 +475,45 @@ public class ExamServiceImpl implements ExamService {
             newExam.setPart4(part4);
         }else{
             newExam.setPart4(currentExam.getPart4());
+        }
+
+        List<Question> questions = new ArrayList<>();
+        if(newExam.getPart1() != null){
+            for(QuestionGroup qg : newExam.getPart1().getQuestionGroups()){
+                questions.addAll(qg.getQuestions());
+            }
+        }
+        if(newExam.getPart2() != null){
+            for(QuestionGroup qg : newExam.getPart2().getQuestionGroups()){
+                questions.addAll(qg.getQuestions());
+            }
+        }
+        if(newExam.getPart3() != null){
+            for(QuestionGroup qg : newExam.getPart3().getQuestionGroups()){
+                questions.addAll(qg.getQuestions());
+            }
+        }
+        if(newExam.getPart4() != null){
+            for(QuestionGroup qg : newExam.getPart4().getQuestionGroups()){
+                questions.addAll(qg.getQuestions());
+            }
+        }
+        int totalPoint = 0;
+        for(Question q : questions){
+            totalPoint += q.getPoint();
+        }
+        if (request.status()==1) {
+            if (totalPoint < 40) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.LISTENING_EXAM_TOTAL_POINT_INVALID,
+                        Constants.ErrorCode.LISTENING_EXAM_TOTAL_POINT_INVALID,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            newExam.setStatus(ExamStatus.ACTIVE);
+
+        }else{
+            newExam.setStatus(ExamStatus.INACTIVE);
         }
 
 

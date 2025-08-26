@@ -15,6 +15,8 @@ public record ExamAttemptGetDetail(
         UUID examAttemptId,
         @JsonProperty("reading_exam")
         ReadingExamResponse readingExam,
+        @JsonProperty("estimated_ielts_band")
+        Double estimatedIeltsBand,
         @JsonProperty("duration")
         Long duration,
         @JsonProperty("total_point")

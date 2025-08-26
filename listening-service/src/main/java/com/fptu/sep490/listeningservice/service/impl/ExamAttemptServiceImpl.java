@@ -148,8 +148,10 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .listeningTaskIdPart3(taskResponses.get(2))
                 .listeningTaskIdPart4(taskResponses.get(3))
                 .build();
+
         return ExamAttemptGetDetail.builder()
                 .examAttemptId(examAttempt.getExamAttemptId())
+                .bandScore(bandScore(examAttempt.getTotalPoint()))
                 .readingExam(readingExamResponse)
                 .duration(examAttempt.getDuration().longValue())
                 .totalQuestion(examAttempt.getTotalPoint())
@@ -160,6 +162,34 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .answers(history.getUserAnswers())
                 .build();
     }
+
+    public Double bandScore(Integer totalPoint) {
+        if (totalPoint == null) {
+            return null;
+        }
+        if (totalPoint == 0) return 0.0;
+        else if (totalPoint == 1) return 1.0;
+        else if (totalPoint == 2) return 1.5;
+        else if (totalPoint == 3) return 2.0;
+        else if (totalPoint >= 4 && totalPoint <= 5) return 2.5;
+        else if (totalPoint >= 6 && totalPoint <= 7) return 3.0;
+        else if (totalPoint >= 8 && totalPoint <= 9) return 3.5;
+        else if (totalPoint >= 10 && totalPoint <= 12) return 4.0;
+        else if (totalPoint >= 13 && totalPoint <= 15) return 4.5;
+        else if (totalPoint >= 16 && totalPoint <= 17) return 5.0;
+        else if (totalPoint >= 18 && totalPoint <= 22) return 5.5;
+        else if (totalPoint >= 23 && totalPoint <= 25) return 6.0;
+        else if (totalPoint >= 26 && totalPoint <= 29) return 6.5;
+        else if (totalPoint >= 30 && totalPoint <= 31) return 7.0;
+        else if (totalPoint >= 32 && totalPoint <= 34) return 7.5;
+        else if (totalPoint >= 35 && totalPoint <= 36) return 8.0;
+        else if (totalPoint >= 37 && totalPoint <= 38) return 8.5;
+        else if (totalPoint >= 39 && totalPoint <= 40) return 9.0;
+        else return null; // trường hợp ngoài 0–40
+    }
+
+
+
 
     @Transactional(readOnly = true)
     @Override

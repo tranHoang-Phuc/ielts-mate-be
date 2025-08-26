@@ -32,6 +32,7 @@ public class Constants {
         public static final String PASSAGE_INVALID_PART = "PASSAGE_INVALID_PART";
         public static final String ATTEMPT_NOT_FINISHED = "ATTEMPT_NOT_FINISHED";
         public static final String EXISTED_SLUG = "EXISTED_SLUG";
+        public static final String READING_EXAM_TOTAL_POINT_INVALID="READING_EXAM_TOTAL_POINT_INVALID";
     }
     public final class RedisKey {
 
@@ -71,5 +72,6 @@ public class Constants {
         public static final String PASSAGE_INVALID_PART = "100030";
         public static final String ATTEMPT_NOT_FINISHED = "100031";
         public static final String EXISTED_SLUG = "100031";
+        public static final String READING_EXAM_TOTAL_POINT_INVALID="100032";
     }
 }
