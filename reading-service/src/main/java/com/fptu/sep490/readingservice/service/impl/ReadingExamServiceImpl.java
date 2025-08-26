@@ -210,7 +210,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                 .replaceAll("\\s+", "-")
                 + "-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"));
 
-        if (readingExamRepository.getByUrlSlug(urlSlug).isPresent()) {
+        if (readingExamRepository.getByUrlSlugExcepThis(urlSlug,currentReadingExam.getReadingExamId() ).isPresent()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_INPUT,
                     Constants.ErrorCode.INVALID_INPUT,
@@ -222,6 +222,8 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         newReadingExam.setUpdatedBy(userId);
         newReadingExam.setVersion(currentReadingExam.getVersion()+1);
         newReadingExam.setStatus(readingExamCreationRequest.status());
+        newReadingExam.setUrlSlug(readingExamCreationRequest.urlSlug());
+        newReadingExam.setCreatedBy(userId);
         newReadingExam.setCreatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         newReadingExam.setUpdatedAt(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")));
         newReadingExam.setParent(readingExam);

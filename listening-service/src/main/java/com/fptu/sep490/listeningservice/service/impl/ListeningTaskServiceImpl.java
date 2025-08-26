@@ -510,7 +510,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
             List<ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
 
             questions.forEach(question -> {
-                List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+                List<Choice> choices = questionMapChoices.get(findOriginalQuestion(question).getQuestionId());
 
                 ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse questionResponse =
                         ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
@@ -567,6 +567,17 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .questionGroups(groups.stream().sorted(Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)).toList())
                 .build();
     }
+
+    // Find parent or return self if no parent exists
+    public Question findOriginalQuestion(Question question) {
+        Question current = question;
+        while (current != null && current.getParent() != null) {
+            current = current.getParent();
+        }
+        return current != null && !current.getIsDeleted() ? current : null;
+    }
+
+
 
     @Override
     public CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId) {
