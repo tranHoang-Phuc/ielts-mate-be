@@ -741,7 +741,7 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
         String urlSlug = slug + "-" + utcStamp;
 
         return SlugGenResponse.builder()
-                .urlSlug(urlSlug)
+                .urlSlug(urlSlug.toLowerCase())
                 .build();
     }
 
