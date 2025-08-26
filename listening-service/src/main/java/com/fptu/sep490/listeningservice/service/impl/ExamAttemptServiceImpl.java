@@ -528,8 +528,8 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
     }
 
     @Override
-    public List<AIResultData> getAIResultData(HttpServletRequest request) {
-        String userId = helper.getUserIdFromToken(request);
+    public List<AIResultData> getAIResultData(HttpServletRequest request,String token) {
+        String userId = helper.getUserIdFromToken(token);
         List<ExamAttempt> examAttempts = examAttemptRepository.findAIDataInCurrentMonth(userId);
 
         return examAttempts.stream().map(e-> AIResultData.builder()
@@ -538,6 +538,23 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .createdAt(e.getCreatedAt())
                 .build()).sorted(Comparator.comparing(AIResultData::createdAt).reversed()).toList();
 
+    }
+
+    @Override
+    public BandScoreData getBandScore(HttpServletRequest request, String token) {
+        String userId = helper.getUserIdFromToken(token);
+        List<ExamAttempt> examAttempts = examAttemptRepository.findAllByUserId(userId);
+
+        int totalScore = 0;
+
+        for (ExamAttempt exam : examAttempts) {
+            totalScore += exam.getTotalPoint() != null ? exam.getTotalPoint() : 0;
+        }
+
+        Double averageBand = IeltsBandConverter.convertScoreToBand(totalScore, examAttempts.size(), IeltsScale.LISTENING);
+        return BandScoreData.builder()
+                .bandScore(averageBand)
+                .build();
     }
 
 }

@@ -12,6 +12,8 @@ import com.fptu.sep490.personalservice.repository.client.ListeningClient;
 import com.fptu.sep490.personalservice.repository.client.ReadingClient;
 import com.fptu.sep490.personalservice.service.ProgressService;
 import com.fptu.sep490.personalservice.viewmodel.response.BandLineChartResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.BandScoreData;
+import com.fptu.sep490.personalservice.viewmodel.response.BandScoreResponse;
 import com.fptu.sep490.personalservice.viewmodel.response.OverviewProgressResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -151,5 +153,31 @@ public class ProgressServiceImpl implements ProgressService {
                 .build();
 
         return response;
+    }
+    @Async("progressExecutor")
+    public CompletableFuture<BandScoreData> fetchReadingBandScore(String accessToken) {
+        ResponseEntity<BaseResponse<BandScoreData>> response = readingClient.getBandScore("Bearer " + accessToken);
+        BandScoreData body = response.getBody().data();
+        return CompletableFuture.completedFuture(body);
+    }
+
+    @Async("progressExecutor")
+    public CompletableFuture<BandScoreData> fetchListeningBandScore(String accessToken) {
+        ResponseEntity<BaseResponse<BandScoreData>> response = listeningClient.getBandScore("Bearer " + accessToken);
+        BandScoreData body = response.getBody().data();
+        return CompletableFuture.completedFuture(body);
+    }
+    @Override
+    public BandScoreResponse getBandScore(HttpServletRequest request) {
+        String accessToken = helper.getAccessToken(request);
+        var completeFutureReading = fetchReadingBandScore(accessToken);
+        var completeFutureListening = fetchListeningBandScore(accessToken);
+        CompletableFuture.allOf(completeFutureReading, completeFutureListening).join();
+        BandScoreData readingData = completeFutureReading.join();
+        BandScoreData listeningData = completeFutureListening.join();
+        return BandScoreResponse.builder()
+                .reading(readingData.bandScore())
+                .listening(listeningData.bandScore())
+                .build();
     }
 }

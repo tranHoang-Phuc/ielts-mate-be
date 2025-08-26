@@ -210,5 +210,17 @@ public interface ReadingExamRepository extends JpaRepository<ReadingExam, UUID> 
     """)
     Optional<ReadingExam> getByUrlSlug(@Param("urlSlug") String s);
 
+
+    @Query("""
+        SELECT r FROM ReadingExam r
+        WHERE r.isDeleted = false
+          AND r.isCurrent = true
+          AND r.urlSlug = :urlSlug
+          AND r.readingExamId <> :id
+    """)
+    Optional<ReadingExam> getByUrlSlugExcepThis(@Param("urlSlug") String urlSlug,
+                                                @Param("id") UUID id);
+
+
     boolean existsByUrlSlug(String urlSlug);
 }
