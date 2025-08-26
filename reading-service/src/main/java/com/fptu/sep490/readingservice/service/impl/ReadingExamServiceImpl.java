@@ -6,8 +6,7 @@ import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.commonlibrary.utils.CookieUtils;
 import com.fptu.sep490.readingservice.constants.Constants;
 import com.fptu.sep490.readingservice.helper.Helper;
-import com.fptu.sep490.readingservice.model.ReadingExam;
-import com.fptu.sep490.readingservice.model.ReadingPassage;
+import com.fptu.sep490.readingservice.model.*;
 import com.fptu.sep490.readingservice.model.enumeration.PartNumber;
 import com.fptu.sep490.readingservice.repository.client.MarkupClient;
 import com.fptu.sep490.readingservice.viewmodel.response.SlugGenResponse;
@@ -259,6 +258,40 @@ public class  ReadingExamServiceImpl implements ReadingExamService  {
                         HttpStatus.NOT_FOUND.value()
                 );              }
             newReadingExam.setPart3(readingPassagePart3.get());
+        }
+
+
+
+        // check total point of all passages must be 40
+        List<Question> questions = new ArrayList<>();
+        if (newReadingExam.getPart1() != null) {
+            for (QuestionGroup questionGroup : newReadingExam.getPart1().getQuestionGroups()) {
+                questions.addAll(questionGroup.getQuestions());
+            }
+        }
+        if (newReadingExam.getPart2() != null) {
+            for (QuestionGroup questionGroup : newReadingExam.getPart2().getQuestionGroups()) {
+                questions.addAll(questionGroup.getQuestions());
+            }
+        }
+        if (newReadingExam.getPart3() != null) {
+            for (QuestionGroup questionGroup : newReadingExam.getPart3().getQuestionGroups()) {
+                questions.addAll(questionGroup.getQuestions());
+            }
+        }
+        if (readingExamCreationRequest.status() == 1){
+            int totalPoint = questions.stream().mapToInt(Question::getPoint).sum();
+            if (totalPoint != 40) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.READING_EXAM_TOTAL_POINT_INVALID,
+                        Constants.ErrorCode.READING_EXAM_TOTAL_POINT_INVALID,
+                        HttpStatus.BAD_REQUEST.value()
+                );
+            }
+            currentReadingExam.setStatus(readingExamCreationRequest.status());
+
+        }else {
+            currentReadingExam.setStatus(readingExamCreationRequest.status());
         }
         readingExamRepository.save(readingExam);
         readingExamRepository.save(newReadingExam);

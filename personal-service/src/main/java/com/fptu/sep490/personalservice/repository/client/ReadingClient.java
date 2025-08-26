@@ -32,6 +32,9 @@ public interface ReadingClient {
     @GetMapping(value = "/dashboard/internal/get-quantity", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<DataStats>> getReadingStats(@RequestHeader("Authorization") String token);
 
+    @GetMapping(value = "/exam/attempts/internal/suggest-ai", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(@RequestHeader("Authorization") String token);
+
     @PostMapping(value = "/exam/attempts/internal/band-chart", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<BaseResponse<List<LineChartData>>> getBandChart(@RequestBody LineChartReq lineChartReq,
                                                                       @RequestHeader("Authorization") String token);

@@ -6,10 +6,7 @@ import com.fptu.sep490.commonlibrary.viewmodel.request.OverviewProgressReq;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.LineChartData;
 import com.fptu.sep490.commonlibrary.viewmodel.response.feign.OverviewProgress;
 import com.fptu.sep490.listeningservice.viewmodel.request.ExamAttemptAnswersRequest;
-import com.fptu.sep490.listeningservice.viewmodel.response.CreateExamAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.ExamAttemptGetDetail;
-import com.fptu.sep490.listeningservice.viewmodel.response.SubmittedExamAttemptResponse;
-import com.fptu.sep490.listeningservice.viewmodel.response.UserGetHistoryExamAttemptResponse;
+import com.fptu.sep490.listeningservice.viewmodel.response.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,4 +32,6 @@ public interface ExamAttemptService {
     OverviewProgress getOverViewProgress(OverviewProgressReq body, String token);
 
     List<LineChartData> getBandChart(LineChartReq body, String token);
+
+    List<AIResultData> getAIResultData(HttpServletRequest request);
 }

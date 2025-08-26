@@ -164,13 +164,15 @@ public class ExamAttemptController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/internal/get-result-data")
+    @GetMapping("/internal/suggest-ai")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<BaseResponse<List<ExamAttemptAI>>> getUserAttemptResultHistory(HttpServletRequest request) throws JsonProcessingException {
-        List<ExamAttemptAI> data = examAttemptService.getAttemptResultHistory(request);
-        BaseResponse<List<ExamAttemptAI>> response = BaseResponse.<List<ExamAttemptAI>>builder()
+    public ResponseEntity<BaseResponse<List<AIResultData>>> getAIData(HttpServletRequest request) throws JsonProcessingException {
+        List<AIResultData> data = examAttemptService.getAIResultData(request);
+        BaseResponse<List<AIResultData>> response = BaseResponse.<List<AIResultData>>builder()
                 .data(data)
                 .build();
         return ResponseEntity.ok(response);
     }
+
+
 }

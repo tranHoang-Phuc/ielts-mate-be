@@ -5,8 +5,10 @@ import com.fptu.sep490.commonlibrary.constants.AIModel;
 import com.fptu.sep490.commonlibrary.exceptions.AppException;
 import com.fptu.sep490.personalservice.constants.Constants;
 import com.fptu.sep490.personalservice.helper.Helper;
+import com.fptu.sep490.personalservice.model.AISuggestion;
 import com.fptu.sep490.personalservice.model.TopicMaster;
 import com.fptu.sep490.personalservice.model.enumeration.LangGuage;
+import com.fptu.sep490.personalservice.repository.AISuggestionRepository;
 import com.fptu.sep490.personalservice.repository.ConfigRepository;
 import com.fptu.sep490.personalservice.repository.TopicMaterRepository;
 import com.fptu.sep490.personalservice.repository.client.ListeningClient;
@@ -16,13 +18,15 @@ import com.fptu.sep490.personalservice.strategy.AIStrategyFactory;
 import com.fptu.sep490.personalservice.strategy.AiApiStrategy;
 import com.fptu.sep490.personalservice.strategy.GeminiApiStrategy;
 import com.fptu.sep490.personalservice.viewmodel.response.AIResponse;
+import com.fptu.sep490.personalservice.viewmodel.response.AIResultData;
+import com.fptu.sep490.personalservice.viewmodel.response.AISuggestionResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.internals.Topic;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +51,7 @@ public class AIServiceImpl implements AIService {
     ListeningClient listeningClient;
     private final GeminiApiStrategy geminiApiStrategy;
     HttpSession httpSession;
+    AISuggestionRepository aiSuggestionRepository;
 
     private final Map<String, List<ChatMessage>> chatHistories = new ConcurrentHashMap<>();
 
@@ -60,6 +65,7 @@ public class AIServiceImpl implements AIService {
     }
     public AIResponse callAIForSuggesting(HttpServletRequest request) {
         try {
+            String accessToken = helper.getAccessToken(request);
             String userId = helper.getUserIdFromToken();
             log.info("Processing AI suggestion request for user: {}", userId);
             
@@ -79,10 +85,28 @@ public class AIServiceImpl implements AIService {
             List<TopicMaster> topicMasters = topicMaterRepository.findAll();
 
             // Call to set user test perform data
-
+            var readingDataRes = readingClient.getAIData("Bearer " + accessToken);
+            var listeningDataRes = listeningClient.getAIData("Bearer " + accessToken);
+            if (readingDataRes.getStatusCode() != HttpStatus.OK || listeningDataRes.getStatusCode() != HttpStatus.OK ||
+                readingDataRes.getBody() == null || listeningDataRes.getBody() == null) {
+                throw new AppException(
+                        Constants.ErrorCodeMessage.FAILED_TO_GET_PRACTICE_DATA,
+                        Constants.ErrorCode.FAILED_TO_GET_PRACTICE_DATA,
+                        HttpStatus.INTERNAL_SERVER_ERROR.value()
+                );
+            }
+            var readingBody = readingDataRes.getBody();
+            var listeningBody = listeningDataRes.getBody();
+            List<AIResultData> readingData = readingBody != null ? readingBody.data() : new ArrayList<>();
+            List<AIResultData> listeningData = listeningBody != null ? listeningBody.data() : new ArrayList<>();
+            String practiceResult = objectMapper.writeValueAsString(Map.of(
+                    "reading", readingData,
+                    "listening", listeningData
+            ));
+            log.info("Retrieved practice results for user {}: {}", userId, practiceResult);
 
             // Create a structured prompt for better AI response
-            String prompt = createStructuredPrompt(userTargetConfig, objectMapper.writeValueAsString(topicMasters),"");
+            String prompt = createStructuredPrompt(userTargetConfig, objectMapper.writeValueAsString(topicMasters), practiceResult);
             log.info("Generated prompt for user {}: {}", userId, prompt);
             
             // Get AI strategy and call model
@@ -91,7 +115,21 @@ public class AIServiceImpl implements AIService {
             
             AIResponse response = strategy.callModel(prompt, AIModel.Gemini.FLASH2_5);
             log.info("AI response received successfully for user: {}", userId);
-            
+
+            var currentSuggestion = aiSuggestionRepository.findByCreatedBy(userId)
+                    .orElse(null);
+
+            if (currentSuggestion == null) {
+                AISuggestion suggestion = AISuggestion.builder()
+                        .suggestionData(response.getContent())
+                        .createdBy(userId)
+                        .build();
+                aiSuggestionRepository.save(suggestion);
+
+            } else {
+                currentSuggestion.setSuggestionData(response.getContent());
+                aiSuggestionRepository.save(currentSuggestion);
+            }
             return response;
             
         } catch (AppException e) {
@@ -139,6 +177,16 @@ public class AIServiceImpl implements AIService {
         return chatHistories.getOrDefault(getSessionId(), List.of());
     }
 
+    @Override
+    public AISuggestionResponse getCurrentSuggestion(HttpServletRequest request) {
+        AISuggestion currentSuggestion = aiSuggestionRepository.findByCreatedBy(helper.getUserIdFromToken())
+                .orElse(null);
+        if (currentSuggestion == null) {
+            return AISuggestionResponse.builder().suggestion(null).build();
+        } else {
+            return AISuggestionResponse.builder().suggestion(currentSuggestion.getSuggestionData()).build();
+        }
+    }
 
 
     @Override
@@ -158,7 +206,7 @@ public class AIServiceImpl implements AIService {
     private String createStructuredPrompt(String targetConfig, String systemTopic, String practiceResult) {
         StringBuilder prompt = new StringBuilder();
         prompt.append("You are an experienced IELTS tutor specializing in personalized learning plans.\n");
-        prompt.append("Your task is to analyze the user's information and create a customized study suggestion.\n\n");
+        prompt.append("Your task is to analyze the user's information and create customized study task suggestions.\n\n");
 
         prompt.append("=== USER INFORMATION ===\n");
         prompt.append("Target Configuration:\n");
@@ -169,15 +217,28 @@ public class AIServiceImpl implements AIService {
         prompt.append(practiceResult).append("\n\n");
 
         prompt.append("=== OUTPUT REQUIREMENTS ===\n");
-        prompt.append("Provide a detailed IELTS study suggestion containing:\n");
-        prompt.append("1. **3-5 specific IELTS topics** the user should focus on (tailored to weaknesses & goals).\n");
-        prompt.append("2. **Recommended study schedule** for the next 7 days (daily breakdown).\n");
-        prompt.append("3. **Specific skills** to improve (e.g., listening for detail, reading skimming).\n");
-        prompt.append("4. **Practice exercises or resources** (include type and source).\n");
-        prompt.append("5. **Motivation tips** (practical, encouraging, and realistic).\n\n");
+        prompt.append("Analyze the user's practice results, strengths, and weaknesses, then provide EXACTLY 3-4 specific study tasks.\n");
+        prompt.append("Focus on areas where the user needs the most improvement based on their recent performance.\n");
+        prompt.append("Cover at least 2 of these 3 skills ONLY: Listening, Reading, Vocabulary.\n\n");
 
-        prompt.append("Make the suggestions practical, achievable, and aligned with the user's current level.\n");
-        prompt.append("Use clear section headings and bullet points for readability.\n");
+        prompt.append("Return ONLY a valid JSON array in this exact format:\n");
+        prompt.append("[\n");
+        prompt.append("  {\n");
+        prompt.append("    \"title\": \"Take a Listening Mock Test\",\n");
+        prompt.append("    \"description\": \"You haven't taken a full listening exam in 2 weeks. Practice with a complete mock test to maintain timing skills.\",\n");
+        prompt.append("    \"priority\": 0,\n");
+        prompt.append("    \"duration\": \"45 min\",\n");
+        prompt.append("    \"skill\": \"Listening\"\n");
+        prompt.append("  }\n");
+        prompt.append("]\n\n");
+
+        prompt.append("IMPORTANT GUIDELINES:\n");
+        prompt.append("- priority: 0 (highest) to 3 (lowest) based on user's weakness level\n");
+        prompt.append("- duration: realistic time estimates (e.g., \"30 min\", \"45 min\", \"60 min\")\n");
+        prompt.append("- skill: Must be EXACTLY one of \"Listening\", \"Reading\", \"Vocabulary\" ONLY\n");
+        prompt.append("- title: Clear, actionable task names\n");
+        prompt.append("- description: Specific, personalized explanations based on user's data\n");
+        prompt.append("- Return valid JSON only, no additional text or markdown formatting\n");
 
         return prompt.toString();
     }

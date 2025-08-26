@@ -13,6 +13,8 @@ import java.util.UUID;
 public record ExamAttemptGetDetail(
         @JsonProperty("exam_attempt_id")
         UUID examAttemptId,
+        @JsonProperty("estimated_ielts_band")
+        Double bandScore,
         @JsonProperty("listening_exam")
         ListeningExamResponse readingExam,
         @JsonProperty("duration")

@@ -35,6 +35,8 @@ public class Constants {
         public static final String EXISTED_SLUG = "EXISTED_SLUG";
         public static final String GET_TRANSCRIPT_ERROR = "GET_TRANSCRIPT_ERROR";
         public static final String CREATE_GEN_TRANSCRIPT_ERROR = "CREATE_GEN_TRANSCRIPT_ERROR";
+        public static final String LISTENING_EXAM_TOTAL_POINT_INVALID = "LISTENING_EXAM_TOTAL_POINT_INVALID";
+
     }
 
     public final class RedisKey {
@@ -82,6 +84,7 @@ public class Constants {
         public static final String EXISTED_SLUG = "400028";
         public static final String GET_TRANSCRIPT_ERROR = "400029";
         public static final String CREATE_GEN_TRANSCRIPT_ERROR = "400030";
+        public static final String LISTENING_EXAM_TOTAL_POINT_INVALID = "400032";
 
     }
 

@@ -35,4 +35,6 @@ public interface ExamAttemptService {
     List<LineChartData> getBandChart(LineChartReq body, String token);
 
     List<ExamAttemptAI> getAttemptResultHistory(HttpServletRequest request);
+
+    List<AIResultData> getAIResultData(HttpServletRequest request);
 }

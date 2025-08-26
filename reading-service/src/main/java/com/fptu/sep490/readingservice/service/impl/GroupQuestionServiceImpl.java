@@ -439,8 +439,11 @@ public class GroupQuestionServiceImpl implements GroupQuestionService {
 
         // Add newGroup to originalGroup's children
         originalGroup.getChildren().add(newGroup);
+        originalGroup.setIsCurrent(false);
+
 
         // Save both parent and new group
+        questionGroupRepository.save(latestCurrentGroup);
         questionGroupRepository.save(originalGroup);
         QuestionGroup savedGroup = questionGroupRepository.save(newGroup);
 
