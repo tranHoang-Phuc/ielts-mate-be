@@ -412,6 +412,7 @@ public class PassageServiceImpl implements PassageService {
                     questionVersionList.add(questionVersion);
                 } else {
                     List<Choice> currentChoice = choiceRepository.findCurrentVersionByQuestionId(q.getParent().getQuestionId());
+
                     questionIdMapCurrentChoice.put(q.getParent().getQuestionId(), currentChoice);
                     QuestionVersion questionVersion = QuestionVersion.builder()
                             .questionId(q.getQuestionId())
@@ -439,7 +440,7 @@ public class PassageServiceImpl implements PassageService {
             List<PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
             if(questions != null) {
                 questions.forEach(question -> {
-                    List<Choice> choices = questionMapChoices.get(question.getQuestionId());
+                    List<Choice> choices = questionMapChoices.get(question.getQuestionId()) == null ? questionMapChoices.get(question.getParent().getQuestionId()) : questionMapChoices.get(question.getQuestionId());
 
                     PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse questionResponse =
                             PassageAttemptResponse.ReadingPassageResponse.QuestionGroupResponse.QuestionResponse.builder()

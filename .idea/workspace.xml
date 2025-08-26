@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="feat: band score">
+    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: get by id versioning">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/QuestionServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/QuestionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/QuestionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/QuestionServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/resources/messages/messages.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ChoiceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/repository/ChoiceRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,33 +60,33 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ApiGatewayApplication.executor": "Run",
-    "Spring Boot.DiscoveryServiceApplication.executor": "Run",
-    "Spring Boot.FileServiceApplication.executor": "Run",
-    "Spring Boot.IdentityServiceApplication.executor": "Run",
-    "Spring Boot.ListeningServiceApplication.executor": "Run",
-    "Spring Boot.PersonalServiceApplication.executor": "Debug",
-    "Spring Boot.ReadingServiceApplication.executor": "Debug",
-    "git-widget-placeholder": "local",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.31034482",
-    "run.configurations.included.in.services": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.DiscoveryServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.FileServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.IdentityServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.ListeningServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.PersonalServiceApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;Spring Boot.ReadingServiceApplication.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.31034482&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>
@@ -111,6 +110,8 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
+              <option value="FileServiceApplication" />
+              <option value="ListeningServiceApplication" />
               <option value="NotificationServiceApplication" />
               <option value="PersonalServiceApplication" />
             </set>
@@ -443,7 +444,8 @@
     <MESSAGE value="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/listener/ListeningTaskListener.java" />
     <MESSAGE value="fix: SCRUM 45- Create attempt" />
     <MESSAGE value="feat: band score" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: band score" />
+    <MESSAGE value="fix: get by id versioning" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: get by id versioning" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -464,16 +466,16 @@
           <option name="timeStamp" value="4" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java</url>
-          <line>106</line>
-          <option name="timeStamp" value="5" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java</url>
-          <line>109</line>
-          <option name="timeStamp" value="6" />
+          <url>file://$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/PassageServiceImpl.java</url>
+          <line>444</line>
+          <option name="timeStamp" value="14" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="com.fptu.sep490.readingservice.model.Question" memberName="parent" />
+      </pinned-members>
+    </pin-to-top-manager>
   </component>
 </project>

@@ -510,7 +510,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
             List<ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse> questionListResponse = new ArrayList<>();
 
             questions.forEach(question -> {
-                List<Choice> choices = questionMapChoices.get(findOriginalQuestion(question).getQuestionId());
+                List<Choice> choices = questionMapChoices.get(question.getQuestionId()) == null ? questionMapChoices.get(question.getParent().getQuestionId()) : questionMapChoices.get(question.getQuestionId());
 
                 ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse questionResponse =
                         ListeningTaskGetAllResponse.QuestionGroupResponse.QuestionResponse.builder()
