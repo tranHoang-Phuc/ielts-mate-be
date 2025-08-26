@@ -205,7 +205,6 @@ public class ChoiceServiceImpl implements ChoiceService {
         }
 
         Choice newVersion = Choice.builder()
-                .choiceId(existingChoice.getChoiceId())
                 .content(choice.content())
                 .choiceOrder(choice.choiceOrder())
                 .isCorrect(choice.isCorrect())
