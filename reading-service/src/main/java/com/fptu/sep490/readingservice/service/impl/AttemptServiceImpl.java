@@ -560,7 +560,7 @@ public class AttemptServiceImpl implements AttemptService {
                 SubmittedAttemptResponse.ResultSet result = SubmittedAttemptResponse.ResultSet.builder()
                         .userAnswer(List.of(dragItemRepository.findById(answer.dragItemId()).get().getContent()))
                         .explanation(question.getExplanation())
-                        .correctAnswer(List.of(question.getDragItem().getContent()))
+                        .correctAnswer(List.of(question.getDragItem().getContent() != null ? question.getDragItem().getContent() : question.getParent().getDragItem().getContent()))
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
