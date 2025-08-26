@@ -245,7 +245,7 @@ public class ChoiceServiceImpl implements ChoiceService {
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-        List<Choice> choices = choiceRepository.findByQuestionAndIsDeletedAndIsCurrentOrderByChoiceOrderAsc(question, false, true);
+        List<Choice> choices = choiceRepository.findCurrentVersionByQuestionId(question.getQuestionId());
         return choices.stream()
                 .map(choice -> ChoiceResponse.builder()
                         .choiceId(choice.getChoiceId().toString())
