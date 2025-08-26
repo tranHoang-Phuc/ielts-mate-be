@@ -300,76 +300,133 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ListeningTaskGetResponse> getActivatedTask(int page, int size, List<Integer> ieltsType,
-                                                           List<Integer> partNumber, String questionCategory,
-                                                           String sortBy, String sortDirection, String title,
-                                                           String createdBy, HttpServletRequest request) {
+    public Page<ListeningTaskGetResponse> getActivatedTask(
+            int page,
+            int size,
+            List<Integer> ieltsType,
+            List<Integer> partNumber,
+            String questionCategory,
+            String sortBy,
+            String sortDirection,
+            String title,
+            String createdBy,
+            HttpServletRequest request
+    ) {
         Pageable pageable = PageRequest.of(page, size);
+
+        // status = 1 (Activated) — tùy enum của bạn, giữ nguyên như code cũ
         var spec = ListeningTaskSpecification.byCondition(
                 ieltsType, List.of(1), partNumber, questionCategory,
                 sortBy, sortDirection, title, createdBy
         );
+
         Page<ListeningTask> pageResult = listeningTaskRepository.findAll(spec, pageable);
         List<ListeningTask> tasks = pageResult.getContent();
 
-        List<UUID> taskIds = tasks.stream().map(ListeningTask::getTaskId).toList();
-
-        Map<UUID, ListeningTask> lastestVersion = listeningTaskRepository.findCurrentVersionsByIds(taskIds)
-                .stream().collect(Collectors.toMap(ListeningTask::getTaskId, Function.identity()));
-
-        for(ListeningTask task : tasks) {
-            lastestVersion.forEach((key, value) -> {
-                if(value.getParent() != null) {
-                    ListeningTask lastVersion = lastestVersion.get(value.getParent().getTaskId());
-                    if (!Objects.isNull(lastVersion)) {
-                        task.setTitle(lastVersion.getTitle());
-                        task.setIeltsType(lastVersion.getIeltsType());
-                        task.setPartNumber(lastVersion.getPartNumber());
-                    }
-                }
-            });
-//                ListeningTask lastVersion = lastestVersion.get(task.getParent().getTaskId());
-//                if (!Objects.isNull(lastVersion)) {
-//                    task.setTitle(lastVersion.getTitle());
-//                    task.setIeltsType(lastVersion.getIeltsType());
-//                    task.setPartNumber(lastVersion.getPartNumber());
-//                }
-
-
+        if (tasks.isEmpty()) {
+            return new PageImpl<>(List.of(), pageable, pageResult.getTotalElements());
         }
-        List<ListeningTaskGetResponse> responses = tasks.stream()
-                .map(this :: toListeningTaskGetResponse)
+
+        // Lấy danh sách task gốc trong trang hiện tại
+        List<UUID> rootTaskIdsInPage = tasks.stream()
+                .map(ListeningTask::getTaskId)
                 .toList();
-        Map<UUID, Integer> taskIdsMarkup;
-        String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
-        if(accessToken != null) {
-            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.LISTENING_TASK);
-            if(response.getStatusCode() == HttpStatus.OK) {
-                var body = response.getBody();
-                if (body != null) {
-                    taskIdsMarkup = body.data().markedUpIdsMapping();
-                    responses = responses.stream()
-                            .map(t -> ListeningTaskGetResponse.builder()
-                                    .taskId(t.taskId())
-                                    .ieltsType(t.ieltsType())
-                                    .partNumber(t.partNumber())
-                                    .status(t.status())
-                                    .title(t.title())
-                                    .createdBy(t.createdBy())
-                                    .createdAt(t.createdAt())
-                                    .updatedBy(t.updatedBy())
-                                    .updatedAt(t.updatedAt())
-                                    .isMarkedUp(taskIdsMarkup.get(t.taskId()) != null)
-                                    .markupTypes(taskIdsMarkup.get(t.taskId()))
-                                    .build())
-                            .toList();
-                    return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+
+        // Tìm các phiên bản hiện tại (latest/current) theo các root task id vừa có
+        // Map theo rootId => currentVersion
+        Map<UUID, ListeningTask> latestByRootId = listeningTaskRepository
+                .findCurrentVersionsByIds(rootTaskIdsInPage)
+                .stream()
+                .collect(Collectors.toMap(
+                        lt -> (lt.getParent() != null ? lt.getParent().getTaskId() : lt.getTaskId()),
+                        Function.identity(),
+                        (a, b) -> a // merge giữ phần tử đầu (không quan trọng nếu unique)
+                ));
+
+        List<ListeningTaskGetResponse> responsesData = new ArrayList<>(tasks.size());
+
+        for (ListeningTask root : tasks) {
+            // Lấy phiên bản mới nhất theo root; nếu không có, dùng chính root
+            ListeningTask current = latestByRootId.getOrDefault(root.getTaskId(), root);
+
+            // createdBy/createdAt lấy theo root (gốc), updatedBy/updatedAt theo current
+            String createdById = (root.getCreatedBy());
+            String updatedById = current.getUpdatedBy(); // có thể null
+
+            UserInformationResponse createdByProfile = null;
+            UserInformationResponse updatedByProfile = null;
+
+            try {
+                if (createdById != null) {
+                    var created = getUserProfileById(createdById);
+                    createdByProfile = UserInformationResponse.builder()
+                            .userId(created.id())
+                            .lastName(created.lastName())
+                            .firstName(created.firstName())
+                            .email(created.email())
+                            .build();
                 }
+                if (updatedById != null) {
+                    var updated = getUserProfileById(updatedById);
+                    updatedByProfile = UserInformationResponse.builder()
+                            .userId(updated.id())
+                            .lastName(updated.lastName())
+                            .firstName(updated.firstName())
+                            .email(updated.email())
+                            .build();
+                }
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+            ListeningTaskGetResponse dto = ListeningTaskGetResponse.builder()
+                    .taskId(root.getTaskId()) // luôn trả về id của task gốc để nhất quán
+                    .title(current.getTitle())
+                    .ieltsType(current.getIeltsType().ordinal())
+                    .partNumber(current.getPartNumber().ordinal())
+                    .status(current.getStatus().ordinal())
+                    .createdAt(root.getCreatedAt() != null ? root.getCreatedAt().toString() : null)
+                    .updatedAt(current.getUpdatedAt() != null ? current.getUpdatedAt().toString() : null)
+                    .createdBy(createdByProfile)
+                    .updatedBy(updatedByProfile)
+                    .build();
+
+            responsesData.add(dto);
+        }
+
+        // Enrich Markup nếu có token
+        String accessToken = CookieUtils.getCookieValue(request, CookieConstants.ACCESS_TOKEN);
+        if (accessToken != null) {
+            var response = markupClient.getMarkedUpData("Bearer " + accessToken, DataMarkup.LISTENING_TASK);
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                var body = response.getBody();
+                Map<UUID, Integer> taskIdsMarkup = body.data().markedUpIdsMapping();
+
+                // map lại list để chèn isMarkedUp & markupTypes
+                responsesData = responsesData.stream()
+                        .map(t -> ListeningTaskGetResponse.builder()
+                                .taskId(t.taskId())
+                                .ieltsType(t.ieltsType())
+                                .partNumber(t.partNumber())
+                                .status(t.status())
+                                .title(t.title())
+                                .createdBy(t.createdBy())
+                                .createdAt(t.createdAt())
+                                .updatedBy(t.updatedBy())
+                                .updatedAt(t.updatedAt())
+                                .isMarkedUp(taskIdsMarkup.get(t.taskId()) != null)
+                                .markupTypes(taskIdsMarkup.get(t.taskId()))
+                                .build())
+                        .toList();
+
+                return new PageImpl<>(responsesData, pageable, pageResult.getTotalElements());
             }
         }
 
-        return new PageImpl<>(responses, pageable, pageResult.getTotalElements());
+        // ✅ Trả về đúng biến đã build
+        return new PageImpl<>(responsesData, pageable, pageResult.getTotalElements());
     }
+
 
     @Override
     public Page<ListeningTaskGetResponse> getListeningTask(int page, int size, List<Integer> statuses, List<Integer> ieltsType,
