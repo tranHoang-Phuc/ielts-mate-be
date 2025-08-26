@@ -28,9 +28,9 @@ import com.fptu.sep490.readingservice.viewmodel.response.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -77,6 +77,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         examAttempt.setDuration(answers.duration());
         List<UUID> questionIds = answers.answers().stream()
                 .map(ExamAttemptAnswersRequest.ExamAnswerRequest::questionId)
+                .filter(Objects::nonNull)
                 .toList();
         List<Question> questions = questionRepository.findQuestionsByIds(questionIds);
         Map<UUID, List<UUID>> groupMapDragItem = new HashMap<>();
@@ -99,13 +100,15 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
 
         // Convert user answers for mapping questions and answers
         Map<UUID, List<String>> userAnswers = answers.answers().stream()
+                .filter(answer -> answer.questionId() != null)
                 .collect(Collectors.toMap(
                         ExamAttemptAnswersRequest.ExamAnswerRequest::questionId,
-                        ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers
+                        answer -> answer.selectedAnswers() != null ? answer.selectedAnswers() : new ArrayList<>(),
+                        (existing, replacement) -> replacement // In case of duplicate keys, keep the latest answer
                 ));
         Map<UUID, List<UUID>> questionMapChoice = new HashMap<>();
         for (ExamAttemptAnswersRequest.ExamAnswerRequest answer : answers.answers()) {
-            if(!CollectionUtils.isEmpty(answer.choiceIds())) {
+            if(answer.questionId() != null && !CollectionUtils.isEmpty(answer.choiceIds())) {
                 questionMapChoice.put(answer.questionId(), answer.choiceIds());
             }
         }
@@ -146,7 +149,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if(question.getCorrectAnswer().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
+                if(!userSelectedAnswers.isEmpty() && question.getCorrectAnswer().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
                     result.setCorrect(true);
                     points += question.getPoint();
                 }
@@ -166,7 +169,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if(question.getCorrectAnswerForMatching().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
+                if(!userSelectedAnswers.isEmpty() && question.getCorrectAnswerForMatching().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
                     result.setCorrect(true);
                     points += question.getPoint();
                 }
@@ -186,8 +189,9 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         .isCorrect(false)
                         .questionIndex(question.getQuestionOrder())
                         .build();
-                if(question.getDragItem().getDragItemId().equals(UUID.fromString(userSelectedAnswers.getFirst()))) {
+                if(!userSelectedAnswers.isEmpty() && question.getDragItem().getDragItemId().equals(UUID.fromString(userSelectedAnswers.getFirst()))) {
                     result.setCorrect(true);
+                    points += question.getPoint();
                 }
                 resultSets.add(result);
                 reportData.add(ReportData.builder()
@@ -267,8 +271,6 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                         )
                 );
 
-        //get reading exam has parent.readingExamId = readingExamId and isCurrent=true
-        // 2. Lấy bản current, nếu ko có current bắn lỗi
         ReadingExam currentExam = readingExamRepository.findCurrentChildByParentId(originalExam.getReadingExamId())
                 .orElse(originalExam);
 
