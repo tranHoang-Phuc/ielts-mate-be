@@ -33,6 +33,10 @@ public class Constants {
         public static final String ATTEMPT_NOT_FINISHED = "ATTEMPT_NOT_FINISHED";
         public static final String EXISTED_SLUG = "EXISTED_SLUG";
         public static final String READING_EXAM_TOTAL_POINT_INVALID="READING_EXAM_TOTAL_POINT_INVALID";
+        public static final String CAN_ONLY_CREATE_DRAFT = "CAN_ONLY_CREATE_DRAFT";
+        public static final String PART_1_POINT_INVALID = "PART_1_POINT_INVALID";
+        public static final String PART_2_POINT_INVALID = "PART_2_POINT_INVALID";
+        public static final String PART_3_POINT_INVALID = "PART_3_POINT_INVALID";
     }
     public final class RedisKey {
 
@@ -73,5 +77,10 @@ public class Constants {
         public static final String ATTEMPT_NOT_FINISHED = "100031";
         public static final String EXISTED_SLUG = "100031";
         public static final String READING_EXAM_TOTAL_POINT_INVALID="100032";
+        public static final String CAN_ONLY_CREATE_DRAFT = "100033";
+
+        public static final String PART_1_POINT_INVALID = "100034";
+        public static final String PART_2_POINT_INVALID = "100035";
+        public static final String PART_3_POINT_INVALID = "100036";
     }
 }

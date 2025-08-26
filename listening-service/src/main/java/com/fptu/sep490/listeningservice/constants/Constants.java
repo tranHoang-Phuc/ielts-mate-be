@@ -37,6 +37,11 @@ public class Constants {
         public static final String CREATE_GEN_TRANSCRIPT_ERROR = "CREATE_GEN_TRANSCRIPT_ERROR";
         public static final String LISTENING_EXAM_TOTAL_POINT_INVALID = "LISTENING_EXAM_TOTAL_POINT_INVALID";
 
+        public static final String CAN_ONLY_CREATE_DRAFT = "CAN_ONLY_CREATE_DRAFT";
+        public static final String PART_1_POINT_INVALID = "PART_1_POINT_INVALID";
+        public static final String PART_2_POINT_INVALID = "PART_2_POINT_INVALID";
+        public static final String PART_3_POINT_INVALID = "PART_3_POINT_INVALID";
+        public static final String PART_4_POINT_INVALID = "PART_4_POINT_INVALID";
     }
 
     public final class RedisKey {
@@ -86,6 +91,11 @@ public class Constants {
         public static final String CREATE_GEN_TRANSCRIPT_ERROR = "400030";
         public static final String LISTENING_EXAM_TOTAL_POINT_INVALID = "400032";
 
+        public static final String CAN_ONLY_CREATE_DRAFT = "400031";
+        public static final String PART_1_POINT_INVALID = "400033";
+        public static final String PART_2_POINT_INVALID = "400034";
+        public static final String PART_3_POINT_INVALID = "400035";
+        public static final String PART_4_POINT_INVALID = "400036";
     }
 
     public final class AssemblyAI {
