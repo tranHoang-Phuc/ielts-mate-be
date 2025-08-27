@@ -137,7 +137,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .instruction(request.instruction())
                 .title(request.title())
                 .status(safeEnumFromOrdinal(Status.values(), request.status()))
-                .transcription(request.isAutomaticTranscription() ? request.transcription() : null)
+                .transcription(request.isAutomaticTranscription() ? null: request.transcription())
                 .isOriginal(true)
                 .isCurrent(true)
                 .parent(null)
