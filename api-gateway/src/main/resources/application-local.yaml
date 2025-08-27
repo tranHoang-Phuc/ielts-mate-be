@@ -58,39 +58,20 @@ spring:
             - Path=/api/v1/notification/**
           filters:
             - StripPrefix=2
-        - id: personal-websocket
-          uri: ws://localhost:8072
-          predicates:
-            - Path=/api/v1/personal/ws/**
-          filters:
-            - StripPrefix=2
         - id: personal-service
           uri: http://localhost:8072
           predicates:
             - Path=/api/v1/personal/**
           filters:
             - StripPrefix=2
-      globalcors:
-        cors-configurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:3000"
-              - "https://ielts-mate-fe.vercel.app"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders:
-              - "*"
-            allowCredentials: true
-            maxAge: 3600
+      # CORS is handled by personal-service CorsFilter
       httpclient:
         connect-timeout: 10000
         response-timeout: 3600s
         pool:
           max-idle-time: 3600s
+        websocket:
+          max-frame-payload-length: 1048576
 
 springdoc:
   api-docs:

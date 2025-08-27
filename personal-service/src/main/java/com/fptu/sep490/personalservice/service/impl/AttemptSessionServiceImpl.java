@@ -22,8 +22,9 @@ public class AttemptSessionServiceImpl implements AttemptSessionService {
     
     private static final String ATTEMPT_SESSION_PREFIX = "attempt_session:";
     private static final String SESSION_ACTIVITY_PREFIX = "session_activity:";
-    private static final Duration SESSION_TTL = Duration.ofMinutes(30); // 30 minutes
-    private static final Duration ACTIVITY_TTL = Duration.ofMinutes(5); // 5 minutes for activity tracking
+    private static final Duration SESSION_TTL = Duration.ofMinutes(60); // 30 minutes
+    private static final Duration ACTIVITY_TTL = Duration.ofMinutes(2); // 5 minutes for activity tracking
+    private static final Duration HEARTBEAT_TIMEOUT = Duration.ofMinutes(1); // 1 minute heartbeat timeout
 
     @Override
     public boolean registerAttemptSession(UUID attemptId, String userId, String sessionId) {
@@ -107,6 +108,7 @@ public class AttemptSessionServiceImpl implements AttemptSessionService {
             Map<String, Object> activityData = new HashMap<>();
             activityData.put("sessionId", sessionId);
             activityData.put("lastActivity", Instant.now().toEpochMilli());
+            activityData.put("lastPing", Instant.now().toEpochMilli());
             
             redisService.saveValue(activityKey, activityData, ACTIVITY_TTL);
             
@@ -149,6 +151,84 @@ public class AttemptSessionServiceImpl implements AttemptSessionService {
         log.debug("Session cleanup triggered - Redis TTL handles automatic cleanup");
     }
 
+    /**
+     * Cleanup sessions that haven't pinged within the heartbeat timeout (1 minute)
+     */
+    public void cleanupInactiveHeartbeatSessions() {
+        try {
+            // Get all session activity keys (this would require Redis SCAN in production)
+            log.info("Starting cleanup of inactive heartbeat sessions (timeout: {} ms)", HEARTBEAT_TIMEOUT.toMillis());
+            
+            // Note: In a production environment, you would want to use Redis SCAN command
+            // to iterate through keys matching the pattern "session_activity:*"
+            // For now, this method can be called when we detect inactive sessions
+            
+        } catch (Exception e) {
+            log.error("Error during heartbeat session cleanup", e);
+        }
+    }
+
+    /**
+     * Check if a specific session has exceeded the heartbeat timeout
+     */
+    public boolean isSessionHeartbeatExpired(UUID attemptId) {
+        String activityKey = SESSION_ACTIVITY_PREFIX + attemptId.toString();
+        
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> activityData = redisService.getValue(activityKey, Map.class);
+            
+            if (activityData == null) {
+                return true; // No activity data means session is expired
+            }
+            
+            Long lastPing = (Long) activityData.get("lastPing");
+            if (lastPing == null) {
+                return true; // No ping timestamp means session is expired
+            }
+            
+            // Check if last ping was more than 1 minute ago
+            long currentTime = Instant.now().toEpochMilli();
+            long timeSinceLastPing = currentTime - lastPing;
+            
+            return timeSinceLastPing > HEARTBEAT_TIMEOUT.toMillis();
+            
+        } catch (JsonProcessingException e) {
+            log.error("Error checking heartbeat expiration", e);
+            return true; // Assume expired on error
+        }
+    }
+
+    /**
+     * Cleanup a specific session if its heartbeat has expired
+     */
+    public void cleanupExpiredHeartbeatSession(UUID attemptId) {
+        if (isSessionHeartbeatExpired(attemptId)) {
+            String attemptKey = ATTEMPT_SESSION_PREFIX + attemptId.toString();
+            String activityKey = SESSION_ACTIVITY_PREFIX + attemptId.toString();
+            
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> sessionData = redisService.getValue(attemptKey, Map.class);
+                
+                if (sessionData != null) {
+                    String sessionId = (String) sessionData.get("sessionId");
+                    String userId = (String) sessionData.get("userId");
+                    
+                    // Remove from Redis
+                    redisService.delete(attemptKey);
+                    redisService.delete(activityKey);
+                    
+                    log.info("Cleaned up expired heartbeat session - attemptId: {}, userId: {}, sessionId: {}", 
+                            attemptId, userId, sessionId);
+                }
+                
+            } catch (JsonProcessingException e) {
+                log.error("Error cleaning up expired heartbeat session", e);
+            }
+        }
+    }
+
     @Override
     public String getActiveSessionForAttempt(UUID attemptId) {
         String attemptKey = ATTEMPT_SESSION_PREFIX + attemptId.toString();
@@ -180,16 +260,27 @@ public class AttemptSessionServiceImpl implements AttemptSessionService {
                 return false;
             }
             
+            Long lastPing = (Long) activityData.get("lastPing");
             Long lastActivity = (Long) activityData.get("lastActivity");
-            if (lastActivity == null) {
-                return false;
+            
+            // Prioritize heartbeat ping for session validation
+            if (lastPing != null) {
+                long currentTime = Instant.now().toEpochMilli();
+                long timeSinceLastPing = currentTime - lastPing;
+                
+                // Session is active if last ping was within 1 minute
+                return timeSinceLastPing < HEARTBEAT_TIMEOUT.toMillis();
             }
             
-            // Consider session active if last activity was within the last 5 minutes
-            long currentTime = Instant.now().toEpochMilli();
-            long timeDiff = currentTime - lastActivity;
+            // Fallback to lastActivity if no ping data (for backward compatibility)
+            if (lastActivity != null) {
+                long currentTime = Instant.now().toEpochMilli();
+                long timeDiff = currentTime - lastActivity;
+                
+                return timeDiff < ACTIVITY_TTL.toMillis();
+            }
             
-            return timeDiff < ACTIVITY_TTL.toMillis();
+            return false;
             
         } catch (JsonProcessingException e) {
             log.error("Error checking session activity", e);

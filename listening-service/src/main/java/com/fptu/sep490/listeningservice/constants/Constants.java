@@ -42,6 +42,8 @@ public class Constants {
         public static final String PART_2_POINT_INVALID = "PART_2_POINT_INVALID";
         public static final String PART_3_POINT_INVALID = "PART_3_POINT_INVALID";
         public static final String PART_4_POINT_INVALID = "PART_4_POINT_INVALID";
+        public static final String ATTEMPT_SESSION_ACTIVE = "ATTEMPT_SESSION_ACTIVE";
+        public static final String ATTEMPT_IN_USE = "ATTEMPT_IN_USE";
     }
 
     public final class RedisKey {
@@ -96,6 +98,8 @@ public class Constants {
         public static final String PART_2_POINT_INVALID = "400034";
         public static final String PART_3_POINT_INVALID = "400035";
         public static final String PART_4_POINT_INVALID = "400036";
+        public static final String ATTEMPT_SESSION_ACTIVE = "400037";
+        public static final String ATTEMPT_IN_USE = "400038";
     }
 
     public final class AssemblyAI {

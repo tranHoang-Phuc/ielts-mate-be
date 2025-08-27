@@ -2,6 +2,7 @@ package com.fptu.sep490.personalservice.controller;
 
 import com.fptu.sep490.personalservice.model.enumeration.AttemptSessionMessageType;
 import com.fptu.sep490.personalservice.service.AttemptSessionService;
+import com.fptu.sep490.personalservice.service.impl.AttemptSessionServiceImpl;
 import com.fptu.sep490.personalservice.viewmodel.request.AttemptSessionMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class AttemptWebSocketController {
 
     private final AttemptSessionService attemptSessionService;
+    private final AttemptSessionServiceImpl attemptSessionServiceImpl;
     private final SimpMessageSendingOperations messagingTemplate;
 
 
@@ -40,6 +42,9 @@ public class AttemptWebSocketController {
                 attemptId, userId, sessionId);
         
         try {
+            // Check and cleanup any expired heartbeat sessions first
+            attemptSessionServiceImpl.cleanupExpiredHeartbeatSession(attemptId);
+            
             boolean registered = attemptSessionService.registerAttemptSession(attemptId, userId, sessionId);
             
             AttemptSessionMessage response = AttemptSessionMessage.builder()
@@ -190,6 +195,9 @@ public class AttemptWebSocketController {
         }
         
         try {
+            // Check and cleanup any expired heartbeat sessions first
+            attemptSessionServiceImpl.cleanupExpiredHeartbeatSession(attemptId);
+            
             boolean blocked = attemptSessionService.isAttemptBlocked(attemptId, sessionId);
             String activeSession = attemptSessionService.getActiveSessionForAttempt(attemptId);
             
