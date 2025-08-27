@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: transcript" />
+    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: add workspace.xml">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose-prod.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,6 +34,10 @@
     &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
   }
 }</component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -41,29 +49,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.Discovery.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Gateway.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Identity.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Personal.executor&quot;: &quot;Run&quot;,
-    &quot;Spring Boot.Reading.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.Discovery.executor": "Run",
+    "Spring Boot.File.executor": "Run",
+    "Spring Boot.Gateway.executor": "Run",
+    "Spring Boot.Identity.executor": "Run",
+    "Spring Boot.Listening.executor": "Run",
+    "Spring Boot.Personal.executor": "Run",
+    "Spring Boot.Reading.executor": "Run",
+    "git-widget-placeholder": "local",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "run.configurations.included.in.services": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -78,8 +88,8 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
-              <option value="Discovery" />
-              <option value="Identity" />
+              <option value="Notification" />
+              <option value="Reading" />
             </set>
           </value>
         </entry>
@@ -186,8 +196,17 @@
       <option name="presentableId" value="Default" />
       <updated>1756269731015</updated>
       <workItem from="1756269735395" duration="306000" />
+      <workItem from="1756310008576" duration="981000" />
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fix: add workspace.xml">
+      <option name="closed" value="true" />
+      <created>1756302489617</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1756302489617</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -195,7 +214,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: prevent practice on 2 tabs" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: prevent practice on 2 tabs" />
+    <MESSAGE value="fix: add workspace.xml" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: add workspace.xml" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
