@@ -137,7 +137,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .instruction(request.instruction())
                 .title(request.title())
                 .status(safeEnumFromOrdinal(Status.values(), request.status()))
-                .transcription(request.isAutomaticTranscription() ? null : request.transcription())
+                .transcription(request.isAutomaticTranscription() ? request.transcription() : null)
                 .isOriginal(true)
                 .isCurrent(true)
                 .parent(null)
@@ -193,9 +193,11 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
             }
         }
 
-        if(task.getPartNumber().equals(PartNumber.PART_1) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
+        if(task.getPartNumber().equals(PartNumber.PART_1)
+                && totalPoint != TotalPoint.PART_QUESTION_LISTENING
                 &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
-                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))
+                && status != Status.DRAFT.ordinal()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PART_1_POINT_INVALID,
                     Constants.ErrorCode.PART_1_POINT_INVALID,
@@ -204,7 +206,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         }
         if(task.getPartNumber().equals(PartNumber.PART_2) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
                 &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
-                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))
+                && status != Status.DRAFT.ordinal()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PART_2_POINT_INVALID,
                     Constants.ErrorCode.PART_2_POINT_INVALID,
@@ -213,7 +216,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         }
         if(task.getPartNumber().equals(PartNumber.PART_3) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
                 &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
-                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))
+                && status != Status.DRAFT.ordinal()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PART_3_POINT_INVALID,
                     Constants.ErrorCode.PART_3_POINT_INVALID,
@@ -223,7 +227,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
         if(task.getPartNumber().equals(PartNumber.PART_4) && totalPoint != TotalPoint.PART_QUESTION_LISTENING
                 &&( safeEnumFromOrdinal(Status.values(),ieltsType).equals(Status.TEST)
-                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))) {
+                || safeEnumFromOrdinal(Status.values(), ieltsType).equals(Status.PUBLISHED))
+                && status != Status.DRAFT.ordinal()) {
             throw new AppException(
                     Constants.ErrorCodeMessage.PART_4_POINT_INVALID,
                     Constants.ErrorCode.PART_4_POINT_INVALID,
