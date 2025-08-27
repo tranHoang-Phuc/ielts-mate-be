@@ -964,6 +964,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                             .audioFileId(task.getAudioFileId())
                             .ieltsType(task.getIeltsType().ordinal())
                             .partNumber(task.getPartNumber().ordinal())
+                            .transcript(task.getTranscription())
                             .questionGroups(questionGroupsList)
                             .build()
             );

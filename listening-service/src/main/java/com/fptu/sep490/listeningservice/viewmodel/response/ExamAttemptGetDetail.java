@@ -67,6 +67,8 @@ public record ExamAttemptGetDetail(
                 String title,
                 @JsonProperty("audio_file_id")
                 UUID audioFileId,
+                @JsonProperty("transcript")
+                String transcript,
 
                 @JsonProperty("question_groups")
                 List<QuestionGroupAttemptResponse> questionGroups

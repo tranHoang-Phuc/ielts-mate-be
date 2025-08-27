@@ -797,6 +797,7 @@ public class AttemptServiceImpl implements AttemptService {
                 .instruction(listeningTask.getInstruction())
                 .title(listeningTask.getTitle())
                 .audioFileId(listeningTask.getAudioFileId())
+                .transcription(listeningTask.getTranscription())
                 .questionGroups(questionGroups.stream().sorted(
                         Comparator.comparing(ListeningTaskGetAllResponse.QuestionGroupResponse::sectionOrder)
                 ).toList())
