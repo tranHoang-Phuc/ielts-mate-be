@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record ListeningTaskGetAllResponse(
         @JsonProperty("listening_task_id")
         UUID taskId,

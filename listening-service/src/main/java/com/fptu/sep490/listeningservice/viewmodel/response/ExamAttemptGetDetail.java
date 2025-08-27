@@ -53,7 +53,6 @@ public record ExamAttemptGetDetail(
             ListeningTaskResponse listeningTaskIdPart4
     ) {
         @Builder
-        @JsonInclude(JsonInclude.Include.NON_NULL)
         public record ListeningTaskResponse(
                 @JsonProperty("task_id")
                 UUID taskId,

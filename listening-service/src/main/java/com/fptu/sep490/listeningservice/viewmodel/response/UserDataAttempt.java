@@ -7,7 +7,6 @@ import lombok.Builder;
 import java.util.List;
 import java.util.UUID;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 public record UserDataAttempt(
         @JsonProperty("attempt_id")
