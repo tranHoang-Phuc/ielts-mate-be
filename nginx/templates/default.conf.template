@@ -77,8 +77,8 @@ server {
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Upgrade,Connection,Sec-WebSocket-Key,Sec-WebSocket-Version,Sec-WebSocket-Protocol' always;
     }
 
-    # Special configuration for SSE endpoints
-    location /api/v1/notification/sse/ {
+    # Special configuration for SSE endpoints - more specific path matching
+    location ~ ^/api/v1/notification/sse/stream/ {
         proxy_pass http://api-gateway:9191;
         proxy_set_header Host                $host;
         proxy_set_header X-Real-IP           $remote_addr;
@@ -93,6 +93,7 @@ server {
         proxy_buffering off;
         proxy_read_timeout 86400s;
         proxy_send_timeout 86400s;
+        proxy_request_buffering off;
         
         # Disable gzip for SSE
         gzip off;
@@ -105,31 +106,256 @@ server {
         proxy_hide_header 'Access-Control-Allow-Credentials';
         
         # Add CORS headers for SSE with specific origin handling
-        # Set the allowed origin based on the request origin
         set $cors_origin "*";
-        
-        # For requests with Origin header, use the actual origin for credential support
         if ($http_origin != "") {
             set $cors_origin $http_origin;
         }
         
         add_header 'Access-Control-Allow-Origin' $cors_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
-        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS' always;
         add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
         add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
         
-        # Handle preflight requests
+        # Handle preflight requests for SSE
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' $cors_origin;
             add_header 'Access-Control-Allow-Credentials' 'true';
-            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS';
             add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
             add_header 'Access-Control-Max-Age' 1728000;
             add_header 'Content-Type' 'text/plain; charset=utf-8';
             add_header 'Content-Length' 0;
             return 204;
         }
+    }
+
+    # Specific configuration for reading endpoints
+    location /api/v1/reading/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for reading API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' $cors_origin;
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Specific configuration for listening endpoints
+    location /api/v1/listening/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for listening API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' $cors_origin;
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Specific configuration for identity endpoints
+    location /api/v1/identity/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for identity API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' $cors_origin;
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Specific configuration for personal endpoints (excluding WebSocket)
+    location /api/v1/personal/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for personal API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' $cors_origin;
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Specific configuration for resource/file endpoints
+    location /api/v1/resource/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for resource API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' $cors_origin;
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+
+    # Fallback for other notification endpoints (non-SSE)
+    location /api/v1/notification/ {
+        proxy_pass http://api-gateway:9191;
+        proxy_set_header Host                $host;
+        proxy_set_header X-Real-IP           $remote_addr;
+        proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto   $scheme;
+        proxy_set_header Origin              $http_origin;
+        
+        # Hide CORS headers from backend to prevent duplicates
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
+        # Standard CORS for notification API
+        set $cors_origin "*";
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
     }
 
     location / {
