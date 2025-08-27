@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSE Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        .info { background: #e3f2fd; color: #1565c0; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SSE Connection Test</h1>
+        
+        <div>
+            <label>User ID:</label>
+            <input type="text" id="userId" value="e2cf7176-42a3-4d32-948b-1714bbe1a0b4" placeholder="Enter user ID">
+        </div>
+        
+        <div>
+            <label>SSE URL:</label>
+            <input type="text" id="sseUrl" value="https://tootsstore.online/api/v1/notification/sse/stream/" placeholder="SSE endpoint base URL">
+        </div>
+        
+        <div>
+            <button onclick="connectSSE()">Connect SSE</button>
+            <button onclick="disconnectSSE()">Disconnect</button>
+            <button onclick="testSend()">Test Send Message</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+        
+        <h3>Connection Status: <span id="status">Disconnected</span></h3>
+        
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        let eventSource = null;
+        let logs = document.getElementById('logs');
+        let status = document.getElementById('status');
+
+        function addLog(message, type = 'info') {
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logs.insertBefore(logDiv, logs.firstChild);
+        }
+
+        function connectSSE() {
+            const userId = document.getElementById('userId').value;
+            const baseUrl = document.getElementById('sseUrl').value;
+            const fullUrl = baseUrl + userId;
+
+            if (eventSource) {
+                eventSource.close();
+            }
+
+            addLog(`Attempting to connect to: ${fullUrl}`, 'info');
+            status.textContent = 'Connecting...';
+
+            eventSource = new EventSource(fullUrl, {
+                withCredentials: true
+            });
+
+            eventSource.onopen = function(event) {
+                addLog('SSE connection opened successfully!', 'success');
+                status.textContent = 'Connected';
+                console.log('SSE opened:', event);
+            };
+
+            eventSource.onmessage = function(event) {
+                addLog(`Message received: ${event.data}`, 'success');
+                console.log('SSE message:', event);
+            };
+
+            eventSource.addEventListener('connection', function(event) {
+                addLog(`Connection event: ${event.data}`, 'success');
+                console.log('Connection event:', event);
+            });
+
+            eventSource.addEventListener('notification', function(event) {
+                addLog(`Notification event: ${event.data}`, 'success');
+                console.log('Notification event:', event);
+            });
+
+            eventSource.onerror = function(event) {
+                addLog(`SSE Error: ${JSON.stringify(event)}`, 'error');
+                status.textContent = 'Error';
+                console.error('SSE error:', event);
+                
+                // Add more detailed error information
+                if (eventSource.readyState === EventSource.CONNECTING) {
+                    addLog('Connection is still trying to connect...', 'info');
+                } else if (eventSource.readyState === EventSource.CLOSED) {
+                    addLog('Connection has been closed', 'error');
+                }
+            };
+        }
+
+        function disconnectSSE() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+                addLog('SSE connection closed', 'info');
+                status.textContent = 'Disconnected';
+            }
+        }
+
+        function testSend() {
+            fetch('https://tootsstore.online/api/v1/notification/sse/send')
+                .then(response => {
+                    if (response.ok) {
+                        addLog('Test message sent successfully', 'success');
+                    } else {
+                        addLog(`Failed to send test message: ${response.status}`, 'error');
+                    }
+                })
+                .catch(error => {
+                    addLog(`Error sending test message: ${error.message}`, 'error');
+                });
+        }
+
+        function clearLogs() {
+            logs.innerHTML = '';
+        }
+
+        // Test health endpoint on page load
+        window.onload = function() {
+            fetch('https://tootsstore.online/api/v1/notification/sse/health')
+                .then(response => response.text())
+                .then(data => {
+                    addLog(`Health check: ${data}`, 'success');
+                })
+                .catch(error => {
+                    addLog(`Health check failed: ${error.message}`, 'error');
+                });
+        };
+    </script>
+</body>
+</html>
+

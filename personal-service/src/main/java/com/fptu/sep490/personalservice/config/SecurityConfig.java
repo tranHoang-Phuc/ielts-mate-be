@@ -28,7 +28,11 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/webjars/**",
-            "/internal/**"
+            "/internal/**",
+            "/ws/**",
+            "/app/**",
+            "/topic/**",
+            "/queue/**"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,

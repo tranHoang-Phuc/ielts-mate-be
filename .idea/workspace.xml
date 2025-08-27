@@ -5,8 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/ChoiceServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notification-service/src/main/resources/static/test-sse.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/CorsFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/ScheduleConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/controller/AttemptWebSocketController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/model/enumeration/AttemptSessionMessageType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/AttemptSessionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/AttemptSessionServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/viewmodel/request/AttemptSessionMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personal-service/src/main/resources/static/attempt-session-test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-local.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api-gateway/src/main/resources/application-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/api-gateway/src/main/resources/application-prod.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx/templates/default.conf.template" beforeDir="false" afterPath="$PROJECT_DIR$/nginx/templates/default.conf.template" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebSocketConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebSocketConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebSocketEventListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/config/WebSocketEventListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/constants/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,27 +75,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;Spring Boot.ApiGatewayApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.DiscoveryServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.FileServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.IdentityServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.ListeningServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;Spring Boot.ReadingServiceApplication.executor&quot;: &quot;Debug&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;prod&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.31034482&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "Spring Boot.ApiGatewayApplication.executor": "Debug",
+    "Spring Boot.DiscoveryServiceApplication.executor": "Debug",
+    "Spring Boot.FileServiceApplication.executor": "Debug",
+    "Spring Boot.IdentityServiceApplication.executor": "Debug",
+    "Spring Boot.ListeningServiceApplication.executor": "Debug",
+    "Spring Boot.ReadingServiceApplication.executor": "Debug",
+    "git-widget-placeholder": "Merging prod",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.31034482"
   }
-}</component>
+}]]></component>
   <component name="ReactorSettings">
     <option name="notificationShown" value="true" />
   </component>

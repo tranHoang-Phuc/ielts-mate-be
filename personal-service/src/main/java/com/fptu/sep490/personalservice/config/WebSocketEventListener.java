@@ -2,6 +2,7 @@ package com.fptu.sep490.personalservice.config;
 
 import com.fptu.sep490.personalservice.model.enumeration.MessageType;
 import com.fptu.sep490.personalservice.service.AIService;
+import com.fptu.sep490.personalservice.service.AttemptSessionService;
 import com.fptu.sep490.personalservice.viewmodel.request.ChatMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,12 +12,15 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class WebSocketEventListener {
     private final SimpMessageSendingOperations messageTemplate;
     private final AIService aiService;
+    private final AttemptSessionService attemptSessionService;
 
 
 
@@ -46,5 +50,26 @@ public class WebSocketEventListener {
 
         // Clear AI session tương ứng
         aiService.clearSession(sessionId);
+        
+        // Clean up attempt session if exists
+        cleanupAttemptSession(accessor, sessionId);
+    }
+    
+    private void cleanupAttemptSession(StompHeaderAccessor accessor, String sessionId) {
+        try {
+            String attemptIdStr = (String) accessor.getSessionAttributes().get("attemptId");
+            String userId = (String) accessor.getSessionAttributes().get("userId");
+            
+            if (attemptIdStr != null && userId != null) {
+                UUID attemptId = UUID.fromString(attemptIdStr);
+                
+                log.info("Cleaning up attempt session on disconnect - attemptId: {}, userId: {}, sessionId: {}", 
+                        attemptId, userId, sessionId);
+                
+                attemptSessionService.unregisterAttemptSession(attemptId, sessionId);
+            }
+        } catch (Exception e) {
+            log.error("Error cleaning up attempt session on disconnect", e);
+        }
     }
 }

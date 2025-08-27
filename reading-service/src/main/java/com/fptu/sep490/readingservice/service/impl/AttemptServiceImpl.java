@@ -340,6 +340,9 @@ public class AttemptServiceImpl implements AttemptService {
             );
         }
 
+        // Check if attempt is currently active in another session
+        checkAttemptSessionActivity(UUID.fromString(attemptId), userId);
+
         String rawJson = attempt.getVersion(); // Là một chuỗi chứa JSON
 
         JsonNode decodedNode = objectMapper.readTree(rawJson);
@@ -833,6 +836,48 @@ public class AttemptServiceImpl implements AttemptService {
         } catch (Exception e) {
             throw new AppException(Constants.ErrorCodeMessage.UNAUTHORIZED, Constants.ErrorCode.UNAUTHORIZED,
                     HttpStatus.UNAUTHORIZED.value());
+        }
+    }
+
+    private void checkAttemptSessionActivity(UUID attemptId, String userId) throws JsonProcessingException {
+        String attemptSessionKey = "attempt_session:" + attemptId.toString();
+        String sessionActivityKey = "session_activity:" + attemptId.toString();
+        
+        // Check if attempt session exists in Redis
+        @SuppressWarnings("unchecked")
+        Map<String, Object> sessionData = redisService.getValue(attemptSessionKey, Map.class);
+        if (sessionData != null) {
+            String sessionUserId = (String) sessionData.get("userId");
+            String sessionId = (String) sessionData.get("sessionId");
+            
+            // If it's the same user, check if session is still active
+            if (userId.equals(sessionUserId)) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> activityData = redisService.getValue(sessionActivityKey, Map.class);
+                if (activityData != null) {
+                    Long lastActivity = (Long) activityData.get("lastActivity");
+                    if (lastActivity != null) {
+                        long currentTime = System.currentTimeMillis();
+                        long timeDiff = currentTime - lastActivity;
+                        
+                        // If last activity was within 5 minutes, consider it active
+                        if (timeDiff < 300000) { // 5 minutes in milliseconds
+                            throw new AppException(
+                                    Constants.ErrorCodeMessage.ATTEMPT_SESSION_ACTIVE,
+                                    Constants.ErrorCode.ATTEMPT_SESSION_ACTIVE,
+                                    HttpStatus.CONFLICT.value()
+                            );
+                        }
+                    }
+                }
+            } else {
+                // Different user is using this attempt
+                throw new AppException(
+                        Constants.ErrorCodeMessage.ATTEMPT_IN_USE,
+                        Constants.ErrorCode.ATTEMPT_IN_USE,
+                        HttpStatus.CONFLICT.value()
+                );
+            }
         }
     }
 }
