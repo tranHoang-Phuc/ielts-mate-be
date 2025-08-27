@@ -735,35 +735,42 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 if (currentVersionQuestion.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
 
                     List<UUID> choiceVersionIds = new ArrayList<>();
+                    List<Choice> choices = new ArrayList<>();
                     if (currentVersionQuestion.getParent() == null) {
                         List<Choice> currentVersionChoices = choiceRepository.getVersionChoiceByQuestionId(
                                 currentVersionQuestion.getQuestionId());
-                        currentVersionChoices.stream()
+                        Map<UUID, Choice> uniqueChoices = new LinkedHashMap<>();
+                        for (Choice c : currentVersionChoices) {
+                            uniqueChoices.put(c.getChoiceId(), c);
+                        }
+                        choices.addAll(uniqueChoices.values());
+                        choices.stream()
                                 .map(Choice::getChoiceId)
                                 .forEach(choiceVersionIds::add);
-
-                        if (currentVersionChoices.isEmpty()) {
+                        if (choices.isEmpty()) {
                             throw new AppException(
                                     Constants.ErrorCodeMessage.CHOICE_NOT_FOUND,
                                     Constants.ErrorCode.CHOICE_NOT_FOUND,
                                     HttpStatus.NOT_FOUND.value()
                             );
                         }
-                        currentVersionChoicesByQuestion.put(currentVersionQuestion, currentVersionChoices);
+                        currentVersionChoicesByQuestion.put(currentVersionQuestion, choices);
                     } else {
                         List<Choice> originVersionChoices = choiceRepository.getVersionChoiceByParentQuestionId(
                                 currentVersionQuestion.getParent().getQuestionId());
-                        List<Choice> choices = new ArrayList<>();
-
+                        Map<UUID, Choice> uniqueChoices = new LinkedHashMap<>();
                         for (Choice choice : originVersionChoices) {
+                            Choice toAdd;
                             if (!choice.getIsCurrent()) {
-                                Choice current = choiceRepository.getCurrentVersionChoiceByChoiceId(choice.getChoiceId());
-                                choices.add(current);
-
+                                toAdd = choiceRepository.getCurrentVersionChoiceByChoiceId(choice.getChoiceId());
                             } else {
-                                choices.add(choice);
+                                toAdd = choice;
+                            }
+                            if (toAdd != null) {
+                                uniqueChoices.put(toAdd.getChoiceId(), toAdd);
                             }
                         }
+                        choices.addAll(uniqueChoices.values());
                         choices.stream()
                                 .map(Choice::getChoiceId)
                                 .forEach(choiceVersionIds::add);
@@ -800,6 +807,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                                                         choice.getContent(),
                                                                         choice.getChoiceOrder()
                                                                 ))
+                                                                .sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder))
                                                                 .collect(Collectors.toList());
 
 //
