@@ -4,13 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: add workspace.xml">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/specification/ListeningTaskSpecification.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/specification/ListeningTaskSpecification.java" afterDir="false" />
+    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="Merge branch 'local' of https://github.com/tranHoang-Phuc/ielts-mate-be into prod&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java">
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ExamAttemptGetDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ExamAttemptGetDetail.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskGetAllResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/ListeningTaskGetAllResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/UserDataAttempt.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/viewmodel/response/UserDataAttempt.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,7 +72,7 @@
     "Spring Boot.Listening.executor": "Run",
     "Spring Boot.ListeningServiceApplication.executor": "Debug",
     "Spring Boot.ReadingServiceApplication.executor": "Debug",
-    "git-widget-placeholder": "prod",
+    "git-widget-placeholder": "Merging prod",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",

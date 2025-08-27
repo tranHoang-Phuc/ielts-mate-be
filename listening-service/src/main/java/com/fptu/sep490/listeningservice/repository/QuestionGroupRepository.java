@@ -43,4 +43,11 @@ public interface QuestionGroupRepository extends JpaRepository<QuestionGroup, UU
     """)
     List<QuestionGroup> findAllByIdOrderBySectionOrder(@Param("ids") List<UUID> ids);
 
+    @Query("""
+        SELECT qg FROM QuestionGroup qg
+        WHERE (qg.parent.groupId = :currentGroupId AND qg.isCurrent = true and qg.isDeleted = false)
+           OR (qg.groupId = :currentGroupId AND qg.isCurrent = true and qg.isDeleted = false)
+        ORDER BY qg.createdAt DESC
+    """)
+    UUID getNewestGroupId(UUID currentGroupId);
 }
