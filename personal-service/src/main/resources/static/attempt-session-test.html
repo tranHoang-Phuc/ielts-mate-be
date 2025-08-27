@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Attempt Session Management Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial; margin: 16px; }
+        .box { border: 1px solid #ccc; padding: 8px; height: 180px; overflow:auto; margin-bottom:8px; background: #f9f9f9; }
+        input, button { padding:6px; margin-right:6px; }
+        .small { font-size: 12px; color: #666; }
+        .status { padding: 8px; margin: 8px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    </style>
+</head>
+<body>
+<h2>Attempt Session Management Test</h2>
+
+<div>
+    <label>User ID (from JWT):</label>
+    <span id="userIdDisplay" style="font-weight: bold; color: #333;">Loading...</span>
+    <br/><br/>
+    <label>Attempt ID</label>
+    <input id="attemptId" placeholder="attempt-uuid" value="550e8400-e29b-41d4-a716-446655440000"/>
+    <button id="connectBtn">Connect</button>
+    <span class="small">Each tab will have a unique session</span>
+</div>
+
+<div id="statusDiv" class="status warning">Not connected</div>
+
+<div>
+    <button id="testInfoBtn">Test /info Endpoint</button>
+    <button id="registerBtn" disabled>Register Attempt</button>
+    <button id="checkBtn" disabled>Check Status</button>
+    <button id="unregisterBtn" disabled>Unregister Attempt</button>
+    <button id="startPingBtn" disabled>Start Ping-Pong</button>
+    <button id="stopPingBtn" disabled>Stop Ping-Pong</button>
+</div>
+
+<h3>Messages</h3>
+<div id="messageBox" class="box"></div>
+
+<h3>Instructions</h3>
+<ul>
+    <li>1. Open this page in multiple tabs</li>
+    <li>2. Connect from each tab</li>
+    <li>3. Register the same attempt ID from different tabs</li>
+    <li>4. Only the first tab should succeed, others should be blocked</li>
+    <li>5. Start ping-pong to maintain session</li>
+    <li>6. Close a tab or stop ping-pong to see session cleanup</li>
+</ul>
+
+<script>
+    const WS_URL = "http://localhost:9191/api/v1/personal/ws";
+    const ACCESS_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJWT3FKajJxRWJiQzVmci1sc19ZYzNyTWYzRzJpNGJkU2RteEhVVkd1Z0ljIn0.eyJleHAiOjE3NTYyOTI3OTQsImlhdCI6MTc1NjI1Njc5NCwianRpIjoiMDVmNDQzMTUtZGQ1NS00ZjEyLThmZTYtMTdmYTU1ODA5YmNkIiwiaXNzIjoiaHR0cDovL2lkZW50aXR5LnNlcC5sb2NhbC9yZWFsbXMvU0VQNDkwIiwiYXVkIjpbInJlYWxtLW1hbmFnZW1lbnQiLCJhY2NvdW50Il0sInN1YiI6ImUwMjI0NGIwLTI4ZmUtNDk4OC1iOGRmLTVmMjRhNzY1Y2VmMyIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZwdHVfc2VwNDkwIiwic2lkIjoiNTFjMGIzOTItYWNiNS00MzJiLTgyMTctNTJhZWJhOTM5MGVkIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyIvKiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsiQ1JFQVRPUiIsIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1zZXA0OTAiLCJ1bWFfYXV0aG9yaXphdGlvbiIsIlVTRVIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJyZWFsbS1tYW5hZ2VtZW50Ijp7InJvbGVzIjpbIm1hbmFnZS11c2VycyJdfSwiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJvcGVuaWQgZW1haWwgcHJvZmlsZSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJuYW1lIjoiQ3JlYXRvciBUZXN0dHR0dHQiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJjcmVhdG9ydGVzdDEyM0BnbWFpbC5jb20iLCJnaXZlbl9uYW1lIjoiQ3JlYXRvciIsImZhbWlseV9uYW1lIjoiVGVzdHR0dHR0IiwiZW1haWwiOiJjcmVhdG9ydGVzdDEyM0BnbWFpbC5jb20ifQ.HnE1_LVPb1kSB2qxHvelOKBdFJ9Ho8bmotCyqc1PgaqRfMEOB9Bm7Xp8OQ6jQn-N4Qh5VPD0Ctas1gyxM_DwcmMpzSFBz4-c6QT1zmciN0lRjLbQl8xzx4e3SaVzb1yT8WiGBReM_H2Bh_m_2F_wJglUJrV8ZHaV1uPKb_HXpE7wE7qu3b_EZXZwSGyKoOIKqPIw10vGO8Vop9WXpVrWrNSJ-lIe_iZ1jWUQR_dbYTS0lNJ89zxymxqHSAriCdj7GpSZL6irhaEDBjlOR8-E53XN8f4Fs0aoHZffTJntHzTWU0Jos-lvkxIxh5DkUYSUyxlw9zcjUzFNYKi0n62m1A";
+
+    let stompClient = null;
+    let connected = false;
+    let pingInterval = null;
+    const sessionId = Math.random().toString(36).substr(2,9);
+
+    // Parse JWT token to get user info
+    function parseJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            console.error('Error parsing JWT:', e);
+            return null;
+        }
+    }
+
+    const tokenPayload = parseJWT(ACCESS_TOKEN);
+    const userId = tokenPayload ? tokenPayload.sub : 'test-user';
+
+    // Display user information on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (tokenPayload) {
+            const userInfo = `${tokenPayload.preferred_username} (${tokenPayload.sub})`;
+            document.getElementById('userIdDisplay').textContent = userInfo;
+            logMessage(`JWT Token loaded for user: ${userInfo}`, 'success');
+            logMessage(`Token expires at: ${new Date(tokenPayload.exp * 1000).toLocaleString()}`, 'info');
+        } else {
+            document.getElementById('userIdDisplay').textContent = 'Failed to parse token';
+            logMessage('Failed to parse JWT token', 'error');
+        }
+    });
+
+    function logMessage(text, type = 'info') {
+        const box = document.getElementById("messageBox");
+        const timestamp = new Date().toLocaleTimeString();
+        const typeColor = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+        box.innerHTML += `<span style="color: ${typeColor}">[${timestamp}] ${text}</span><br/>`;
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function updateStatus(message, type) {
+        const statusDiv = document.getElementById("statusDiv");
+        statusDiv.textContent = message;
+        statusDiv.className = `status ${type}`;
+    }
+
+    function updateButtons(connectedState) {
+        document.getElementById("connectBtn").disabled = connectedState;
+        document.getElementById("registerBtn").disabled = !connectedState;
+        document.getElementById("checkBtn").disabled = !connectedState;
+        document.getElementById("unregisterBtn").disabled = !connectedState;
+        document.getElementById("startPingBtn").disabled = !connectedState;
+        document.getElementById("stopPingBtn").disabled = !connectedState || !pingInterval;
+    }
+
+    document.getElementById("testInfoBtn").addEventListener("click", testInfoEndpoint);
+    document.getElementById("connectBtn").addEventListener("click", connect);
+    document.getElementById("registerBtn").addEventListener("click", registerAttempt);
+    document.getElementById("checkBtn").addEventListener("click", checkStatus);
+    document.getElementById("unregisterBtn").addEventListener("click", unregisterAttempt);
+    document.getElementById("startPingBtn").addEventListener("click", startPingPong);
+    document.getElementById("stopPingBtn").addEventListener("click", stopPingPong);
+
+    function testInfoEndpoint() {
+        const infoUrl = WS_URL + "/info";
+        logMessage("Testing /info endpoint: " + infoUrl, "info");
+        
+        fetch(infoUrl, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Authorization': 'Bearer ' + ACCESS_TOKEN
+            }
+        })
+        .then(response => {
+            logMessage("Info endpoint response status: " + response.status, "info");
+            return response.json();
+        })
+        .then(data => {
+            logMessage("Info endpoint data: " + JSON.stringify(data), "success");
+        })
+        .catch(error => {
+            logMessage("Info endpoint error: " + error.toString(), "error");
+            console.error("Fetch error:", error);
+        });
+    }
+
+    function connect() {
+        if (connected) { alert("Already connected"); return; }
+        
+        logMessage("Attempting to connect to: " + WS_URL, "info");
+        
+        const sock = new SockJS(WS_URL);
+        stompClient = Stomp.over(sock);
+        stompClient.debug = function(msg) { 
+            console.debug("STOMP:", msg);
+            if (msg.includes("ERROR") || msg.includes("FAILED")) {
+                logMessage("STOMP Debug: " + msg, "error");
+            }
+        };
+
+        // Include JWT token in connection headers
+        const headers = {
+            'Authorization': 'Bearer ' + ACCESS_TOKEN
+        };
+
+        stompClient.connect(headers, function(frame) {
+            connected = true;
+            updateStatus("WebSocket connected (Session: " + sessionId + ")", "success");
+            updateButtons(true);
+            logMessage("Connected to WebSocket", "success");
+
+            // Subscribe to attempt responses
+            stompClient.subscribe("/user/queue/attempt.response", function(message) {
+                try {
+                    const response = JSON.parse(message.body);
+                    handleAttemptResponse(response);
+                } catch(e) {
+                    logMessage("Error parsing response: " + message.body, "error");
+                }
+            });
+
+        }, function(error) {
+            console.error("STOMP error", error);
+            updateStatus("Connection error", "error");
+            logMessage("Connection error: " + JSON.stringify(error), "error");
+            
+            // Check for specific CORS errors
+            if (error && error.toString().includes('CORS')) {
+                logMessage("CORS Error detected. Check browser console for details.", "error");
+            }
+        });
+    }
+
+    function handleAttemptResponse(response) {
+        const messageType = response.messageType;
+        const message = response.message;
+        
+        switch(messageType) {
+            case 'SESSION_VALIDATED':
+                logMessage("✓ " + message, "success");
+                if (message.includes("registered")) {
+                    updateStatus("Attempt registered successfully", "success");
+                    
+                    // Auto-start heartbeat ping after successful registration
+                    if (!pingInterval) {
+                        setTimeout(() => {
+                            startPingPong();
+                            logMessage("🔄 Auto-started heartbeat ping (30s interval)", "info");
+                        }, 1000);
+                    }
+                }
+                break;
+            case 'ATTEMPT_BLOCKED':
+                logMessage("✗ " + message, "error");
+                updateStatus("Attempt blocked by another session", "error");
+                break;
+            case 'PONG':
+                logMessage("📡 Pong received", "info");
+                break;
+            default:
+                logMessage("Response: " + message, "info");
+        }
+    }
+
+    function registerAttempt() {
+        if (!connected) return;
+        
+        const attemptId = document.getElementById("attemptId").value;
+        
+        if (!attemptId) {
+            alert("Please enter Attempt ID");
+            return;
+        }
+
+        const message = {
+            messageType: "REGISTER_ATTEMPT",
+            attemptId: attemptId,
+            userId: userId, // Use parsed user ID from JWT token
+            sessionId: sessionId,
+            timestamp: Date.now()
+        };
+
+        const headers = {
+            'Authorization': 'Bearer ' + ACCESS_TOKEN
+        };
+
+        stompClient.send("/app/attempt.register", headers, JSON.stringify(message));
+        logMessage("Registering attempt: " + attemptId + " for user: " + userId, "info");
+    }
+
+    function checkStatus() {
+        if (!connected) return;
+        
+        const attemptId = document.getElementById("attemptId").value;
+        if (!attemptId) {
+            alert("Please enter Attempt ID");
+            return;
+        }
+
+        const message = {
+            messageType: "CHECK_STATUS",
+            attemptId: attemptId,
+            sessionId: sessionId,
+            timestamp: Date.now()
+        };
+
+        const headers = {
+            'Authorization': 'Bearer ' + ACCESS_TOKEN
+        };
+        
+        stompClient.send("/app/attempt.check", headers, JSON.stringify(message));
+        logMessage("Checking attempt status: " + attemptId, "info");
+    }
+
+    function unregisterAttempt() {
+        if (!connected) return;
+        
+        const attemptId = document.getElementById("attemptId").value;
+        if (!attemptId) {
+            alert("Please enter Attempt ID");
+            return;
+        }
+
+        const message = {
+            messageType: "UNREGISTER_ATTEMPT",
+            attemptId: attemptId,
+            sessionId: sessionId,
+            timestamp: Date.now()
+        };
+
+        const headers = {
+            'Authorization': 'Bearer ' + ACCESS_TOKEN
+        };
+        
+        stompClient.send("/app/attempt.unregister", headers, JSON.stringify(message));
+        logMessage("Unregistering attempt: " + attemptId, "info");
+        updateStatus("Attempt unregistered", "warning");
+    }
+
+    function startPingPong() {
+        if (!connected || pingInterval) return;
+        
+        const attemptId = document.getElementById("attemptId").value;
+        if (!attemptId) {
+            alert("Please enter Attempt ID");
+            return;
+        }
+
+        pingInterval = setInterval(() => {
+            const message = {
+                messageType: "PING",
+                attemptId: attemptId,
+                sessionId: sessionId,
+                timestamp: Date.now()
+            };
+
+            const headers = {
+                'Authorization': 'Bearer ' + ACCESS_TOKEN
+            };
+            
+            stompClient.send("/app/attempt.ping", headers, JSON.stringify(message));
+            logMessage("📡 Ping sent", "info");
+        }, 30000); // Ping every 30 seconds (within 1-minute timeout)
+
+        document.getElementById("startPingBtn").disabled = true;
+        document.getElementById("stopPingBtn").disabled = false;
+        logMessage("Started ping-pong mechanism (30s intervals)", "success");
+        updateStatus("Heartbeat active - Ping every 30s", "success");
+    }
+
+    function stopPingPong() {
+        if (pingInterval) {
+            clearInterval(pingInterval);
+            pingInterval = null;
+            document.getElementById("startPingBtn").disabled = false;
+            document.getElementById("stopPingBtn").disabled = true;
+            logMessage("Stopped ping-pong mechanism", "warning");
+            updateStatus("Heartbeat stopped - Session will expire in 1 minute", "warning");
+        }
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (connected && stompClient) {
+            unregisterAttempt();
+        }
+    });
+</script>
+
+</body>
+</html>
