@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: add workspace.xml">
+    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: trascript">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose-prod.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose-prod.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningExamRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/specification/ListeningTaskSpecification.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/specification/ListeningTaskSpecification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,10 +34,10 @@
     &quot;accountId&quot;: &quot;5ea8103d-a79c-4e58-8ae3-2d325d43e98d&quot;
   }
 }</component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
 }</component>
@@ -49,31 +49,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.Discovery.executor": "Run",
-    "Spring Boot.File.executor": "Run",
-    "Spring Boot.Gateway.executor": "Run",
-    "Spring Boot.Identity.executor": "Run",
-    "Spring Boot.Listening.executor": "Run",
-    "Spring Boot.Personal.executor": "Run",
-    "Spring Boot.Reading.executor": "Run",
-    "git-widget-placeholder": "local",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "run.configurations.included.in.services": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.Discovery.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.File.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.Gateway.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.Identity.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.Listening.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.Personal.executor&quot;: &quot;Run&quot;,
+    &quot;Spring Boot.Reading.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;run.configurations.included.in.services&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunDashboard">
     <option name="configurationTypes">
       <set>
@@ -89,7 +89,6 @@
           <value>
             <set>
               <option value="Notification" />
-              <option value="Reading" />
             </set>
           </value>
         </entry>
@@ -220,16 +219,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java</url>
-          <line>464</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java</url>
-          <line>600</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/personal-service/src/main/java/com/fptu/sep490/personalservice/service/impl/AIServiceImpl.java</url>
           <line>183</line>

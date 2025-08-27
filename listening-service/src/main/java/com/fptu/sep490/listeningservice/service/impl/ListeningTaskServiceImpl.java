@@ -553,7 +553,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 //        List<ListeningTaskGetResponse> responses = tasks.stream()
 //                .map(this :: toListeningTaskGetResponse)
 //                .toList();
-        return new PageImpl<>(responses.stream().sorted(Comparator.comparing(ListeningTaskGetResponse::createdAt).reversed()).toList(), pageable, pageResult.getTotalElements());
+        List<ListeningTaskGetResponse> filtered = responses;
+        return new PageImpl<>(filtered.stream().sorted(Comparator.comparing(ListeningTaskGetResponse::createdAt).reversed()).toList(), pageable, pageResult.getTotalElements());
     }
 
     @Override
