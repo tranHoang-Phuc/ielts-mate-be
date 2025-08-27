@@ -73,4 +73,11 @@ public interface ListeningTaskRepository extends JpaRepository<ListeningTask, UU
     @Query(value = "select count(*) from listening_task where is_original = true and " +
             "is_deleted = false ", nativeQuery = true)
     int getNumberOfTasks();
+
+    @Query("""
+        select lt.taskId from ListeningTask lt
+        where (lt.parent.taskId = :taskId and lt.isCurrent = true and lt.isDeleted = false)
+            or (lt.taskId = :taskId and lt.isCurrent = true and lt.isDeleted = false)
+    """)
+    UUID getNewestTaskId(@Param("taskId") UUID taskId);
 }

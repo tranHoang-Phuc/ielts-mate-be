@@ -697,6 +697,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
 
 
     @Override
+    @Transactional
     public CreateExamAttemptResponse.ListeningExamResponse.ListeningTaskResponse fromListeningTask(String taskId) {
         ListeningTask task = listeningTaskRepository.findById(UUID.fromString(taskId))
                 .orElseThrow(() -> new AppException(
@@ -958,7 +959,10 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                                     .sectionOrder(group.getSectionOrder())
                                     .sectionLabel(group.getSectionLabel())
                                     .instruction(group.getInstruction())
-                                    .questions(questionAttemptResponses)
+                                    .questions(questionAttemptResponses.stream().sorted(
+                                            Comparator.comparing(ExamAttemptGetDetail.ListeningExamResponse
+                                                    .ListeningTaskResponse.QuestionGroupAttemptResponse
+                                                    .QuestionAttemptResponse::questionOrder)).toList())
                                     .dragItems(dragItemResponses)
                                     .build()
                     );
@@ -973,7 +977,8 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                             .audioFileId(task.getAudioFileId())
                             .ieltsType(task.getIeltsType().ordinal())
                             .partNumber(task.getPartNumber().ordinal())
-                            .questionGroups(questionGroupsList)
+                            .questionGroups(questionGroupsList.stream().sorted(Comparator.comparing(ExamAttemptGetDetail
+                                    .ListeningExamResponse.ListeningTaskResponse.QuestionGroupAttemptResponse::sectionOrder)).toList())
                             .build()
             );
         }
