@@ -37,6 +37,9 @@ public class ExamAttempt {
     @JoinColumn(name = "listening_exam_id")
     private ListeningExam listeningExam;
 
+    @Column(name = "is_finish")
+    private Boolean isFinished;
+
     @Column(name = "created_by", length = 100)
     private String createdBy;
 
@@ -50,4 +53,5 @@ public class ExamAttempt {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
 }

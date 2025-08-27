@@ -36,4 +36,6 @@ public interface ExamAttemptService {
     List<AIResultData> getAIResultData(HttpServletRequest request, String token);
 
     BandScoreData getBandScore(HttpServletRequest request, String token);
+
+    void autoSaveExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException;
 }
