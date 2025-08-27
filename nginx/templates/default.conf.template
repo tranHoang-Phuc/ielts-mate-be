@@ -63,8 +63,10 @@ server {
         proxy_hide_header 'Access-Control-Allow-Credentials';
         
         # Set CORS origin for WebSocket
-        set $cors_origin "";
-        if ($http_origin ~* "^https?://(localhost:[0-9]+|127\.0\.0\.1:[0-9]+|.*\.vercel\.app|ielts-mate-fe\.vercel\.app|tootsstore\.online)$") {
+        set $cors_origin "*";
+        
+        # For requests with Origin header, use the actual origin for credential support
+        if ($http_origin != "") {
             set $cors_origin $http_origin;
         }
         
@@ -104,8 +106,10 @@ server {
         
         # Add CORS headers for SSE with specific origin handling
         # Set the allowed origin based on the request origin
-        set $cors_origin "";
-        if ($http_origin ~* "^https?://(localhost:[0-9]+|127\.0\.0\.1:[0-9]+|.*\.vercel\.app|ielts-mate-fe\.vercel\.app|tootsstore\.online)$") {
+        set $cors_origin "*";
+        
+        # For requests with Origin header, use the actual origin for credential support
+        if ($http_origin != "") {
             set $cors_origin $http_origin;
         }
         
@@ -150,14 +154,11 @@ server {
         proxy_pass http://api-gateway:9191;
         
         # Add CORS headers for regular API requests
-        set $cors_origin "";
-        if ($http_origin ~* "^https?://(localhost:[0-9]+|127\.0\.0\.1:[0-9]+|.*\.vercel\.app|ielts-mate-fe\.vercel\.app|tootsstore\.online)$") {
-            set $cors_origin $http_origin;
-        }
+        set $cors_origin "*";
         
-        # Allow same-origin requests (no origin header)
-        if ($http_origin = "") {
-            set $cors_origin "*";
+        # For requests with Origin header, use the actual origin for credential support
+        if ($http_origin != "") {
+            set $cors_origin $http_origin;
         }
         
         add_header 'Access-Control-Allow-Origin' $cors_origin always;

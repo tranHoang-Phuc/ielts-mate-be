@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: nginx">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="4094e639-e929-431b-abd2-4442eae62a60" name="Changes" comment="fix: cors" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -409,7 +407,15 @@
       <option name="project" value="LOCAL" />
       <updated>1756273877830</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="fix: cors">
+      <option name="closed" value="true" />
+      <created>1756274636665</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1756274636665</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -427,7 +433,8 @@
     <MESSAGE value="fix: auto transcript" />
     <MESSAGE value="fix: api gateway" />
     <MESSAGE value="fix: nginx" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: nginx" />
+    <MESSAGE value="fix: cors" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: cors" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
