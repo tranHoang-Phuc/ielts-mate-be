@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: add transcription">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/constants/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamAttemptController.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/controller/ExamAttemptController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ExamAttempt.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/model/ExamAttempt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamAttemptService.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/ExamAttemptService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamAttemptServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/resources/messages/messages.properties" afterDir="false" />
-    </list>
+    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: transcript" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -95,10 +86,19 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.Reading">
+  <component name="RunManager" selected="Spring Boot.File">
     <configuration name="Discovery" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <option name="ACTIVE_PROFILES" value="local" />
       <module name="discovery-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="fptu.sep490.registryservice.DiscoveryServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="File" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <option name="ACTIVE_PROFILES" value="local" />
+      <module name="file-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.fileservice.FileServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -115,6 +115,22 @@
       <option name="ACTIVE_PROFILES" value="local" />
       <module name="identity-service" />
       <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.identityservice.IdentityServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Listening" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <option name="ACTIVE_PROFILES" value="local" />
+      <module name="listening-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.listeningservice.ListeningServiceApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Notification" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <option name="ACTIVE_PROFILES" value="local" />
+      <module name="notification-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fptu.sep490.notificationservice.NotificationServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -136,11 +152,14 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="Spring Boot.Listening" />
+      <item itemvalue="Spring Boot.File" />
       <item itemvalue="Spring Boot.Gateway" />
       <item itemvalue="Spring Boot.Personal" />
       <item itemvalue="Spring Boot.Discovery" />
       <item itemvalue="Spring Boot.Identity" />
       <item itemvalue="Spring Boot.Reading" />
+      <item itemvalue="Spring Boot.Notification" />
     </list>
   </component>
   <component name="SharedIndexes">
