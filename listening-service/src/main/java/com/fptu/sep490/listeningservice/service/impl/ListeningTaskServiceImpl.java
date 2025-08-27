@@ -120,7 +120,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
         }
 
         // 2) validate size (e.g. max 10MB)
-        long maxBytes = 10 * 1024 * 1024;
+        long maxBytes = 20 * 1024 * 1024;
         if (audio.getSize() > maxBytes) {
             throw new AppException(
                     Constants.ErrorCodeMessage.INVALID_REQUEST,
@@ -137,7 +137,7 @@ public class ListeningTaskServiceImpl implements ListeningTaskService {
                 .instruction(request.instruction())
                 .title(request.title())
                 .status(safeEnumFromOrdinal(Status.values(), request.status()))
-                .transcription(request.isAutomaticTranscription() ? request.transcription() : null)
+                .transcription(request.isAutomaticTranscription() ? null: request.transcription())
                 .isOriginal(true)
                 .isCurrent(true)
                 .parent(null)
