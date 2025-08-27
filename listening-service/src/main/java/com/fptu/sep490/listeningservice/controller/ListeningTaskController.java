@@ -49,7 +49,7 @@ public class ListeningTaskController {
             @RequestParam("status") Integer status,
             @RequestPart("audio_file") MultipartFile audioFile,
             @RequestParam("is_automatic_transcription") boolean isAutomaticTranscription,
-            @RequestParam(value = "transcription", required = false) String transcription,
+            @RequestParam(value = "transcript", required = false) String transcription,
             HttpServletRequest httpServletRequest) throws IOException {
         ListeningTaskResponse response = listeningTaskService.createListeningTask(ListeningTaskCreationRequest.builder()
                         .ieltsType(ieltsType)
