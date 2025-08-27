@@ -315,7 +315,7 @@ services:
     ports:
       - "9191:9191"
     environment:
-      - EUREKA_SERVICE_GATEWAY=${EUREKA_SERVICE_GATEWAY}
+      - EUREKA_SERVICE=${EUREKA_SERVICE}
       - NOTIFICATION_API=${NOTIFICATION_API}
       - IDENTITY_API=${IDENTITY_API}
       - READING_API=${READING_API}
@@ -328,6 +328,8 @@ services:
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
     depends_on:
       - discovery-service
+      - kafka
+      - redis
     networks:
       - sep-network
 
