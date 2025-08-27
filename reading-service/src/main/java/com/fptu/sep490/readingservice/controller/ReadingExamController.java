@@ -111,7 +111,7 @@ public class ReadingExamController {
     }
 
     @GetMapping("/{readingExamId}")
-    @PreAuthorize("hasRole('CREATOR')")
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "Get a reading exam",
             description = "Retrieve a reading exam by its ID."

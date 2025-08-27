@@ -81,6 +81,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 .listeningExam(currentExam)
                 .createdBy(userId)
                 .updatedBy(userId)
+                .isFinished(false)
                 .build();
         //save examAttempt
         examAttempt = examAttemptRepository.saveAndFlush(examAttempt);
@@ -250,6 +251,7 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
                 )
         );
         examAttempt.setDuration(answers.duration());
+        examAttempt.setIsFinished(true);
         List<UUID> questionIds = answers.answers().stream()
                 .map(ExamAttemptAnswersRequest.ExamAnswerRequest::questionId)
                 .filter(Objects::nonNull)
@@ -556,6 +558,135 @@ public class ExamAttemptServiceImpl implements ExamAttemptService {
         return BandScoreData.builder()
                 .bandScore(averageBand)
                 .build();
+    }
+
+    @Override
+    public void autoSaveExam(String attemptId, ExamAttemptAnswersRequest answers, HttpServletRequest request) throws JsonProcessingException {
+        ExamAttempt examAttempt = examAttemptRepository.findById(UUID.fromString(attemptId)).orElseThrow(
+                () -> new AppException(
+                        Constants.ErrorCodeMessage.EXAM_ATTEMPT_NOT_FOUND,
+                        Constants.ErrorCode.EXAM_ATTEMPT_NOT_FOUND,
+                        HttpStatus.NOT_FOUND.value()
+                )
+        );
+        if(examAttempt.getIsFinished()) {
+            throw new AppException(
+                    Constants.ErrorCodeMessage.EXAM_ATTEMPT_ALREADY_SUBMITTED,
+                    Constants.ErrorCode.EXAM_ATTEMPT_ALREADY_SUBMITTED,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        }
+        examAttempt.setDuration(answers.duration());
+
+        List<UUID> questionIds = answers.answers().stream()
+                .map(ExamAttemptAnswersRequest.ExamAnswerRequest::questionId)
+                .filter(Objects::nonNull)
+                .toList();
+        List<Question> questions = questionRepository.findQuestionsByIds(questionIds);
+        Map<UUID, List<UUID>> groupMapDragItem = new HashMap<>();
+        if(!CollectionUtils.isEmpty(answers.itemsIds())) {
+            List<DragItem> items = dragItemRepository.findAllById(answers.itemsIds());
+            List<UUID> groupIds = items.stream()
+                    .map(i -> i.getQuestionGroup().getGroupId()).toList();
+            Set<UUID> group = new HashSet<>(groupIds);
+            group.forEach(groupId -> {
+                List<UUID> ids = items.stream()
+                        .filter(dragItem -> groupId.equals(dragItem.getQuestionGroup().getGroupId()))
+                        .map(DragItem::getDragItemId)
+                        .toList();
+
+                groupMapDragItem.put(groupId, ids);
+            });
+        }
+
+        Map<UUID, List<String>> userAnswers = answers.answers().stream()
+                .filter(answer -> answer.questionId() != null && answer.selectedAnswers() != null)
+                .collect(Collectors.toMap(
+                        ExamAttemptAnswersRequest.ExamAnswerRequest::questionId,
+                        ExamAttemptAnswersRequest.ExamAnswerRequest::selectedAnswers,
+                        (existing, replacement) -> existing // Handle duplicate keys by keeping the first one
+                ));
+        Map<UUID, List<UUID>> questionMapChoice = new HashMap<>();
+        for (ExamAttemptAnswersRequest.ExamAnswerRequest answer : answers.answers()) {
+            if(answer.questionId() != null && !CollectionUtils.isEmpty(answer.choiceIds())) {
+                questionMapChoice.put(answer.questionId(), answer.choiceIds());
+            }
+        }
+        ExamAttemptHistory examAttemptHistory = ExamAttemptHistory.builder()
+                .taskId(answers.taskId())
+                .questionGroupIds(answers.questionGroupIds())
+                .userAnswers(userAnswers)
+                .groupMapItems(groupMapDragItem)
+                .questionMapChoices(questionMapChoice)
+                .questionIds(questionIds)
+                .build();
+        examAttempt.setHistory(objectMapper.writeValueAsString(examAttemptHistory));
+        int points = 0;
+        List<SubmittedExamAttemptResponse.ResultSet> resultSets = new ArrayList<>();
+        for(Question question : questions) {
+
+            List<String> userSelectedAnswers = userAnswers.get(question.getQuestionId());
+            if(userSelectedAnswers == null) {
+                continue;
+            }
+
+            if (question.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+                SubmittedExamAttemptResponse.ResultSet result = checkMultipleChoiceQuestion(question, userSelectedAnswers);
+                points += result.isCorrect() ? question.getPoint() : 0;
+                resultSets.add(result);
+            }
+            if (question.getQuestionType() == QuestionType.FILL_IN_THE_BLANKS) {
+                SubmittedExamAttemptResponse.ResultSet result = SubmittedExamAttemptResponse.ResultSet.builder()
+                        .userAnswer(userSelectedAnswers)
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswer()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswer().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
+                    result.setCorrect(true);
+                    points += question.getPoint();
+                }
+                resultSets.add(result);
+
+            }
+
+            if (question.getQuestionType() == QuestionType.MATCHING) {
+                SubmittedExamAttemptResponse.ResultSet result = SubmittedExamAttemptResponse.ResultSet.builder()
+                        .userAnswer(userSelectedAnswers)
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getCorrectAnswerForMatching()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getCorrectAnswerForMatching().equalsIgnoreCase(userSelectedAnswers.getFirst())) {
+                    result.setCorrect(true);
+                    points += question.getPoint();
+                }
+                resultSets.add(result);
+
+            }
+
+            if( question.getQuestionType() == QuestionType.DRAG_AND_DROP) {
+                SubmittedExamAttemptResponse.ResultSet result = SubmittedExamAttemptResponse.ResultSet.builder()
+                        .userAnswer(userSelectedAnswers)
+                        .explanation(question.getExplanation())
+                        .correctAnswer(List.of(question.getDragItem().getContent()))
+                        .isCorrect(false)
+                        .questionIndex(question.getQuestionOrder())
+                        .build();
+                if(question.getDragItem().getDragItemId().equals(UUID.fromString(userSelectedAnswers.getFirst()))) {
+                    result.setCorrect(true);
+                    points += question.getPoint();
+                }
+                resultSets.add(result);
+            }
+
+
+        }
+        examAttempt.setTotalPoint(points);
+
+        examAttemptRepository.save(examAttempt);
     }
 
 }

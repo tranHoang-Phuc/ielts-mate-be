@@ -136,6 +136,24 @@ public class ExamAttemptController {
         return ResponseEntity.ok(baseResponse);
     }
 
+    @PutMapping("/auto-save/{attempt-id}")
+    @Operation(
+            summary = "Auto-save exam attempt answers",
+            description = "Auto-save the answers for an ongoing exam attempt identified by its ID without marking it as completed"
+    )
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<BaseResponse<Void>> autoSaveExamAttempt(
+            @PathVariable("attempt-id") String attemptId,
+            @RequestBody ExamAttemptAnswersRequest answers,
+            HttpServletRequest request
+    ) throws JsonProcessingException {
+        examAttemptService.autoSaveExam(attemptId, answers, request);
+        BaseResponse<Void> baseResponse = BaseResponse.<Void>builder()
+                .message("Exam attempt auto-saved successfully")
+                .build();
+        return ResponseEntity.ok(baseResponse);
+    }
+
     @PostMapping("/internal/overview-progress")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<OverviewProgress>> getOverViewProgress(@RequestHeader("Authorization") String token, @RequestBody OverviewProgressReq body) throws JsonProcessingException {
