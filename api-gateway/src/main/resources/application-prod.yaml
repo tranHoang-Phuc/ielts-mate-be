@@ -78,6 +78,12 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: personal-websocket
+          uri: ${PERSONAL_WS_API}
+          predicates:
+            - Path=/api/v1/personal/ws/**
+          filters:
+            - StripPrefix=2
         - id: personal-service
           uri: ${PERSONAL_API}
           predicates:

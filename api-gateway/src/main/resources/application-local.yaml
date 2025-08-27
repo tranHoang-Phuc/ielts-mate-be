@@ -58,6 +58,12 @@ spring:
             - Path=/api/v1/notification/**
           filters:
             - StripPrefix=2
+        - id: personal-websocket
+          uri: ws://localhost:8072
+          predicates:
+            - Path=/api/v1/personal/ws/**
+          filters:
+            - StripPrefix=2
         - id: personal-service
           uri: http://localhost:8072
           predicates:
