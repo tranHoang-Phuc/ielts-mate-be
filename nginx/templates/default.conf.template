@@ -55,13 +55,20 @@ server {
         # WebSocket keep-alive
         proxy_socket_keepalive on;
         
+        # Hide CORS headers from backend to prevent duplication
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+        
         # Set CORS origin for WebSocket
         set $cors_origin "";
         if ($http_origin ~* "^https?://(localhost:3000|127\.0\.0\.1:3000|localhost:5500|127\.0\.0\.1:5500|ielts-mate-fe\.vercel\.app)$") {
             set $cors_origin $http_origin;
         }
         
-        # Add CORS headers for WebSocket handshake
+        # Add CORS headers for WebSocket handshake (only if origin is allowed)
         add_header 'Access-Control-Allow-Origin' $cors_origin always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
@@ -128,11 +135,29 @@ server {
         proxy_set_header X-Forwarded-For     $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto   $scheme;
 
+        # Hide CORS headers from backend to prevent duplication
+        proxy_hide_header 'Access-Control-Allow-Origin';
+        proxy_hide_header 'Access-Control-Allow-Methods';
+        proxy_hide_header 'Access-Control-Allow-Headers';
+        proxy_hide_header 'Access-Control-Expose-Headers';
+        proxy_hide_header 'Access-Control-Allow-Credentials';
+
         if ($request_method = OPTIONS) {
             proxy_pass http://api-gateway:9191;
             break;
         }
 
         proxy_pass http://api-gateway:9191;
+        
+        # Add CORS headers for regular API requests
+        set $cors_origin "";
+        if ($http_origin ~* "^https?://(localhost:3000|127\.0\.0\.1:3000|localhost:5500|127\.0\.0\.1:5500|ielts-mate-fe\.vercel\.app)$") {
+            set $cors_origin $http_origin;
+        }
+        
+        add_header 'Access-Control-Allow-Origin' $cors_origin always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
     }
 }

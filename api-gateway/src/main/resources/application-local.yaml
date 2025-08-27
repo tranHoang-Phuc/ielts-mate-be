@@ -71,7 +71,15 @@ spring:
             - Path=/api/v1/personal/**
           filters:
             - StripPrefix=2
-      # CORS is handled by personal-service CorsFilter
+      # CORS is handled by Nginx to prevent duplicate headers
+      # globalcors:
+      #   cors-configurations:
+      #     '[/**]':
+      #       allowedOriginPatterns: ['*']
+      #       allowedMethods: ['*']
+      #       allowedHeaders: ['*']
+      #       allowCredentials: true
+      #       maxAge: 3600
       httpclient:
         connect-timeout: 10000
         response-timeout: 3600s
