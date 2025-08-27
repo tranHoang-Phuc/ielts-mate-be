@@ -22,8 +22,7 @@ public interface ListeningExamRepository extends JpaRepository<ListeningExam, UU
 
     @Query("""
     SELECT le FROM ListeningExam le
-    WHERE le.createdBy = :userId
-    AND le.isDeleted = false
+    WHERE  le.isDeleted = false
     AND le.isCurrent = true
     AND (
         :keyword IS NULL OR :keyword = '' OR
