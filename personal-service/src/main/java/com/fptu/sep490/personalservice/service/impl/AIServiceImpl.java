@@ -279,6 +279,48 @@ public class AIServiceImpl implements AIService {
         }
     }
 
+    public String generateSemanticContextFromMeaning(String word, String meaning) {
+        try {
+            String prompt = createContextGenerationPrompt(word, meaning);
+            log.info("Generated context prompt for word '{}': {}", word, prompt);
+
+            AiApiStrategy strategy = aiStrategyFactory.getStrategy(AIModel.Gemini.FLASH2_5);
+            AIResponse aiResponse = strategy.callModel(prompt, AIModel.Gemini.FLASH2_5);
+
+            if (aiResponse != null && aiResponse.getContent() != null && !aiResponse.getContent().isBlank()) {
+                return aiResponse.getContent().trim().toLowerCase();
+            } else {
+                throw new AppException(
+                        "AI_MODEL_EMPTY_CONTEXT",
+                        "AI model returned empty response for semantic context generation",
+                        HttpStatus.INTERNAL_SERVER_ERROR.value()
+                );
+            }
+        } catch (Exception e) {
+            log.error("Error generating semantic context for word '{}' with meaning '{}': {}", word, meaning, e.getMessage(), e);
+            throw new RuntimeException("Failed to generate semantic context: " + e.getMessage(), e);
+        }
+    }
+
+    private String createContextGenerationPrompt(String word, String meaning) {
+        StringBuilder prompt = new StringBuilder();
+
+        prompt.append("You are a linguistic categorizer.\n");
+        prompt.append("You are an advanced English-English dictionary.\n");
+        prompt.append("Based on the word and its meaning, return ONLY one short semantic context/domain.\n");
+        prompt.append("Examples: 'animal', 'fruit', 'finance', 'technology', 'science', 'sport', 'medicine', etc.\n\n");
+        prompt.append("Rules:\n");
+        prompt.append("- Output exactly one lowercase word.\n");
+        prompt.append("- Do not explain.\n");
+        prompt.append("- Do not output multiple options.\n\n");
+
+        prompt.append("=== WORD ===\n").append(word).append("\n");
+        prompt.append("=== MEANING ===\n").append(meaning).append("\n");
+
+        return prompt.toString();
+    }
+
+
     /**
      * Tạo prompt cho AI để định nghĩa từ vựng theo ngôn ngữ yêu cầu
      */
@@ -301,9 +343,13 @@ public class AIServiceImpl implements AIService {
 
         prompt.append("\n=== OUTPUT REQUIREMENTS ===\n");
         if (language == LangGuage.VIETNAMESE) {
-            prompt.append("Only return the Vietnamese meaning of the word. No extra explanation, no English.\n");
+            prompt.append("Only return the most common Vietnamese meaning of the word. ");
+            prompt.append("If the context is irrelevant, ignore it and return the primary meaning. ");
+            prompt.append("Do not list multiple meanings. No extra explanation, no English.\n");
         } else if (language == LangGuage.ENGLISH) {
-            prompt.append("Only return the English meaning of the word. No translation, no extra explanation.\n");
+            prompt.append("Only return the most common English meaning of the word. ");
+            prompt.append("If the context is irrelevant, ignore it and return the primary meaning. ");
+            prompt.append("Do not list multiple meanings. No translation, no extra explanation.\n");
         }
 
         return prompt.toString();

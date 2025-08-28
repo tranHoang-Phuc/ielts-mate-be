@@ -73,6 +73,12 @@ public class VocabularyServiceImpl  implements VocabularyService {
             // Replace with your actual AI API call
 
             meaning = aiServiceImpl.getVocabularyDefinition(vocabularyRequest.word(), vocabularyRequest.context(), vocabularyRequest.language());
+            if(vocabularyRequest.context() == null || vocabularyRequest.context().isBlank()){
+                String contextVocab = aiServiceImpl.generateSemanticContextFromMeaning(vocabularyRequest.word(), meaning);
+                if(vocabularyRequest.context() == null || vocabularyRequest.context().isBlank()) {
+                    newVocabulary.setContext(contextVocab);
+                }
+            }
         }
         newVocabulary.setMeaning(meaning);
 
