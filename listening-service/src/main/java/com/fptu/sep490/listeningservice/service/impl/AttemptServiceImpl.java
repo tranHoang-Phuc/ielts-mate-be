@@ -176,7 +176,7 @@ public class AttemptServiceImpl implements AttemptService {
             List<AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse> questionListResponse = new ArrayList<>();
 
             finalQuestions.forEach(question -> {
-                List<Choice> choices = finalQuestionMapChoices.get(question.getQuestionId());
+                List<Choice> choices = finalQuestionMapChoices.get(question.getParent() != null ? question.getParent().getQuestionId() : question.getQuestionId());
                 AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse questionResponse = AttemptResponse.
                         QuestionGroupAttemptResponse.QuestionAttemptResponse.builder()
                         .questionId(question.getQuestionId())
