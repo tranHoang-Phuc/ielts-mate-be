@@ -199,7 +199,7 @@ public class AttemptServiceImpl implements AttemptService {
                                 .instructionForChoice(question.getInstructionForChoice())
                                 .instructionForMatching(question.getInstructionForMatching())
                                 .zoneIndex(question.getZoneIndex())
-                                .choices(
+                                .choices(choices != null ?
                                         choices.stream().map(c ->
                                                 AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse.builder()
                                                         .choiceId(c.getChoiceId())
@@ -207,7 +207,7 @@ public class AttemptServiceImpl implements AttemptService {
                                                         .content(c.getContent())
                                                         .choiceOrder(question.getQuestionOrder())
                                                         .build()
-                                        ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList()
+                                        ).sorted(Comparator.comparing(AttemptResponse.QuestionGroupAttemptResponse.QuestionAttemptResponse.ChoiceAttemptResponse::choiceOrder)).toList() : List.of()
                                 )
                                 .build();
                 questionListResponse.add(questionResponse);
