@@ -497,6 +497,15 @@ public class AuthServiceImpl implements AuthService {
                 throw new InternalServerErrorException(Constants.ErrorCodeMessage.KEYCLOAK_ERROR,
                         Constants.ErrorCode.KEYCLOAK_ERROR);
             }
+
+            // remove cached profile in redis
+            String cacheKey = Constants.RedisKey.PROFILE + email;
+            try {
+                redisService.delete(cacheKey);
+                log.debug("Deleted user profile cache for username: {}", email);
+            } catch (Exception e) {
+                log.warn("Failed to delete user profile cache in Redis for username: {}. Error: {}", email, e.getMessage());
+            }
             return UserCreationProfile.builder()
                     .id(userAccessInfo.id())
                     .email(userAccessInfo.email())
