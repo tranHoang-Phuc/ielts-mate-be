@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: list">
-      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,7 +57,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.Discovery.executor": "Run",
-    "Spring Boot.File.executor": "Debug",
+    "Spring Boot.File.executor": "Run",
     "Spring Boot.Gateway.executor": "Run",
     "Spring Boot.Identity.executor": "Run",
     "Spring Boot.Listening.executor": "Debug",
@@ -89,9 +90,13 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
+              <option value="Discovery" />
               <option value="File" />
+              <option value="Gateway" />
+              <option value="Identity" />
               <option value="Listening" />
               <option value="Notification" />
+              <option value="Personal" />
               <option value="Reading" />
             </set>
           </value>
@@ -99,7 +104,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="Spring Boot.File">
+  <component name="RunManager" selected="Spring Boot.Listening">
     <configuration name="Discovery" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
       <option name="ACTIVE_PROFILES" value="local" />
       <module name="discovery-service" />
