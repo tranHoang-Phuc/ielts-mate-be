@@ -307,10 +307,8 @@ public class AIServiceImpl implements AIService {
 
         prompt.append("You are a linguistic categorizer.\n");
         prompt.append("You are an advanced English-English dictionary.\n");
-        prompt.append("Based on the word and its meaning, return ONLY one short semantic context/domain.\n");
-        prompt.append("Examples: 'animal', 'fruit', 'finance', 'technology', 'science', 'sport', 'medicine', etc.\n\n");
+        prompt.append("Based on the word and its meaning, return ONLY one short context/domain.\n");
         prompt.append("Rules:\n");
-        prompt.append("- Output exactly one lowercase word.\n");
         prompt.append("- Do not explain.\n");
         prompt.append("- Do not output multiple options.\n\n");
 
