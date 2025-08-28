@@ -29,7 +29,6 @@ public class PassageSpecifications {
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(root.get("isCurrent").in(true));
 
             if (ieltsType != null && !ieltsType.isEmpty()) {
                 List<IeltsType> typeEnums = ieltsType.stream()
@@ -78,6 +77,7 @@ public class PassageSpecifications {
                 predicates.add(cb.like(cb.lower(root.get("createdBy")), "%" + createdBy.toLowerCase() + "%"));
             }
             predicates.add(cb.isFalse(root.get("isDeleted")));
+            predicates.add(cb.isTrue(root.get("isOriginal")));
             final String finalSortField = sortBy != null ? sortBy : "updatedAt";
             final String finalSortDirection = sortDirection != null ? sortDirection : "desc";
 
