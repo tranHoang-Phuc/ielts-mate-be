@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: add workspace.xml">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/ListeningTaskRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/repository/QuestionGroupRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ExamServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/listening-service/src/main/java/com/fptu/sep490/listeningservice/service/impl/ListeningTaskServiceImpl.java" afterDir="false" />
+    <list default="true" id="93a53f76-79d5-4795-86ff-f27b482fd76c" name="Changes" comment="fix: list">
+      <change beforePath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/reading-service/src/main/java/com/fptu/sep490/readingservice/service/impl/AttemptServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,10 +55,10 @@
     "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.Discovery.executor": "Debug",
+    "Spring Boot.Discovery.executor": "Run",
     "Spring Boot.File.executor": "Debug",
-    "Spring Boot.Gateway.executor": "Debug",
-    "Spring Boot.Identity.executor": "Debug",
+    "Spring Boot.Gateway.executor": "Run",
+    "Spring Boot.Identity.executor": "Run",
     "Spring Boot.Listening.executor": "Debug",
     "Spring Boot.Personal.executor": "Run",
     "Spring Boot.Reading.executor": "Run",
@@ -93,8 +89,10 @@
         <entry key="SpringBootApplicationConfigurationType">
           <value>
             <set>
+              <option value="File" />
+              <option value="Listening" />
               <option value="Notification" />
-              <option value="Personal" />
+              <option value="Reading" />
             </set>
           </value>
         </entry>
